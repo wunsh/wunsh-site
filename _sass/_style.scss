@@ -1,0 +1,138 @@
+.icon-section {
+    width: 6.5rem;
+}
+
+.elixir-logo {
+    background-image: url("../assets/elixir-logo.png");
+    width: 63px;
+    height: 95px;
+    position: absolute;
+    left: 50%;
+    margin-left: -32px;
+}
+
+.header {
+    text-align: center;
+}
+
+.greetings {
+    padding: 0 8%;
+    margin-top: 24px;
+}
+
+.aaa {
+    margin: 24px 0;
+    width: 450px;
+    margin-left: 30%;
+    padding-left: -225px;
+}
+
+input.large {
+    height: 3.5rem;
+    font-size: 1.25rem;
+}
+
+.main-email-form {
+    margin-top: 35px;
+}
+
+.main-email-form input[type=submit] {
+    background: #EF4339;
+}
+
+.features {
+    margin-top: 35px;
+}
+
+
+.uses-logos td {
+    width: 25%;
+    text-align: center;
+}
+
+.meduza {
+}
+
+.moz {
+    max-height: 56px;
+    margin-top: 15px;
+}
+
+.puppet {
+    max-height: 80px;
+
+}
+
+.thoughbot {
+    max-height: 80px;
+}
+
+#mc_embed_signup{background:#fff; clear:left; font:14px Helvetica,Arial,sans-serif; width:100%;}
+
+.article__header {
+    margin-bottom: 36px;
+}
+
+.article__header {
+  & > small {
+    font-size: 0.45em;
+
+    line-height: 2em;
+    white-space: nowrap;
+
+    & > time {
+      display: inline;
+      vertical-align: top;
+    }
+  }
+}
+
+.article__information {
+    text-align: right;
+    margin-top: -35px;
+    margin-bottom: 25px;
+}
+
+@media screen and (min-width: 40em) {
+    .article__body {
+        font-size: 1.25rem;
+    }
+
+    h2 {
+        margin-top: 2.25rem;
+    }
+
+    h3 {
+        margin-bottom: 0.75rem;
+    }
+}
+
+.callout.large {
+    padding-left: 0;
+    padding-right: 0;
+}
+
+pre.code,
+code {
+    background: #f6f6f6;
+    border: none;
+    border-radius: 2px;
+    padding: 0.5rem 0.75rem 0;
+    margin: 0.25rem 0 1.25rem;
+}
+
+code {
+    padding: 0.25rem;
+}
+
+img.article-image {
+   margin: 5px 0 25px;
+}
+
+.main-content {
+   margin-top: 107px;
+}
+
+.post-content {
+  font-size: 1.25em;
+}

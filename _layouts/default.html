@@ -5,15 +5,20 @@
 
   <body>
 
-    {% include header.html %}
+    <div class="callout large">
+      {% include header.html %}
 
-    <div class="page-content">
-      <div class="wrapper">
+      <div id="top" class="main-content row column">
+
         {{ content }}
-      </div>
-    </div>
 
-    {% include footer.html %}
+        <hr>
+
+        {% include footer.html %}
+
+      </div>
+
+    </div>
 
   </body>
 

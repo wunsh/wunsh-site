@@ -6,16 +6,43 @@
 # 'jekyll serve'. If you change this file, please restart the server process.
 
 # Site settings
-title: Your awesome title
-email: your-email@domain.com
-description: > # this means to ignore newlines until "baseurl:"
-  Write an awesome description for your new site here. You can edit this
-  line in _config.yml. It will appear in your document head meta (for
-  Google search results) and in your feed.xml site description.
-baseurl: "" # the subpath of your site, e.g. /blog
-url: "http://yourdomain.com" # the base hostname & protocol for your site
-twitter_username: jekyllrb
-github_username:  jekyll
+title: Русскоязычное сообщество Elixir и Phoenix Framework
+email: elixir@wunsh.ru
+description: >
+  Русскоязычное сообщество Elixir и Phoenix Framework
+baseurl: ""
+url: "https://wunsh.ru"
+
+permalink: none
+
+timezone: "Europe/Moscow"
 
 # Build settings
 markdown: kramdown
+
+verifications:
+  yandex-verification: 0e259c9bb6d411cb
+
+defaults:
+  -
+    scope:
+      path: "_posts/news"
+    values:
+      permalink: /:categories/:year/:title.html
+      layout: post
+      categories: [news]
+
+  -
+    scope:
+      path: "_posts/articles"
+    values:
+      layout: post
+      categories: [articles]
+
+authors:
+  jaroslav:
+    name: Ярослав
+    gender: male
+  nadezhda:
+    name: Надежда Нестерова
+    gender: female
