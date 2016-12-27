@@ -40,11 +40,11 @@ input.large {
     background: #EF4339;
 }
 
-.features {
-    margin-top: 35px;
+.articles {
+  ul {
+    margin-bottom: 0;
+  }
 }
-
-
 .uses-logos td {
     width: 25%;
     text-align: center;
@@ -133,19 +133,6 @@ input.large {
     padding-right: 0;
 }
 
-pre.code,
-code {
-    background: #f6f6f6;
-    border: none;
-    border-radius: 2px;
-    padding: 0.5rem 0.75rem 0;
-    margin: 0.25rem 0 1.25rem;
-}
-
-code {
-    padding: 0.25rem;
-}
-
 img.article-image {
    margin: 5px 0 25px;
 }
@@ -156,4 +143,8 @@ img.article-image {
 
 .post-content {
   font-size: 1.25em;
+}
+
+.pull-right {
+  float: right;
 }

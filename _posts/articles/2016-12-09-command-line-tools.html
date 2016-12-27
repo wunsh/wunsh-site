@@ -1,0 +1,230 @@
+---
+title: Создание консольных приложений на Elixir
+excerpt: В этой статье рассказывается, как создавать свои консольные приложения, для чего Elixir подходит как нельзя лучше.
+author: nadezhda
+source_url: http://elixirdose.com/post/create_command_line_tools
+source_author: ElixirDose
+---
+<p>Разработчики&nbsp;ПО, как правило, не&nbsp;представляют себе жизни без командной строки, а&nbsp;консольные приложения используются везде, где только можно. Python, Ruby, Erlang и&nbsp;Elixir дают разработчикам замечательные инструменты командной строки, называемые как раз консольными приложениями.</p>
+
+<p>В&nbsp;этой статье рассказывается, как создавать свои консольные приложения, для чего Elixir подходит как нельзя лучше.</p>
+
+<h2>Создание приложения</h2>
+
+<p>Создадим новый проект с&nbsp;помощью <code>mix</code>.</p>
+
+{% highlight bash %}
+$> mix new awesome_cli
+$> cd awesome_cli
+{% endhighlight %}
+
+<p>Откройте файл <code>lib/awesome_cli.ex</code>, где вы&nbsp;увидите нечто подобное:</p>
+
+{% highlight elixir %}
+defmodule AwesomeCli do
+  use Application.Behaviour
+
+  # See http://elixir-lang.org/docs/stable/elixir/Application.html
+  # for more information on OTP Applications
+  def start(_type, _args) do
+    AwesomeCli.Supervisor.start_link
+  end
+end
+{% endhighlight %}
+
+<p>Покажите, кто тут крутой программист: добавьте в&nbsp;проект вывод сообщения &laquo;Hello World&raquo;.</p>
+
+{% highlight elixir %}
+defmodule AwesomeCli do
+  use Application.Behaviour
+
+  # See http://elixir-lang.org/docs/stable/elixir/Application.html
+  # for more information on OTP Applications
+  def start(_type, _args) do
+    AwesomeCli.Supervisor.start_link
+  end
+
+  def main(args) do
+    IO.puts "Hello, world!"
+  end
+end
+{% endhighlight %}
+
+<p>После этого запустите <code>mix escript.build</code> для сборки проекта.</p>
+
+{% highlight bash %}
+$> mix escript.build
+{% endhighlight %}
+
+<p>Возможно, возникнет такая ошибка:</p>
+
+{% highlight shellsession %}
+** (Mix) Could not generate escript, please set :escript in your project configuration
+to a function that returns the escript configuration for our application.
+So let's do that by openingmix.exs` file.
+{% endhighlight %}
+
+<p>Попробуем пойти другим путём&nbsp;&mdash; откроем файл <code>mix.exs</code>.</p>
+
+{% highlight elixir %}
+defmodule AwesomeCli.Mixfile do
+  use Mix.Project
+
+  def project do
+    [app: :awesome_cli,
+    version: "0.0.1",
+    elixir: "~> 1.0.4",
+    escript: escript,
+    deps: deps]
+  end
+
+  def escript do
+    [main_module: AwesomeCli]
+  end
+
+
+  def application do
+    [ applications: [],
+      mod: { AwesomeCli, [] } ]
+  end
+
+  defp deps do
+    []
+  end
+end
+{% endhighlight %}
+
+<p>Перезапустим <code>mix escript.build</code>, после чего <code>mix</code> выполнит компиляцию файла <code>awesome_cli.ex</code> и&nbsp;создаст файл <code>Elixir.AwesomeCli.beam</code> и&nbsp;исполняемый файл <code>awesome_cli</code> в&nbsp;директории <code>_build/dev/lib/awesome_cli/ebin</code>. Откроем исполняемый файл.</p>
+
+{% highlight bash %}
+$> ./awesome_cli
+Hello, world!
+{% endhighlight %}
+
+<p>Вот вы&nbsp;и&nbsp;создали своё первое работающее приложение на&nbsp;Elixir!</p>
+
+<h2>Парсинг аргументов</h2>
+
+<p>Нам повезло, что для парсинга аргументов интерфейса командной строки в&nbsp;Elixir имеется <noindex><a href="http://elixir-lang.org/docs/stable/elixir/OptionParser.html" rel="nofollow">модуль OptionParser</a></noindex>. Воспользуемся&nbsp;им, чтобы создать хитроумный инструмент командной строки, который&nbsp;бы получал один или два аргумента от&nbsp;пользователя.</p>
+
+<p>Первым делом научим инструмент приветствовать пользователя с&nbsp;заданным именем. Вот что мы&nbsp;сделаем:</p>
+
+{% highlight bash %}
+./awesome_cli --name ElixirFriend
+{% endhighlight %}
+
+<p>Откройте файл <code>lib/awesome_cli.ex</code> и&nbsp;добавьте в&nbsp;него следующий код:</p>
+
+{% highlight elixir %}
+def main(args) do
+  args |> parse_args
+end
+
+def parse_args(args) do
+  {[name: name], _, _} = OptionParser.parse(args)
+
+  IO.puts "Hello, #{name}! You're awesome!!"
+end
+{% endhighlight %}
+
+<p>Оператор <code>|&gt;</code> используется для передачи аргумента в&nbsp;функцию <code>parse_args</code>, а&nbsp;парсинг аргументов проводится с&nbsp;помощью <code>OptionParser.parse</code>. Вывод осуществлён для одного из&nbsp;аргументов. Если сейчас снова запустить <code>mix escript.build</code>, то&nbsp;получится следующее:</p>
+
+{% highlight shellsession %}
+$> mix escript.build
+$> ./awesome_cli --name ElixirFriend
+Hello, ElixirFriend! You're awesome!!
+{% endhighlight %}
+
+<p>Здорово, правда? Теперь, чтобы сделать CLI ещё круче, добавим в&nbsp;него справочное сообщение. Так пользователь поймёт, как с&nbsp;ним обращаться. Для этого воспользуемся конструкцией <code>case</code> и&nbsp;проведём сопоставление с&nbsp;образцом.</p>
+
+{% highlight elixir %}
+def parse_args(args) do
+  options = OptionParser.parse(args)
+
+  case options do
+    {[name: name], _, _} -> IO.puts "Hello, #{name}! You're awesome!!"
+    {[help: true], _, _} -> IO.puts "This is help message"
+
+  end
+end
+{% endhighlight %}
+
+<p>Перезапустим <code>mix escript.build</code> ещё раз и&nbsp;выполним файл с&nbsp;помощью <code>--help</code>.</p>
+
+{% highlight shellsession %}
+$> ./awesome_cli --name ElixirFriend
+Hello, ElixirFriend! You're awesome!!
+$> ./awesome_cli --help
+This is help message
+
+{% endhighlight %}
+
+<h2>Последний штрих</h2>
+
+<p>Давайте немного перестроим код. Сначала, сделаем так, чтобы функция <code>parse_args</code> выполняла только парсинг аргументов и&nbsp;возвращаемый ею&nbsp;результат можно было&nbsp;бы использовать в&nbsp;другой функции.</p>
+
+{% highlight elixir %}
+def main(args) do
+  args |> parse_args |> do_process
+end
+
+def parse_args(args) do
+  options = OptionParser.parse(args)
+
+  case options do
+    {[name: name], _, _} -> [name]
+    {[help: true], _, _} -> :help
+    _ -> :help
+
+  end
+end
+
+def do_process([name]) do
+  IO.puts "Hello, #{name}! You're awesome!!"
+end
+
+def do_process(:help) do
+  IO.puts """
+    Usage:
+    ./awesome_cli --name [your name]
+
+    Options:
+    --help  Show this help message.
+
+    Description:
+    Prints out an awesome message.
+  """
+
+  System.halt(0)
+end
+{% endhighlight %}
+
+<p>Перезапустите <code>mix escript.build</code> и&nbsp;попробуйте его выполнить.</p>
+
+{% highlight shellsession %}
+$> mix escript.build
+$> ./awesome_cli --name ElixirFriend
+Hello, ElixirFriend! You're awesome!!
+$> ./awesome_cli --help
+Usage:
+./awesome_cli --name [your name]
+
+Options:
+--help  Show this help message.
+
+Description:
+Prints out an awesome message.
+$> ./awesome_cli
+Usage:
+./awesome_cli --name [your name]
+
+Options:
+--help  Show this help message.
+
+Description:
+Prints out an awesome message.
+{% endhighlight %}
+
+<h2>Заключение</h2>
+
+<p>Мы&nbsp;рассмотрели, как создавать простые консольные приложения посредством <code>OptionParser</code> и&nbsp;как заставить код работать с&nbsp;помощью <code>mix escript.build</code>. И&nbsp;пусть приведённый пример не&nbsp;изобилует сложными конструкциями, но&nbsp;даже на&nbsp;нём видно, что создавать консольные приложения в&nbsp;Elixir&nbsp;&mdash; просто и&nbsp;очень удобно.</p>

@@ -22,7 +22,7 @@ layout: default
             <div class="article__information">
                 <small itemprop="author" itemscope itemtype="http://schema.org/Person">
                     {% if page.source_url %}
-                        Оригинальный текст – <a href="{{ source_url }}">{{ page.source_author }}</a><br>
+                        Оригинальный текст – <a href="{{ page.source_url }}">{{ page.source_author }}</a><br>
                         Над переводом работал{% if author.gender == "female" %}а{% endif %} <span itemprop="name">{{ author.name }}</span>
                     {% elsif author %}
                         Автор &mdash; <span itemprop="name">{{ author.name }}</span>

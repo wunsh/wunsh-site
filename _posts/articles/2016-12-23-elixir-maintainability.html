@@ -1,0 +1,124 @@
+---
+title: Сопровождение приложений на&nbsp;Elixir
+excerpt: В этой статье рассказывается о том, как обеспечить высокую надёжность эксплуатации кода на Эликсире.
+author: nadezhda
+source_url: http://tech.findmypast.com/elixir-maintainability/2016-12-23-elixir-maintainability.html
+source_author: Steven Blowers
+---
+<p>В&nbsp;процессе создания кода будет не&nbsp;лишним подумать о&nbsp;том, каково придётся читающему его человеку, будь&nbsp;то другой разработчик или вы&nbsp;сами. Будь то&nbsp;завтра или через полгода.</p>
+<p>Участники сообщества Elixir/Erlang написали множество различных инструментов для улучшения читабельности кода и&nbsp;удобства его сопровождения. В&nbsp;данной статье мы&nbsp;рассмотрим четыре основных инструмента для этого и&nbsp;обсудим каждый&nbsp;из.</p>
+<p>Прежде чем перейти к&nbsp;обсуждению инструментов, оставлю небольшую заметку. Я&nbsp;возлагаю большие надежды на&nbsp;технику разработки через тестирование и&nbsp;полное покрытие кода. <noindex><a href="http://elixir-lang.org/docs/stable/ex_unit/ExUnit.html" rel="nofollow">ExUnit</a></noindex>&nbsp;&mdash; замечательный инструмент для создания быстро работающих юнит-тестов на&nbsp;Elixir, а&nbsp;все перечисленные ниже инструменты следует использовать при выполнении условия полного покрытия кода.</p>
+<h2>Почему мне можно доверять?</h2>
+<p>Недавно с&nbsp;моей командой разработчиков мы&nbsp;закончили работу над проектом по&nbsp;созданию API на&nbsp;Elixir, где одной из&nbsp;основных целей было обеспечение удобного сопровождения. Ниже приведены инструменты, которые мы&nbsp;использовали для достижения этой цели.</p>
+<h2>ExDoc</h2>
+<noindex><small class="subheader"><a href="https://github.com/elixir-lang/ex_doc" rel="nofollow">Github</a> / <a href="https://hex.pm/packages/ex_doc" rel="nofollow">Hex</a></small></noindex>
+<p>С&nbsp;помощью данного инструмента была сгенерирована <noindex><a href="http://elixir-lang.org/docs/stable/elixir/" rel="nofollow">официальная документация</a></noindex> Elixir, а&nbsp;также документация к&nbsp;пакетам на&nbsp;ресурсе <noindex><a href="https://hex.pm/" rel="nofollow">Hex</a></noindex>, наиболее популярном менеджере пакетов для экосистемы Elixir/Erlang. Его главная задача&nbsp;&mdash; сделать процесс создания документации как можно более простым, и&nbsp;я&nbsp;считаю, что он&nbsp;прекрасно с&nbsp;этим справляется.</p>
+<h3>Добавление инструмента в&nbsp;проект</h3>
+<p>Поместите в&nbsp;файл <code>mix.exs</code> следующий код:</p>
+{% highlight elixir %}def deps do
+  {:ex_doc, "~> 0.13", only: :dev}
+end{% endhighlight %}
+<p>Более подробные инструкции по&nbsp;установке и&nbsp;настройке инструмента можно найти <noindex><a href="https://github.com/elixir-lang/ex_doc" rel="nofollow">на&nbsp;странице Github</a></noindex>.</p>
+<h3>Создание документации</h3>
+<p>Инструмент ExDoc создаёт при запуске &laquo;скелет&raquo; документации, состоящий из&nbsp;модулей проекта, который просто нужно заполнить необходимой информацией.</p>
+<p>Это делается путём добавления атрибутов в&nbsp;модули. Например:</p>
+{% highlight elixir %}defmodule MyProject.Response do
+  @moduledoc """
+  This module will respond to a greeting.
+  """
+end{% endhighlight %}
+<p>Из&nbsp;примера видно, что для добавления документации на&nbsp;уровне модуля используется атрибут <code>@moduledoc</code>.</p>
+<p>Добавить документацию для отдельной функции можно с&nbsp;помощью атрибута <code>@doc</code>. Если использовать этот атрибут с&nbsp;функциями, повторно определёнными через сопоставления с&nbsp;образцом, документация будет выглядеть неаккуратно. Чтобы этого избежать, можно определить функцию с&nbsp;пустым телом и&nbsp;добавить для неё атрибут <code>@doc</code>. Например:</p>
+{% highlight elixir %}defmodule MyAnimals.Sound do
+
+  @doc """
+  Recognises an animal given its sound.
+  """
+  def recognise(sound)
+
+  def recognise("oink") do
+    :pig
+  end
+
+  def recognise("moo") do
+    :cow
+  end
+end{% endhighlight %}
+<p>Помимо добавления документации в&nbsp;проект, ExDoc может похвастаться такой волшебной возможностью, как <noindex><a href="http://elixir-lang.org/docs/stable/ex_unit/ExUnit.DocTest.html" rel="nofollow">DocTest</a></noindex>. Она позволяет проводить юнит-тестирование функции на&nbsp;примерах её&nbsp;использования, которые вы&nbsp;описываете внутри документации. Рассмотрим такой пример:</p>
+{% highlight elixir %}defmodule MyMaths.Basic do
+
+  @doc """
+  This function will add two numbers together.
+
+  ## Examples
+
+      iex> MyMaths.Basic.add(3, 4)
+      7
+
+  """
+  def add(num_one, num_two) do
+    num_one + num_two
+  end
+end
+
+defmodule MyMaths.BasicTest do
+  use ExUnit.Case, async: true
+  doctest MyModule
+end{% endhighlight %}
+<p>Из&nbsp;примера видно, что команда <code>iex&gt;</code> присутствует в&nbsp;атрибуте <code>@doc</code> в качестве примера использования функции. Затем в&nbsp;соответствующем тест-файле с&nbsp;помощью макроса <code>doctest</code> проводится тестирование вышеописанных примеров.</p>
+<p>Основная задача DocTest&nbsp;&mdash; сделать документацию достоверной, убедившись, что приведённые в&nbsp;ней примеры актуальны и&nbsp;безошибочны. Но&nbsp;это совершенно не&nbsp;значит, что такая проверка может заменить юнит-тесты. Справедливо и&nbsp;обратное: если юнит-тест пройден, это не&nbsp;значит, что в&nbsp;документации содержатся рабочие примеры.</p>
+<p>Подробную информацию о&nbsp;процессе <noindex><a href="http://elixir-lang.org/docs/master/elixir/writing-documentation.html" rel="nofollow">создания документации</a></noindex> можно найти на&nbsp;официальном сайте Elixir.</p>
+<h3>Генерация документации</h3>
+<p>В&nbsp;корневом каталоге проекта нужно запустить <code>mix docs</code>, после чего документация станет доступна в&nbsp;файле <code>doc/index.html</code>.</p>
+<p>Чтобы узнать о&nbsp;других доступных действиях, запустите <code>mix help docs</code>.</p>
+<h2>Dialyzer&nbsp;/ Dialyxir</h2>
+<noindex><small class="subheader"><a href="https://github.com/jeremyjh/dialyxir" rel="nofollow">Github</a> / <a href="https://hex.pm/packages/dialyxir" rel="nofollow">Hex</a></small></noindex>
+<p>Ещё один атрибут&nbsp;&mdash; <code>@spec</code>&nbsp;&mdash; позволяет задавать типы входных и&nbsp;выходных данных функции. Он&nbsp;добавляется на&nbsp;созданные с&nbsp;помощью ExDoc страницы, помогая пользователю разобраться в&nbsp;нюансах использования функции. Например:</p>
+{% highlight elixir %}@spec multiply(integer, integer) :: integer
+def multiply(a, b) do
+  a * b
+end{% endhighlight %}
+<p>Подробную информацию <noindex><a href="http://elixir-lang.org/docs/stable/elixir/typespecs.html" rel="nofollow">о&nbsp;типах данных и&nbsp;спецификациях</a></noindex> можно найти на&nbsp;официальном сайте Elixir.</p>
+<p>Но&nbsp;как проверить корректность объявленных типов? Здесь-то нам и&nbsp;пригодится Dialyxir, работающий на&nbsp;базе инструмента <noindex><a href="http://erlang.org/doc/man/dialyzer.html" rel="nofollow">Dialyzer</a></noindex>.</p>
+<h3>Добавление инструмента в&nbsp;проект</h3>
+<p>Поместите в&nbsp;файл <code>mix.exs</code> следующий код:</p>
+{% highlight elixir %}defp deps do
+  [{:dialyxir, "~> 0.3", only: :dev}]
+end{% endhighlight %}
+<h3>Запуск анализа</h3>
+<p>Перед первым использованием Dialyxir придётся сначала запустить файл <code>mix dialyzer.plt</code>. Это займёт достаточно много времени, но&nbsp;зато последующие запуски будут осуществляться быстрее.</p>
+<p>После этого запустите инструмент с&nbsp;помощью <code>mix dialyzer</code>. К&nbsp;сожалению, отчёт Dialyzer далёк от&nbsp;идеала, но&nbsp;как&nbsp;бы то&nbsp;ни&nbsp;было, польза от&nbsp;него всё-таки есть. Подсказка: если требуется найти результат анализа какого-то определённого файла, можно передать результат работы в&nbsp;<code>grep</code>.</p>
+<h2>Credo</h2>
+<noindex><small class="subheader"><a href="https://github.com/rrrene/credo" rel="nofollow">Github</a> / <a href="https://hex.pm/packages/credo" rel="nofollow">Hex</a></small></noindex>
+<p>Credo&nbsp;&mdash; инструмент для анализа кода, особое внимание в&nbsp;котором уделяется согласованности кода внутри кодовой базы. Он&nbsp;покажет, правильно&nbsp;ли вы&nbsp;расставили пробелы и&nbsp;табуляцию, выполнили&nbsp;ли вы&nbsp;действия из&nbsp;списка TODO, не&nbsp;содержат&nbsp;ли функции слишком много аргументов и&nbsp;многое другое.</p>
+<p>Инструмент выделяет все найденные неточности, что упрощает процесс исправления ошибок.</p>
+<h3>Добавление инструмента в&nbsp;проект</h3>
+<p>Поместите в&nbsp;файл <code>mix.exs</code> следующий код:</p>
+{% highlight elixir %}def deps do
+  {:credo, "~> 0.4", only: [:dev, :test]}
+end{% endhighlight %}
+<p>Более подробные инструкции по&nbsp;установке инструмента можно найти <noindex><a href="https://github.com/rrrene/credo" rel="nofollow">на&nbsp;странице Github</a></noindex>.</p>
+<h3>Конфигурация</h3>
+<p>Credo можно настроить таким образом, чтобы при анализе включались/исключались определённые директории или проверки и&nbsp;даже создавались отдельные профили.</p>
+<p>Конфигурации хранятся в&nbsp;файле <code>.credo.exs</code>, который находится либо в&nbsp;корневом каталоге проекта, либо в&nbsp;папке <code>config/</code>. Пример <noindex><a href="https://github.com/rrrene/credo/blob/master/.credo.exs" rel="nofollow">файла конфигураций</a></noindex>.</p>
+<h3>Запуск анализа</h3>
+<p>Находясь в&nbsp;корневой директории проекта, выполните команду <code>mix credo</code>. Советую сделать это, указав аргумент <code>--strict</code>, тогда результаты будут более полными.</p>
+<h2>ExCoveralls</h2>
+<noindex><small class="subheader"><a href="https://github.com/parroty/excoveralls" rel="nofollow">Github</a> / <a href="https://hex.pm/packages/excoveralls" rel="nofollow">Hex</a></small></noindex>
+<p>ExCoveralls&nbsp;&mdash; инструмент для анализа покрытия кода в&nbsp;проекте. Он&nbsp;способен выводить отчёт в&nbsp;командную строку и&nbsp;работать с&nbsp;такими инструментами непрерывной интеграции, как Travis CI&nbsp;или Gitlab CI.</p>
+<p>Очень удобно копаться в&nbsp;отчётах с&nbsp;помощью бесплатного для публичных репозиториев сервиса <noindex><a href="https://coveralls.io/" rel="nofollow">coveralls.io</a></noindex>.</p>
+<h3>Добавление инструмента в&nbsp;проект</h3>
+<p>Поместите в&nbsp;файл <code>mix.exs</code> следующий код:</p>
+{% highlight elixir %}def project do
+  [...
+   test_coverage: [tool: ExCoveralls],
+   preferred_cli_env: ["coveralls": :test]]
+end
+
+defp deps do
+  [{:excoveralls, "~> 0.5", only: :test}]
+end{% endhighlight %}
+<h3>Запуск анализа</h3>
+<p>Запустите файл <code>mix coveralls</code>, находящийся в&nbsp;корневом каталоге проекта.</p>
+<h2>Заключение</h2>
+<p>Надеюсь, данная статья поможет вам в&nbsp;изучении инструментов для обеспечения более высокой надёжности эксплуатации кода. Также обратите особое внимание на&nbsp;ссылки в&nbsp;тексте, если вы&nbsp;хотели&nbsp;бы узнать все подробности об&nbsp;использовании описанных выше инструментов.</p>

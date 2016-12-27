@@ -1,0 +1,134 @@
+---
+title: Процессы в конкурентной модели Elixir
+excerpt: Конкурентная модель Elixir строится на понятии процеесов. В этой статье рассматривается что же такое процессы, их жизненный цикл и взаимодействие.
+author: nadezhda
+source_url: http://www.bassam.co/journal/2016/08/concurrent-elixir-processes/
+source_author: Bassam Ismail
+---
+<h2>Введение</h2>
+
+<p>Процессы&nbsp;&mdash; фундамент конкурентной модели Elixir. Вместо потоков операционной системы в&nbsp;Elixir реализованы высокопроизводительные легковесные &laquo;зелёные&raquo; потоки, а&nbsp;процессы взаимодействуют и&nbsp;синхронизируются друг с&nbsp;другом посредством <i>передачи сообщений</i>. Elixir- и&nbsp;Erlang-разработчикам не&nbsp;приходится беспокоиться о&nbsp;производительности при одновременном запуске нескольких тысяч процессов, поскольку они являются изолированными, а&nbsp;память освобождается после их&nbsp;отработки или уничтожения.</p>
+
+<h2>Создание процесса</h2>
+
+<p>Для создания нового процесса в&nbsp;Elixir используется функция <code>spawn</code>. В&nbsp;неё можно передать либо анонимную функцию, либо функцию с&nbsp;аргументами из&nbsp;модуля. Новый процесс создастся в&nbsp;текущем процессе виртуальной машины Beam, однако эти два процесса совершенно не&nbsp;связаны друг с&nbsp;другом и&nbsp;не&nbsp;имеют общих данных. Все необходимые переменные копируются в&nbsp;только что созданные процессы.</p>
+
+<h4>Использование анонимной функции</h4>
+
+{% highlight elixir %}
+spawn fn ->
+IO.inspect "Process body here."
+end
+{% endhighlight %}
+
+<h4>Использование функции модуля</h4>
+
+{% highlight elixir %}
+spawn Module, :function, [arg1, arg2]
+{% endhighlight %}
+
+<h2>Обмен сообщениями</h2>
+
+<p>Elixir опирается на&nbsp;Erlang и&nbsp;его мощную виртуальную машину в&nbsp;целях обеспечения конкурентности, основанной на&nbsp;принципах модели акторов. Данные передаются от&nbsp;процесса к&nbsp;процессу с&nbsp;помощью сообщений, посылаемых идентификаторам.</p>
+
+{% highlight elixir %}
+pid = spawn Module, :function, [arg1, arg2]
+pid2 = spawn fn -> IO.inspect "Current Process: #{self}." end
+{% endhighlight %}
+
+<h3>Идентификаторы процессов</h3>
+
+<p>При создании нового процесса в&nbsp;качестве возвращаемого параметра выступает идентификатор процесса <code>pid</code>. <code>pid</code> в&nbsp;Elixir&nbsp;&mdash; это тип данных, используемый для работы с&nbsp;процессами. С&nbsp;помощью идентификатора можно проверить статус процесса, послать ему сообщения, уничтожить его и&nbsp;многое другое. Функция <code>self</code> позволяет получить <code>pid</code> текущего процесса.</p>
+
+{% highlight elixir %}
+pid = spawn Account, :add, []
+send pid, {:deposit, 1_000_000}
+{% endhighlight %}
+
+<h3>Отправка сообщений</h3>
+
+<p>Послать сообщение процессу можно с&nbsp;помощью макроса <code>send</code>. В&nbsp;него потребуется передать идентификатор <code>pid</code> процесса-получателя и&nbsp;само сообщение. Сообщение может представлять собой любой тип данных, однако для Elixir-сообщества характерно использование атомов или тегированных кортежей, которые можно сопоставлять с&nbsp;образцом для проверки на&nbsp;ошибки.</p>
+
+<h3>Получение сообщений</h3>
+
+<p>Обработать все сообщения в&nbsp;почтовом ящике процесса поможет макрос <code>receive</code>. Можно обрабатывать все полученные сообщения таким способом или&nbsp;же проводить сопоставлением с&nbsp;образцом.</p>
+
+<h4>Получение обычным способом</h4>
+
+{% highlight elixir %}
+receive do
+  message ->
+    IO.inspect "Generic method to handle all the messages: #{message}."
+  end
+end
+{% endhighlight %}
+
+<h4>Сопоставление с&nbsp;образцом</h4>
+
+{% highlight elixir %}
+receive do
+  {:ok, data} ->
+    IO.puts "Received data: #{data}."
+  {:error, reason} ->
+    IO.puts "Failed to get data: #{reason}."
+  end
+end
+{% endhighlight %}
+
+<p><code>receive</code> продолжит работать в&nbsp;фоновом режиме, ожидая получения новых сообщений. Тем не&nbsp;менее в&nbsp;блоке after макроса recieve есть возможность указать необходимое время ожидания.</p>
+
+{% highlight elixir %}
+receive do
+  ...
+after 500 ->
+  IO.puts "Didn't get any messages."
+end
+{% endhighlight %}
+
+<h3>Пример</h3>
+
+<p>Процессы выгодно использовать в&nbsp;тех случаях, когда последовательное выполнение заданий занимает слишком много времени. Например, реализация параллельного загрузчика файлов: просто передаём ему набор ссылок, и&nbsp;файлы загружаются параллельно. Это значительно сокращает время выполнения задачи по&nbsp;сравнению с&nbsp;линейным способом реализации.</p>
+
+<h4>Пример кода</h4>
+
+{% highlight elixir %}
+defmodule Downloader do
+  def pget(url) when is_list(url) do
+    url
+    |> Enum.map(&spawn_process(&1, self))
+    |> Enum.map(&await/1)
+  end
+
+  defp spawn_process(url, parent) do
+    spawn_link fn ->
+      case HTTPoison.get(url) do
+        {:ok, %HTTPoison.Response{body: body, headers: _headers, status_code: 200}} ->
+          send parent, {:ok, body}
+        {:error, %HTTPoison.Error{reason: reason}} ->
+          send parent, {:error, "Failed: #{reason}."}
+        _ ->
+          send parent, {:error, "Failed."}
+      end
+    end
+  end
+
+  defp await(pid) do
+    receive do
+      {:ok, body} ->
+        File.write("./#{:rand.uniform(1_000_000)}.html", body)
+      {:error, reason} ->
+        IO.puts "#{reason}"
+    end
+  end
+end
+{% endhighlight %}
+
+<h4>Описание</h4>
+
+<p>Модуль <code>Downloader</code> содержит функцию <code>pget</code>, в&nbsp;который помещаются ссылки. В&nbsp;<code>pget</code> имеется охранное условие <code>when is_list(url)</code>, проверяющее, что функция вызывается только если ему передать аргумент <code>list</code>.</p>
+
+<p>Ссылки нумеруются и&nbsp;передаются функции <code>spawn_process</code>, который запрашивает содержимое той или иной ссылки (<code>url</code>), используя библиотеку HTTPoison. Функции <code>spawn_process</code> также передаётся <code>pid</code> родительского процесса. В&nbsp;<code>spawn_process</code> проводится сопоставление полученного ответа с&nbsp;образцом, после чего с&nbsp;помощью макроса <code>send</code> в&nbsp;<code>pid</code> родительского процесса направляется сообщение в&nbsp;форме тегированного кортежа.</p>
+
+<p>По&nbsp;завершении <code>spawn_process</code> функция <code>await</code> обрабатывает все сообщения, полученные родительскими процессами от&nbsp;дочерних, созданных с&nbsp;помощью функции <code>spawn_process</code>. Если получен кортеж <code>:ok</code>, он&nbsp;сохраняется в&nbsp;файл, названный случайным именем, в&nbsp;противном случае в&nbsp;<code>stdout</code> регистрируется ошибка.</p>
+
+<p>Важно отметить, что новый процесс создаётся в&nbsp;течение нескольких микросекунд. Это может привести к&nbsp;задержке при работе с&nbsp;заданиями, которые завершаются сразу&nbsp;же после запуска. В&nbsp;таком случае использование одного процесса, возможно, будет более эффективным решением.</p>

@@ -1,0 +1,173 @@
+---
+title: Как работают супервизоры в Elixir
+excerpt: В этой статье рассказывается о том, как работают супервизоры в языке Elixir.
+author: nadezhda
+source_url: https://jbodah.github.io/blog/2016/11/18/supervisors-work/
+source_author: Josh Bodah
+---
+<p>В&nbsp;Erlang и&nbsp;Elixir супервизоры&nbsp;&mdash; это процессы, управляющие дочерними процессами и&nbsp;перезапускающие их&nbsp;в&nbsp;случае возникновения ошибок. В&nbsp;этой статье подробно рассматривается реализация супервизоров в&nbsp;Elixir.</p>
+<p>Но&nbsp;прежде чем перейти к&nbsp;самим супервизорам, неплохо было&nbsp;бы как следует ознакомиться с&nbsp;модулями <code>gen_server</code> и&nbsp;<code>supervisor</code>. Можно обойтись и&nbsp;без этого, если вам уже доводилось работать с&nbsp;эквивалентными модулями Elixir, так как они просто передают вызовы модулям Erlang, не&nbsp;меняя своего поведения.</p>
+<p>Начнём, пожалуй, с&nbsp;примера из&nbsp;самой документации Elixir:</p>
+{% highlight elixir %}defmodule MyApp.Supervisor do
+  use Supervisor
+
+  def start_link do
+    Supervisor.start_link(__MODULE__, [])
+  end
+
+  def init([]) do
+    children = [
+      worker(Stack, [[:hello]])
+    ]
+
+    # supervise/2 is imported from Supervisor.Spec
+    supervise(children, strategy: :one_for_one)
+  end
+end{% endhighlight %}
+<p>В&nbsp;приведённом примере метод <code>start_link</code> создаёт супервизор, а&nbsp;метод <code>init</code> реализует обратный вызов, используемый поведением из&nbsp;<code>Supervisor</code>. Рассмотрим <code>Supervisor</code> подробнее.</p>
+<p>Пробежимся по&nbsp;поведениям. Инструкция <code>use Supervisor</code> разворачивается во&nbsp;время компиляции в&nbsp;поведение, указанное в&nbsp;макросе <code>__using__</code>. Посмотрим на&nbsp;код макроса <code>__using__</code> из&nbsp;модуля <code>Supervisor</code> <noindex><a href="https://github.com/elixir-lang/elixir" rel="nofollow">в&nbsp;исходниках Elixir</a></noindex>.</p>
+<p>На&nbsp;момент написания статьи макрос <code>__using__</code> выглядел так:</p>
+{% highlight elixir %}defmacro __using__(_) do
+  quote location: :keep do
+    @behaviour Supervisor
+    import Supervisor.Spec
+  end
+end{% endhighlight %}
+<p>С&nbsp;помощью <code>@behaviour</code> в&nbsp;супервизоре проверяется наличие необходимых функций обратного вызова, а&nbsp;оператор <code>import</code> подгружает в&nbsp;<code>MyApp.Supervisor</code> дополнительные функции из&nbsp;модуля <code>Supervisor.Spec</code>. Именно в&nbsp;нём определены функции <code>worker</code> и&nbsp;<code>supervise</code>.</p>
+<p>Если в&nbsp;двух словах, то&nbsp;инструкция <code>use Supervisor</code> добавляет в&nbsp;проект несколько новых функций и&nbsp;следит за&nbsp;наличием нужных функций обратного вызова.</p>
+<p>Работа супервизора начинается с&nbsp;вызова <code>MyApp.Supervisor.start_link</code>. Он&nbsp;делегируется функции <code>Supervisor.start_link</code>, передавая ссылку на&nbsp;себя (с&nbsp;помощью макроса <code>__MODULE__</code>).</p>
+<p>Посмотрим на&nbsp;реализацию <code>Supervisor.start_link</code>:</p>
+{% highlight elixir %}def start_link(module, arg, options \\ []) when is_list(options) do
+  case Keyword.get(options, :name) do
+    nil ->
+      :supervisor.start_link(module, arg)
+    atom when is_atom(atom) ->
+      :supervisor.start_link({:local, atom}, module, arg)
+    {:global, _term} = tuple ->
+      :supervisor.start_link(tuple, module, arg)
+    {:via, via_module, _term} = tuple when is_atom(via_module) ->
+      :supervisor.start_link(tuple, module, arg)
+    other ->
+      raise ArgumentError, """
+      expected :name option to be one of:
+        * nil
+        * atom
+        * {:global, term}
+        * {:via, module, term}
+      Got: #{inspect(other)}
+      """
+  end
+end{% endhighlight %}
+<p>Обратите внимание, что модуль Elixir делегирует вызовы модулю Erlang <code>:supervisor</code>. Но&nbsp;это не&nbsp;повод для паники! Доверьтесь мне и&nbsp;загляните <noindex><a href="https://github.com/erlang/otp" rel="nofollow">в&nbsp;исходники Erlang</a></noindex>.</p>
+<p>Введя в&nbsp;поиске <code>start_link</code>, вы&nbsp;наткнётесь на&nbsp;инструкцию <code>export</code>, позволяющую использовать функцию за&nbsp;пределами модуля, спецификацию, описывающую доступные для функции типы данных, и, собственно, саму её&nbsp;реализацию:</p>
+{% highlight elixir %}start_link(Mod, Args) ->
+    gen_server:start_link(supervisor, {self, Mod, Args}, []).{% endhighlight %}
+<p>Видите? Уже что-то знакомое. Просто запускаем <code>gen_server</code>, не&nbsp;вдаваясь <noindex><a href="http://erlang.org/doc/design_principles/gen_server_concepts.html" rel="nofollow">в&nbsp;подробности его работы</a></noindex>. Главное, что здесь нужно усвоить,&nbsp;&mdash; это&nbsp;то, что супервизоры построены на&nbsp;основе модуля <code>gen_server</code>, который ожидает увидеть реализацию нескольких функций обратного вызова.</p>
+<p>Гораздо больший интерес представляет метод <code>init</code>. Обратите внимание, что хоть <code>MyApp.Supervisor</code> и&nbsp;содержит реализацию функции <code>init</code>, но&nbsp;это <em>не</em>&nbsp;функция обратного вызова, которая будет вызвана далее. Если вернуться к&nbsp;реализации функции <code>start_link</code> в&nbsp;модуле <code>:supervisor</code> из&nbsp;Erlang, можно заметить, что в&nbsp;неё передаётся параметр <code>self</code>. Это означает, что <code>:supervisor.init</code>&nbsp;&mdash; та&nbsp;самая искомая функция.</p>
+<p>Посмотрите на&nbsp;её&nbsp;исходный код:</p>
+{% highlight elixir %}init({SupName, Mod, Args}) ->
+    process_flag(trap_exit, true),
+    case Mod:init(Args) of
+        {ok, {SupFlags, StartSpec}} ->
+            case init_state(SupName, SupFlags, Mod, Args) of
+                {ok, State} when ?is_simple(State) ->
+                    init_dynamic(State, StartSpec);
+                {ok, State} ->
+                    init_children(State, StartSpec);
+                Error ->
+                    {stop, {supervisor_data, Error}}
+                  end;
+        ignore ->
+            ignore;
+        Error ->
+            {stop, {bad_return, {Mod, init, Error}}}
+end.{% endhighlight %}
+<p>Во-первых, вызывается функция <code>Mod:init(Args)</code>, которая в&nbsp;свою очередь вызывает функцию <code>MyApp.Supervisor.init</code>. Ещё раз взглянем на&nbsp;код:</p>
+{% highlight elixir %}def init([]) do
+  children = [
+    worker(Stack, [[:hello]])
+  ]
+
+  # supervise/2 is imported from Supervisor.Spec
+  supervise(children, strategy: :one_for_one)
+end{% endhighlight %}
+<p>Не&nbsp;стоит забывать, что <code>worker</code> и&nbsp;<code>supervise</code>&nbsp;&mdash; хелперы из&nbsp;<code>Supervisor.Spec</code>. Не&nbsp;будем ходить вокруг да&nbsp;около, а&nbsp;перейдём к&nbsp;самому главному, то&nbsp;есть рассмотрим подробнее, как всё это реализуется в&nbsp;Erlang. <code>worker</code> возвращает <code><a href="http://erlang.org/doc/man/supervisor.html#type-child_spec" rel="nofollow">child_spec</a></code>, а&nbsp;<code>supervise</code>&nbsp;&mdash; такой кортеж: <code>{:ok, { {strategy, max_retries, max_seconds}, child_specs} }</code>.</p>
+<p>Во-вторых, <code>:supervisor.init</code> вызывает <code>process_flag</code>, после чего происходит перехват <noindex><a href="http://erlang.org/doc/reference_manual/processes.html#errors" rel="nofollow">сигнала выхода</a></noindex>. Это&nbsp;&mdash; ключевой момент, демонстрирующий, как и&nbsp;когда супервизор принимает решение о&nbsp;перезапуске процесса. Если коротко, то&nbsp;перед уничтожением процесс посылает сигнал выхода всем связанным с&nbsp;ним процессам. Вызов <code>process_flag</code> перехватывает сигнал и&nbsp;вместо этого посылает процессу сообщение <code>{&rsquo;EXIT&rsquo;, from_pid, reason}</code>. Далее будет показано, каким образом процесс-супервизор использует значение <code>from_pid</code> для выявления уничтоженного процесса и&nbsp;его перезапуска.</p>
+<p>Итак, мы&nbsp;рассмотрели функцию <code>:supervisor.init</code> и&nbsp;узнали про перехват сигналов выхода. Теперь перейдём к&nbsp;инициализации состояния и&nbsp;дочерних процессов. Так как в&nbsp;данном примере супервизоры <code>:simple_one_for_one</code> не&nbsp;используются, то&nbsp;обратим внимание лишь на&nbsp;инициализацию дочерних процессов <code>init_children</code>.</p>
+{% highlight elixir %}init_children(State, StartSpec) ->
+    SupName = State#state.name,
+    case check_startspec(StartSpec) of
+        {ok, Children} ->
+            case start_children(Children, SupName) of
+                {ok, NChildren} ->
+                    {ok, State#state{children = NChildren}};
+                {error, NChildren, Reason} ->
+                    _ = terminate_children(NChildren, SupName),
+                    {stop, {shutdown, Reason}}
+            end;
+        Error ->
+            {stop, {start_spec, Error}}
+end.{% endhighlight %}
+<p>Небольшое отступление: <code>State#state.name</code> обращается к&nbsp;переменной <code>State</code> как к&nbsp;записи <code>state</code> и&nbsp;&laquo;вытаскивает&raquo; из&nbsp;неё поле <code>name</code>. <noindex><a href="http://erlang.org/doc/reference_manual/records.html" rel="nofollow">Записи</a></noindex> представляют собой более или менее структурированный тип данных, так как они хранятся в&nbsp;виде кортежей типа <code>{:state, &laquo;josh&raquo;, [1, 2, 3]}</code> (подобно типу <code>enum</code> в&nbsp;других языках). Записи&nbsp;&mdash; это лишь способ отвязать позицию поля от&nbsp;его значения. Так выглядит исходный код записи <code>state</code>, прописанный в&nbsp;начале:</p>
+{% highlight elixir %}-record(state, {name,
+                strategy               :: strategy() | 'undefined',
+                children = []          :: [child_rec()],
+                dynamics               :: {'dict', ?DICT(pid(), list())}
+                                        | {'set', ?SET(pid())}
+                                        | 'undefined',
+                intensity              :: non_neg_integer() | 'undefined',
+                period                 :: pos_integer() | 'undefined',
+                restarts = [],
+                dynamic_restarts = 0   :: non_neg_integer(),
+                module,
+                args}).{% endhighlight %}
+<p>Можно видеть, что запись <code>state</code> содержит поле name, а&nbsp;выражение <code>SupName = State#state.name</code> просто обращается к&nbsp;кортежу <code>State</code> как к&nbsp;записи <code>state</code>, вытаскивая и&nbsp;сохраняя в&nbsp;<code>SupName</code> поле, связанное с&nbsp;<code>name</code>.</p>
+<p>Что касается функции <code>check_startspec</code>, то&nbsp;она проверяет данные и&nbsp;помещает полученные от&nbsp;<code>MyApp.Supervisor.init</code> спецификации в&nbsp;запись (<noindex><a href="https://github.com/erlang/otp/blob/2a56d0ed91c1c5e18008d1cf37406f36b46b4e62/lib/stdlib/src/supervisor.erl#L1346" rel="nofollow">исходник</a></noindex>).</p>
+<p>Суть функции <code>:supervisor.init_children</code> заключается в&nbsp;вызове функции <code>start_children</code>:</p>
+{% highlight elixir %}start_children(Children, SupName) -> start_children(Children, [], SupName).
+
+start_children([Child|Chs], NChildren, SupName) ->
+    case do_start_child(SupName, Child) of
+        {ok, undefined} when Child#child.restart_type =:= temporary ->
+            start_children(Chs, NChildren, SupName);
+        {ok, Pid} ->
+            start_children(Chs, [Child#child{pid = Pid}|NChildren], SupName);
+        {ok, Pid, _Extra} ->
+            start_children(Chs, [Child#child{pid = Pid}|NChildren], SupName);
+        {error, Reason} ->
+            report_error(start_error, Reason, Child, SupName),
+            {error, lists:reverse(Chs) ++ [Child | NChildren],
+            {failed_to_start_child,Child#child.name,Reason}}
+    end;
+
+start_children([], NChildren, _SupName) ->
+    {ok, NChildren}.{% endhighlight %}
+<p>Наблюдается небольшая рекурсия: берётся каждый дочерний процесс и&nbsp;вызывается функция <code>do_start_child</code>:</p>
+{% highlight elixir %}do_start_child(SupName, Child) ->
+    #child{mfargs = {M, F, Args}} = Child,
+    case catch apply(M, F, Args) of
+        {ok, Pid} when is_pid(Pid) ->
+            NChild = Child#child{pid = Pid},
+            report_progress(NChild, SupName),
+            {ok, Pid};
+        {ok, Pid, Extra} when is_pid(Pid) ->
+            NChild = Child#child{pid = Pid},
+            report_progress(NChild, SupName),
+            {ok, Pid, Extra};
+        ignore ->
+            {ok, undefined};
+        {error, What} -> {error, What};
+        What -> {error, What}
+end.{% endhighlight %}
+<p><code>apply</code> в&nbsp;Erlang&nbsp;&mdash; метод динамического вызова функций (подобно <code>send</code> в&nbsp;Ruby или <code>apply</code>/<code>call</code> в&nbsp;Javascript). Он&nbsp;динамически обращается к&nbsp;функции обратного вызова, определённой в&nbsp;<code>Supervisor.Spec.worker</code>: <noindex><a href="https://github.com/elixir-lang/elixir/blob/f8f4731f5ea32b6ee2896fcda5ed901b28fbaca7/lib/elixir/lib/supervisor/spec.ex#L240" rel="nofollow">по соглашению вызывается функция start_link</a></noindex> из&nbsp;модуля <code>worker</code>. И, наконец, он&nbsp;вызывает функцию <code>report_progress</code> и&nbsp;передаёт информационное событие о&nbsp;запуске супервизором нового процесса в&nbsp;менеджер событий Erlang <noindex><a href="http://erlang.org/doc/man/error_logger.html" rel="nofollow">под названием error_logger</a></noindex> (не&nbsp;самое удачное имя).</p>
+<p>Полдела сделано. Идём дальше.</p>
+<p>Резюмируя вышеизложенное: мы&nbsp;рассмотрели, как запускаются супервизоры, перехватываются сигналы выхода и&nbsp;создаются дочерние процессы. Но&nbsp;как&nbsp;же перезапускаются дочерние процессы? Помните, как <code>process_flag</code> отлавливает сигналы выхода, превращая их&nbsp;в&nbsp;кортежи <code>{&rsquo;EXIT&rsquo;, from_pid, reason}</code>? А&nbsp;то, что супервизоры построены на&nbsp;основе библиотеки <code>gen_server</code>? <code>gen_server</code> обрабатывает все сообщения, кроме типов <code>call</code>/<code>cast</code> с&nbsp;помощью функции <code>handle_info</code> (подробнее о&nbsp;ней <noindex><a href="http://erlang.org/doc/man/gen_server.html#Module:handle_info-2" rel="nofollow">здесь</a></noindex>). Именно так супервизор обрабатывает сигналы выхода из&nbsp;дочерних процессов.</p>
+{% highlight elixir %}handle_info({'EXIT', Pid, Reason}, State) ->
+    case restart_child(Pid, Reason, State) of
+        {ok, State1} ->
+            {noreply, State1};
+        {shutdown, State1} ->
+            {stop, shutdown, State1}
+    end;{% endhighlight %}
+<p>Отсюда видно, как он&nbsp;создаёт сообщение, содержащее идентификатор дочернего процесса (<code>pid</code>) и&nbsp;причину его завершения, и&nbsp;передаёт эти данные в&nbsp;метод <code>restart_child</code>! Победа! Функции <code>do_start_child</code> имеет много общего с&nbsp;ранее рассмотренной функцией <code>restart_child</code>, поэтому оставим вопрос её&nbsp;реализации на&nbsp;самостоятельное изучение. Если вам интересно узнать, как супервизоры реализуют стратегии своего завершения, взгляните <noindex><a href="http://erlang.org/doc/man/gen_server.html#stop-1" rel="nofollow">на&nbsp;функцию :gen_server.stop</a></noindex>, которая делегирует вызовы функции обратного вызова <noindex><a href="https://github.com/erlang/otp/blob/2a56d0ed91c1c5e18008d1cf37406f36b46b4e62/lib/stdlib/src/supervisor.erl#L644" rel="nofollow">под названием terminate</a></noindex>.</p>
+<p>Подведём итоги. Elixir использует общепринятую модель построения супервизоров, которая базируется на&nbsp;интерфейсе модуля <code>:supervisor</code> из&nbsp;Erlang, построенного на&nbsp;библиотеке <code>:gen_server</code>. Настройки из&nbsp;Elixir передаются в&nbsp;модуль <code>:supervisor</code>, который на&nbsp;их&nbsp;основе запускает дочерние процессы. Супервизор управляет дочерними процессами, перехватывая их&nbsp;сигналы выхода, и&nbsp;превращает эти сигналы в&nbsp;сообщения. В&nbsp;нём реализована функция обратного вызова <code>handle_info</code>, принимающая сообщения о&nbsp;выходе и&nbsp;перезапускающая необходимый воркер. И&nbsp;последнее, что стоит упомянуть,&nbsp;&mdash; отчёты выводятся в&nbsp;менеджер событий Erlang <code>:error_logger</code>.</p>

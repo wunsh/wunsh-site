@@ -1,0 +1,275 @@
+---
+title: Опыт переноса приложения с Rails на Elixir/Phoenix
+excerpt: Рассказываем об опыте переноса приложения с Rails на Phoenix.
+author: nadezhda
+source_url: https://medium.com/@stueccles/what-i-learned-migrating-a-rails-app-to-elixir-phoenix-f707436749aa
+source_author: Stuart Eccles
+public: true
+---
+<p>Прошло уже немало времени с&nbsp;тех пор, как я&nbsp;с&nbsp;головой ушёл в&nbsp;Elixir. Для нашей команды в&nbsp;компании Made by&nbsp;Many язык Ruby, многообещающая продуктивность которого не&nbsp;наносит ущерба чистой производительности и&nbsp;масштабируемости, становится победителем в&nbsp;номинации «лучший серверный язык программирования».</p>
+<p>Я&nbsp;всячески пытался ускорить процесс изучения Elixir: <a href="/first_contest.html">читал книгу Дэйва Томаса</a> и&nbsp;выполнял приведенные в&nbsp;ней задания, посетил конференцию в&nbsp;Остине, посвященную Elixir, а&nbsp;ещё я&nbsp;попробовал перенести Rails-приложение моего коллеги на&nbsp;Phoenix.</p>
+<p>Речь пойдёт о&nbsp;нестандартном приложении для электронной коммерции его довольно прибыльного чулочно-носочного бизнеса на&nbsp;сайте Form &amp;Thread. В&nbsp;процессе переноса я&nbsp;отметил не&nbsp;только кое-какие любопытные факты, но&nbsp;и&nbsp;несколько подводных камней. Конечно, если кто-то ещё проделает ту&nbsp;же работу, у&nbsp;него, вероятно, сложится совершенно иное мнение и&nbsp;возникнут свои трудности. Прежде чем перейти к&nbsp;деталям, рассмотрим три основных момента.</p>
+<p><em>Примечание: я&nbsp;не&nbsp;собираюсь расписывать азы Elixir, процесс установки Phoenix и&nbsp;тому подобные вещи. Предполагается, что вы&nbsp;уже на&nbsp;должном уровне знакомы с&nbsp;этим языком и&nbsp;его фреймворком.</em></p>
+<p><strong>1. Необходимо выкинуть из&nbsp;головы основы объектно-ориентированного подхода, особенно применительно к&nbsp;моделям.</strong></p>
+<p>Для Ruby-разработчика изменить эту психологическую установку&nbsp;— то, что в&nbsp;обязательном порядке нужно сделать в&nbsp;первую очередь. Принцип «толстых» моделей и&nbsp;«тонких» контроллеров настолько прочно сидит у&nbsp;рубистов в&nbsp;голове, что облегчить модели не&nbsp;получается даже при условии использования паттернов декоратора/презентера или сервисных объектов.</p>
+<p>Вместо этого старайтесь мыслить отдельными функциями, объединяя их&nbsp;в&nbsp;единое целое. Осуществив перенос приложения, я&nbsp;осознал, что не&nbsp;так уж&nbsp;всё и&nbsp;сложно. Волшебство тут почти ни&nbsp;при чём.</p>
+<p><strong>2. Кое-какие модули интеграции нужно будет написать самому.</strong></p>
+<p>Экосистема Elixir пока не&nbsp;располагает интеграционными библиотеками для каждого из&nbsp;используемых сервисов. Возможно, придётся засучить рукава и&nbsp;проделать эту работу самостоятельно и&nbsp;тем самым внести свой вклад в&nbsp;развитие экосистемы. Именно с&nbsp;этой целью я&nbsp;и&nbsp;создал для Elixir <noindex><a href="https://github.com/stueccles/analytics-elixir/" rel="nofollow">библиотеку segment.com</a></noindex>.</p>
+<p>Для Phoenix также существует намного меньше расширений и&nbsp;вспомогательных библиотек, но&nbsp;я&nbsp;выяснил, что возможности языка Elixir способны это компенсировать, правда, нужно будет дописать пару лишних строчек кода.</p>
+<p><strong>3. Кое-что в&nbsp;Elixir/Phoenix устроено совсем по-другому.</strong></p>
+<p>Следует отметить, что при программировании на&nbsp;Elixir некоторые шаблоны проектирования должны быть реализованы иным образом. Возьмём, к&nbsp;примеру, асинхронный подход. В&nbsp;Rails-приложениях обычно используются очереди Sidekiq или DelayedJob, которые исполняют задачи в&nbsp;фоновых процессах. Конкурентная модель Elixir позволяет этого избежать. Как правило, достаточно просто обернуть функцию в&nbsp;<code>Task.async</code> или создать своё OTP-приложение.</p>
+<blockquote>«<em>Волшебство тут почти ни&nbsp;при чём».</em></blockquote>
+<h4><strong>Процесс переноса сборки фронтенда на&nbsp;brunch</strong></h4>
+<p>Первым шагом после создания нового приложения стал перенос сборки фронтенда на&nbsp;<noindex><a href="http://brunch.io/" rel="nofollow">Brunch</a></noindex>, который является предпочтительным для Phoenix.</p>
+<p>Первой проблемой, с&nbsp;которой я&nbsp;столкнулся, стало отсутствие в&nbsp;Brunch обработчика SASS, который в&nbsp;Rails идёт по&nbsp;умолчанию. Однако SAAS можно легко подключить при помощи модуля sass-brunch. Я&nbsp;добавил его вместе с&nbsp;другими необходимыми модулями Node в&nbsp;файл
+  <code>package.json</code>.</p>
+
+{% highlight elixir %}
+"sass-brunch": "^1.8.10",
+"bourbon": "^4.2.6",
+"css-patterns": "^0.2.0",
+"normalize.css": "^3.0.3"
+{% endhighlight %}
+                    
+<p>Необходимо произвести кое-какие модификации в&nbsp;<code>brunch.config</code>&nbsp;— настроить модуль <code>sass-brunch</code> так, чтобы тот включал путь к&nbsp;директории
+  <code>node_modules</code>. Таким образом, мы&nbsp;подключим библиотеку bourbon, файл
+  <code>normalize.css</code> и&nbsp; css-шаблоны компании Mady by&nbsp;Many.</p>
+
+{% highlight ruby %}
+plugins: {
+  babel: {
+    // Do not use ES6 compiler in vendor code
+    ignore: [/web\/static\/vendor/]
+  },
+  sass: {
+    options: {
+      includePaths: [ 'node_modules' ]
+    }
+  }
+}
+{% endhighlight %}
+                    
+<p>Затем импортируем в&nbsp;<code>application.scss</code> пути, соответствующие директории модулей
+  <code>node_modules</code>.</p>
+
+{% highlight sass %}
+@import “bourbon/app/assets/stylesheets/bourbon";
+@import “normalize.css/normalize.css";
+@import “css-patterns/stylesheets/patterns";
+{% endhighlight %}
+                    
+<p>Также нужно выполнить следующие действия: переместить файлы с&nbsp;расширением <code>js</code>&nbsp;и&nbsp;<code>css</code> из&nbsp;директории
+  <code>assets</code> в&nbsp;директорию <code>web/static</code>, в&nbsp;то&nbsp;время как изображения и&nbsp;шрифты&nbsp;— в&nbsp;директорию
+  <code>web/static/assets</code>.</p>
+<p>Ещё одно важное отличие в&nbsp;области фронтенда&nbsp;— это&nbsp;то, что в&nbsp;Phoenix не&nbsp;существует гема sass-rails, который волшебным образом предоставлял&nbsp;бы
+  <code>asset_path</code> или <code>asset_url</code>. Придётся вычистить из&nbsp;кода всё, что к&nbsp;нему относится, и&nbsp;прописать необходимые пути вручную.</p>
+
+{% highlight sass %}
+url(asset-path('Apercu Bold-webfont.eot'));
+{% endhighlight %}
+<p><i><small>Превращается в...</small></i></p>
+{% highlight sass %}
+url('/fonts/Apercu Bold-webfont.eot');
+{% endhighlight %}
+
+                    
+<h4><strong>Перевод моделей с&nbsp;ActiveRecord на&nbsp;Ecto</strong></h4>
+<p><em>Примечание: хотя в&nbsp;Phoenix подобные компоненты называются моделями, в&nbsp;Ecto используется название «schema», и&nbsp;я&nbsp;хотел&nbsp;бы, чтобы Phoenix перенял именно этот термин. Это помогает <strong>не&nbsp;думать</strong> о&nbsp;них, как о&nbsp;моделях, и&nbsp;избавиться от&nbsp;устоев ООП. Но&nbsp;на&nbsp;данный момент, говоря о&nbsp;Phoenix, я&nbsp;всё-таки буду называть их&nbsp;моделями.</em></p>
+<p>Задание оказалось относительно простым: взять файл schema.rb и&nbsp;создать соответствующие файлы модели в&nbsp;Phoenix при помощи команды mix phoenix.gen.model. Я&nbsp;отловил несколько исключений, но&nbsp;в&nbsp;вашем случае их&nbsp;может и&nbsp;не&nbsp;быть.</p>
+<ol>
+    <li><p>В&nbsp;Ecto отсутствует функция <code>has_and_belongs_to_many</code>, поэтому существует необходимость создавать свою промежуточную модель. Затем её&nbsp;можно использовать простым вызовом
+      <code>has_many :through</code>.</p>
+    </li>
+    <li><p>Расширение HSTORE не&nbsp;реализовано для Ecto.</p>
+    </li>
+</ol>
+<p>Существующая модель данных использует Postgres HSTORE для хранения пар ключ-значение у&nbsp;некоторых моделей. Ecto пока не&nbsp;поддерживает HSTORE, а&nbsp;решение этого вопроса заняло&nbsp;бы слишком много времени. Вместо этого я&nbsp;перевёл данные в&nbsp;формат jsonb, имеющий внутреннее представление в&nbsp;виде словаря Elixir. Подробнее
+  <noindex><a href="https://robots.thoughtbot.com/embedding-elixir-structs-in-ecto-models" rel="nofollow">об&nbsp;этом здесь</a>
+  </noindex>.</p>
+<p>На&nbsp;этом этапе важно проверить, чтобы расширение JSON было включено в&nbsp;настройках окружения:</p>
+                    
+{% highlight elixir %}
+config :form_and_thread, FormAndThread.Repo,
+  adapter: Ecto.Adapters.Postgres,
+  extensions: [{Postgrex.Extensions.JSON, [library: nil]}],
+{% endhighlight %}
+
+<p>Далее проводим перенос всех начальных данных из&nbsp;файла <code>priv/repo/seeds.exs</code> в&nbsp;Elixir-приложение с&nbsp;помощью выполнения команды:</p>
+
+{% highlight bash %}
+mix run priv/repo/seeds.exs
+{% endhighlight %}
+
+<h4><strong>Использование моделей</strong></h4>
+<p>Ecto и&nbsp;ActiveRecord&nbsp;— это не&nbsp;одно и&nbsp;то&nbsp;же, и&nbsp;нужно будет обратить внимание на&nbsp;некоторые моменты. Например, вот&nbsp;то, что попалось мне на&nbsp;глаза.</p>
+<p><strong>Отсутствие скоупов</strong></p>
+<p>Скоупы в&nbsp;Ecto не&nbsp;используются. Вместо этого запросы хранятся в&nbsp;модуле, а&nbsp;разработчику остаётся только составить из&nbsp;них более сложный запрос. Подробнее <noindex><a href="http://blog.drewolson.org/composable-queries-ecto/" rel="nofollow">здесь</a></noindex>.</p>
+
+{% highlight ruby %}
+class Order < ActiveRecord::Base
+  scope :received_or_shipped, -> { where(state: ['received', 'shipped']) }
+{% endhighlight %}
+
+<p><i><small>Превращается в...</small></i></p>
+
+{% highlight elixir %}
+defmodule FormAndThread.Order do
+  def received_or_shipped_query(query) do
+    from o in query,
+    where: o.state == 'received' or o.state == 'shipped'
+  end
+end
+
+Order |> Order.received_or_shipped_query |> Repo.all
+{% endhighlight %}
+
+                    
+<p><strong>Отсутствие отложенной загрузки ассоциаций</strong></p>
+<p>Как вы&nbsp;знаете, ActiveRecord реализует отложенную загрузку ассоциаций. Однако в&nbsp;Ecto во&nbsp;избежание ошибок для этого необходимо использовать функцию
+  <code>Repo.preload</code>. Мы&nbsp;используем подход, при котором сохраняем часто используемые связи в&nbsp;отдельной функции, а&nbsp;потом передаём её&nbsp;внутрь
+  <code>Repo.preload</code> (обратите внимание, что здесь возможно выполнять глубоко вложенные предзагрузки).</p>
+                    
+{% highlight elixir %}
+defmodule FormAndThread.Order do
+  def preloaded do
+    [:shipping_address, line_items: [variant: [:product]]]
+  end
+end
+
+order = get_current_order(conn) |> Repo.preload(Order.preloaded)
+{% endhighlight %}
+
+<p><strong>Набор изменений вместо функций обратного вызова</strong></p>
+<p>Подход с&nbsp;набором изменений позволяет вам модифицировать модели, обеспечивая иммутабельность. При этом вам нужно использовать различные наборы изменений для разных целей вместо написания функций обратного вызова.</p>
+
+{% highlight elixir %}
+before_create :set_default_shipping_country, :set_random_number
+{% endhighlight %}
+<p><i><small>Превращается в...</small></i></p>
+{% highlight elixir %}
+def create_changeset(model, params \\ :empty) do
+  changeset(model, params)
+  |> put_change(:number, random_unique_order_number)
+  |> put_change(:shipping_country, @default_shipping_country)
+end
+{% endhighlight %}
+
+                    
+<blockquote>«<em>Ecto и&nbsp;ActiveRecord&nbsp;— это не&nbsp;одно и&nbsp;то&nbsp;же»</em></blockquote>
+<h4><strong>Перенос контроллера</strong></h4>
+<p>Структуры контроллеров Rails и&nbsp;Phoenix настолько похожи, что я&nbsp;даже не&nbsp;буду вдаваться в&nbsp;систему маршрутов. При всём при том кое-что всё-таки требует изменений.</p>
+<p>Выбранное мной Rails-приложение для вызова данных использует в&nbsp;контроллерах множество событий <code>before_action</code>. В&nbsp;Phoenix можно было&nbsp;бы заменить их&nbsp;на&nbsp;плаги, но&nbsp;я&nbsp;вместо этого объединил в&nbsp;пайплайн различные функции внутри действий. Теперь можно отчётливо видеть, что происходит при каждом рендере пайплайна:</p>
+
+{% highlight ruby %}
+before_action :fetch_product, only: [:show]
+
+def fetch_product
+  @product = Product.includes(:variants).find_by(slug: params[:id])
+end
+{% endhighlight %}
+<p><i><small>Превращается в...</small></i></p>
+{% highlight elixir %}
+def show(conn, %{"id" => id}) do
+  conn
+  |> assign_current_order
+  |> assign_product(id)
+  |> render("show.html")
+end
+
+defp assign_product(conn, id) do
+  assign(conn, :product, Repo.get!(Product, id, preload [:variants]))
+end
+{% endhighlight %}
+
+                    
+<p>В&nbsp;некоторых случаях помещаем плаги, чтобы проверять выполнение требований перед осуществлением действий.</p>
+
+{% highlight ruby %}
+before_action :check_for_order, only: [:show, :update]
+
+def check_for_order
+  redirect_to root_path unless current_order.present?
+end
+{% endhighlight %}
+
+<p><i><small>Превращается в...</small></i></p>
+
+{% highlight elixir %}
+plug :check_for_order
+
+defp check_for_order(conn, _params) do
+  case get_current_order(conn) do
+    nil ->
+      conn |> redirect(to: "/") |> halt
+    order ->
+      assign(conn, :order, order)
+  end
+end
+{% endhighlight %}
+<h4><strong>Шаблоны/Представления</strong></h4>
+<p>Здесь имеет место небольшая терминологическая замена: то, что для Rails является представлением, в&nbsp;Phoenix будет называться шаблоном. Файл шаблона компилируется в&nbsp;функцию внутри модуля представления. Представления в&nbsp;Phoenix также являются местом для функций, аналогов хелперов из&nbsp;Rails. Вот простой пример вычисления общего количества отображаемых позиций заказа:</p>
+
+{% highlight elixir %}
+def line_item_amount(line_item) do
+  Decimal.mult(line_item.price, Decimal.new(line_item.quantity))
+end
+{% endhighlight %}
+
+<p>В&nbsp;представлении возможно получить доступ только к&nbsp;явно объявленным переменным, тогда как в&nbsp;Rails по&nbsp;умолчанию доступны все переменные экземпляра. Rails-приложение, переносом которого я&nbsp;занимался, также использует декораторы из&nbsp;гема Draper для расширения моделей. А&nbsp;мы&nbsp;предоставим эти действия функциям в&nbsp;представлении:</p>
+
+{% highlight ruby %}
+<% product.imagery.each_with_index do |image, index| %>
+{% endhighlight %}
+
+<p><i><small>Превращается в...</small></i></p>
+
+{% highlight elixir %}
+<%= for {img, index} <- Enum.with_index(product_images(@product)) do %>
+{% endhighlight %}
+
+Функция <code>product_images</code> находится в <code>FormAndThread.ProductView</code>.
+
+
+<h4><strong>Сервисы</strong></h4>
+<p>Ещё одна основная составляющая приложения&nbsp;— это сервисы, вбирающие в&nbsp;себя основную бизнес-логику внутри действий. Чтобы сохранить функциональность, я&nbsp;создал Elixir-модули.</p>
+<p>Большим преимуществом Elixir является&nbsp;то, что можно с&nbsp;лёгкостью понять порядок выполнения действий. Здесь реализуется такой паттерн, при котором каждому действию, изменяющему некоторую запись заказа в&nbsp;базе данных, возвращается новое состояние, прежде чем осуществится переход к&nbsp;следующему действию.</p>
+
+{% highlight elixir %}
+defmodule FormAndThread.Checkout do
+...
+def complete(changeset) do
+  changeset
+  |> Repo.update!
+  |> Repo.preload(Order.preloaded)
+  |> charge_customer
+  |> deliver_confirmation_email
+  |> reconcile_stock_levels
+  |> mark_as_received
+end
+
+def charge_customer(order) do
+  Gateway.charge_customer(order)
+end
+
+def deliver_confirmation_email(order) do
+  Mailer.send_order_received_email(order)
+end
+
+def reconcile_stock_levels(order) do
+  Repo.transaction(fn ->
+    for li <- order.line_items do
+      Repo.update!(%{li.variant | stock_level: li.variant.stock_level - li.quantity})
+    end
+  end)
+
+  order
+end
+
+def mark_as_received(order) do
+  Order.changeset(order, %{state: "received", completed_at: Ecto.DateTime.local()})
+  |> Repo.update!
+end
+{% endhighlight %}
+
+<h4><strong>Подведение итогов</strong></h4>
+<p>Я&nbsp;уверен, что со&nbsp;временем появится множество различных схем переноса Rails-приложений, но&nbsp;для себя я&nbsp;отметил, что этот процесс не&nbsp;только оказался «безболезненным», но&nbsp;и&nbsp;позволил получить превосходные результаты. Не&nbsp;говоря уже о&nbsp;том, что Elixir-приложение работает гораздо быстрее (показатель времени отклика менее 100&nbsp;мс льёт мне бальзам на&nbsp;душу).</p>
