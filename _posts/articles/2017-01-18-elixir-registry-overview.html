@@ -1,0 +1,67 @@
+---
+title: Использование модуля Registry в&nbsp;Elixir&nbsp;1.4
+excerpt: В этой статье рассказывается о том, как можно извлечь пользу из&nbsp;замечательного модуля Registry, который теперь является частью стандартной библиотеки.
+author: nadezhda
+source_url: https://medium.com/@adammokan/registry-in-elixir-1-4-0-d6750fb5aeb
+source_author: Adam Mokan
+---
+<p>Одно из&nbsp;<a href="http://elixir-lang.org/blog/2017/01/05/elixir-v1-4-0-released/" target="_blank" rel="noopener noreferrer">нововведений</a> в&nbsp;Elixir&nbsp;1.4, которого многие с&nbsp;нетерпением ждали,&nbsp;&mdash; это модуль <a href="https://hexdocs.pm/elixir/Registry.html" target="_blank" rel="noopener noreferrer">Registry</a>. Из&nbsp;этой статьи вы&nbsp;узнаете, как можно извлечь пользу из&nbsp;этого замечательного модуля, который теперь является частью стандартной библиотеки.</p>
+<p>Если вы&nbsp;только приступили к&nbsp;изучению Elixir и&nbsp;принципов OTP, то&nbsp;количество идентификаторов процессов (PID) наверняка покажется вам неисчислимым, особенно при использовании REPL (<em>iex</em>). Для модели акторов сотни или даже тысячи выполняемых в&nbsp;системе процессов&nbsp;&mdash; обычное дело. Один из&nbsp;способов связаться с&nbsp;этими процессами&nbsp;&mdash; отслеживать их&nbsp;при запуске по&nbsp;PID или заданным именам. Модуль Registry предлагает другой способ сделать это без использования внешних библиотек.</p>
+<p>Предположим, вы&nbsp;занимаетесь продажей виджетов своим клиентам <em>(далее&nbsp;&mdash; пользователям)</em>. Перед вами стоит задача разработать интерфейс пользователя (UI) для системы реального времени, чтобы он&nbsp;отображал учётные записи тех, кто разместил заказ в&nbsp;текущий день, и&nbsp;основную информацию по&nbsp;каждой учётной записи. Если пользователь не&nbsp;заказывал ничего в&nbsp;течение 24&nbsp;часов, то&nbsp;его учётная запись удалялась&nbsp;бы из&nbsp;списка в&nbsp;UI.</p>
+<p>Одно из&nbsp;быстрых решений&nbsp;&mdash; создать процесс сразу после того, как пользователь разместит заказ и&nbsp;реализовать функцию, которая по&nbsp;прошествии 24&nbsp;часов удаляла&nbsp;бы процессы, не&nbsp;задействованные в&nbsp;новых заказах. Но&nbsp;как в&nbsp;таком случае понять, с&nbsp;какой учётной записью связан тот или иной процесс? С&nbsp;этой задачей отлично справляется модуль Registry, работающий практически как DNS-поиск по&nbsp;имени, а&nbsp;в&nbsp;нашем случае по&nbsp;<code>account_id</code>, и&nbsp;предоставляющий ссылку на&nbsp;исполняемый процесс.</p>
+
+<p class="text-center"><img src="https://cdn-images-1.medium.com/max/1600/1*ZYtNx-mClIFt16n9URQ4VQ.jpeg" alt="Elixir Registry" width="100%">
+<small><em>Реестр будет своего рода адресной книгой для процессов</em>  (<a href="https://commons.wikimedia.org/wiki/File%3ATelefonbog_ubt-1.JPG" rel="nofollow noreferrer noopener">изображение © 2010 by Tomasz Sienicki</a>)</small></p>
+<p>Прежде всего нужно будет запустить реестр и&nbsp;присвоить ему имя с&nbsp;помощью <a href="https://hexdocs.pm/elixir/Registry.html#start_link/3" target="_blank" rel="noopener noreferrer">функции <code>Registry.start_link</code></a>. Далее просто добавим нужный реестр к&nbsp;дереву супервизоров приложения. Обратите внимание на&nbsp;то, что мы&nbsp;создаём реестр <code>:unique</code>.</p>
+
+{% highlight elixir %}
+children = [
+  supervisor(Registry, [:unique, :account_process_registry])
+]
+{% endhighlight %}
+
+<p>Теперь у&nbsp;вас есть свой реестр под названием <code>:account_process_registry</code>, который будет отслеживать идентификаторы процессов. Остаётся только реализовать функцию, которая будет возвращать кортеж <code>:via</code> в&nbsp;соответствии с&nbsp;переданным ей&nbsp;значением. <a href="https://hexdocs.pm/elixir/GenServer.html#module-name-registration" target="_blank" rel="noopener noreferrer">GenServer</a> упрощает работу с&nbsp;кортежем <code>:via</code> и&nbsp;обеспечивает автоматическую привязку имени (<code>account_id</code>) к&nbsp;процессу.</p>
+
+{% highlight elixir %}
+defmodule Account do
+  use GenServer
+
+  def start_link(account_id) do
+    name = via_tuple(account_id)
+    GenServer.start_link(__MODULE__, [account_id], name: name)
+  end
+
+  defp via_tuple(account_id) do
+    {:via, Registry, {:account_process_registry, account_id}}
+  end
+
+  def order_placed(account_id) do
+    GenServer.call(via_tuple(account_id), :order_placed)
+  end
+
+  # genserver callbacks not shown for simplicity
+
+end
+{% endhighlight %}
+
+<p>Функция <code>via_tuple</code> вместе с&nbsp;модулем Registry позволяют создавать процесс для заданного <code>account_id</code> и&nbsp;осуществлять последующие вызовы процесса по&nbsp;имени, а&nbsp;не&nbsp;по&nbsp;PID. И&nbsp;больше не&nbsp;придётся иметь дело с&nbsp;&laquo;загадочными&raquo; PID или разрабатывать собственную систему назначения имён внутри функции <code>start_link</code>. Чтобы найти процесс среди тысяч других процессов, достаточно будет всего лишь иметь его <code>account_id</code>.</p>
+{% highlight iex %}
+iex> Account.start_link(5)
+{:ok, #PID<0.114.0>}
+
+iex> Account.start_link(20)
+{:ok, #PID<0.118.0>}
+
+iex> Account.order_placed(20)
+1
+{% endhighlight %}
+<p>А&nbsp;что если снова запустить процесс для <code>account_id</code> &#8470;&nbsp;5?</p>
+{% highlight iex %}
+iex> Account.start_link(5)
+{:error, {:already_started, #PID<0.114.0>}}
+{% endhighlight %}
+<p>Реестр напомнит нам, что процесс для <code>account_id</code> &#8470;&nbsp;5&nbsp;уже отслеживается, о&nbsp;чём будет сигнализировать сообщение <code>:already_started</code>.</p>
+<p>Неплохое начало. Теперь можно программно создавать нужный процесс с&nbsp;именем или идентификатором, не&nbsp;опасаясь того, что процесс для данного идентификатора уже существует: система об&nbsp;этом предупредит. Ещё одно преимущество в&nbsp;том, что, если возникнет ошибка и&nbsp;процесс перезапустится по&nbsp;какой-либо причине, система зарегистрирует новый PID для исходного имени. Стандартная ссылка на&nbsp;определённый PID так&nbsp;бы не&nbsp;сработала.</p>
+<p>Что&nbsp;же делать дальше? А&nbsp;дальше останется лишь осуществить вызовы в&nbsp;GenServer и&nbsp;обновить состояние. Возможность идентификации процессов программно на&nbsp;Elixir&nbsp;&mdash; отличное решение, позволяющее разработчику больше времени уделить бизнес-логике. Конечно, чтобы передать данные в&nbsp;интерфейс, всё равно придётся реализовать веб-сокет, но&nbsp;сегодня речь не&nbsp;об&nbsp;этом. (<em>Подсказка: рекомендую</em> <em>для создания простых сокетов использовать</em> <a href="https://hex.pm/packages/cowboy" target="_blank" rel="noopener noreferrer"><em>cowboy</em></a>).</p>
+<p>Если покопаться в&nbsp;примере на&nbsp;<a href="https://github.com/amokan/registry_sample" target="_blank" rel="noopener noreferrer">Github</a>, то&nbsp;в&nbsp;модуле <a href="https://github.com/amokan/registry_sample/blob/master/lib/registry_sample/account_supervisor.ex" target="_blank" rel="noopener noreferrer"><code>RegistrySample.AccountSupervisor</code></a> можно отыскать несколько полезных функций для взаимодействия с&nbsp;реестром. Функции вроде <code>find_or_create_process/1</code> можно использовать, чтобы облегчить работу с&nbsp;процессами.</p>
+<p>Можете смело адаптировать этот код для своих целей и продолжать изучать возможности Registry!</p>
