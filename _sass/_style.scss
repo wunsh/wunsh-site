@@ -148,3 +148,23 @@ img.article-image {
 .pull-right {
   float: right;
 }
+
+ol.parenthesis {
+  list-style-type: none;
+  margin-left: 0;
+
+  & > li {
+    counter-increment: customlistcounter;
+
+    &:before {
+      content: counter(customlistcounter) ")";
+      float: left;
+      text-align: right;
+      margin-right: 8px;
+    }
+
+    &:first-child {
+      counter-reset: customlistcounter;
+    }
+  }
+}
