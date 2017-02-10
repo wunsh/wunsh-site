@@ -1,0 +1,193 @@
+---
+title: Деплой Elixir при помощи Docker. Часть 2
+excerpt: Рассказываем о деплое Elixir-приложений через Docker с помощью Rancher, а также о том, как соединить несколько экземпляров в один Erlang-кластер.
+author: nadezhda
+source_url: http://teamon.eu/2017/setting-up-elixir-cluster-using-docker-and-rancher/
+source_author: Tymon Tobolski
+---
+<p>В&nbsp;<a href="{% post_url articles/2017-02-01-elixir-deploy-1 %}">предыдущей статье</a> мы&nbsp;рассмотрели процесс упаковки Elixir-приложения в&nbsp;Docker-образ. Один из&nbsp;недостатков использования Docker для Elixir-приложений заключается в&nbsp;том, что из-за наличия у&nbsp;контейнеров собственной сети, две Elixir-ноды, находящиеся в&nbsp;двух разных контейнерах, не&nbsp;могут подключаться друг к&nbsp;другу, даже если запускать их&nbsp;на&nbsp;одном и&nbsp;том&nbsp;же физическом сервере.</p>
+<p>Более того, деплой контейнеров проводится на&nbsp;платформе <a href="http://rancher.com/">Rancher</a>, которая распределяет их&nbsp;между несколькими физическими машинами. По&nbsp;этой причине отобразить порты Docker-контейнера на&nbsp;сервер невозможно, ведь на&nbsp;каждом сервере несколько контейнеров могут запускать одно и&nbsp;то&nbsp;же приложение. Однако в&nbsp;Rancher имеется встроенный DNS-сервис для автоматического поиска новых нод и&nbsp;подключения к&nbsp;ним.</p>
+<h2>Как работает Rancher</h2>
+<p>Основой Rancher являются сервисы. Каждый сервис представляет собой Docker-образ с&nbsp;соответствующими конфигурациями (ENV, command, volumes и&nbsp;др.) и&nbsp;способен запускать несколько одинаковых контейнеров на&nbsp;нескольких машинах.</p>
+<p>Для осуществления маршрутизации между этими контейнерами в&nbsp;Rancher существует своя оверлейная сеть и&nbsp;DNS-протокол обнаружения сервисов.</p>
+<p>Например, у&nbsp;нас есть сервис &laquo;my-hello-service&raquo; с&nbsp;тремя контейнерами, запускающий функцию <code>nslookup</code> в&nbsp;одном из&nbsp;контейнеров:</p>
+{% highlight shell %}
+/opt/app $ nslookup my-hello-service
+Name:      my-hello-service
+Address 1: 10.42.72.199
+Address 2: 10.42.96.65
+Address 3: 10.42.240.66
+{% endhighlight %}
+<p>Поскольку все контейнеры одного сервиса могут связываться друг с&nbsp;другом посредством этой оверлейной сети, нужно лишь сделать так, чтобы каждая нода &laquo;видела&raquo; все другие ноды.</p>
+<h2>Динамические адреса и&nbsp;имена</h2>
+<p>Все вышеуказанные IP-адреса являются динамическими, а&nbsp;значит, срок их&nbsp;жизни равен сроку жизни контейнера. Адреса изменятся если перезапустить/обновить контейнер или провести масштабирование (добавить контейнер в&nbsp;сервис или удалить его). В&nbsp;связи с&nbsp;этим использовать статическую конфигурацию файла из&nbsp;<code>sys.config</code> (подробнее об&nbsp;этом <a href="https://dockyard.com/blog/2016/01/28/running-elixir-and-phoenix-projects-on-a-cluster-of-nodes">здесь</a>) уже не&nbsp;получится.</p>
+<p>Так что познакомим наше приложение с&nbsp;Rancher DNS и&nbsp;постараемся извлечь из&nbsp;этого максимум пользы.</p>
+<h2>Настройка ноды Elixir</h2>
+<p>Прежде чем перейти к&nbsp;обнаружению нод, сделаем так, чтобы Elixir-ноды смогли &laquo;видеть&raquo; друг друга. При использовании модуля <a href="https://github.com/recruitee/mix_docker">mix_docker</a> (точнее <a href="https://github.com/bitwalker/distillery">distillery</a>) ноде по&nbsp;умолчанию даётся имя <code>appname@127.0.0.1</code>. Но, если нужно подключиться к&nbsp;другим нодам сети <code>10.42.x.x</code>, это имя необходимо будет изменить. Кроме того, оно должно динамически создаваться внутри контейнера при его запуске (только в&nbsp;этом случае можно быть уверенным, что сеть Rancher перекроет IP-адрес).</p>
+<p>Я&nbsp;достаточно долго размышлял на&nbsp;тему того, как это можно сделать, и, наконец, нашёл решение. В&nbsp;двух словах, нужно сделать так, чтобы <code>vm.args</code> стали доступны переменные среды, а&nbsp;затем поместить эти переменные в&nbsp;контейнер.</p>
+<p><strong>ПРИМЕЧАНИЕ</strong>: прежде чем читать дальше, рекомендую сначала ознакомиться с&nbsp;<a href="{% post_url articles/2017-02-01-elixir-deploy-1 %}">предыдущей статьёй об&nbsp;Elixir и&nbsp;Docker</a>.</p>
+<p>Для начала укажем в&nbsp;модуле distillery путь к&nbsp;своему <code>vm.args</code> файлу:</p>
+{% highlight elixir %}
+# rel/config.exs
+# ...
+environment :prod do
+  # ...
+  set vm_args: "rel/vm.args"
+end
+{% endhighlight %}
+<p>А&nbsp;сам файл <code>vm.args</code> будет выглядеть так:</p>
+{% highlight shell %}
+# rel/vm.args
+## Name of the node - this is the only change
+-name hello@${RANCHER_IP}
+
+## Cookie for distributed erlang
+-setcookie something-secret-here-please-change-me
+
+## Heartbeat management; auto-restarts VM if it dies or becomes unresponsive
+## (Disabled by default..use with caution!)
+##-heart
+
+## Enable kernel poll and a few async threads
+##+K true
+##+A 5
+
+## Increase number of concurrent ports/sockets
+##-env ERL_MAX_PORTS 4096
+
+## Tweak GC to run more often
+##-env ERL_FULLSWEEP_AFTER 10
+
+# Enable SMP automatically based on availability
+-smp auto
+{% endhighlight %}
+<p>Синтаксис <code>${RANCHER_IP}</code> и&nbsp;конфигурация <code>REPLACE_OS_VARS=true</code> модуля distillery позволяют задавать имя ноды динамически на&nbsp;основе переменной среды <code>RANCHER_IP</code>.</p>
+<p>Далее, воспользуемся встроенным в&nbsp;Rancher Metadata API, чтобы создать переменную <code>RANCHER_IP</code>. Поместим следующий код в&nbsp;скрипт <code>rel/rancher_boot.sh</code>, который будет выступать в&nbsp;качестве точки входа контейнера.</p>
+{% highlight shell %}
+#!/bin/sh
+set -e
+
+export RANCHER_IP=$(wget -qO- http://rancher-metadata.rancher.internal/latest/self/container/primary_ip)
+
+/opt/app/bin/hello $@
+{% endhighlight %}
+
+<p>И&nbsp;напоследок, немного изменим Docker-файл релиза: будем использовать свои настройки вместо стандартных значений из&nbsp;mix_docker.</p>
+{% highlight shell %}
+# Dockerfile.release
+FROM bitwalker/alpine-erlang:6.1
+
+RUN apk update && \
+apk --no-cache --update add libgcc libstdc++ && \
+rm -rf /var/cache/apk/*
+
+EXPOSE 4000
+ENV PORT=4000 MIX_ENV=prod REPLACE_OS_VARS=true SHELL=/bin/sh
+
+ADD hello.tar.gz ./
+RUN chown -R default ./releases
+
+USER default
+
+# the only change are these two lines
+COPY rel/rancher_boot.sh /opt/app/bin/rancher_boot.sh
+ENTRYPOINT ["/opt/app/bin/rancher_boot.sh"]
+{% endhighlight %}
+<p>Построив образ и&nbsp;обновив сервис Rancher, проверим, могут&nbsp;ли контейнеры подключаться друг к&nbsp;другу. Для этого подключимся к&nbsp;удалённой машине с&nbsp;помощью SSH и&nbsp;запустим <code>docker exec</code>:</p>
+{% highlight shell %}
+core@host1 ~ $ docker exec -it e3c6a817b618 /opt/app/bin/rancher_boot.sh remote_console
+Erlang/OTP 18 [erts-7.3.1] [source] [64-bit] [smp:2:2] [async-threads:10] [kernel-poll:false]
+
+Interactive Elixir (1.3.4) - press Ctrl+C to exit (type h() ENTER for help)
+iex(hello@10.42.96.65)1>
+{% endhighlight %}
+<p>Как видно из&nbsp;подсказки iex, ноде присвоен&nbsp;IP оверлейной сети Rancher. Теперь запустим ещё один контейнер для того&nbsp;же сервиса и&nbsp;получим его&nbsp;IP (в&nbsp;той&nbsp;же сети <code>10.42.x.x</code>). Чтобы убедиться, что ноды могут &laquo;видеть&raquo; друг друга, попробуйте подключить одну ноду к&nbsp;другой через <code>Node.connect</code>. Предположим, что IP-адрес второго контейнера&nbsp;&mdash; <code>10.42.240.66</code>:</p>
+{% highlight elixir %}
+iex(hello@10.42.96.65)1> Node.connect :"hello@10.42.240.66"
+true
+iex(hello@10.42.96.65)2> Node.list
+[:"hello@10.42.240.66"]
+{% endhighlight %}
+<p>Для второй ноды:</p>
+{% highlight elixir %}
+core@host2 ~ $ docker exec -it 47dd4308fe8e /opt/app/bin/rancher_boot.sh remote_console
+Erlang/OTP 18 [erts-7.3.1] [source] [64-bit] [smp:2:2] [async-threads:10] [kernel-poll:false]
+
+Interactive Elixir (1.3.4) - press Ctrl+C to exit (type h() ENTER for help)
+iex(hello@10.42.240.66)1> Node.list
+[:"hello@10.42.96.65"]
+{% endhighlight %}
+<p>Теперь в&nbsp;Elixir/Erlang можно осуществлять распределения с&nbsp;помощью модуля <code>Node</code>.</p>
+<h2>Автообнаружение на&nbsp;основе DNS</h2>
+<p>Мы&nbsp;рассмотрели, как установить связь между двумя нодами Elixir, но&nbsp;для этого пришлось вводить IP-адрес второй ноды вручную. Такой способ определённо неуместен в&nbsp;продакшне, поэтому попробуем сделать это через DNS.</p>
+<p>Эквивалентом nslookup в&nbsp;Elixir выступает функция <code>:inet.gethostbyname</code>, а&nbsp;если быть точнее, то <code>:inet_tcp.getaddrs(name)</code>. Вызвав эту функцию в&nbsp;одном из&nbsp;контейнеров, получим список всех IP-адресов контейнеров сервиса:</p>
+{% highlight elixir %}
+iex(hello@10.42.96.65)11> :inet_tcp.getaddrs 'my-hello-service'
+{:ok, [{10, 42, 72, 199}, {10, 42, 240, 66}, {10, 42, 96, 65}]}
+{% endhighlight %}
+<p>Теперь осталось только создать на&nbsp;каждой ноде erlang-процесс, который&nbsp;бы периодически вызывал эту функцию и&nbsp;подключался&nbsp;бы к&nbsp;другим нодам. Достаточно создать простой GenServer, который будет проверять DNS каждые 5&nbsp;секунд.</p>
+{% highlight elixir %}
+# lib/hello/rancher.ex
+defmodule Hello.Rancher do
+  use GenServer
+
+  @connect_interval 5000 # try to connect every 5 seconds
+
+  def start_link do
+    GenServer.start_link __MODULE__, [], name: __MODULE__
+  end
+
+  def init([]) do
+    name = Application.fetch_env!(:hello, :rancher_service_name)
+    send self, :connect
+
+    {:ok, to_char_list(name)}
+  end
+
+  def handle_info(:connect, name) do
+    case :inet_tcp.getaddrs(name) do
+      {:ok, ips} ->
+        IO.puts "Connecting to #{name}: #{inspect ips}"
+        for {a,b,c,d} <- ips do
+          Node.connect :"hello@#{a}.#{b}.#{c}.#{d}"
+        end
+
+      {:error, reason} ->
+        IO.puts "Error resolving #{inspect name}: #{inspect reason}"
+    end
+
+    IO.puts "Nodes: #{inspect Node.list}"
+    Process.send_after(self, :connect, @connect_interval)
+
+    {:noreply, name}
+  end
+end
+{% endhighlight %}
+<p>Подключим его в&nbsp;дерево супервизоров приложения:</p>
+{% highlight elixir %}
+# lib/hello.ex
+children = [
+  # ...
+  worker(Hello.Rancher, [])
+]
+{% endhighlight %}
+<p>Ноды будут автоматически удаляться из&nbsp;списка сразу после отключения. <code>Node.connect</code> предотвращает двойное подключение к&nbsp;одной и&nbsp;той&nbsp;же ноде, поэтому проверять <code>Node.list</code> перед подключением не&nbsp;обязательно.</p>
+<p>Ещё одна возможность, которая упростит вам жизнь,&nbsp;&mdash; это динамическое именование сервисов Rancher.</p>
+<p>Как видно из&nbsp;примера выше, имя сервиса (а&nbsp;значит, и&nbsp;DNS-сервера) взято из&nbsp;ключа <code>:rancher_service_name</code> конфигурации приложения. В&nbsp;<code>config/prod.exs</code> можно сделать это имя статическим, но&nbsp;гораздо лучше оставить всё как есть.</p>
+<p>Поместим следующий код в&nbsp;config/prod.exs:</p>
+{% highlight elixir %}
+config :hello, :rancher_service_name, "${RANCHER_SERVICE_NAME}"
+{% endhighlight %}
+<p>А&nbsp;<code>rel/rancher_boot.sh</code> приведём в&nbsp;соответствие со&nbsp;следующим:</p>
+{% highlight elixir %}
+#!/bin/sh
+set -e
+
+export RANCHER_IP=$(wget -qO- http://rancher-metadata.rancher.internal/latest/self/container/primary_ip)
+export RANCHER_SERVICE_NAME=$(wget -qO- http://rancher-metadata.rancher.internal/latest/self/service/name)
+
+/opt/app/bin/hello $@
+{% endhighlight %}
+<p>Здесь для получения имени текущего сервиса снова используется встроенный в&nbsp;Rancher сервис метаданных. Такой подход позволяет использовать один и&nbsp;тот&nbsp;же образ-контейнер повторно для различных сервисов (с&nbsp;различными конфигурациями среды выполнения).</p>
+<h2>Победа!</h2>
+<p>Посмотреть, как в&nbsp;реальности работает&nbsp;то, что у&nbsp;нас получилось, можно на&nbsp;<a href="https://v.usetapes.com/SdRPIY7jph">видео по ссылке</a>. С&nbsp;левой стороны представлен живой лог одного из&nbsp;контейнеров, а&nbsp;с&nbsp;правой&nbsp;&mdash; список контейнеров, запущенных сервисом &laquo;my-hello-service&raquo;. При добавлении и&nbsp;удалении запущенных сервисом контейнеров можно видеть, как в&nbsp;логе контейнера справа учитываются все изменения и&nbsp;обновляется список подключённых нод.</p>
