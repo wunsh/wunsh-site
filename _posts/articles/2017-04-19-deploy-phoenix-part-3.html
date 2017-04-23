@@ -1,0 +1,97 @@
+---
+title: Деплой Phoenix-приложений через Edeliver. Часть&nbsp;3
+excerpt: Введение в деплой приложений, написанных на Phoenix. Продолжение.
+author: nadezhda
+source_url: https://shovik.com/blog/6-deploying-phoenix-apps-for-rails-developers
+source_author: Alex Kovshovik
+---
+<p>В&nbsp;<a href="{% post_url articles/2017-03-15-deploy-phoenix-part-1 %}">предыдущих</a> <a href="{% post_url articles/2017-03-31-deploy-phoenix-part-2 %}">частях</a> был построен &laquo;скелет&raquo; Phoenix-приложения, сконфигурированного для создания и&nbsp;развёртывания релизов <code>distillery</code> при помощи <code>edeliver</code>. А&nbsp;теперь рассмотрим развёртывание <strong>релиза обновления</strong> с&nbsp;использованием горячего обновления кода Erlang.</p>
+<blockquote>Перезапускать приложение не&nbsp;придётся: его обновлённая версия <strong>будет доступна сразу&nbsp;же после развёртывания</strong>.</blockquote>
+<p>&mdash;&nbsp;из&nbsp;<a href="https://github.com/boldpoker/edeliver#examples">документации edeliver</a>.</p>
+<h2>Релизы обновления</h2>
+<p>Прежде чем читать статью дальше, я&nbsp;настоятельно рекомендую вам ознакомиться с&nbsp;<a href="https://hexdocs.pm/distillery/upgrades-and-downgrades.html">документацией distillery (раздел об&nbsp;обновлениях и&nbsp;откатах)</a> и&nbsp;освежить свои знания, заглянув в&nbsp;<a href="https://github.com/boldpoker/edeliver#quick-start">документацию edeliver (раздел, посвящённый быстрому старту)</a>.</p>
+<p>Чтобы развернуть обновление, потребуется создать &laquo;релиз обновления&raquo;. В&nbsp;отличие от&nbsp;обычных релизов, релизы обновления содержат <a href="http://erlang.org/doc/man/appup.html">appups</a>&nbsp;&mdash; инструкции по&nbsp;обновлению версии запущенного приложения. Создавая релиз обновления, необходимо указать исходную и&nbsp;конечную версии, чтобы <code>distillery</code> сгенерировал корректные инструкции <code>appups</code>.</p>
+<blockquote>Архивы релиза в&nbsp;директории релиза, созданные командой <strong>build release</strong>, <strong>не&nbsp;получится использовать для развёртывания обновления</strong>.</blockquote>
+<p>Релизы обновления позволяют делать невероятное&nbsp;&mdash; вносить изменения в&nbsp;приложение без простоя. Однако несмотря на&nbsp;все свои волшебные функции, <code>distillery</code> не&nbsp;в&nbsp;силах сгенерировать корректные инструкции <code>appup</code> для каждого возможного сценария обновления.</p>
+<h2>Шаг 1. Настройка работы edeliver</h2>
+<p>На&nbsp;момент написания данной статьи <a href="https://github.com/boldpoker/edeliver/issues/182">edeliver перестал поддерживать distillery</a>, но&nbsp;решить эту проблему несложно. Достаточно лишь добавить одну строчку в&nbsp;конфигурацию окружения <code>:prod</code>, находящуюся по&nbsp;адресу <code>rel/config.exs</code>:</p>
+{% highlight elixir %}
+environment :prod do
+  set include_erts: true
+  set include_src: false
+  set cookie: :"..."
+  set output_dir: "rel/edelivered_app" # ADD THIS LINE!!!
+end
+{% endhighlight %}
+<p>Попробуем выполнить развёртывание изменений &laquo;дедовским&raquo; методом: сначала создадим обычный релиз, затем произведём его развёртывание и&nbsp;запуск.</p>
+{% highlight elixir %}
+mix edeliver stop production # Run this if production node is currently running
+env MIX_ENV=prod mix edeliver build release production
+mix edeliver deploy release to production
+mix edeliver start production
+{% endhighlight %}
+<h2>Шаг 2. Внесение изменений в&nbsp;приложение</h2>
+<p>Во-первых, внесите изменения в&nbsp;приложение и&nbsp;увеличьте его версию до&nbsp;<code>0.0.2</code>&nbsp;в <code>config/mix.exs</code>. Это очень важный момент, так как нам предстоит подготовить и&nbsp;развернуть релиз обновления с&nbsp;версии <code>0.0.1</code> до&nbsp;версии <code>0.0.2</code>:</p>
+{% highlight elixir %}
+def project do
+  [app: :edelivered_app,
+  version: "0.0.2", # Bump to 0.0.2!
+  elixir: "~> 1.4",
+  elixirc_paths: elixirc_paths(Mix.env),
+  compilers: [:phoenix, :gettext] ++ Mix.compilers,
+  build_embedded: Mix.env == :prod,
+  start_permanent: Mix.env == :prod,
+  aliases: aliases(),
+  deps: deps()]
+end
+{% endhighlight %}
+<p>Сделайте коммит изменений и&nbsp;пометьте их&nbsp;тегом:</p>
+<ol>
+    <li><code>git commit -am "Steal default Phoenix look to make Edeliver look"</code></li>
+    <li><code>git tag 0.0.2</code></li>
+</ol>
+<p>Повторюсь, что пушить коммиты в&nbsp;удалённый репозиторий не&nbsp;понадобится. Edeliver сделает это за&nbsp;вас: коммиты и&nbsp;теги с&nbsp;локального репозитория отобразятся на&nbsp;нужном вам сервере/серверах.</p>
+<h2>Шаг 3. Развертывание обновления</h2>
+<p>Прежде чем перейти к&nbsp;развёртыванию обновления, убедимся в&nbsp;возможности подключения edeliver к&nbsp;работающей ноде и&nbsp;подтверждения его версии:</p>
+{% highlight elixir %}
+mix edeliver version production
+{% endhighlight %}
+<p>Должен появиться следующий текст:</p>
+<img src="https://s3.amazonaws.com/shovik-com/uploads/post_images/7/02-mix-edeliver-version-production.png?v=63658353860" alt="mix edeliver version production">
+<p>В&nbsp;случае возникновения ошибки или получения от&nbsp;edeliver сообщения о&nbsp;нерабочем состоянии ноды, переходите к&nbsp;пункту &laquo;устранение ошибок&raquo;.</p>
+<p>Теперь можно начинать развёртывание релиза обновления:</p>
+{% highlight elixir %}
+mix edeliver upgrade production --from=0.0.1 --to=0.0.2
+{% endhighlight %}
+<p>Вывод команды:</p>
+<img src="https://s3.amazonaws.com/shovik-com/uploads/post_images/7/03-mix-edeliver-upgrade-production.png?v=63658353963" alt="Edeliver upgrade production">
+<p>Обновите страницу, и... о, чудо!</p>
+<img src="https://s3.amazonaws.com/shovik-com/uploads/post_images/7/04-deployed-app-after.png?v=63658353968" alt="App after deploy">
+<h2>Шаг 4. Устранение ошибок</h2>
+<p>Большинство решений по&nbsp;устранению ошибок из&nbsp;<a href="{% post_url articles/2017-03-31-deploy-phoenix-part-2 %}">предыдущей статьи</a> применимы и&nbsp;здесь, но&nbsp;есть и&nbsp;несколько особых подходов, актуальных только для работы с&nbsp;обновлениями:</p>
+<ul>
+    <li>
+        <p>Горячая замена кода может не&nbsp;сработать при обновлении зависимостей. В&nbsp;таком случае создайте &laquo;чистый&raquo; релиз и&nbsp;перезапустите ноду.</p>
+    </li>
+    <li>
+        <p>Иногда edeliver не&nbsp;видит работающую ноду на&nbsp;сервере, даже если она действительно запущена. Попробуйте подключиться к&nbsp;серверу по&nbsp;SSH и&nbsp;остановить Erlang-процесс вручную, после чего запустить ноду через edeliver или самостоятельно.</p>
+    </li>
+    <li>
+        <p>После выполнения команды <code>mix edeliver start production</code>, в&nbsp;некоторых случаях появляется сообщение &laquo;START SUCCESSFUL&raquo;, однако на&nbsp;деле оказывается, что ничего не&nbsp;запустилось. Объяснения на&nbsp;этот счёт отыскать пока не&nbsp;удалось, поэтому просто подключитесь к&nbsp;серверу по&nbsp;SSH и&nbsp;запустите всё вручную.</p>
+    </li>
+</ul>
+<h2>Выводы</h2>
+<p>Обещанные свойства среды выполнения Erlang весьма привлекательны: это высоконадёжная система с&nbsp;бесконечным сроком существования, в&nbsp;которой можно проводить развёртывание обновлений, забыв о&nbsp;простое и&nbsp;перезагрузке кодовой базы. Звучит великолепно, но&nbsp;на&nbsp;своём скудном опыте я&nbsp;убедился, что процесс развёртывания Elixir-приложений не&nbsp;вызывает доверия. Мои ожидания не&nbsp;оправдались. На&nbsp;момент написания статьи я&nbsp;произвёл развёртывание 15&nbsp;релизов обновления и&nbsp;в&nbsp;четверти случаев столкнулся с&nbsp;трудностями. Дошло до&nbsp;того, что не&nbsp;отображались даже простейшие изменения текста.</p>
+<p>Я&nbsp;уверен, что это произошло из-за моей недостаточной компетентности в&nbsp;Appups, Relups и&nbsp;неполного понимания концепции релизов. Что&nbsp;ж, попробую пойти другим путём.</p>
+<p>Таймон Тобольски в&nbsp;<a href="{% post_url articles/2017-02-01-elixir-deploy-1 %}">статье о&nbsp;развёртывании Phoenix-приложений в&nbsp;продакшн с&nbsp;помощью Docker (перевод)</a> констатирует следующее:</p>
+<ul>
+    <li>
+        <p>Унификация: обычно в&nbsp;продакшн стеке запускаются приложения, написанные на&nbsp;разных языках программирования. Если&nbsp;бы можно было произвести развёртывание всех этих приложений одинаковым способом&nbsp;&mdash; это было&nbsp;бы большим прорывом в&nbsp;DevOps.</p>
+    </li>
+    <li>
+        <p>Как правило, для работы в продакшне требуется несколько серверов, и&nbsp;отказ одного из&nbsp;них должен пройти безболезненно. Балансировщик нагрузки оперативно отреагирует на&nbsp;это и&nbsp;остановит поток запросов к&nbsp;такому серверу, в&nbsp;результате чего некоторые пользователи потеряют WebSocket-соединение. Но&nbsp;эта проблема легко разрешима: нужно лишь выполнить переподключение клиентов этих пользователей. До&nbsp;тех пор, пока сбои не&nbsp;происходят ежеминутно, беспокоиться не&nbsp;о&nbsp;чем.</p>
+    </li>
+    <li>
+        <p>В&nbsp;последнее время интерес разработчиков к&nbsp;Docker достаточно высок, поэтому я&nbsp;бы хотел провести сравнение развёртывания с&nbsp;помощью Docker и&nbsp;Edeliver по&nbsp;критериям надёжности и&nbsp;возможности повторного использования.</p>
+    </li>
+</ul>
