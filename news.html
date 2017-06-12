@@ -1,0 +1,10 @@
+---
+layout: page
+permalink: /news/index.html
+---
+
+<h1>Новости Elixir</h1>
+
+{% for post in site.categories["news"] | limit: 10 %}
+  {% include post_list.html post=post %}
+{% endfor %}

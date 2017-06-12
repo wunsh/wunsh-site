@@ -1,0 +1,270 @@
+---
+title: Схватка Elixir и Ruby. Phoenix против Rails
+excerpt: Сравниваем производительность Elixir с производительностью Ruby посредством нагрузочного тестирования Phoenix и Rails.
+author: nadezhda
+source_url: https://littlelines.com/blog/2014/07/08/elixir-vs-ruby-showdown-phoenix-vs-rails
+source_author: Chris McCord
+public: true
+tags: [overview, phoenix, ruby, rails]
+---
+<p>Эта статья&nbsp;&mdash; демонстрация сравнительного анализа языков <em>Elixir и&nbsp;Ruby</em>: в&nbsp;ней пойдёт речь о&nbsp;том, какую производительность обеспечивают веб-фреймворки Phoenix и&nbsp;Rails при выполнении одних и&nbsp;тех&nbsp;же задач. Прежде чем перейти к&nbsp;примерам кода и&nbsp;результатам бенчмарков, ответим на&nbsp;несколько распространённых вопросов о&nbsp;тестах такого рода.</p>
+<p><strong>Если коротко</strong>, то&nbsp;Phoenix справился с&nbsp;заданием в&nbsp;<strong>10,63 раза</strong> быстрее, чем Rails, обеспечив более низкую загрузку CPU.</p>
+<h2>ЧАВО</h2>
+<h3>Не&nbsp;думаете&nbsp;ли вы, что пытаетесь сравнить несравнимое?</h3>
+<p>Вовсе нет. Приведённые тесты&nbsp;&mdash; прямое сопоставление полюбившихся особенностей Ruby (Rails) с&nbsp;Elixir (Phoenix). Elixir гарантирует предоставить&nbsp;то, что все так ценят в&nbsp;Ruby: скорость разработки, метапрограммирование, изящные API и&nbsp;DSL, но&nbsp;при этом работать быстрее, обеспечивая надёжную конкурентную модель и&nbsp;распределённую обработку данных. Цель данной статьи&nbsp;&mdash; выяснить, как уже полюбившиеся особенности Ruby без потери удобства программных интерфейсов реализуются в&nbsp;Elixir с&nbsp;точки зрения производительности веб-фреймворков.</p>
+<h3>Так&nbsp;ли необходимы бенчмарки?</h3>
+<p>Бенчмарки&nbsp;&mdash; не&nbsp;что иное, как средство заблаговременного обеспечения надёжности работы тестируемых программ. Но&nbsp;даже в&nbsp;этом случае бенчмарки всего лишь позволяют получить представление о&nbsp;каких-либо характеристиках. Поэтому мораль здесь такова: <em>не&nbsp;стоит полагаться на&nbsp;бенчмарки, нужно всегда проводить проверки вручную</em>.</p>
+<h3>Что конкретно вы&nbsp;сравниваете?</h3>
+<h4>Elixir Phoenix Framework</h4>
+<ul>
+    <li>Phoenix 0.3.1</li>
+    <li>Cowboy webserver (single Elixir node)</li>
+    <li>Erlang 17.1</li>
+    <li>Ruby on Rails</li>
+</ul>
+
+<h4>Rails 4.0.4</h4>
+<ul>
+    <li>Rails 4.0.4</li>
+    <li>Puma webserver (4 воркера &mdash; по одному на каждое ядро)</li>
+    <li>MRI Ruby 2.1.0</li>
+</ul>
+
+<p>Мы&nbsp;проводим сравнение быстродействия двух эквивалентных приложений на&nbsp;Phoenix и&nbsp;на&nbsp;Rails, причём для большей наглядности определённые задачи рассматриваются отдельно. Для оценки выполним следующие пункты.</p>
+<ol>
+    <li>
+        <p>Сопоставим запрос к&nbsp;серверу и&nbsp;направим его к&nbsp;соответствующему действию контроллера, разбирая именованные параметры</p>
+    </li>
+    <li>
+        <p>Внутри контроллера рендерим представление (в&nbsp;зависимости от&nbsp;заголовка Accept в&nbsp;запросе), которое помещается в&nbsp;родительский макет. Представления <em>рендерятся посредством встроенных в&nbsp;язык шаблонизаторов (ERB, EEx).</em></p>
+    </li>
+    <li>
+        <p>В&nbsp;представлении рендерим коллекцию данных, полученных из&nbsp;контроллера.</p>
+    </li>
+    <li>
+        <p>Отправляем ответ клиенту.</p>
+    </li>
+</ol>
+<p>Вот и&nbsp;всё. Мы&nbsp;тестируем типовое сопоставление маршрутов и&nbsp;отображение стека представлений, что явно выходит за&nbsp;рамки примера &laquo;Hello World&raquo;. В&nbsp;обоих приложениях производится рендеринг макета, представлений и&nbsp;их&nbsp;составляющих для проведения анализа реальной производительности при выполнении основной задачи веб-фреймворка. Чтобы не&nbsp;перегружать&nbsp;IO в&nbsp;обоих приложениях отключены кэширование представлений и&nbsp;логирование запросов. Для проведения бенчмаркинга мы&nbsp;использовали <noindex><a href="https://github.com/wg/wrk" rel="nofollow">инструмент wrk</a></noindex>. Помимо тестирования на&nbsp;локальном сервере, мы&nbsp;также провели тестирование и&nbsp;на&nbsp;удалённом (основанном на&nbsp;heroku dynos) с&nbsp;целью исключения влияния этого инструмента на&nbsp;результаты, полученные в&nbsp;ходе локального эксперимента. Хватит болтовни, посмотрим, как выглядит код.</p>
+<h2>Маршрутизаторы</h2>
+<h4>Phoenix</h4>
+{% highlight elixir %}
+defmodule Benchmarker.Router do
+  use Phoenix.Router
+  alias Benchmarker.Controllers
+
+  get "/:title", Controllers.Pages, :index, as: :page
+end
+{% endhighlight %}
+
+<h4>Rails</h4>
+{% highlight ruby %}
+Benchmarker::Application.routes.draw do
+  root to: "pages#index"
+  get "/:title", to: "pages#index", as: :page
+end
+{% endhighlight %}
+
+<h2><a name="controllers"></a> Контроллеры</h2>
+<h4>Phoenix</h4>
+{% highlight elixir %}
+defmodule Benchmarker.Controllers.Pages do
+  use Phoenix.Controller
+
+  def index(conn, %{"title" => title}) do
+    render conn, "index", title: title, members: [
+      %{name: "Chris McCord"},
+      %{name: "Matt Sears"},
+      %{name: "David Stump"},
+      %{name: "Ricardo Thompson"}
+    ]
+  end
+end
+{% endhighlight %}
+
+<h4>Rails</h4>
+{% highlight ruby %}
+class PagesController < ApplicationController
+
+  def index
+    @title = params[:title]
+    @members = [
+      {name: "Chris McCord"},
+      {name: "Matt Sears"},
+      {name: "David Stump"},
+      {name: "Ricardo Thompson"}
+    ]
+    render "index"
+  end
+end
+{% endhighlight %}
+
+<h2>Представления</h2>
+<h4>Phoenix&nbsp;(EEx)</h4>
+{% highlight erb %}
+...
+    <h4>Team Members</h4>
+    <ul>
+      <%= for member <- @members do %>
+        <li>
+          <%= render "bio.html", member: member %>
+        </li>
+      <% end %>
+    </ul>
+...
+{% endhighlight %}
+
+{% highlight erb %}
+<b>Name:</b> <%= @member.name %>
+{% endhighlight %}
+
+<h4>Rails&nbsp;(ERB)</h4>
+
+{% highlight erb %}
+...
+    <h4>Team Members</h4>
+    <ul>
+      <% for member in @members do %>
+        <li>
+          <%= render partial: "bio.html", locals: {member: member} %>
+        </li>
+      <% end %>
+    </ul>
+...
+{% endhighlight %}
+
+{% highlight erb %}
+<b>Name:</b> <%= member[:name] %>
+{% endhighlight %}
+
+<h2>Результаты для локального сервера</h2>
+<p>Phoenix показал <strong>в&nbsp;10,63 раза большую производительность</strong> и&nbsp;более устойчивое среднеквадратическое отклонение времени задержки. Такие результаты доказывают реальные преимущества конкурентной модели Elixir. Одна нода Elixir использует все необходимые ресурсы CPU и&nbsp;требуемый объём памяти, в&nbsp;то&nbsp;время как веб-сервер Puma (Rails) для реализации многопоточности создаёт по&nbsp;одному процессу на&nbsp;каждом ядре CPU.</p>
+{% highlight bash %}Phoenix:
+req/s: 12,120.00
+Stdev: 3.35ms
+Max latency: 43.30ms
+
+Rails:
+req/s: 1,140.53
+Stdev: 18.96ms
+Max latency: 159.43ms{% endhighlight %}
+
+<h4>Phoenix</h4>
+{% highlight bash %}$ mix do deps.get, compile
+$ MIX_ENV=prod mix compile.protocols
+$ MIX_ENV=prod elixir -pa _build/prod/consolidated -S mix phoenix.start
+Running Elixir.Benchmarker.Router with Cowboy on port 4000
+
+$ wrk -t4 -c100 -d30S --timeout 2000 "http://127.0.0.1:4000/showdown"
+Running 10s test @ http://127.0.0.1:4000/showdown
+4 threads and 100 connections
+Thread Stats   Avg      Stdev     Max   +/- Stdev
+Latency     8.31ms    3.53ms  43.30ms   79.38%
+Req/Sec     3.11k   376.89     4.73k    79.83%
+121202 requests in 10.00s, 254.29MB read
+Requests/sec:  12120.94
+Transfer/sec:     25.43MB{% endhighlight %}
+
+<h4>Rails</h4>
+{% highlight bash %}$ bundle
+$ RACK_ENV=production bundle exec puma -w 4
+[13057] Puma starting in cluster mode...
+[13057] * Version 2.8.2 (ruby 2.1.0-p0), codename: Sir Edmund Percival Hillary
+[13057] * Min threads: 0, max threads: 16
+[13057] * Environment: production
+[13057] * Process workers: 4
+[13057] * Phased restart available
+[13185] * Listening on tcp://0.0.0.0:9292
+
+$ wrk -t4 -c100 -d30S --timeout 2000 "http://127.0.0.1:9292/showdown"
+Running 10s test @ http://127.0.0.1:9292/showdown
+4 threads and 100 connections
+Thread Stats   Avg      Stdev     Max   +/- Stdev
+Latency    21.67ms   18.96ms 159.43ms   85.53%
+Req/Sec   449.74    413.36     1.10k    63.82%
+11414 requests in 10.01s, 25.50MB read
+Requests/sec:   1140.53
+Transfer/sec:      2.55MB{% endhighlight %}
+
+<h2>Результаты для Heroku (1&nbsp;dyno)</h2>
+<p>Phoenix оказался <strong>в&nbsp;8,94 раза производительнее</strong>, снова показав намного более устойчивое среднеквадратическое отклонение времени задержки и&nbsp;<strong>в&nbsp;3,74 раза меньшую загрузку CPU</strong>. Пытаясь получить на&nbsp;сервере Phoenix такую&nbsp;же нагрузку на&nbsp;CPU, как и&nbsp;на&nbsp;сервере Rails, мы&nbsp;столкнулись с&nbsp;нехваткой доступных сокетов. Возможно, Phoenix-приложение показало&nbsp;бы большую производительность, если&nbsp;бы сети клиентов имели более высокую пропускную способность. В&nbsp;случае использования удалённого сервера значение среднеквадратического отклонения имеет особую важность. Rails-приложение не&nbsp;смогло обеспечить устойчивое время отклика, показав результат времени задержки более 8&nbsp;секунд. На&nbsp;практике, Phoenix-приложение в&nbsp;нагруженном состоянии должно работать намного более стабильно, чем приложение на&nbsp;Rails.</p>
+{% highlight bash %}Phoenix:
+req/s: 2,691.03
+Stdev: 139.92ms
+Max latency: 1.39s
+
+Rails:
+req/s: 301.36
+Stdev: 2.06s
+Max latency: 8.36s{% endhighlight %}
+
+<h4>Phoenix (Cold)</h3>
+    {% highlight bash %}$ ./wrk -t12 -c800 -d30S --timeout 2000 "http://tranquil-brushlands-6459.herokuapp.com/showdown"
+Running 30s test @ http://tranquil-brushlands-6459.herokuapp.com/showdown
+12 threads and 800 connections
+Thread Stats   Avg      Stdev     Max   +/- Stdev
+Latency   317.15ms  139.55ms 970.43ms   81.12%
+Req/Sec   231.43     66.07   382.00     63.92%
+83240 requests in 30.00s, 174.65MB read
+Socket errors: connect 0, read 1, write 0, timeout 0
+Requests/sec:   2774.59
+Transfer/sec:      5.82MB
+{% endhighlight %}
+
+    <h4>Phoenix (Warm)</h4>
+    {% highlight bash %}$ ./wrk -t12 -c800 -d180S --timeout 2000 "http://tranquil-brushlands-6459.herokuapp.com/showdown"
+Running 3m test @ http://tranquil-brushlands-6459.herokuapp.com/showdown
+12 threads and 800 connections
+Thread Stats   Avg      Stdev     Max   +/- Stdev
+Latency   318.52ms  139.92ms   1.39s    82.03%
+Req/Sec   224.42     57.23   368.00     68.50%
+484444 requests in 3.00m, 0.99GB read
+Socket errors: connect 0, read 9, write 0, timeout 0
+Requests/sec:   2691.03
+Transfer/sec:      5.65MB{% endhighlight %}
+
+    <h4>Загрузка</h4>
+    {% highlight bash %}load_avg_1m=2.78
+
+sample#memory_total=34.69MB
+sample#memory_rss=33.57MB
+sample#memory_cache=0.09MB
+sample#memory_swap=1.03MB
+sample#memory_pgpgin=204996pages sample#memory_pgpgout=196379pages{% endhighlight %}
+
+    <h4>Rails (Cold)</h4>
+    {% highlight bash %}$ ./wrk -t12 -c800 -d30S --timeout 2000 "http://dry-ocean-9525.herokuapp.com/showdown"
+Running 30s test @ http://dry-ocean-9525.herokuapp.com/showdown
+12 threads and 800 connections
+Thread Stats   Avg      Stdev     Max   +/- Stdev
+Latency     2.85s     1.33s    5.75s    65.73%
+Req/Sec    22.68      7.18    61.00     69.71%
+8276 requests in 30.03s, 18.70MB read
+Requests/sec:    275.64
+Transfer/sec:    637.86KB{% endhighlight %}
+
+    <h4>Rails (Warm)</h4>
+    {% highlight bash %}$ ./wrk -t12 -c800 -d180S --timeout 2000 "http://dry-ocean-9525.herokuapp.com/showdown"
+Running 3m test @ http://dry-ocean-9525.herokuapp.com/showdown
+12 threads and 800 connections
+Thread Stats   Avg      Stdev     Max   +/- Stdev
+Latency     3.07s     2.06s    8.36s    70.39%
+Req/Sec    24.65      9.97    63.00     67.10%
+54256 requests in 3.00m, 122.50MB read
+Socket errors: connect 0, read 1, write 0, timeout 0
+Requests/sec:    301.36
+Transfer/sec:    696.77KB{% endhighlight %}
+
+    <h4>Загрузка</h4>
+    {% highlight bash %}sample#load_avg_1m=10.40
+
+sample#memory_total=235.37MB
+sample#memory_rss=235.35MB
+sample#memory_cache=0.02MB
+sample#memory_swap=0.00MB
+sample#memory_pgpgin=66703pages
+sample#memory_pgpgout=6449pages{% endhighlight %}
+    <h2>Обобщённые результаты</h2>
+    <p>Elixir сочетает в&nbsp;себе удобство и&nbsp;скорость разработки Ruby с&nbsp;конкурентной моделью и&nbsp;отказоустойчивостью Erlang. Программируя на&nbsp;Elixir, можно одновременно пользоваться преимуществами двух этих языков, в&nbsp;связи с&nbsp;чем я&nbsp;призываю вас ознакомиться с&nbsp;Phoenix. Придётся ещё попотеть над доработкой Phoenix, чтобы он&nbsp;мог сравняться с&nbsp;мощной экосистемой Rails, но&nbsp;это только начало. На&nbsp;этот год у&nbsp;нас уже большие планы.</p>
+    <p>Если вы&nbsp;хотели&nbsp;бы собственноручно провести такое&nbsp;же тестирование, то&nbsp;созданные приложения находятся в&nbsp;свободном доступе <noindex><a href="https://twitter.com/peregrine" rel="nofollow">на&nbsp;сайте Github</a></noindex>. Интересно было&nbsp;бы посмотреть, какие результаты получились на&nbsp;разном железе, особенно на&nbsp;том, которое могло&nbsp;бы сильнее нагрузить Phoenix-приложение.</p>
+    <p>За&nbsp;предоставленную информацию об&nbsp;установке приложений Heroku и&nbsp;тестировании удалённых серверов благодарим <noindex><a href="https://twitter.com/peregrine" rel="nofollow">Джейсона Стибса</a></noindex>!</p>

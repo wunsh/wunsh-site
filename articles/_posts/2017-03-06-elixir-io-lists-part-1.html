@@ -1,0 +1,134 @@
+---
+title: "Списки ввода-вывода в&nbsp;Elixir. Часть&nbsp;1: повышение производительности вывода данных"
+excerpt: В этой статье рассказывается о повышении производительности вывода текстовых данных с помощью структуры под названием списки ввода-вывода.
+author: nadezhda
+source_url: https://www.bignerdranch.com/blog/elixir-and-io-lists-part-1-building-output-efficiently/
+source_author: Nathan Long
+tags: [advanced]
+---
+<p>Чтобы программа работала быстрее, она должна делать как можно меньше.</p>
+<p>Предположим, нужно записать данные в&nbsp;файл или послать ответ браузеру. Каким в&nbsp;этом случае будет <i>минимальный набор действий</i>?</p>
+<p>Ответ: <i>скопировать каждый байт данных в&nbsp;файл или сокет</i>.</p>
+<p>Чтобы получить мгновенное время отклика, как у&nbsp;фреймворка Phoenix, это действие должно быть единственным. С&nbsp;Phoenix это возможно благодаря одной любопытной структуре данных под названием <b>&laquo;список ввода-вывода&raquo;</b>.</p>
+<p>Используя такую структуру, можно повысить эффективность кода. Чтобы понять, как это работает, рассмотрим&nbsp;то, с&nbsp;чем разработчики сталкиваются каждый день,&nbsp;&mdash; операцию конкатенации строк.</p>
+<h2>Строки и&nbsp;списки ввода-вывода</h2>
+<p>Конкатенация в&nbsp;Elixir выглядит примерно так:</p>
+{% highlight elixir %}
+name = "James"
+IO.puts "Hi, " <> name  # => "Hi, James"
+{% endhighlight %}
+<p>Интерполяция, в&nbsp;общем-то, делает то&nbsp;же самое, но&nbsp;немного красивее:</p>
+{% highlight elixir %}
+name = "James"
+IO.puts "Hi, #{name}"  # => "Hi, James"
+{% endhighlight %}
+<p>Чтобы исполнить этот код, виртуальная машина BEAM должна:</p>
+<ul>
+<li>
+<p>выделить память под строку &laquo;James&raquo;;</p>
+</li>
+<li>
+<p>выделить память под строку &laquo;Hi,&raquo;;</p>
+</li>
+<li>
+<p>выделить память под третью строку и&nbsp;скопировать две другие в&nbsp;неё, чтобы получилось &laquo;Hi, James&raquo;.</p>
+</li>
+</ul>
+<p>Копирование&nbsp;&mdash; это уже лишние действия. Кроме того, чем больше строк, тем больше используется памяти и&nbsp;тем больше будет работы для сборщика мусора.</p>
+<p>В&nbsp;Elixir сцепление строк можно реализовать гораздо более эффективно с&nbsp;помощью списка ввода-вывода.</p>
+<p>Список ввода-вывода&nbsp;&mdash; это список данных (например, строк или <noindex><a href="https://www.bignerdranch.com/blog/unicode-and-utf-8-explained/" rel="noreferrer nofollow">кодовых точек</a></noindex>), подходящих для операций ввода/вывода. Функции вроде <code>IO.puts/1</code> и&nbsp;<code>File.write/2</code> работают с&nbsp;определёнными данными, в&nbsp;качестве которых может выступать либо простая строка, либо список ввода-вывода.</p>
+{% highlight elixir %}
+name = "James"
+IO.puts ["Hi, ", name]                            # => "Hi, James"
+IO.puts ["Hi, ", 74, 97, 109, 101, 115]           # => "Hi, James"
+{% endhighlight %}
+<p>Списки ввода-вывода могут быть вложенными, но&nbsp;функции ввода-вывода всё равно будут воспринимать их&nbsp;как плоские.</p>
+{% highlight elixir %}
+IO.puts ["Hi, ", [74, [97, [109, [101, [115]]]]]] # => "Hi, James"
+{% endhighlight %}
+<p>На&nbsp;первый взгляд может показаться, что ничего не&nbsp;изменилось, ведь результат остался прежним. Однако подобная структуризации выходных данных положительно сказывается на&nbsp;производительности.</p>
+<p>Во-первых, списки позволяют реализовать повторения более грамотно.</p>
+{% highlight elixir %}
+users = [%{name: "Amy"}, %{name: "Joe"}]
+
+response = Enum.map(users, fn (user) ->
+["<li>", user.name, "</li>"]
+end)
+
+IO.puts response
+{% endhighlight %}
+<p>В&nbsp;приведённом примере строка <code>&lt;li&gt;</code> создаётся только один раз, а&nbsp;для её&nbsp;дублирования в&nbsp;списке используются указатели. Таким образом, чем больше в&nbsp;содержимом вывода повторов, тем лучше, ведь теперь не&nbsp;потребуется выделять память под каждую строку.</p>
+<p>Списки ввода-вывода можно вкладывать друг в&nbsp;друга, что позволяет создавать их&nbsp;намного быстрее. Обычно, добавление элемента к&nbsp;связному списку выполняется за&nbsp;<i>O(N)</i>: перебрать все элементы списка, дойти до&nbsp;последнего и&nbsp;поместить в&nbsp;него указатель на&nbsp;новый элемент. Иммутабельность данных усложняет всё ещё больше: последний элемент изменять нельзя, его можно только копировать. А&nbsp;это означает, что копировать придётся и&nbsp;предыдущий элемент, и&nbsp;тот, что стоит перед ним, и&nbsp;так до&nbsp;самого начала списка.</p>
+<p>При этом, используя вложения, можно добавить элемент в&nbsp;список, просто обернув этот список в&nbsp;другой.</p>
+{% highlight elixir %}
+names = ["A", "B"]    # => ["A", "B"]
+names = [names, "C"]  # => [["A", "B"], "C"]
+{% endhighlight %}
+<p>Эта операция выполнится за&nbsp;время <i>O(1)</i> и&nbsp;не&nbsp;потребует копирования данных.</p>
+<p>Списки ввода-вывода также оказывают значительное влияние на&nbsp;системные вызовы.</p>
+<h2>Системные вызовы</h2>
+<p>Большинство приложений не&nbsp;способны напрямую взаимодействовать с&nbsp;файлами и&nbsp;сокетами. Чтобы предписать операционной системе какие-либо действия от&nbsp;своего имени, они используют системные вызовы. В&nbsp;свою очередь, ОС&nbsp;осуществляет контроль доступа к&nbsp;файлам и&nbsp;учитывает нюансы работы с&nbsp;тем или иным железом.</p>
+<p>Рассмотрим такой пример, написанный на&nbsp;Elixir:</p>
+{% highlight elixir %}
+# Here I'm calling an Erlang function. I'll explain why later.
+{:ok, file} = :file.open("/tmp/tmp.txt", [:write, :raw])
+
+foo = "foo"
+bar = "bar"
+
+output = [foo, bar, foo]
+output = Enum.join(output)
+
+# Another Erlang function call
+:file.write(file, output)
+{% endhighlight %}
+<p>Всё достаточно просто: открываем файл, создаём несколько строк, связываем их&nbsp;друг с&nbsp;другом и&nbsp;выводим результат в&nbsp;файл.</p>
+<p>Исполняя последнюю строчку кода, виртуальная машина BEAM инициирует системный вызов для записи в&nbsp;файл. Воспользовавшись <noindex><a href="https://github.com/evanmiller/tracewrite" rel="noreferrer nofollow">скриптом DTrace от&nbsp;Эвана Миллера</a></noindex>, который упоминается <noindex><a href="http://www.evanmiller.org/elixir-ram-and-the-template-of-doom.html" rel="nofollow noreferrer">в&nbsp;этой замечательной статье</a></noindex>, получим следующее:</p>
+{% highlight elixir %}
+write:return Write data (9 bytes): 0x00000000146007e2
+{% endhighlight %}
+<p>BEAM осуществляет системный вызов <code>write</code> и&nbsp;даёт команду: переписать 9&nbsp;байт из&nbsp;ячейки памяти по&nbsp;адресу <code>0&times;00000000146007e2</code>. Эта строка длиной 9&nbsp;байт состоит из&nbsp;трёх частей: <code>foo</code> (3&nbsp;байта), <code>bar</code> (3&nbsp;байта) и <code>foo</code> (3&nbsp;байта).</p>
+<p>Теперь посмотрим, что получится, если строку кода, в&nbsp;которой эти три части объединяются в&nbsp;единое целое, превратить в&nbsp;комментарий:</p>
+{% highlight elixir %}
+{:ok, file} = :file.open("/tmp/tmp.txt", [:write, :raw])
+
+foo = "foo"
+bar = "bar"
+
+output = [foo, bar, foo]
+# output = Enum.join(output)
+
+:file.write(file, output)
+{% endhighlight %}
+<p>На&nbsp;этот раз передаём в&nbsp;функцию <code>:file.write/2</code> список ввода-вывода. Казалось&nbsp;бы, не&nbsp;такое уж&nbsp;большое изменение, но&nbsp;взгляните на&nbsp;системный вызов:</p>
+{% highlight elixir %}
+writev:return Writev data 1/3: (3 bytes): 0x0000000014600430
+writev:return Writev data 2/3: (3 bytes): 0x0000000014600120
+writev:return Writev data 3/3: (3 bytes): 0x0000000014600430
+{% endhighlight %}
+<p>Получаем один вызов функции <code>writev</code> для вывода трёх фрагментов данных: <code>foo</code> с&nbsp;одного адреса памяти, <code>bar</code>&nbsp;&mdash; с&nbsp;другого, а&nbsp;<code>foo</code> с&nbsp;того&nbsp;же адреса, что и&nbsp;первый фрагмент.</p>
+<p>Интересно, не&nbsp;правда&nbsp;ли? Конечная строка <code>foobarfoo</code> в&nbsp;самой программе не&nbsp;создаётся. <strong>Три фрагмента собираются воедино непосредственно в&nbsp;файле.</strong></p>
+<p>Когда конкатенация осуществляется программно, две строки помещаются в&nbsp;память виртуальной машины, их&nbsp;содержимое копируется в&nbsp;третью строку, которую операционная система выводит в&nbsp;файл.</p>
+<p>В&nbsp;случае со&nbsp;списком ввода-вывода можно забыть о&nbsp;реализации конкатенации строк и&nbsp;выделении памяти для девятибайтовой строки и&nbsp;избавить сборщик мусора от&nbsp;работы по&nbsp;её&nbsp;удалению.</p>
+<p><strong>Всё, что останется сделать виртуальной машине,&nbsp;&mdash; это обратиться к&nbsp;ОС, и&nbsp;она скопирует данные в&nbsp;файл</strong>.</p>
+<h2>Особенности работы с&nbsp;writev</h2>
+<p>Как было сказано ранее, виртуальная машина не&nbsp;осуществляет конкатенацию строк в&nbsp;списке при реализации операций ввода-вывода. Если запустить этот код в&nbsp;IEx и&nbsp;отследить системные вызовы, то&nbsp;каждый элемент списка окажется отдельным аргументом <code>writev</code>.</p>
+{% highlight elixir %}
+{:ok, file} = :file.open("/tmp/tmp.txt", [:write, :raw])
+:file.write(file, some_iolist_of_your_own)
+{% endhighlight %}
+<p>И&nbsp;всё&nbsp;же, чтобы убедиться, что <code>writev</code> действительно используется в&nbsp;приведённом фрагменте кода, я&nbsp;принял пару важных решений.</p>
+<p>Во-первых, я&nbsp;сделал так, чтобы файл <strong>открывался</strong> <strong>в&nbsp;режиме</strong> <strong>raw</strong>. Так, BEAM не&nbsp;будет создавать отдельный процесс для работы с&nbsp;файлом, как это происходит по&nbsp;умолчанию. Об&nbsp;этом подробно написано в&nbsp;<a href="http://erlang.org/doc/man/file.html#open-2">документации Erlang </a> для функции <a href="http://erlang.org/doc/man/file.html#open-2"><code>file:open/2</code></a> и&nbsp;в&nbsp;разделе &laquo;Performance&raquo; внизу страницы.</p>
+<p>Во-вторых<strong>, я&nbsp;использовал два вызова функций Erlang, а&nbsp;не&nbsp;Elixir, как может показаться</strong>:</p>
+{% highlight elixir %}
+File.write("/tmp/tmp.txt", some_iodata, [:raw])
+{% endhighlight %}
+<p>Эта функция Elixir&nbsp;&mdash; <noindex><a href="https://github.com/elixir-lang/elixir/blob/v1.3.2/lib/elixir/lib/file.ex#L701-L705" rel="noreferrer nofollow">делегирует вызов похожей функции Erlang</a></noindex> <noindex><a href="https://github.com/elixir-lang/elixir/blob/v1.3.2/lib/elixir/lib/file.ex#L701-L705" rel="noreferrer nofollow">file:write_file/3</a></noindex>, которую можно вызвать следующим образом:</p>
+{% highlight elixir %}
+:file.write_file("/tmp/tmp.txt", some_iodata, [:raw])
+{% endhighlight %}
+<p>Данная функция открывает и&nbsp;закрывает дескриптор файлов. В&nbsp;текущей версии Erlang/OTP (19.1.2) в&nbsp;функции <code>:file:write_file/3</code> есть баг: <noindex><a href="https://github.com/erlang/otp/blob/OTP-19.1.2/lib/kernel/src/file.erl#L401" rel="nofollow noreferrer">она всегда помещает данные вывода в&nbsp;одну строку</a></noindex>, даже при использовании режима <code>raw</code>.</p>
+<p>Ещё одна особенность работы с&nbsp;writev заключается в&nbsp;том, что можно объединять только строки длиной до&nbsp;64&nbsp;байт. Причиной этому служит специфика работы BEAM с&nbsp;поиском строк в&nbsp;памяти и&nbsp;копированием данных между процессами. Если список ввода-вывода содержит строки длиннее 64&nbsp;байт (<noindex><a href="http://erlang.org/doc/efficiency_guide/binaryhandling.html" rel="nofollow">&laquo;refc&raquo; строки</a></noindex>), они появятся в&nbsp;векторе функции writev отдельными записями.</p>
+<h2>Используйте списки ввода-вывода</h2>
+<p>Если вы&nbsp;планируете организовать вывод данных и&nbsp;записать их&nbsp;в&nbsp;файл, то&nbsp;вот небольшой совет: забудьте о&nbsp;конкатенации. <strong>Воспользуйтесь списком ввода-вывода</strong>.</p>
+<p>С&nbsp;их&nbsp;помощью вывод можно будет реализовать гораздо проще, расход памяти сократится, а&nbsp;BEAM вместо копирования данных будет вызывать writev.</p>

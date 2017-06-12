@@ -1,0 +1,834 @@
+---
+title: Использование GenStage и Flow для создания системы рекомендаций товаров
+excerpt: Рассказываем об использовании GenStage и Flow для создания системы рекомендации на языке Elixir.
+author: nadezhda
+source_url: https://10consulting.com/2017/01/20/building-product-recommendations-using-elixir-gen-stage-flow
+source_author: Ben Smith
+tags: [genstage]
+---
+<h2>Введение</h2>
+<blockquote>Flow, подобно модулям Enum и Stream, позволяет разработчикам производить вычисления в коллекциях, однако с его помощью и с помощью GenStage вычисления могут выполняться параллельно.</blockquote>
+<p>Канонический пример, размещённый в сервисе <a href="https://github.com/elixir-lang/flow">GitHub</a>, показывает, как с помощью Flow можно параллельно осуществить подсчёт количества слов в документе:</p>
+{% highlight elixir %}
+File.stream!("path/to/some/file")
+|> Flow.from_enumerable()
+|> Flow.flat_map(&String.split(&1, " "))
+|> Flow.partition()
+|> Flow.reduce(fn -> %{} end, fn word, acc ->
+  Map.update(acc, word, 1, & &1 + 1)
+end)
+|> Enum.to_list()
+{% endhighlight %}
+
+{% highlight elixir %}
+{% endhighlight %}
+
+<p>Мне хотелось опробовать Flow в действии ещё с тех пор, когда Жозе Валим только представил концепции работы этого модуля на <a href="https://www.youtube.com/watch?v=srtMWzyqdp8">конференции "Elixir Conf 2016"</a>. У меня сразу же возникла мысль разработать инструмент для построения системы рекомендаций на основе отзывов большого количества людей (краудсорсинг). Так как это предполагает наличие задач с интенсивным вводом-выводом (HTTP-запросы) и операций с высокой вычислительной нагрузкой на CPU (например, анализ тональности текста), то параллельное исполнение и Flow &ndash; то, что нужно.</p>
+<p>Так я и создал страницу <a href="https://startlearningelixir.com/">Start learning Elixir</a>.</p>
+<h3>Start learning Elixir</h3>
+<blockquote><a href="https://startlearningelixir.com/">Start learning Elixir</a> поможет найти лучшие ресурсы для изучения Elixir.</blockquote>
+<img src="https://10consulting.com/assets/2017-01-20-start-learning-elixir.png" alt="Start Learning Elixir">
+<p>Краудсорсинг я использовал для того, чтобы найти и оценить подходящие учебные материалы: книги, электронные книги, видеоролики и обучающие курсы.</p>
+<p>Алгоритм ранжирования основан на совокупности показателей популярности и результатов анализа тональности. Популярные материалы с высоким рейтингом имеют высокую оценку. Оценка&nbsp;&ndash; совокупность положительных, отрицательных и нейтральных отзывов пользователей известного <a href="https://elixirforum.com/">форума об Elixir</a>.</p>
+<h2>Создание инструмента рекомендации товаров</h2>
+<p>Разработанное мной зонтичное приложение (umbrella application) на Elixir состоит из трёх приложений:</p>
+<ul>
+  <li>
+    <code>indexer</code>, осуществляющего выборку внешнего контента с помощью HTTP-запросов и упорядочивающего товары по рейтингу.
+  </li>
+  <li>
+    <code>recommendations</code>, содержащего область Ecto schema и запросы: ресурсы, отзывы, оценки, авторы.
+  </li>
+  <li>
+    <code>web</code>&nbsp;&ndash; фронтенд-части приложения в Phoenix, реализующей вывод рекомендованных товаров.
+  </li>
+</ul>
+<p>Flow используется в приложении <code>indexer</code>, где производятся все вычисления. Я набросал схему этапов конвейера, после чего разработал отдельный модуль для каждого этапа. Каждый этап разрабатывался и тестировался изолированно. Затем я объединил модули в единое целое и наладил их работу с помощью соответствующей функции Flow.</p>
+<h3>Высокоуровневый поток</h3>
+<p>В своём проекте разработки системы рекомендаций я использовал следующий непрерывный процесс:</p>
+<ul>
+  <li>
+    Создание списка рекомендованных ресурсов (подходящих книг, демо-роликов, сайтов, обучающих курсов) вручную.
+  </li>
+  <li>
+    Определение набора ключевых слов:
+    <ul>
+      <li>
+        "научиться", "книга", "книги", "электронные книги", "видео", "учебное пособие", "программирование на Elixir" и т. д.
+      </li>
+    </ul>
+  </li>
+  <li>
+    Поиск по ключевому слову на <a href="https://elixirforum.com/">форуме об Elixir</a> и получение списка тем.
+  </li>
+  <li>
+    Выборка постов по данной теме:
+    <ul>
+      <li>
+        парсинг содержимого поста (html-страницы);
+      </li>
+      <li>
+        удаление тегов <code>&lt;aside/&gt;</code>&nbsp;и&nbsp;<code>&lt;code/&gt;</code>;
+      </li>
+      <li>
+        разделение текста на предложения тегом <code>&lt;p&gt;</code>;
+      </li>
+      <li>
+        извлечение текста.
+      </li>
+    </ul>
+  </li>
+  <li>
+    Поиск названий ресурсов в тексте.
+  </li>
+  <li>
+    Выделение положительных, отрицательных и нейтральных отзывов с помощью анализа тональности текста.
+  </li>
+  <li>
+    Объединение комментариев от одного и того же автора.
+  </li>
+  <li>
+    Оценка ресурсов и начисление им рейтинга согласно частоте их упоминания и характера отзывов с использованием сглаживания Лапласа.
+  </li>
+</ul>
+<p>Получаем следующий код на Elixir (при участии <code>Flow</code>):</p>
+
+{% highlight elixir %}
+defmodule Learn.Indexer do
+  @moduledoc """
+  Index mentions of resources from an authoritative source.
+  """
+
+  alias Learn.Indexer
+
+  alias Learn.Indexer.{
+    Mention,
+    Post,
+    Ranking,
+    Resource,
+  }
+
+  @doc """
+  Rank the given resources based on their mentions in topics matching the given keywords
+  """
+  @spec rank(list(String.t), list(Resource.t)) :: list(Ranking.t)
+  def rank(keywords, resources, opts \\ []) do
+    keywords
+    |> Flow.from_enumerable()
+    |> Flow.flat_map(&Indexer.search(&1, opts))
+    |> Flow.uniq()
+    |> Flow.partition()
+    |> Flow.flat_map(&Indexer.list_posts(&1, opts))
+    |> Flow.partition(key: {:key, :id})
+    |> Flow.uniq_by(&(&1.id))
+    |> Flow.map(&Indexer.parse_html_content/1)
+    |> Flow.map(&Indexer.parse_sentences/1)
+    |> Flow.flat_map(&Indexer.extract_mentions(&1, resources))
+    |> Flow.map(&Indexer.sentiment_analysis/1)
+    |> Flow.partition(key: {:key, :resource})
+    |> Flow.group_by(&(&1.resource))
+    |> Flow.map(fn {resource, mentions} -> {resource, Indexer.aggregate_mentions_by_author(mentions)} end)
+    |> Flow.map(fn {resource, recommendations} -> Indexer.rank_recommendations(resource, recommendations) end)
+    |> Enum.to_list()
+    |> Enum.sort_by(&(&1.score), &>=/2)
+  end
+end
+{% endhighlight %}
+
+
+<p>Можно заметить, что на некоторых этапах конвейера присутствуют дополнительные функции <code>Flow.partition</code>. Дополнительное разбиение позволяет убедиться в том, что данные передаются в тот же процесс, и минимизировать количество передаваемых сообщений. Для секционирования данных используется хэш-функция. Можно провести секционирование по функции, или по ключу-кортежу, это также необходимо при объединении или разделении каких-либо данных. При секционировании данные в каждой секции не будут накладываться друг на друга.</p>
+<p>Подробнее об этапах конвейера Flow:</p>
+<ul>
+  <li>
+    <p><a href="#search-topics-by-keyword">Поиск тем по ключевому слову</a></p>
+  </li>
+  <li>
+    <p><a href="#parse-html-content">Парсинг HTML-кода</a></p>
+  </li>
+  <li>
+    <p><a href="#parse-sentences">Парсинг предложений</a></p>
+  </li>
+  <li>
+    <p><a href="#extract-mentions">Извлечение названий товаров</a></p>
+  </li>
+  <li>
+    <p><a href="#sentiment-analysis">Анализ тональности</a></p>
+  </li>
+  <li>
+    <p><a href="#score-recommendations">Рекомендации (оценки)</a></p>
+  </li>
+</ul>
+<h3>Поиск тем по ключевому слову</h3>
+<p><a href="https://elixirforum.com/">Форум об Elixir</a> построен на платформе <a href="http://www.discourse.org/">Discourse</a> с общедоступным интерфейсом, предоставляющим данные в формате JSON. Для этого достаточно будет просто добавить <code>.json</code> к запросу.</p>
+<p>Поисковый запрос по слову "book" (<a href="https://elixirforum.com/search?q=book)">https://elixirforum.com/search?q=book)</a> превратится в <a href="https://elixirforum.com/search.json?q=book.">https://elixirforum.com/search.json?q=book.</a> Таким же образом можно осуществлять поиск по отдельно взятым темам.</p>
+<p>Я разработал простенький модуль <code>ElixirForum</code>, в котором для отправки HTTP-запросов использовал клиент-приложение <a href="https://github.com/edgurgel/httpoison">HTTPoison</a>, а для парсинга страницы&nbsp;&ndash; библиотеку <a href="https://github.com/devinus/poison">Poison</a>.</p>
+
+{% highlight elixir %}
+defmodule Learn.Indexer.Sources.ElixirForum do
+  use HTTPoison.Base
+
+  alias Learn.Indexer.Cache.HttpRequestCache
+  alias Learn.Indexer.Sources.ElixirForum
+
+  @endpoint "https://elixirforum.com"
+
+  defp process_url(path) do
+    @endpoint <> path
+  end
+
+  def process_response_body(body) do
+    body
+    |> Poison.decode!
+  end
+
+  def cached_request!(url, opts) do
+    HttpRequestCache.cached("elixirforum.com/" <> url, fn ->
+      rate_limit_access(fn ->
+        ElixirForum.get!(url).body
+      end, opts)
+    end)
+  end
+
+  defp rate_limit_access(request, opts \\ []) do
+    scale = Keyword.get(opts, :scale, 1_000)
+    limit = Keyword.get(opts, :limit, 1)
+
+    case ExRated.check_rate(@endpoint, scale, limit) do
+      {:ok, _} ->
+        request.()
+
+      {:error, _} ->
+        :timer.sleep(1_000)
+        rate_limit_access(request, opts)
+    end
+  end
+
+  defmodule Search do
+    @expected_fields ~w(posts topics)
+
+    def query(q, opts) do
+      "/search.json?" <> URI.encode_query(q: q)
+      |> ElixirForum.cached_request!(opts)
+      |> Map.take(@expected_fields)
+      |> Enum.map(fn({k, v}) -> {String.to_existing_atom(k), v} end)
+    end
+  end
+end
+{% endhighlight %}
+
+<p>Чтобы поисковой робот работал надлежащим образом, на доступ к сайту с помощью <a href="https://github.com/grempe/ex_rated">ExRated</a> поставлено ограничение по скорости так, что посылать можно лишь один запрос в секунду. Такое ограничение действует для всех запросов в данном модуле, независимо от вызывающего процесса, так как ExRated, как и GenServer, запускается с собственным состоянием.</p>
+<p>Выглядит это так:</p>
+
+{% highlight elixir %}
+ElixirForum.Search.query("books", [scale: 1_000, limit: 1])
+{% endhighlight %}
+
+<p>Отклики кэшируются на диск, чтобы повторные запросы не повлияли на работу сайта.</p>
+
+{% highlight elixir %}
+defmodule Learn.Indexer.Cache.HttpRequestCache do
+  use GenServer
+  require Logger
+
+  defmodule State do
+    defstruct [
+      cache_dir: nil
+    ]
+  end
+
+  def start_link(cache_dir) do
+    GenServer.start_link(__MODULE__, %State{cache_dir: cache_dir}, name: __MODULE__)
+  end
+
+  def init(%State{cache_dir: cache_dir} = state) do
+    File.mkdir_p!(cache_dir)
+    {:ok, state}
+  end
+
+  def cached(key, operation) do
+    case read(key) do
+      {:ok, value} -> value
+      {:error, :not_found} ->
+        value = operation.()
+        :ok = cache(key, value)
+        value
+    end
+  end
+
+  def read(key) do
+    GenServer.call(__MODULE__, {:read, key})
+  end
+
+  def cache(key, value) do
+    GenServer.call(__MODULE__, {:cache, key, value})
+  end
+
+  def handle_call({:read, key}, _from, %State{} = state) do
+    path = cached_path(key, state)
+
+    reply = case File.read(path) do
+      {:ok, data} -> {:ok, Poison.decode!(data)}
+      {:error, :enoent} -> {:error, :not_found}
+      {:error, _} = reply -> reply
+    end
+
+    {:reply, reply, state}
+  end
+
+  def handle_call({:cache, key, value}, _from, %State{} = state) do
+    path = cached_path(key, state)
+
+    File.write!(path, Poison.encode!(value), [:write])
+
+    {:reply, :ok, state}
+  end
+
+  defp cached_path(key, %State{cache_dir: cache_dir}) do
+    key = String.slice(key, 0, 255)
+    path = Path.join(cache_dir, key)
+    ensure_dir(path)
+    path
+  end
+
+  defp ensure_dir(path) do
+    path
+    |> Path.dirname()
+    |> File.mkdir_p!()
+  end
+end
+{% endhighlight %}
+
+<p>Модуль кэша HTTP сконфигурирован в супервизоре приложения.</p>
+
+{% highlight elixir %}
+defmodule Learn.Indexer.Application do
+  @moduledoc false
+
+  use Application
+
+  def start(_type, _args) do
+    import Supervisor.Spec, warn: false
+
+    children = [
+      worker(Learn.Indexer.Cache.HttpRequestCache, ["fixture/http_cache"])
+    ]
+
+    opts = [strategy: :one_for_one, name: Learn.Indexer.Supervisor]
+    Supervisor.start_link(children, opts)
+  end
+end
+{% endhighlight %}
+
+<p>Во время тестирования поиска я снова воспользовался библиотекой&nbsp;<a href="https://github.com/parroty/exvcr">ExVCR</a> для записи HTTP-запросов и откликов и для повторного запуска с диска последующих тестов.</p>
+{% highlight elixir %}
+defmodule Learn.Indexer.Sources.ElixirForumTest do
+  use ExUnit.Case, async: false
+  use ExVCR.Mock, adapter: ExVCR.Adapter.Hackney
+
+  alias Learn.Indexer.Sources.ElixirForum
+
+  setup_all do
+    HTTPoison.start
+    :ok
+  end
+
+  describe "search" do
+    test "for \"books\"" do
+      use_cassette "elixirforum.com/search.json?&q=book", match_requests_on: [:query] do
+        response = ElixirForum.Search.query("book", [])
+
+        assert length(response[:posts]) > 0
+        assert length(response[:topics]) > 0
+      end
+    end
+  end
+end
+{% endhighlight %}
+<p>Подробнее об этом можно почитать <a href="https://10consulting.com/2016/11/07/http-unit-tests-in-elixir-using-exvcr/">здесь</a>.</p>
+<h3>Парсинг HTML-кода</h3>
+<p>Для парсинга HTML-кода и извлечения из него текста с помощью CSS-селекторов воспользуемся парсером <a href="https://github.com/philss/floki">Floki</a>.</p>
+{% highlight elixir %}
+defmodule Learn.Indexer.Stages.ParseHtmlContent do
+  @moduledoc """
+  Parse the HTML post content into paragraphs of text.
+  """
+
+  alias Learn.Indexer.{
+    Content,
+    Post,
+  }
+
+  def execute(%Post{content: content} = post) do
+    %Post{post |
+      content: parse_content_html(content),
+    }
+  end
+
+  defp parse_content_html(%Content{html: html} = content) do
+    paragraphs =
+      html
+      |> Floki.filter_out("aside")
+      |> Floki.filter_out("pre")
+      |> Floki.find("p")
+      |> Enum.map(&Floki.text/1)
+      |> Enum.flat_map(fn p -> String.split(p, "\n") end)
+      |> Enum.reject(fn p -> p == "" end)
+
+    %Content{content |
+      paragraphs: paragraphs,
+    }
+  end
+end
+{% endhighlight %}
+
+<p>Абзацы определяются тегом <code>&lt;p&gt;</code>, а функция&nbsp;<code>Floki.text/1</code> вытаскивает из них текст.</p>
+<h3>Парсинг предложений</h3>
+<p>Выделим отдельные предложения из текста поста. Для этого воспользуемся функцией <code>Essence.Chunker.sentences</code> из NLP-библиотеки <a href="https://github.com/nicbet/essence">essence</a>.</p>
+
+{% highlight elixir %}
+defmodule Learn.Indexer.Stages.ParseSentences do
+  @moduledoc """
+  Parse the paragraphs of text into sentences.
+  """
+
+  alias Learn.Indexer.{
+    Content,
+    Post,
+  }
+
+  def execute(%Post{content: content} = post) do
+    %Post{post |
+      content: parse_sentences(content),
+    }
+  end
+
+  # chunks the given paragraphs into sentences.
+  defp parse_sentences(%Content{paragraphs: paragraphs} = content) do
+    sentences =
+      paragraphs
+      |> Enum.map(&Essence.Chunker.sentences/1)
+      |> Enum.flat_map(fn sentences -> sentences end)
+
+    %Content{content |
+      sentences: sentences,
+    }
+  end
+end
+{% endhighlight %}
+
+<h3>Извлечение названий товаров</h3>
+<p>Чтобы извлечь названия отдельных товаров:</p>
+<ol>
+  <li>
+    Разобьём предложение на отдельные слова, написанные строчными буквами, с помощью функции <code>Essence.Tokenizer.tokenize</code>:
+    <ul>
+      <li>
+        &ldquo;I recommend Elixir in Action&rdquo; превратится в [&ldquo;i, &ldquo;recommend&rdquo;, &ldquo;elixir&rdquo;, &ldquo;in&rdquo;, &ldquo;action&rdquo;]
+      </li>
+    </ul>
+  </li>
+  <li>
+    Сделаем то же самое с названием товара:
+    <ul>
+      <li>
+        &ldquo;Elixir in Action&rdquo; превратится в [&ldquo;elixir&rdquo;, &ldquo;in&rdquo;, &ldquo;action&rdquo;]
+      </li>
+    </ul>
+  </li>
+  <li>
+    С помощью функции <code>Enum.chunk</code> произведём перебор расчленённых предложений, передав в неё длину искомого слова и шаг равный единице для учёта перекрытий, и осуществим поиск по заданному имени товара.</p>
+  </li>
+</ol>
+
+{% highlight elixir %}
+defp mentioned?(sentence, %Resource{name: name}) do
+  contains?(tokenize_downcase(sentence), tokenize_downcase(name))
+end
+
+def tokenize_downcase(text), do: text |> String.downcase |> Essence.Tokenizer.tokenize
+
+defp contains?(source_tokens, search_tokens) do
+  source_tokens
+  |> Stream.chunk(length(search_tokens), 1)
+  |> Enum.any?(fn chunk -> chunk == search_tokens end)
+end
+{% endhighlight %}
+
+<h3>Анализ тональности</h3>
+<p>Для несложных анализов тональности я обычно использую систему <a href="https://github.com/dantame/sentient">Sentient</a>. Она работает на основе списка слов <a href="http://www2.imm.dtu.dk/pubdb/views/publication_details.php?id=6010">AFINN-111</a>,&nbsp;разделяя предложения на положительные, отрицательные и нейтральные на основе присутствия этих слов в тексте и их эмоциональной окраски.</p>
+<blockquote>AFINN&nbsp;&ndash; это список английских слов, отмеченных целыми числами согласно их коннотациям от минус пяти (отрицательная коннотация) до плюс пяти (положительная коннотация).</blockquote>
+<p>К примеру, текст "я рекомендую книгу "Elixir in Action" к прочтению" получит положительную оценку, поскольку слово "рекомендовать" отмечено значением числом +2. Список AFINN-111 содержит 2477 слов. Этот простейший алгоритм вполне адекватно оценивает тональность предложений.</p>
+
+{% highlight elixir %}
+defmodule Learn.Indexer.Stages.SentimentAnalysis do
+  @moduledoc """
+  Analyse the mention sentence for its sentiment (positive, neutral, or negative).
+
+  Uses the AFINN-111 word list.
+  """
+
+  alias Learn.Indexer.{
+    Mention,
+  }
+
+  @spec execute(Mention.t) :: Mention.t
+  def execute(%Mention{} = mention) do
+    %Mention{mention |
+      sentiment_score: sentiment(mention),
+    }
+  end
+
+  @override_words %{"free" => 0}
+
+  defp sentiment(%Mention{sentence: sentence}) do
+    Sentient.analyze(sentence, @override_words)
+  end
+end
+{% endhighlight %}
+
+<p>Оценка тональности предложения, содержащего название товара, добавляется к общей оценке этого товара.</p>
+<h3>Рекомендации (оценки)</h3>
+<p>Общая оценка определяется заново каждый раз, когда в тексте было найдено название того или иного товара и была проведена оценка тональности.</p>
+<p>Чтобы при оценке отделить соотношение положительных/отрицательных отзывов от малого количества отзывов по товару, воспользуемся формулой сглаживания Лапласа:</p>
+
+{% highlight foo %}
+score = (upvotes + α) / (upvotes + downvotes + β)
+{% endhighlight %}
+
+<p>Например, при &alpha; = 1 и &beta; = 2 товар без голосов получит оценку 0,5.</p>
+<p>По каждому товару могут быть положительные, отрицательные и нейтральные отзывы. В моём случае каждый нейтральный комментарий получает оценку +1, а каждый положительный получает +2.</p>
+
+{% highlight elixir %}
+defmodule Learn.Indexer.Stages.RankRecommendations do
+  @moduledoc """
+  Combine recommendations for the same resource into a single ranking and score
+  """
+
+  alias Learn.Indexer.{
+    Ranking,
+    Recommendation,
+    Resource,
+  }
+
+  @spec execute(Resource.t, list(Recommendation.t)) :: Ranking.t
+  def execute(resource, recommendations) do
+    %Ranking{
+      resource: resource,
+      recommendations: recommendations,
+      score: calculate_score(recommendations),
+    }
+  end
+
+  # calculate score by using Laplace smoothing on positive, neutral and negative mentions
+  defp calculate_score([]), do: 0
+  defp calculate_score(recommendations) do
+    recommendations
+    |> Enum.reduce({0, 0, 0}, &Recommendation.score/2)
+    |> score
+  end
+
+  defp score({negative, neutral, positive}) do
+    upvotes = neutral + (positive * 2)
+    downvotes = negative
+
+    (upvotes + 1) / (upvotes + downvotes + 2)
+  end
+end
+{% endhighlight %}
+
+<p>Существует исследование о применении сглаживания Лапласа для "предоставления наиболее верного решения проблемы ранжирования информации на основе оценок пользователей в веб-приложениях".</p>
+<ul>
+  <li>
+    <p><a href="http://planspace.org/2014/08/17/how-to-sort-by-average-rating/">Сортировка по среднему рейтингу</a></p>
+  </li>
+  <li>
+    <p><a href="http://www.dcs.bbk.ac.uk/~dell/publications/dellzhang_ictir2011.pdf">Подсчёт положительных и отрицательных оценок: ранжирование информации на основе оценок пользователей с аксиоматической точки зрения</a> (PDF)</p>
+  </li>
+</ul>
+<h2>Рекомендации (краудсорсинг)</h2>
+<p>Объединяя отдельные этапы в единый конвейер с помощью Flow, можно оценить любой товар по отзывам на него.</p>
+
+{% highlight elixir %}
+def index_mentions(keywords, resources, opts \\ []) do
+  keywords
+  |> Learn.Indexer.rank(resources, opts)
+  |> record_rankings(resources)
+end
+{% endhighlight %}
+
+<p><a href="https://github.com/elixir-ecto/ecto">Ecto</a> сохраняет их в базу данных PostgreSQL. Отобразить товары, упорядоченные по рейтингу, поможет Ecto-запрос, представленный ниже. Товары можно отсортировать по языку программирования или по уровню знания языка и классифицировать их по этим признакам на сайте.</p>
+
+{% highlight elixir %}
+defmodule Learn.Recommendations.Queries.RecommendedResources do
+  import Ecto.Query
+
+  alias Learn.Recommendations.{
+    Resource,
+    Score,
+  }
+
+  def new do
+    from r in Resource,
+    left_join: s in assoc(r, :score),
+    order_by: [asc: s.rank, asc: r.title],
+    preload: [:score]
+  end
+
+  def by_experience(query, level) do
+    from [r, s] in query,
+    where: r.experience_level == ^level
+  end
+
+  def by_language(query, language) do
+    from [r, s] in query,
+    where: r.programming_language == ^language
+  end
+end
+{% endhighlight %}
+
+<p>Контроллер Phoenix составляет запрос и осуществляет выборку подходящих ресурсов с помощью функции <code>Repo.all/2</code>:</p>
+
+{% highlight elixir %}
+defmodule Learn.Web.ResourceController do
+  use Learn.Web.Web, :controller
+
+  alias Learn.Recommendations.Repo,
+  alias Learn.Recommendations.Queries.RecommendedResources
+
+  def index(conn, _params) do
+    resources =
+      RecommendedResources.new
+      |> RecommendedResources.by_experience("beginner")
+      |> RecommendedResources.by_language("Elixir")
+      |> Repo.all()
+
+    render conn, "index.html", resources: resources
+  end
+end
+{% endhighlight %}
+
+<h3>Заключение</h3>
+<p>Рассмотренное приложение&nbsp;&ndash; пример использования Flow для построения вычислительного конвейера с параллельным выполнением операций для решения реальных задач. Предполагалось, что применение упрощённого алгоритма построения системы рекомендаций не имеет особого смысла. Однако, взглянув на конечные результаты, можно констатировать обратное: популярные ресурсы с высоким рейтингом занимают положение на вершине списка. Значение популярности, формирующееся из комментариев пользователей и результатов анализа тональности, может быть использовано для ранжирования товаров.</p>
+<p>Недавно я добавил на сайт отслеживание активности пользователей, чтобы затем использовать эти значения для оценки. Таким образом, наиболее часто просматриваемые ресурсы имеют более высокий рейтинг. Возможно, в скором времени на сайте появится ещё и механизм обратной связи, чтобы пользователи могли отмечать ошибочные отзывы и оставлять свои.</p>
+<p><a href="mailto:ben@10consulting.com">Свяжитесь со мной</a>, если у вас возникли какие-либо вопросы и предложения.</p>
+<hr />
+<h2>Оптимизация</h2>
+<p>Я был приятно удивлён алгоритмом оптимизации моего конвейера Flow, представленным <a href="http://teamon.eu/about/">Таймоном Тобольски</a>, который написал две чудесные статьи на эту тему.</p>
+<ul>
+  <li>
+    <a href="http://teamon.eu/2016/tuning-elixir-genstage-flow-pipeline-processing/">Оптимизация обработки данных с помощью GenStage/Flow в Elixir</a>
+  </li>
+  <li>
+    <a href="http://teamon.eu/2016/measuring-visualizing-genstage-flow-with-gnuplot/">Измерения и визуализация работы GenStage/Flow с помощью GnuPlot</a>
+  </li>
+</ul>
+<p>Взяв разработанный им модуль&nbsp;Progress и исходный код GnuPlot, я смог провести оптимизацию своего конвейера и визуализировать результаты его работы.</p>
+<h3>Отслеживание прогресса</h3>
+<p>Модуль <code>Learn.Progress</code> целиком взят из статьи Таймона.</p>
+
+{% highlight elixir %}
+defmodule Learn.Progress do
+  @moduledoc """
+  Progress stats collector, courtesy of http://teamon.eu/2016/measuring-visualizing-genstage-flow-with-gnuplot/
+  """
+
+  use GenServer
+
+  @timeres :millisecond
+
+  # Progress.start_link [:a, :b, :c]
+  def start_link(scopes \\ []) do
+    GenServer.start_link(__MODULE__, scopes, name: __MODULE__)
+  end
+
+  def stop do
+    GenServer.stop(__MODULE__)
+  end
+
+  # increment counter for given scope by `n`
+  #     Progress.incr(:my_scope)
+  #     Progress.incr(:my_scope, 10)
+  def incr(scope, n \\ 1) do
+    GenServer.cast __MODULE__, {:incr, scope, n}
+  end
+
+  def init(scopes) do
+    File.mkdir_p!("fixture/trace")
+
+    # open "progress-{scope}.log" file for every scope
+    files = Enum.map(scopes, fn scope ->
+      {scope, File.open!("fixture/trace/progress-#{scope}.log", [:write])}
+    end)
+
+    # keep current counter for every scope
+    counts = Enum.map(scopes, fn scope -> {scope, 0} end)
+
+    # save current time
+    time = :os.system_time(@timeres)
+
+    # write first data point for every scope with current time and value 0
+    # this helps to keep the graph starting nicely at (0,0) point
+    Enum.each(files, fn {_, io} -> write(io, time, 0) end)
+
+    {:ok, {time, files, counts}}
+  end
+
+  def handle_cast({:incr, scope, n}, {time, files, counts}) do
+    # update counter
+    {value, counts} = Keyword.get_and_update!(counts, scope, &({&1+n, &1+n}))
+
+    # write new data point
+    write(files[scope], time, value)
+
+    {:noreply, {time, files, counts}}
+  end
+
+  defp write(file, time, value) do
+    time = :os.system_time(@timeres) - time
+    IO.write(file, "#{time}\t#{value}\n")
+  end
+end
+{% endhighlight %}
+
+<p>Я также воспользовался библиотекой&nbsp;<a href="https://github.com/arjan/decorator">decorator</a> Арджана Шерпениссе, чтобы добавить отслеживание прогресса в функцию каждого этапа конвейера, поставив перед объявлением каждой функции <code>@decorate progress</code>.</p>
+
+{% highlight elixir %}
+defmodule Learn.Indexer do
+  @moduledoc """
+  Index mentions of resources from an authoritative source.
+  """
+
+  use Learn.ProgressDecorator
+
+  @doc """
+  Search for topics matching a given query
+  """
+  @decorate progress
+  def search(query, opts \\ []), do: SearchKeyword.execute(query, opts)
+end
+{% endhighlight %}
+
+<p>Декоратор увеличивает счётчик метода после его выполнения. Счётчик увеличивается на количество элементов в возвращаемом функцией списке или на единицу, если список не был возвращён.</p>
+
+{% highlight elixir %}
+defmodule Learn.ProgressDecorator do
+  use Decorator.Define, [progress: 0]
+
+  alias Learn.Progress
+
+  def progress(body, context) do
+    quote do
+      reply = unquote(body)
+
+      case reply do
+        list when is_list(list) -> Progress.incr(unquote(context.name), length(list))
+        _ -> Progress.incr(unquote(context.name), 1)
+      end
+
+      reply
+    end
+  end
+end
+{% endhighlight %}
+
+
+<p>Функция&nbsp;<code>Learn.Indexer.rank/3</code> передаёт в процесс имя каждого этапа перед выполнением потока. После этого она останавливает процесс, проверяет, чтобы файлы журналов были созданы и закрыты.</p>
+
+{% highlight elixir %}
+defmodule Learn.Indexer do
+  @moduledoc """
+  Index mentions of resources from an authoritative source.
+  """
+
+  @doc """
+  Rank the given resources based on their mentions in topics matching the given keywords
+  """
+  @spec rank(list(String.t), list(Resource.t)) :: list(Ranking.t)
+  def rank(keywords, resources, opts \\ []) do
+    Progress.start_link([
+      :search,
+      :list_posts,
+      :parse_html_content,
+      :parse_sentences,
+      :extract_mentions,
+      :sentiment_analysis,
+      :aggregate_mentions_by_author,
+      :rank_recommendations,
+    ])
+
+    rankings =
+      keywords
+      |> Flow.from_enumerable(max_demand: 1, stages: 1)
+      |> Flow.flat_map(&Indexer.search(&1, opts))
+      |> Flow.uniq()
+      |> Flow.partition(max_demand: 5)
+      |> Flow.flat_map(&Indexer.list_posts(&1, opts))
+      |> Flow.partition(key: {:key, :id}, max_demand: 5)
+      |> Flow.uniq_by(&(&1.id))
+      |> Flow.map(&Indexer.parse_html_content/1)
+      |> Flow.map(&Indexer.parse_sentences/1)
+      |> Flow.flat_map(&Indexer.extract_mentions(&1, resources))
+      |> Flow.map(&Indexer.sentiment_analysis/1)
+      |> Flow.partition(key: {:key, :resource}, max_demand: 5)
+      |> Flow.group_by(&(&1.resource))
+      |> Flow.map(fn {resource, mentions} -> {resource, Indexer.aggregate_mentions_by_author(mentions)} end)
+      |> Flow.map(fn {resource, recommendations} -> Indexer.rank_recommendations(resource, recommendations) end)
+      |> Enum.to_list()
+      |> Enum.sort_by(&(&1.score), &>=/2)
+
+    Progress.stop()
+
+    rankings
+  end
+end
+{% endhighlight %}
+
+
+<h4>Визуализация потока</h4>
+<p>После запуска индексатора, в котором функции этапов были отмечены тегом <code>@progress</code>, я построил графики "до" и "после".</p>
+<h5>Изначальный поток</h5>
+<p>В первоначальной версии приложения поток запускался в течение 33 секунд. HTTP-кэш заполнен, внешние запросы отсутствуют.</p>
+
+<img src="https://10consulting.com/assets/2017-01-20-flow-initial.png" alt="Elixir Flow processing">
+
+
+<h5>Поток после оптимизации</h5>
+<p>Я изменил опции <code>max_demand</code>&nbsp;и&nbsp;<code>stages</code> для некоторых этапов Flow, как показано выше. Это позволило сократить время запуска потока с 33 секунд до 26.</p>
+
+<img src="https://10consulting.com/assets/2017-01-20-flow-after.png" alt="Optimized Elixir Flow processing">
+
+
+
+<p>Графики были построены с помощью следующего кода (GnuPlot): Они показывают прогресс выполнения каждого этапа в процентах. Полученные рекомендации, упорядоченные по рейтингу, показаны на отдельной оси y.</p>
+
+{% highlight foo %}
+# plot.gp
+set terminal png font "Arial,10" size 700,500
+set output "progress.png"
+
+set title "Elixir Flow processing progress over time"
+set xlabel "Time (ms)"
+
+set ylabel "Progress (%)"
+set y2label "Rankings"
+set ytics nomirror
+set yrange [0:100]
+set format y '%2.0f%%'
+set y2tics
+
+set key top left # put labels in top-left corner
+
+# limit x range to 35.000 ms instead of dynamic one - needed when generating graphs that will be later compared visually
+set xrange [0:35000]
+
+plot  "trace/progress-search.log"                         using ($1):($2/1249*100)  with steps  axes x1y1 ls 1 title "Search topics",\
+      "trace/progress-search.log"                         using ($1):($2/1249*100)  with points axes x1y1 ls 1 notitle,\
+      "trace/progress-list_posts.log"                     using ($1):($2/14974*100) with lines  axes x1y1 ls 2 title "List posts",\
+      "trace/progress-parse_html_content.log"             using ($1):($2/6780*100)  with lines  axes x1y1 ls 3 title "Parse HTML",\
+      "trace/progress-parse_sentences.log"                using ($1):($2/6780*100)  with lines  axes x1y1 ls 4 title "Parse sentences",\
+      "trace/progress-extract_mentions.log"               using ($1):($2/515*100)   with lines  axes x1y1 ls 5 title "Extract mentions",\
+      "trace/progress-sentiment_analysis.log"             using ($1):($2/515*100)   with lines  axes x1y1 ls 6 title "Sentiment analysis",\
+      "trace/progress-aggregate_mentions_by_author.log"   using ($1):($2/314*100)   with lines  axes x1y1 ls 7 title "Aggregate mentions by author",\
+      "trace/progress-rank_recommendations.log"                                     with steps  axes x1y2 ls 8 title "Rank",\
+      "trace/progress-rank_recommendations.log"                                     with points axes x1y2 ls 8 notitle
+{% endhighlight %}

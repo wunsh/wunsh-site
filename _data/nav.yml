@@ -1,0 +1,27 @@
+- name: О языке
+  path: elixir.html
+  section_id: about
+- name: Установка
+  path: install.html
+  section_id: install
+- name: Документация
+  path: docs.html
+  section_id: docs
+- name: Гайды
+  path: guides.html
+  section_id: guides
+- name: Новости
+  path: news
+  section_id: news
+- name: Статьи
+  path: articles
+  section_id: articles
+- name: Видео
+  path: videos
+  section_id: videos
+- name: Вакансии
+  path: vacancies.html
+  section_id: vacancies
+- name: FAQ
+  path: faq.html
+  section_id: faq

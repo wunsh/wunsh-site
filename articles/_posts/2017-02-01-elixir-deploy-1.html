@@ -1,0 +1,116 @@
+---
+title: Деплой Elixir при помощи Docker
+excerpt: Рассказываем о деплое Elixir-приложений через Docker на примере Phoenix.
+author: nadezhda
+source_url: http://teamon.eu/2017/deploying-phoenix-to-production-using-docker/
+source_author: Tymon Tobolski
+tags: [deploy, docker]
+---
+<p>Для разработки приложений обычно используются различные технологии, такие как Ruby/Rails, Elixir/Phoenix, Java, Python или даже PHP. И&nbsp;как&nbsp;бы нам ни&nbsp;хотелось, использовать единый инструмент для деплоя всего, это невозможно.</p>
+<p>Однако благодаря Docker-контейнерам разработчикам доступен унифицированный механизм деплоя приложений независимо от&nbsp;того, с&nbsp;помощью каких технологий они были созданы.</p>
+<h2>Как работать с&nbsp;Docker</h2>
+<p>Во-первых, будет достаточно всего одного <code>Dockerfile</code> для того, чтобы создать рабочий образ и&nbsp;передать его напрямую в&nbsp;продакшн. Тем не&nbsp;менее создать рабочий образ не&nbsp;так просто. При использовании стандартного подхода в&nbsp;результате получаются тяжёлые образы, имеющие на&nbsp;этапе компиляции зависимости, которые совершенно не&nbsp;нужны во&nbsp;время выполнения программы.</p>
+<p>Поэтому гораздо выгоднее разделить этот процесс на&nbsp;две части, то&nbsp;есть отделить разработку приложения (компиляцию, подготовку релиза) от&nbsp;деплоя и&nbsp;эксплуатации.</p>
+<p>Далее рассматривается такой процесс для Elixir, хотя и&nbsp;для остальных языков применяются те&nbsp;же самые принципы. Например, запущенный контейнер с&nbsp;приложением на&nbsp;JavaScript содержит только откомпилированный код без каких-либо npm зависимостей.</p>
+<h2>Упаковка Phoenix-приложения в&nbsp;образ Docker</h2>
+<p>Как было сказано прежде, построение Docker-образа осуществляется в&nbsp;два этапа:</p>
+<ol>
+    <li>
+        <p>Разработка</p>
+        <ol>
+            <li>
+                <p>Установить Erlang</p>
+            </li>
+            <li>
+                <p>Установить Elixir</p>
+            </li>
+            <li>
+                <p>Запустить <code>mix deps.get</code></p>
+            </li>
+            <li>
+                <p>Запустить <code>mix release</code></p>
+            </li>
+            <li>
+                <p>Сохранить дистрибутив <code>myapp.tar.gz</code></p>
+            </li>
+        </ol>
+    </li>
+    <li>
+        <p>Подготовка релиза</p>
+        <ol>
+            <li>
+                <p>Установить Erlang</p>
+            </li>
+            <li>
+                <p>Извлечь файлы из&nbsp;дистрибутива <code>myapp.tar.gz</code> в&nbsp;контейнер</p>
+            </li>
+            <li>
+                <p>Готово!</p>
+            </li>
+        </ol>
+    </li>
+</ol>
+<p>Так как этот процесс одинаков для всех Elixir-приложений, был разработан простой модуль <a href="https://github.com/recruitee/mix_docker">mix_docker</a>, который выполняет все вышеперечисленные действия при помощи парочки mix-команд.</p>
+<h2>Немного о mix_docker</h2>
+<p>Утилита mix_docker предоставляет несколько mix-команд для простой и удобной упаковки Elixir-приложений в Docker-образы. Он построен на базе пакета <a href="https://github.com/bitwalker/distillery">distillery</a> от <noindex><a href="http://bitwalker.org/" rel="nofollow">Пола Сконфелдера</a></noindex> и легковесного Docker-образа <noindex><a href="https://hub.docker.com/r/bitwalker/alpine-erlang/" rel="nofollow">alpine-erlang</a></noindex>.</p>
+<p>Ниже перечислены шесть этапов создания Docker-образа.</p>
+<p>1. Добавить mix_docker в <code>mix.exs</code>:</p>
+{% highlight elixir %}
+def deps do
+  [{:mix_docker, "~> 0.2.2"}]
+end
+{% endhighlight %}
+<p>2. Дать образу имя в <code>config/config.exs</code>:</p>
+{% highlight elixir %}
+config :mix_docker, image: "teamon/demo"
+{% endhighlight %}
+<p>3. Инициализировать настройки приложения:</p>
+{% highlight elixir %}
+mix docker.init
+{% endhighlight %}
+<p>После этого запустится <code>distillery init</code> и создастся файл <code>rel/config.exs</code>, и вам даже не придётся ничего менять &ndash; стандартные значения для Docker доступны из коробки.</p>
+<p>4. Подготовить релиз</p>
+{% highlight elixir %}
+mix docker.build
+{% endhighlight %}
+<p>Создастся образ&nbsp;<code>teamon/demo:build</code>, содержащий в себе пакет <code>demo.tar.gz</code>.</p>
+<p>5. Создание минимального образа приложения:</p>
+{% highlight elixir %}
+mix docker.release
+{% endhighlight %}
+<p>Архив <code>demo.tar.gz</code>&nbsp;распакуется в минимальный Docker-образ, готовый к запуску в продакшн. Такие образы, как правило, весят меньше, чем изначальные.</p>
+<p>6. Опубликовать образ на Docker Hub</p>
+{% highlight elixir %}
+mix docker.publish
+{% endhighlight %}
+<p>После этого образ получит название согласно текущей версии приложения в mix.exs, количеству git-коммитов и sha-хешу, например <code>0.1.0.253-158c4a45c1</code>. Полное имя образа будет таким:&nbsp;<code>teamon/demo:0.1.0.253-158c4a45c1</code>.</p>
+<p>Существует также команда <code>mix docker.shipit</code>, выполняющая сразу и сборку, и подготовку релиза, и публикацию образа.</p>
+<h2>Настройка загруженных в Docker приложений</h2>
+<p>Так как релизы в продакшн не содержат Mix, то наиболее простой способ подобрать рабочие настройки &ndash; использовать переменные среды. Стандартные образы Docker, созданные с помощью mix_docker, содержат конфигурацию <code>REPLACE_OS_VARS=true</code>, поэтому нужно будет &laquo;подготовить&raquo; файл <code>config/prod.exs</code> следующим образом:</p>
+{% highlight elixir %}
+config :demo, Demo.Endpoint,
+  server: true,
+  # use {:system, var} if library supports it
+  http: [port: {:system, "PORT"}],
+  # use ${VAR} syntax to replace config on startup
+  url: [ host: "${APP_DOMAIN}" ]
+
+config :demo, Demo.Mailer,
+  adapter: Bamboo.MailgunAdapter,
+  api_key: "${MAILGUN_API_KEY}"
+{% endhighlight %}
+<p>Подробнее об этом можно почитать в <noindex><a href="https://hexdocs.pm/distillery/runtime-configuration.html" rel="nofollow">документации к пакету distillery</a></noindex>.</p>
+<p>Не забудьте перестроить образ после изменения конфигураций!</p>
+<h2>Запуск приложения</h2>
+<p>Теперь можно смело запускать приложение, как простой Docker-контейнер.</p>
+{% highlight elixir %}
+docker run -e PORT=4000 teamon/demo:0.1.0.253-158c4a45c1 foreground
+{% endhighlight %}
+<h2>Использование удалённого терминала</h2>
+<p>Так как Docker-контейнеры самодостаточны, то, чтобы подключиться к работающей ноде, используя remote_console, нужно выполнить команду exec с текущим контейнером:</p>
+{% highlight elixir %}
+docker exec -it CID /opt/app/bin/demo remote_console
+{% endhighlight %}
+<h2>Вот и всё!</h2>
+<p>Одно из явных преимуществ использования переменных среды для настройки приложений во время выполнения &ndash; это возможность использования одного и того же образа как на стадии подготовки, так и на стадии внедрения (изменяются только домены, API-ключи и т. д.), что очень удобно во время деплой в продакшн.</p>
+<p>В <a href="{% post_url articles/2017-02-10-elixir-deploy-2 %}">следующей части</a> рассказывается о том, как осуществить деплой этих же Docker-контейнеров с помощью Rancher и соединить несколько экземпляров в один Erlang-кластер.</p>
