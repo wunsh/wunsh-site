@@ -1,14 +1,14 @@
 - name: О языке
-  path: elixir.html
+  path: elixir
   section_id: about
 - name: Установка
-  path: install.html
+  path: install
   section_id: install
 - name: Документация
-  path: docs.html
+  path: docs
   section_id: docs
 - name: Гайды
-  path: guides.html
+  path: guides
   section_id: guides
 - name: Новости
   path: news
@@ -20,8 +20,8 @@
   path: videos
   section_id: videos
 - name: Вакансии
-  path: vacancies.html
+  path: vacancies
   section_id: vacancies
 - name: FAQ
-  path: faq.html
+  path: faq
   section_id: faq

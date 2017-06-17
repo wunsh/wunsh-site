@@ -4,6 +4,6 @@ require_relative "lib/not_found"
 use Rack::TryStatic,
     root: "_site",
     urls: %w(/),
-    try: %w(index.html /index.html)
+    try: %w(.html index.html /index.html)
 
 run NotFound
