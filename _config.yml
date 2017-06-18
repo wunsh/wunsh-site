@@ -59,14 +59,12 @@ defaults:
       path: "articles"
     values:
       layout: post
-      category: article
       permalink: /:categories/:title.html
   -
     scope:
       path: "news"
     values:
       layout: post
-      category: news
       permalink: /:categories/:year/:title.html
 
 authors:
