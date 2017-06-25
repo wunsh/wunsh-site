@@ -1,0 +1,72 @@
+---
+title: Полиморфизм в&nbsp;Elixir
+excerpt: Полиморфизм есть не только в объектно-ориентированной парадигме программирования, но и в функциональной. О том, как реализовать полиморфизм в Elixir при помощи протоколов, мы рассмотрим в этой статье.
+author: nadezhda
+source_url: https://medium.com/elixirlabs/polymorphism-in-elixir-cd0c765b6929
+source_author: Mustafa Turan
+tags: [practical, beginner]
+cover: /assets/images/polymorphism.png
+---
+<p>Полиморфизм&nbsp;&mdash; это возможность использования единого интерфейса сущностями различных типов. По&nbsp;сути, это свойство позволяет различным типам данных взаимодействовать с&nbsp;одной и&nbsp;той&nbsp;же функцией, в&nbsp;результате чего этим типам становится свойственно одинаковое поведение. Для &laquo;чистой&raquo; реализации полиморфизма в&nbsp;Elixir существует механизм <strong>протоколов</strong>.</p>
+<p>Создадим простенький протокол для перевода значений температуры по&nbsp;шкале Кельвина или Фаренгейта в&nbsp;градусы Цельсия.</p>
+{% highlight elixir %}
+defmodule Kelvin do
+  defstruct name: "Kelvin", symbol: "K", degree: 0
+end
+
+defmodule Fahrenheit do
+  defstruct name: "Fahrenheit", symbol: "°F", degree: 0
+end
+
+defmodule Celsius do
+  defstruct name: "Celsius", symbol: "°C", degree: 0
+end
+
+defprotocol Temperature do
+  @doc """
+  Convert Kelvin and Fahrenheit to Celsius degree
+  """
+  def to_celsius(degree)
+end
+
+defimpl Temperature, for: Kelvin do
+  @doc """
+  Deduct 273.15
+  """
+  def to_celsius(kelvin) do
+    celsius_degree = kelvin.degree - 273.15
+    %Celsius{degree: celsius_degree}
+  end
+end
+
+defimpl Temperature, for: Fahrenheit do
+  @doc """
+  Deduct 32, then multiply by 5, then divide by 9
+  """
+  def to_celsius(fahrenheit) do
+    celsius_degree = (fahrenheit.degree - 32) * 5 / 9
+    %Celsius{degree: celsius_degree}
+  end
+end
+{% endhighlight %}
+<p>Итак, конвертеры для шкал Кельвина и&nbsp;Фаренгейта готовы. Опробуем их&nbsp;на&nbsp;практике:</p>
+{% highlight elixir %}
+iex> fahrenheit = %Fahrenheit{degree: 45}
+%Fahrenheit{degree: 45, name: "Fahrenheit", symbol: "°F"}
+iex> celsius = Temperature.to_celsius(fahrenheit)
+%Celsius{degree: 7.22, name: "Celsius", symbol: "°C"}
+
+iex> kelvin = %Kelvin{degree: 300}
+%Kelvin{degree: 300, name: "Kelvin", symbol: "K"}
+iex> celsius = Temperature.to_celsius(kelvin)
+%Celsius{degree: 26.85, name: "Celsius", symbol: "°C"}
+{% endhighlight %}
+<p>А&nbsp;теперь попытаемся конвертировать какой-нибудь тип данных, не&nbsp;содержащий реализацию функции <code>to_celsius</code>:</p>
+{% highlight elixir %}
+iex> Temperature.to_celsius(%{degree: 12})
+** (Protocol.UndefinedError) protocol Temperature not implemented for %{degree: 12}
+  iex:11: Temperature.impl_for!/1
+  iex:15: Temperature.to_celsius/1
+{% endhighlight %}
+<p>Если необходимо охватить все типы данных, то&nbsp;создайте для них отдельную реализацию для типа <code>Any</code>. И&nbsp;наконец, рекомендую обратить внимание на&nbsp;исходный код <a href="https://github.com/elixir-lang/elixir/blob/master/lib/elixir/lib/enum.ex#L3096" target="_blank" rel="noopener"><strong><code>Enum</code></strong></a> и <a href="https://github.com/elixir-lang/elixir/blob/master/lib/elixir/lib/string/chars.ex#L3" target="_blank" rel="noopener"><strong><code>String.Char</code></strong></a>, которые являются прекрасными примерами полиморфизма в&nbsp;Elixir.</p>
+<p>Успехов в&nbsp;<a href="{{ site.url }}">функциональном программировании</a>! &hearts;</p>
