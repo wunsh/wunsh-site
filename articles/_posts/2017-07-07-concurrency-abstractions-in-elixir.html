@@ -1,0 +1,229 @@
+---
+title: Параллельное программирование на Elixir
+excerpt: Для написания конкурентного кода, Elixir предоставляет разработчикам простые абстракции. В данной статье будут рассмотрены три из них – Task, Agent и GenServer.
+author: nadezhda
+source_url: https://blog.codeship.com/concurrency-abstractions-in-elixir/
+source_author: Leigh Halliday
+tags: [agent, genserver, overview, task]
+cover: /assets/images/concurrency.png
+---
+<p>Elixir предоставляет разработчикам простые инструменты для написания конкурентного кода. В&nbsp;одной из&nbsp;предыдущих статей была освещена <a href="https://blog.codeship.com/concurrency-in-elixir/">конкурентная модель Elixir</a> через призму основных структурных элементов конкурентности. В&nbsp;Elixir процессы подчиняются конкурентной модели акторов и&nbsp;являются фундаментом, на&nbsp;основе которого другие процессы обмениваются между собой сообщениями.</p>
+<p>При реализации типовых задач вы&nbsp;наверняка уже сталкивались с&nbsp;необходимостью осуществления значительного количества стандартных действий, таких как отслеживание состояния внутри процесса или выполнение блокирующего вызова и&nbsp;ожидание ответа.</p>
+<p>На&nbsp;этот счёт Elixir предоставляет ряд общепринятых абстракций, ещё более облегчающих написание конкурентного кода. В&nbsp;данной статье будут рассмотрены три таких абстракции: Task, Agent и&nbsp;GenServer.</p>
+<h2>Модуль Task</h2>
+<p>Модуль <code>Task</code> упрощает работу с&nbsp;конкурентными процессами еще больше. В&nbsp;нём наиболее примечательны два метода: <code>async</code>&nbsp;&mdash; начать асинхронное выполнение операций в&nbsp;другом процессе и&nbsp;<code>await</code>&nbsp;&mdash; ждать завершения операции и&nbsp;возвратить результат.</p>
+<p>Для иллюстрации этого рассмотрим простейший пример, а&nbsp;затем выясним, каким образом он&nbsp;поможет ускорить работу <code>map</code> через распараллеливание.</p>
+
+{% highlight elixir %}
+task = Task.async(fn -> 5 + 5 end)
+{% endhighlight %}
+
+<p>Команда в&nbsp;строке выше запускает анонимную функцию в&nbsp;отдельном процессе. Если на&nbsp;стадии разработки у&nbsp;вас под рукой имеется ссылка на&nbsp;задачу, вы&nbsp;сможете получить доступ к&nbsp;результату данной анонимной функции. Функция <code>async</code> возвращает не&nbsp;что иное, как ссылку на&nbsp;необходимый для получения результата PID&nbsp;процесса, в&nbsp;котором выполняется данная задача:</p>
+
+{% highlight elixir %}
+%Task{owner: #PID<0.80.0>, pid: #PID<0.82.0>, ref: #Reference<0.0.7.207>}
+{% endhighlight %}
+
+<p>Давайте взглянем на&nbsp;этот <code>PID</code>, чтобы понять, что происходит с&nbsp;текущим процессом:</p>
+
+{% highlight elixir %}
+Process.info(task.pid)
+nil
+Process.alive?(task.pid)
+false
+{% endhighlight %}
+
+<p>Как можно заметить, такого процесса больше не&nbsp;существует; процесс завершается сразу после того, как модуль Task завершит работу. Как&nbsp;же тогда получить от&nbsp;него отклик? В&nbsp;этом нам поможет почтовый ящик вызывающего процесса:</p>
+
+{% highlight elixir %}
+Process.info(task.owner)[:messages]
+[{#Reference<0.0.7.207>, 10},
+{:DOWN, #Reference<0.0.7.207>, :process, #PID<0.82.0>, :normal}]
+{% endhighlight %}
+
+<p><code>task.owner</code>&nbsp;&mdash; это и&nbsp;есть текущий процесс или <code>self()</code>. Здесь также можно видеть два входящих сообщения. Первое из&nbsp;них&nbsp;&mdash; это отклик на&nbsp;задачу <code>async</code>, а&nbsp;второе&nbsp;&mdash; уведомление от&nbsp;ссылки на&nbsp;Task-процесс о&nbsp;его завершении. Чтобы получить доступ к&nbsp;этим сообщениям, можно использовать блок receive, но&nbsp;модуль <code>Task</code> предлагает более простое решение:</p>
+
+{% highlight elixir %}
+Task.await(task)
+10
+{% endhighlight %}
+
+<p>Если сейчас взглянуть на&nbsp;входящие сообщения текущему процессу, то&nbsp;можно заметить, что они исчезли:</p>
+
+{% highlight elixir %}
+Process.info(task.owner)[:messages]
+[]
+{% endhighlight %}
+
+<h3>Параллельное выполнение функции map при помощи модуля Task</h3>
+<p>Рассмотрим пример работы с&nbsp;map, построенный с&nbsp;помощью функций <code>async</code> и&nbsp;<code>await</code> модуля Task. Этот&nbsp;же пример, но&nbsp;без использования <code>Task</code>, приведён в&nbsp;<a href="https://blog.codeship.com/concurrency-in-elixir/">предыдущей статье</a>. Можно видеть, что теперь он&nbsp;значительно упростился:</p>
+
+{% highlight elixir %}
+defmodule Statuses do
+  def map(urls) do
+    urls
+    |> Enum.map(&(Task.async(fn -> process(&1) end)))
+    |> Enum.map(&(Task.await(&1)))
+  end
+
+  def process(url) do
+    case HTTPoison.get(url) do
+      {:ok, %HTTPoison.Response{status_code: status_code}} ->
+        {url, status_code}
+      {:error, %HTTPoison.Error{reason: reason}} ->
+        {:error, reason}
+    end
+  end
+end
+{% endhighlight %}
+
+<p>Проведём тестирование по&nbsp;той&nbsp;же схеме, что и&nbsp;в&nbsp;прошлый раз:</p>
+
+{% highlight elixir %}
+defmodule StatusesTest do
+  use ExUnit.Case
+
+  test "parallel status map" do
+    urls = [
+      url1 = "http://www.fakeresponse.com/api/?sleep=2",
+      url2 = "http://www.fakeresponse.com/api/?sleep=1",
+      url3 = "http://www.fakeresponse.com/api/?status=500",
+      url4 = "https://www.leighhalliday.com",
+      url5 = "https://www.reddit.com"
+    ]
+    assert Statuses.map(urls) == [
+      {url1, 200},
+      {url2, 200},
+      {url3, 500},
+      {url4, 200},
+      {url5, 200}
+    ]
+  end
+end
+{% endhighlight %}
+
+
+<p>На&nbsp;тесты ушло около 2,1&nbsp;секунды, что сигнализирует о&nbsp;работоспособности системы, поскольку это время сопоставимо с&nbsp;длительностью самого медленного HTTP-вызова в&nbsp;2&nbsp;секунды.</p>
+<h2>Модуль Agent</h2>
+<p>Агенты упрощают процедуру хранения состояния в&nbsp;процессе: они позволяют производить обмен состоянием/данными между различными процессами без необходимости передачи большого объёма данных каждой функции, которой может понадобиться доступ к&nbsp;ним.</p>
+<p>Создадим с&nbsp;помощью Agent небольшой модуль для получения и&nbsp;установки ключей конфигураций. Функция <code>start_link</code> запускает Agent-процесс, после чего функции <code>get</code> и&nbsp;<code>set</code> получают доступ к&nbsp;конфигурационным данным и&nbsp;обновляют&nbsp;их.</p>
+
+{% highlight elixir %}
+defmodule Configure do
+  def start_link(initial \\ %{}) do
+    Agent.start_link(fn -> initial end, name: __MODULE__)
+  end
+
+  def get(key) do
+    Agent.get(__MODULE__, &Map.fetch(&1, key))
+  end
+
+  def set(key, value) do
+    Agent.update(__MODULE__, &Map.put(&1, key, value))
+  end
+end
+{% endhighlight %}
+
+<p>Вы&nbsp;наверняка заметили, что в&nbsp;примере выше обошлось без метода return и&nbsp;PID по&nbsp;той причине, что этот процесс привязан к&nbsp;имени модуля, а&nbsp;значит, такой процесс будет единственным. Проведём несколько тестов, чтобы убедиться, что всё работает как надо.</p>
+
+{% highlight elixir %}
+defmodule ConfigureTest do
+  use ExUnit.Case
+
+  test "get with initial value" do
+    Configure.start_link(%{env: :production})
+    assert Configure.get(:env) == {:ok, :production}
+  end
+
+  test "error when missing value" do
+    Configure.start_link()
+    assert Configure.get(:env) == :error
+  end
+
+  test "set and then get value" do
+    Configure.start_link()
+    Configure.set(:env, :production)
+    assert Configure.get(:env) == {:ok, :production}
+  end
+end
+{% endhighlight %}
+
+<p>Состояния агентов хранятся в&nbsp;памяти, в&nbsp;связи с&nbsp;чем следует запоминать только те&nbsp;данные, которые можно было&nbsp;бы быстро восстановить с&nbsp;помощью какой-либо стратегии перезапуска (через супервизор!). Состояния могут принадлежать к&nbsp;любому <a href="https://blog.codeship.com/understanding-elixir-types/">типу данных Elixir</a>, несмотря на&nbsp;то, что в&nbsp;предыдущем примере использовался тип <code>Map</code>.</p>
+
+<p>В&nbsp;Elixir все процессы обрабатывают запросы последовательно. Даже при том, что Elixir является языком параллельного программирования, каждый процесс обрабатывает только один запрос в&nbsp;единицу времени. Если запрос к&nbsp;процессу выполняется медленно, доступ к&nbsp;данным в&nbsp;этом процессе будет перекрыт. На&nbsp;самом деле это даже удобно. Запросы обрабатываются последовательно в&nbsp;порядке их&nbsp;поступления, так что в&nbsp;некотором смысле это вполне предсказуемо. Нужно лишь удостовериться, что &laquo;тяжелые&raquo; задачи и&nbsp;медленно выполняющиеся вычисления осуществляются не&nbsp;в&nbsp;процессе агента, а&nbsp;в&nbsp;другом месте, например, в&nbsp;вызывающем процессе.</p>
+<p>Если вам интересны более мощные и&nbsp;гибкие компоненты, то&nbsp;прочитайте про <a href="http://erlang.org/doc/man/ets.html">ETS</a>. В&nbsp;сети можно найти замечательную статью Барри Джонса <a href="https://blog.codeship.com/elixir-ets-vs-redis/">о&nbsp;сопоставлении ETS, агентов, Redis и&nbsp;других внешних инструментов</a>.</p>
+<h2>Модуль GenServer</h2>
+<p>Итак, мы&nbsp;рассмотрели управление выполнением параллельных вычислений с&nbsp;использованием задач и&nbsp;управление состоянием в&nbsp;процессе с&nbsp;помощью агентов. Теперь обратимся к&nbsp;модулю <a href="https://hexdocs.pm/elixir/GenServer.html">GenServer</a>, объединяющему работу с&nbsp;двумя описанными выше процедурами.</p>
+<p>Воспользуемся примером <code>MyLogger</code> из&nbsp;<a href="https://blog.codeship.com/concurrency-in-elixir/">этой статьи</a> и&nbsp;перепишем его с&nbsp;использованием <code>GenServer</code>.</p>
+
+{% highlight elixir %}
+defmodule MyLogger do
+  use GenServer
+
+  # Client
+
+  def start_link do
+    GenServer.start_link(__MODULE__, 0)
+  end
+
+  def log(pid, msg) do
+    GenServer.cast(pid, {:log, msg})
+  end
+
+  def print_stats(pid) do
+    GenServer.cast(pid, {:print_stats})
+  end
+
+  def return_stats(pid) do
+    GenServer.call(pid, {:return_stats})
+  end
+
+  # Server
+
+  def handle_cast({:log, msg}, count) do
+    IO.puts msg
+    {:noreply, count + 1}
+  end
+
+  def handle_cast({:print_stats}, count) do
+    IO.puts "I've logged #{count} messages"
+    {:noreply, count}
+  end
+
+  def handle_call({:return_stats}, _from, count) do
+    {:reply, count, count}
+  end
+end
+{% endhighlight %}
+
+<p>Во-первых, в&nbsp;самом начале модуля включаем в него <code>GenServer</code>. Это позволит в&nbsp;полной мере пользоваться функциональностью <code>GenServer</code>.</p>
+<p>Следом идёт функция <code>start_link</code>. Она вызывает функцию <code>GenServer.start_link</code>, создаёт новый процесс для текущего модуля и&nbsp;передаёт начальное состояние, которое в&nbsp;данном случае равняется 0. Она возвращает кортеж <code>{:ok, pid}</code>.</p>
+<p>GenServer может работать как синхронно, так и&nbsp;асинхронно. Синхронные запросы, при которых необходимо блокировать действия в&nbsp;ожидании ответа, называются <code>call</code>, асинхронные&nbsp;&mdash; <code>cast</code>.</p>
+<h3>Асинхронные запросы / Cast</h3>
+<p>При вызове <code>GenServer.cast(pid, {:log, msg})</code> внутри функции <code>log</code>, процессу будет отправлено сообщение с&nbsp;кортежем <code>{:log, msg}</code> в&nbsp;виде аргументов. Теперь предстоит написать функцию для обработки этого сообщения.</p>
+<p>Создадим функцию <code>handle_cast</code>, в&nbsp;которой первый аргумент должен совпадать с&nbsp;полученными входящими аргументами <code>{:log, msg}</code>, а&nbsp;второй аргумент представляет собой текущее состояние процесса.</p>
+<p>В&nbsp;теле функции <code>handle_cast</code> следует выполнить задачу чтения сообщения и&nbsp;отправки отклика, содержащего атом <code>:noreply</code> и&nbsp;новое состояние процесса.</p>
+<h3>Синхронные запросы / Call</h3>
+<p>В&nbsp;случае если от&nbsp;процесса требуется своего рода отклик, нужно использовать синхронные запросы <code>call</code>. <code>GenServer.call(pid, {:return_stats})</code> посылает процессу сообщение с&nbsp;аргументом <code>{:return_stats}</code>. По&nbsp;тому&nbsp;же принципу, что и&nbsp;для <code>cast</code>, нужно реализовать функцию <code>handle_call</code> для обработки сообщения и&nbsp;ответа на&nbsp;него.</p>
+
+{% highlight elixir %}
+def handle_call({:return_stats}, _from, count) do
+  {:reply, count, count}
+end
+{% endhighlight %}
+
+<p>Аргументы запросов <code>call</code> несколько разнятся с&nbsp;аргументами <code>cast</code>. Они включают дополнительный аргумент <code>from</code>&nbsp;&mdash; процесс, пославший запрос. Отклик также отличен. Это кортеж, состоящий из&nbsp;трех элементов: атома <code>:reply</code>, значения, которое нужно выслать вызывающему процессы в&nbsp;качестве отклика, и&nbsp;нового состояния процесса.</p>
+<p>В&nbsp;приведённом выше примере возвращаемое значение и&nbsp;новое состояние&nbsp;&mdash; одно и&nbsp;то&nbsp;же, поэтому <code>count</code> повторяется дважды.</p>
+<p>Теперь модуль готов к&nbsp;практическому использованию!</p>
+
+{% highlight elixir %}
+{:ok, pid} = MyLogger.start_link
+MyLogger.log(pid, "First message")
+MyLogger.log(pid, "Another message")
+MyLogger.print_stats(pid)
+stats = MyLogger.return_stats(pid)
+{% endhighlight %}
+
+<h2>Выводы</h2>
+<p>В&nbsp;данной статье были рассмотрены три абстракции для параллельного программирования на&nbsp;Elixir, построенные на&nbsp;основе предоставленных языком программных возможностей. Первая из&nbsp;них&nbsp;&mdash; модуль <code>Task</code>, позволяющий исполнять код внутри отдельного процесса и&nbsp;при необходимости ожидать ответа. Вторая&nbsp;&mdash; <code>Agent</code>&nbsp;&mdash; фреймворк для управления состоянием внутри процесса. Третья&nbsp;&mdash; <code>GenServer</code>&nbsp;&mdash; фреймворк для синхронного и&nbsp;асинхронного исполнения кода и&nbsp;управления состоянием одновременно.</p>
+<p>Не&nbsp;хватает только реализации возможности отслеживания процессов и&nbsp;реагирования на&nbsp;их&nbsp;завершение. Это, конечно, можно проделать вручную, но&nbsp;в&nbsp;таком случае вы&nbsp;рискуете остаться без &laquo;фантастических&raquo; способностей супервизоров и&nbsp;OTP. Фактически, они позволяют отслеживать процессы и&nbsp;предпринимать действия по&nbsp;их&nbsp;завершению, автоматически перезапуская отслеживаемые процессы и&nbsp;их&nbsp;потомков. Но&nbsp;об&nbsp;этом в&nbsp;следующий раз!</p>
