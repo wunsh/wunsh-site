@@ -1,0 +1,14 @@
+---
+layout: page
+permalink: /vacancies/index.html
+---
+
+<h1>Вакансии на Elixir</h1>
+
+<ul>
+  {% for post in site.categories["vacancies"] | limit: 10 %}
+    <li>
+      <a href="{{ post.url }}" class="h-simple_link">{{ post.title }}</a>
+    </li>
+  {% endfor %}
+</ul>

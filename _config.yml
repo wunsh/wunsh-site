@@ -66,6 +66,12 @@ defaults:
     values:
       layout: post
       permalink: /:categories/:year/:title.html
+  -
+    scope:
+      path: "vacancies"
+    values:
+      layout: post
+      permalink: /:categories/:year/:month/:title.html
 
 authors:
   jaroslav:
