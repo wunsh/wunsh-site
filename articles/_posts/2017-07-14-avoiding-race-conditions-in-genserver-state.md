@@ -3,6 +3,7 @@ title: Как избежать состояния гонки при исполь
 excerpt: В этой статье пойдёт речь о том, как избежать состояния гонки при использовании GenServer на примере многопользовательской игры.
 author: nadezhda
 source_url: https://bhelx.simst.im/articles/avoiding-race-conditions-in-genserver-state/
+source_title: Avoiding Race Conditions in GenServer
 source_author: Benjamin Eckel
 tags: [advanced, genserver, practical]
 cover: /assets/images/race_conditions.png

@@ -3,6 +3,7 @@ title: Оптимизация Elixir- и Phoenix-приложений с пом�
 excerpt: Статья про оптимизацию кода на Эликсире с помощью инструмента под названием ETS.
 author: nadezhda
 source_url: https://dockyard.com/blog/2017/05/19/optimizing-elixir-and-phoenix-with-ets
+source_title: Optimizing Your Elixir and Phoenix Projects with ETS
 source_author: Chris McCord
 tags: [ets]
 cover: /assets/images/ets.png

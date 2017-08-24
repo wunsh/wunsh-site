@@ -3,6 +3,7 @@ title: Храним состояние веб-сокетов с помощью G
 excerpt: Можно ли использовать эти технологии для создания последовательного поиска?
 author: nadezhda
 source_url: https://medium.com/mint-digital/stateful-websockets-with-elixirs-genstage-a29eab420c0d
+source_title: Stateful WebSockets with Elixir’s GenStage
 source_author: Ed Ellson
 tags: [genstage, phoenix, practical]
 cover: /assets/images/genstage_search.png

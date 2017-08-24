@@ -3,6 +3,7 @@ title: Способы замены строк в Elixir и их производ
 excerpt: Статья про производительность замены символов в строках на Elixir.
 author: nadezhda
 source_url: http://minhajuddin.com/2017/06/19/performance-variations-of-string-substitution-in-elixir/
+source_title: Performance Variations of String Substitution in Elixir
 source_author: Khaja Minhajuddin
 tags: [advanced, overview]
 cover: /assets/images/string_substitution.png

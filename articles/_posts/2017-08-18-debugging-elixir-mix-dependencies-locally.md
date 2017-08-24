@@ -3,6 +3,7 @@ title: Локальная отладка зависимостей через Mix
 excerpt: Разбираем технику локальной отладки Mix-зависимостей.
 author: nadezhda
 source_url: http://joeellis.la/debugging-mix-dependencies-locally/
+source_title: Debugging Mix Dependencies Locally
 source_author: Joe Ellis
 tags: [beginner, debug, practical]
 cover: /assets/images/debugging.png
