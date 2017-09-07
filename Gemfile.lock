@@ -1,6 +1,6 @@
 GIT
   remote: https://github.com/wunsh/theme
-  revision: 608b054949ecde79e8ad1b9be6a814d0151c2099
+  revision: 492b85af7efb7f0ec3e7ba6b9ba5bc84af4447ea
   specs:
     wunsh-theme (0.1.11)
       jekyll (~> 3.3)
@@ -9,8 +9,8 @@ GIT
 GEM
   remote: https://rubygems.org/
   specs:
-    addressable (2.5.1)
-      public_suffix (~> 2.0, >= 2.0.2)
+    addressable (2.5.2)
+      public_suffix (>= 2.0.2, < 4.0)
     colorator (1.1.0)
     daemons (1.2.4)
     eventmachine (1.2.3)
@@ -47,7 +47,7 @@ GEM
     mercenary (0.3.6)
     pathutil (0.14.0)
       forwardable-extended (~> 2.6)
-    public_suffix (2.0.5)
+    public_suffix (3.0.0)
     rack (1.6.8)
     rack-contrib (1.4.0)
       git-version-bump (~> 0.15)
