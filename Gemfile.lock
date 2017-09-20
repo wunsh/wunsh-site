@@ -1,8 +1,8 @@
 GIT
   remote: https://github.com/wunsh/theme
-  revision: 492b85af7efb7f0ec3e7ba6b9ba5bc84af4447ea
+  revision: 6d6489c6dec15334a02a352a9a6ee58fa2f9415c
   specs:
-    wunsh-theme (0.1.11)
+    wunsh-theme (0.1.12)
       jekyll (~> 3.3)
       jekyll-paginate
 
@@ -39,7 +39,7 @@ GEM
       jekyll (~> 3.3)
     jekyll-watch (1.5.0)
       listen (~> 3.0, < 3.1)
-    kramdown (1.14.0)
+    kramdown (1.15.0)
     liquid (3.0.6)
     listen (3.0.8)
       rb-fsevent (~> 0.9, >= 0.9.4)
