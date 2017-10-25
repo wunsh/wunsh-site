@@ -1,8 +1,8 @@
 GIT
   remote: https://github.com/wunsh/theme
-  revision: 9df1c0486b9844eb995d7ba8822521218d38a59f
+  revision: 504296c4540dfaea22a8787873e508c49cd7f80a
   specs:
-    wunsh-theme (0.1.18)
+    wunsh-theme (0.1.19)
       jekyll (~> 3.3)
       jekyll-paginate
 
