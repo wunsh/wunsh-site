@@ -3,7 +3,7 @@ title: Безболезненная эксплуатация через рефа
 excerpt: Эликсир – это не только модули и функции, но также и протоколы с поведениями. О том, как рефакторить код с помощью этих абстракций, читайте в статье.
 author: nadezhda
 source_url: https://blog.usejournal.com/beyond-functions-in-elixir-refactoring-for-maintainability-5c73daba77f3
-source_title: Beyond Functions in Elixir: Refactoring for Maintainability
+source_title: "Beyond Functions in Elixir: Refactoring for Maintainability"
 source_author: Dave Lucia
 tags: [advanced, refactoring]
 cover: /assets/images/refactoring.png
