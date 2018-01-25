@@ -30,10 +30,11 @@ name: Эликсир и&nbsp;Вунш
 tagline: Erlang + Ruby = &#10084;
 home_title: Вунш&nbsp;&mdash; русскоязычное сообщество разработчиков на&nbsp;языке программирования Elixir и&nbsp;Phoenix Framework.
 
-gems:
+plugins:
   - jekyll-feed
   - jekyll-archives
   - jekyll-paginate
+
 exclude:
   - Gemfile
   - Gemfile.lock
