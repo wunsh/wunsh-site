@@ -21,6 +21,7 @@ baseurl: ""
 url: "https://wunsh.ru"
 
 lang: "ru"
+encoding: utf-8
 
 # Build settings
 markdown: kramdown
