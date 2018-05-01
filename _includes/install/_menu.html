@@ -1,0 +1,27 @@
+<div class="menu-pills pure-menu pure-menu-horizontal">
+    <div class="pure-menu-list">
+        {% if page.path contains 'install/linux' %}
+        <span class="menu-pills__item pure-menu-item pure-menu-selected">Линукс</span>
+        {% else %}
+        <span class="menu-pills__item pure-menu-item">
+            <a href="/install/linux-asdf" class="pure-menu-link">Линукс</a>
+        </span>
+        {% endif %}
+
+        {% if page.path contains 'install/mac' %}
+        <span class="menu-pills__item pure-menu-item pure-menu-selected">МакОС</span>
+        {% else %}
+        <span class="menu-pills__item pure-menu-item">
+            <a href="/install/mac-asdf" class="pure-menu-link">МакОС</a>
+        </span>
+        {% endif %}
+
+        {% if page.path contains 'install/windows' %}
+        <span class="menu-pills__item pure-menu-item pure-menu-selected">Виндоуз</span>
+        {% else %}
+        <span class="menu-pills__item pure-menu-item">
+                <a href="/install/windows-choco" class="pure-menu-link">Виндоуз</a>
+            </span>
+        {% endif %}
+    </div>
+</div>

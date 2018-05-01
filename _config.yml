@@ -20,6 +20,8 @@ description: >
 baseurl: ""
 url: "https://wunsh.ru"
 
+elixir_version: 1.6.4
+
 lang: "ru"
 encoding: utf-8
 
@@ -80,6 +82,11 @@ defaults:
       path: "docs"
     values:
       layout: docs
+  -
+    scope:
+      path: "install"
+    values:
+      layout: post
 
 authors:
   jaroslav:

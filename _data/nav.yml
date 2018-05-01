@@ -2,7 +2,7 @@
   path: elixir
   section_id: about
 - name: Установка
-  path: install
+  path: install/linux-asdf
   section_id: install
 - name: Документация
   path: docs
