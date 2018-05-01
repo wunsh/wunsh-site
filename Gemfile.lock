@@ -1,6 +1,6 @@
 GIT
   remote: https://github.com/wunsh/theme
-  revision: 924e1d2e4eef89f1c7cd175128894253d48fb5db
+  revision: af5abe89ed4e3688b980c00039d368d2c4c0c3fe
   specs:
     wunsh-theme (0.2.1)
       jekyll (~> 3.3)
@@ -24,7 +24,7 @@ GEM
     http_parser.rb (0.6.0)
     i18n (0.9.5)
       concurrent-ruby (~> 1.0)
-    jekyll (3.8.0)
+    jekyll (3.8.1)
       addressable (~> 2.4)
       colorator (~> 1.0)
       em-websocket (~> 0.5)
