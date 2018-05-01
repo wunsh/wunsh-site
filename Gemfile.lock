@@ -1,5 +1,6 @@
-PATH
-  remote: ../wunsh-theme
+GIT
+  remote: https://github.com/wunsh/theme
+  revision: 924e1d2e4eef89f1c7cd175128894253d48fb5db
   specs:
     wunsh-theme (0.2.1)
       jekyll (~> 3.3)
