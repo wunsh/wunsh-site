@@ -1,6 +1,5 @@
-GIT
-  remote: https://github.com/wunsh/theme
-  revision: f81024bada18f302782b9e71fd4cea290ce15a31
+PATH
+  remote: ../wunsh-theme
   specs:
     wunsh-theme (0.2.1)
       jekyll (~> 3.3)
@@ -11,22 +10,20 @@ GEM
   specs:
     addressable (2.5.2)
       public_suffix (>= 2.0.2, < 4.0)
-    byebug (9.1.0)
-    coderay (1.1.2)
     colorator (1.1.0)
     concurrent-ruby (1.0.5)
     daemons (1.2.4)
     em-websocket (0.5.1)
       eventmachine (>= 0.12.9)
       http_parser.rb (~> 0.6.0)
-    eventmachine (1.2.5)
-    ffi (1.9.18)
+    eventmachine (1.2.6)
+    ffi (1.9.23)
     forwardable-extended (2.6.0)
     git-version-bump (0.15.1)
     http_parser.rb (0.6.0)
-    i18n (0.9.3)
+    i18n (0.9.5)
       concurrent-ruby (~> 1.0)
-    jekyll (3.7.2)
+    jekyll (3.8.0)
       addressable (~> 2.4)
       colorator (~> 1.0)
       em-websocket (~> 0.5)
@@ -44,7 +41,9 @@ GEM
     jekyll-feed (0.8.0)
       jekyll (~> 3.3)
     jekyll-paginate (1.1.0)
-    jekyll-sass-converter (1.5.1)
+    jekyll-redirect-from (0.13.0)
+      jekyll (~> 3.3)
+    jekyll-sass-converter (1.5.2)
       sass (~> 3.4)
     jekyll-sitemap (1.1.1)
       jekyll (~> 3.3)
@@ -57,31 +56,21 @@ GEM
       rb-inotify (~> 0.9, >= 0.9.7)
       ruby_dep (~> 1.2)
     mercenary (0.3.6)
-    method_source (0.9.0)
-    octopress-debugger (1.0.2)
-      jekyll
-      pry-byebug
     pathutil (0.16.1)
       forwardable-extended (~> 2.6)
-    pry (0.11.1)
-      coderay (~> 1.1.0)
-      method_source (~> 0.9.0)
-    pry-byebug (3.5.0)
-      byebug (~> 9.1)
-      pry (~> 0.10)
-    public_suffix (3.0.1)
+    public_suffix (3.0.2)
     rack (1.6.8)
     rack-contrib (1.4.0)
       git-version-bump (~> 0.15)
       rack (~> 1.4)
     rake (12.0.0)
-    rb-fsevent (0.10.2)
+    rb-fsevent (0.10.3)
     rb-inotify (0.9.10)
       ffi (>= 0.5.0, < 2)
     rouge (3.1.1)
     ruby_dep (1.5.0)
     safe_yaml (1.0.4)
-    sass (3.5.5)
+    sass (3.5.6)
       sass-listen (~> 4.0.0)
     sass-listen (4.0.0)
       rb-fsevent (~> 0.9, >= 0.9.4)
@@ -95,18 +84,18 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
-  jekyll (~> 3.6)
+  jekyll (~> 3.8)
   jekyll-archives
   jekyll-feed (~> 0.6)
+  jekyll-redirect-from
   jekyll-sitemap
-  octopress-debugger
   rack-contrib
   rake
   thin
   wunsh-theme!
 
 RUBY VERSION
-   ruby 2.4.2p198
+   ruby 2.5.0p0
 
 BUNDLED WITH
    1.16.1
