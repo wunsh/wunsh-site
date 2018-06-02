@@ -1,6 +1,6 @@
 GIT
   remote: https://github.com/wunsh/theme
-  revision: f95abe4fab80d82de81f2755c9e431855d9deca5
+  revision: 970f7185de331fe564523864d6ac44ff55a9a8a3
   specs:
     wunsh-theme (0.2.1)
       jekyll (~> 3.3)
@@ -17,14 +17,14 @@ GEM
     em-websocket (0.5.1)
       eventmachine (>= 0.12.9)
       http_parser.rb (~> 0.6.0)
-    eventmachine (1.2.6)
+    eventmachine (1.2.7)
     ffi (1.9.23)
     forwardable-extended (2.6.0)
     git-version-bump (0.15.1)
     http_parser.rb (0.6.0)
     i18n (0.9.5)
       concurrent-ruby (~> 1.0)
-    jekyll (3.8.1)
+    jekyll (3.8.2)
       addressable (~> 2.4)
       colorator (~> 1.0)
       em-websocket (~> 0.5)
@@ -50,7 +50,7 @@ GEM
       jekyll (~> 3.3)
     jekyll-watch (2.0.0)
       listen (~> 3.0)
-    kramdown (1.16.2)
+    kramdown (1.17.0)
     liquid (4.0.0)
     listen (3.1.5)
       rb-fsevent (~> 0.9, >= 0.9.4)
