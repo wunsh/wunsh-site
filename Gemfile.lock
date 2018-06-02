@@ -1,6 +1,6 @@
 GIT
   remote: https://github.com/wunsh/theme
-  revision: 970f7185de331fe564523864d6ac44ff55a9a8a3
+  revision: 2211da004b1cd4788cd2368a53b68a174fcd98f0
   specs:
     wunsh-theme (0.2.1)
       jekyll (~> 3.3)
