@@ -1,6 +1,6 @@
 GIT
   remote: https://github.com/wunsh/theme
-  revision: 2211da004b1cd4788cd2368a53b68a174fcd98f0
+  revision: ecb028c551fac7667009a4429dfbf141e644540b
   specs:
     wunsh-theme (0.2.1)
       jekyll (~> 3.3)
@@ -18,7 +18,7 @@ GEM
       eventmachine (>= 0.12.9)
       http_parser.rb (~> 0.6.0)
     eventmachine (1.2.7)
-    ffi (1.9.23)
+    ffi (1.9.25)
     forwardable-extended (2.6.0)
     git-version-bump (0.15.1)
     http_parser.rb (0.6.0)
