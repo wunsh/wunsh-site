@@ -1,7 +1,7 @@
 ---
 title: Установка Эликсира на Виндоуз
-update_date: 01-05-2018
-elixir_version: 1.6.4
+update_date: 21-06-2018
+elixir_version: 1.6.6
 ---
 
 {% include install/_windows_header.md page=page %}

@@ -20,7 +20,7 @@ description: >
 baseurl: ""
 url: "https://wunsh.ru"
 
-elixir_version: 1.6.4
+elixir_version: 1.6.6
 
 lang: "ru"
 encoding: utf-8
