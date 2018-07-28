@@ -29,7 +29,9 @@ services:
   builder:
     image: jekyll/builder:3.8
     container_name: wunsh-builder
-    command: jekyll build
+    command: >
+      sh -c "bundle install &&
+             jekyll build --watch"
     env_file:
       - .env
     volumes:
