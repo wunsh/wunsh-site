@@ -26,6 +26,8 @@ lang: "ru"
 encoding: utf-8
 
 # Build settings
+destination: public
+source: backend
 markdown: kramdown
 theme: wunsh-theme
 

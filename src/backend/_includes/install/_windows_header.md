@@ -5,5 +5,5 @@
 Для того, чтобы проследовать этой инструкции и в результате получить систему с работающим Эликсиром, тебе необходимо иметь систему ***Windows*** и ***15 минут свободного времени***.
 
 > Я хочу установить Эликсир через
-> {% if page.path == "install/windows-choco.md" %} - менеджер пакетов `Chocolatey` **(рекомендуется)** {% else %} - [менеджер пакетов `Chocolatey`](/install/windows-choco) **(рекомендуется)** {% endif %}
-> {% if page.path == "install/windows-installer.md" %} - веб-установщик {% else %} - [веб-установщик](/install/windows-installer){% endif %}
+> {% if page.path == "install/windows-choco.md" %} - менеджер пакетов `Chocolatey` **(рекомендуется)** {% else %} - [менеджер пакетов `Chocolatey`](/src/install/windows-choco) **(рекомендуется)** {% endif %}
+> {% if page.path == "install/windows-installer.md" %} - веб-установщик {% else %} - [веб-установщик](/src/install/windows-installer){% endif %}

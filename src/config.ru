@@ -1,5 +1,5 @@
 require "rack/contrib/try_static"
-require_relative "lib/not_found"
+require_relative "backend/_lib/not_found"
 
 use Rack::Deflater
 

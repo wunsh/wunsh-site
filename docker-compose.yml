@@ -11,16 +11,16 @@ services:
       - /etc/nginx/conf.d/wunsh.ru
       - /etc/nginx/conf.d
       - /etc/nginx/vhost.d
-      - ./_site:/usr/share/nginx/html
+      - ./src/public:/usr/share/nginx/html
 
   app:
     image: jekyll/minimal:3.8
     container_name: wunsh-app
-    command: jekyll server
+    command: jekyll server --incremental
     env_file:
       - .env
     volumes:
-      - .:/srv/jekyll
+      - ./src:/srv/jekyll
       - ./vendor/bundle:/usr/local/bundle
     ports:
       - 4000:4000
@@ -33,7 +33,7 @@ services:
     env_file:
       - .env
     volumes:
-      - .:/srv/jekyll
+      - ./src:/srv/jekyll
       - ./vendor/bundle:/usr/local/bundle
 
 

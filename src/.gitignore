@@ -1,0 +1,5 @@
+.jekyll-metadata
+
+/backend/docs/*
+/public
+/.sass-cache
