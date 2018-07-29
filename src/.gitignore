@@ -1,6 +1,4 @@
 .jekyll-metadata
 
-/backend/docs/*
-!/backend/docs/.gitkeep
 /public
 /.sass-cache
