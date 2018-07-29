@@ -1,0 +1,3 @@
+[submodule "src/backend/docs"]
+	path = src/backend/docs
+	url = https://github.com/wunsh/elixir-docs-ru.git
