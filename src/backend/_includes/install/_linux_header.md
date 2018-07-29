@@ -5,5 +5,5 @@
 Для того, чтобы проследовать этой инструкции и в результате получить систему с работающим Эликсиром, тебе необходимо иметь ***Ubuntu 18.04 Bionic Beaver*** и ***15 минут свободного времени***.
 
 > Я хочу установить Эликсир через
-> {% if page.path == "install/linux-asdf.md" %} - менеджер версий `asdf` **(рекомендуется)** {% else %} - [менеджер версий `asdf`](/src/install/linux-asdf) **(рекомендуется)** {% endif %}
-> {% if page.path == "install/linux-apt.md" %} - менеджер пакетов `apt` {% else %} - [менеджер пакетов `apt`](/src/install/linux-apt){% endif %}
+> {% if page.path == "install/linux-asdf.md" %} - менеджер версий `asdf` **(рекомендуется)** {% else %} - [менеджер версий `asdf`](/install/linux-asdf) **(рекомендуется)** {% endif %}
+> {% if page.path == "install/linux-apt.md" %} - менеджер пакетов `apt` {% else %} - [менеджер пакетов `apt`](/install/linux-apt){% endif %}
