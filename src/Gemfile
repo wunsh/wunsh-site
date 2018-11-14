@@ -22,6 +22,7 @@ gem "wunsh-theme", git: "https://github.com/wunsh/theme"
 # If you have any plugins, put them here!
 group :jekyll_plugins do
    gem "jekyll-feed", "~> 0.6"
+   gem "jekyll-assets"
    gem "jekyll-archives"
    gem "jekyll-sitemap"
    gem "jekyll-redirect-from"
