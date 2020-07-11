@@ -1,5 +1,8 @@
+.DS_Store
 .env
-**/.DS_Store
+.jekyll-metadata
 
 /.idea
+/.sass-cache
+/public
 /vendor
