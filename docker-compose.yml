@@ -1,18 +1,6 @@
 version: "3"
 
 services:
-  web:
-    restart: always
-    image: nginx:1.15-alpine
-    container_name: wunsh-web
-    env_file:
-      - .env
-    volumes:
-      - /etc/nginx/conf.d
-      - /etc/nginx/vhost.d
-      - ./config/nginx.conf:/etc/nginx/conf.d/wunsh.conf:ro
-      - ./src/public:/usr/share/nginx/html
-
   app:
     image: jekyll/minimal:3.8
     container_name: wunsh-app
@@ -20,7 +8,7 @@ services:
     env_file:
       - .env
     volumes:
-      - ./src:/srv/jekyll
+      - .:/srv/jekyll
       - ./vendor/bundle:/usr/local/bundle
     ports:
       - 4000:4000
@@ -35,11 +23,5 @@ services:
     env_file:
       - .env
     volumes:
-      - ./src:/srv/jekyll
+      - .:/srv/jekyll
       - ./vendor/bundle:/usr/local/bundle
-
-
-networks:
-  default:
-    external:
-      name: nginx-proxy
