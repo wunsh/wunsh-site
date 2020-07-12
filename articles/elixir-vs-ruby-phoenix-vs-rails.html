@@ -1,0 +1,540 @@
+<!DOCTYPE html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Схватка Elixir и Ruby. Phoenix против Rails |> Сообщество Elixir и Phoenix Framework</title>
+    <meta name="description" content="Сравниваем производительность Elixir с производительностью Ruby посредством нагрузочного тестирования Phoenix и Rails.">
+
+    <link rel="alternate" type="application/rss+xml" title="Сообщество Elixir и Phoenix Framework" href="/feed.xml" />
+    <link rel="canonical" href="https://wunsh.ru/articles/elixir-vs-ruby-phoenix-vs-rails.html">
+
+    <style type="text/css">@import url("//fonts.googleapis.com/css?family=Source+Sans+Pro:400,700&subset=cyrillic");</style>
+    <link rel="stylesheet" href="/assets/css/vendors/pure.min.css">
+    <link rel="stylesheet" href="/assets/css/vendors/pure-grids-responsive.min.css">
+    <link rel="stylesheet" href="/assets/css/style.css?1594516983">
+
+    <link rel="shortcut icon" type="image/png" href="/assets/favicon.png" >
+</head>
+
+
+  <body>
+    <div class="wunsh pure-g">
+      
+
+
+
+
+<div class="menu pure-u-1 pure-u-md-1-4">
+  <div class="header">
+    <h2 class="header__title">
+      
+        <a href="https://wunsh.ru" class="header__title_link" title="На главную">Эликсир и&nbsp;Вунш</a>
+      
+    </h2>
+    <h3 class="header__tagline">Erlang + Ruby = &#10084;</h3>
+
+    <nav class="nav">
+      <ul class="nav_list">
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/elixir" class="nav_list__item_link pure-button">О языке</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/install/linux-asdf" class="nav_list__item_link pure-button">Установка</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/docs/" class="nav_list__item_link pure-button">Документация</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/guides" class="nav_list__item_link pure-button">Гайды</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/news" class="nav_list__item_link pure-button">Новости</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/articles" class="nav_list__item_link pure-button">Статьи</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/videos" class="nav_list__item_link pure-button">Видео</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/vacancies" class="nav_list__item_link pure-button">Вакансии</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/faq" class="nav_list__item_link pure-button">FAQ</a>
+            </li>
+          
+        
+      </ul>
+    </nav>
+
+    <a href="#subscribeModal" class="pure-button header__subscribe_link">Подписаться на рассылку</a>
+  </div>
+</div>
+
+
+      <div class="content pure-u-1 pure-u-md-3-4">
+        
+
+<article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+  <header class="post__header">
+    
+    <h1 class="post__title" itemprop="name headline">Схватка Elixir и Ruby. Phoenix против Rails</h1>
+
+    <div class="post__meta post_meta">
+      <ul class="meta_list">
+        <li class="meta_list__item">
+          
+          <span class="">
+            <small class="meta_list__item_name">Дата</small>
+            <time class="h-bold" datetime="2016-11-23T00:00:00+00:00" itemprop="datePublished">
+              
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+23 ноября 2016
+
+            </time>
+          </span>
+          
+
+          
+        </li>
+        
+        <li class="meta_list__item">
+            <span class="tag_cloud tags_cloud--inline h-no_margin">
+              <small class="meta_list__item_name">Теги</small> 
+
+
+<ul class="tags_cloud__list">
+  
+    <a href="/tags/#overview" class="tags_cloud__link tag tag--overview">overview</a>
+  
+    <a href="/tags/#phoenix" class="tags_cloud__link tag tag--phoenix">phoenix</a>
+  
+    <a href="/tags/#ruby" class="tags_cloud__link tag tag--ruby">ruby</a>
+  
+    <a href="/tags/#rails" class="tags_cloud__link tag tag--rails">rails</a>
+  
+</ul>
+
+            </span>
+        </li>
+        
+        <li class="meta_list__item">
+          <span itemprop="author" itemscope itemtype="http://schema.org/Person">
+            <small class="meta_list__item_name">
+              
+                Перевод
+              
+            </small>
+            <span itemprop="name" class="h-bold">Надежда Нестерова</span>
+          </span>
+        </li>
+
+        <li class="meta_list__item">
+          
+            <div >
+              <small>Оригинал</small>
+              <strong>
+                &laquo;<a href="https://littlelines.com/blog/2014/07/08/elixir-vs-ruby-showdown-phoenix-vs-rails" style="text-transform: none; text-decoration: underline; color: #4b2e39;">Elixir vs Ruby Showdown. Phoenix vs Rails</a>&raquo;
+              </strong>
+              <small>&copy;</small>
+              <strong>Chris McCord</strong>
+            </div>
+          
+        </li>
+      </ul>
+    </div>
+  </header>
+
+  <div class="post__content" itemprop="articleBody">
+    <p>Эта статья&nbsp;&mdash; демонстрация сравнительного анализа языков <em>Elixir и&nbsp;Ruby</em>: в&nbsp;ней пойдёт речь о&nbsp;том, какую производительность обеспечивают веб-фреймворки Phoenix и&nbsp;Rails при выполнении одних и&nbsp;тех&nbsp;же задач. Прежде чем перейти к&nbsp;примерам кода и&nbsp;результатам бенчмарков, ответим на&nbsp;несколько распространённых вопросов о&nbsp;тестах такого рода.</p>
+<p><strong>Если коротко</strong>, то&nbsp;Phoenix справился с&nbsp;заданием в&nbsp;<strong>10,63 раза</strong> быстрее, чем Rails, обеспечив более низкую загрузку CPU.</p>
+<h2>ЧАВО</h2>
+<h3>Не&nbsp;думаете&nbsp;ли вы, что пытаетесь сравнить несравнимое?</h3>
+<p>Вовсе нет. Приведённые тесты&nbsp;&mdash; прямое сопоставление полюбившихся особенностей Ruby (Rails) с&nbsp;Elixir (Phoenix). Elixir гарантирует предоставить&nbsp;то, что все так ценят в&nbsp;Ruby: скорость разработки, метапрограммирование, изящные API и&nbsp;DSL, но&nbsp;при этом работать быстрее, обеспечивая надёжную конкурентную модель и&nbsp;распределённую обработку данных. Цель данной статьи&nbsp;&mdash; выяснить, как уже полюбившиеся особенности Ruby без потери удобства программных интерфейсов реализуются в&nbsp;Elixir с&nbsp;точки зрения производительности веб-фреймворков.</p>
+<h3>Так&nbsp;ли необходимы бенчмарки?</h3>
+<p>Бенчмарки&nbsp;&mdash; не&nbsp;что иное, как средство заблаговременного обеспечения надёжности работы тестируемых программ. Но&nbsp;даже в&nbsp;этом случае бенчмарки всего лишь позволяют получить представление о&nbsp;каких-либо характеристиках. Поэтому мораль здесь такова: <em>не&nbsp;стоит полагаться на&nbsp;бенчмарки, нужно всегда проводить проверки вручную</em>.</p>
+<h3>Что конкретно вы&nbsp;сравниваете?</h3>
+<h4>Elixir Phoenix Framework</h4>
+<ul>
+    <li>Phoenix 0.3.1</li>
+    <li>Cowboy webserver (single Elixir node)</li>
+    <li>Erlang 17.1</li>
+    <li>Ruby on Rails</li>
+</ul>
+
+<h4>Rails 4.0.4</h4>
+<ul>
+    <li>Rails 4.0.4</li>
+    <li>Puma webserver (4 воркера &mdash; по одному на каждое ядро)</li>
+    <li>MRI Ruby 2.1.0</li>
+</ul>
+
+<p>Мы&nbsp;проводим сравнение быстродействия двух эквивалентных приложений на&nbsp;Phoenix и&nbsp;на&nbsp;Rails, причём для большей наглядности определённые задачи рассматриваются отдельно. Для оценки выполним следующие пункты.</p>
+<ol>
+    <li>
+        <p>Сопоставим запрос к&nbsp;серверу и&nbsp;направим его к&nbsp;соответствующему действию контроллера, разбирая именованные параметры</p>
+    </li>
+    <li>
+        <p>Внутри контроллера рендерим представление (в&nbsp;зависимости от&nbsp;заголовка Accept в&nbsp;запросе), которое помещается в&nbsp;родительский макет. Представления <em>рендерятся посредством встроенных в&nbsp;язык шаблонизаторов (ERB, EEx).</em></p>
+    </li>
+    <li>
+        <p>В&nbsp;представлении рендерим коллекцию данных, полученных из&nbsp;контроллера.</p>
+    </li>
+    <li>
+        <p>Отправляем ответ клиенту.</p>
+    </li>
+</ol>
+<p>Вот и&nbsp;всё. Мы&nbsp;тестируем типовое сопоставление маршрутов и&nbsp;отображение стека представлений, что явно выходит за&nbsp;рамки примера &laquo;Hello World&raquo;. В&nbsp;обоих приложениях производится рендеринг макета, представлений и&nbsp;их&nbsp;составляющих для проведения анализа реальной производительности при выполнении основной задачи веб-фреймворка. Чтобы не&nbsp;перегружать&nbsp;IO в&nbsp;обоих приложениях отключены кэширование представлений и&nbsp;логирование запросов. Для проведения бенчмаркинга мы&nbsp;использовали <noindex><a href="https://github.com/wg/wrk" rel="nofollow">инструмент wrk</a></noindex>. Помимо тестирования на&nbsp;локальном сервере, мы&nbsp;также провели тестирование и&nbsp;на&nbsp;удалённом (основанном на&nbsp;heroku dynos) с&nbsp;целью исключения влияния этого инструмента на&nbsp;результаты, полученные в&nbsp;ходе локального эксперимента. Хватит болтовни, посмотрим, как выглядит код.</p>
+<h2>Маршрутизаторы</h2>
+<h4>Phoenix</h4>
+<figure class="highlight"><pre><code class="language-elixir" data-lang="elixir"><span class="k">defmodule</span> <span class="no">Benchmarker</span><span class="o">.</span><span class="no">Router</span> <span class="k">do</span>
+  <span class="kn">use</span> <span class="no">Phoenix</span><span class="o">.</span><span class="no">Router</span>
+  <span class="n">alias</span> <span class="no">Benchmarker</span><span class="o">.</span><span class="no">Controllers</span>
+
+  <span class="n">get</span> <span class="sd">"</span><span class="s2">/:title"</span><span class="p">,</span> <span class="no">Controllers</span><span class="o">.</span><span class="no">Pages</span><span class="p">,</span> <span class="ss">:index</span><span class="p">,</span> <span class="ss">as:</span> <span class="ss">:page</span>
+<span class="k">end</span></code></pre></figure>
+
+<h4>Rails</h4>
+<figure class="highlight"><pre><code class="language-ruby" data-lang="ruby"><span class="no">Benchmarker</span><span class="o">::</span><span class="no">Application</span><span class="p">.</span><span class="nf">routes</span><span class="p">.</span><span class="nf">draw</span> <span class="k">do</span>
+  <span class="n">root</span> <span class="ss">to: </span><span class="s2">"pages#index"</span>
+  <span class="n">get</span> <span class="s2">"/:title"</span><span class="p">,</span> <span class="ss">to: </span><span class="s2">"pages#index"</span><span class="p">,</span> <span class="ss">as: :page</span>
+<span class="k">end</span></code></pre></figure>
+
+<h2><a name="controllers"></a> Контроллеры</h2>
+<h4>Phoenix</h4>
+<figure class="highlight"><pre><code class="language-elixir" data-lang="elixir"><span class="k">defmodule</span> <span class="no">Benchmarker</span><span class="o">.</span><span class="no">Controllers</span><span class="o">.</span><span class="no">Pages</span> <span class="k">do</span>
+  <span class="kn">use</span> <span class="no">Phoenix</span><span class="o">.</span><span class="no">Controller</span>
+
+  <span class="k">def</span> <span class="n">index</span><span class="p">(</span><span class="n">conn</span><span class="p">,</span> <span class="p">%{</span><span class="sd">"</span><span class="s2">title"</span> <span class="o">=&gt;</span> <span class="n">title</span><span class="p">})</span> <span class="k">do</span>
+    <span class="n">render</span> <span class="n">conn</span><span class="p">,</span> <span class="sd">"</span><span class="s2">index"</span><span class="p">,</span> <span class="ss">title:</span> <span class="n">title</span><span class="p">,</span> <span class="ss">members:</span> <span class="p">[</span>
+      <span class="p">%{</span><span class="ss">name:</span> <span class="sd">"</span><span class="s2">Chris McCord"</span><span class="p">},</span>
+      <span class="p">%{</span><span class="ss">name:</span> <span class="sd">"</span><span class="s2">Matt Sears"</span><span class="p">},</span>
+      <span class="p">%{</span><span class="ss">name:</span> <span class="sd">"</span><span class="s2">David Stump"</span><span class="p">},</span>
+      <span class="p">%{</span><span class="ss">name:</span> <span class="sd">"</span><span class="s2">Ricardo Thompson"</span><span class="p">}</span>
+    <span class="p">]</span>
+  <span class="k">end</span>
+<span class="k">end</span></code></pre></figure>
+
+<h4>Rails</h4>
+<figure class="highlight"><pre><code class="language-ruby" data-lang="ruby"><span class="k">class</span> <span class="nc">PagesController</span> <span class="o">&lt;</span> <span class="no">ApplicationController</span>
+
+  <span class="k">def</span> <span class="nf">index</span>
+    <span class="vi">@title</span> <span class="o">=</span> <span class="n">params</span><span class="p">[</span><span class="ss">:title</span><span class="p">]</span>
+    <span class="vi">@members</span> <span class="o">=</span> <span class="p">[</span>
+      <span class="p">{</span><span class="ss">name: </span><span class="s2">"Chris McCord"</span><span class="p">},</span>
+      <span class="p">{</span><span class="ss">name: </span><span class="s2">"Matt Sears"</span><span class="p">},</span>
+      <span class="p">{</span><span class="ss">name: </span><span class="s2">"David Stump"</span><span class="p">},</span>
+      <span class="p">{</span><span class="ss">name: </span><span class="s2">"Ricardo Thompson"</span><span class="p">}</span>
+    <span class="p">]</span>
+    <span class="n">render</span> <span class="s2">"index"</span>
+  <span class="k">end</span>
+<span class="k">end</span></code></pre></figure>
+
+<h2>Представления</h2>
+<h4>Phoenix&nbsp;(EEx)</h4>
+<figure class="highlight"><pre><code class="language-erb" data-lang="erb">...
+    <span class="nt">&lt;h4&gt;</span>Team Members<span class="nt">&lt;/h4&gt;</span>
+    <span class="nt">&lt;ul&gt;</span>
+      <span class="cp">&lt;%=</span> <span class="k">for</span> <span class="n">member</span> <span class="o">&lt;-</span> <span class="vi">@members</span> <span class="k">do</span> <span class="cp">%&gt;</span>
+        <span class="nt">&lt;li&gt;</span>
+          <span class="cp">&lt;%=</span> <span class="n">render</span> <span class="s2">"bio.html"</span><span class="p">,</span> <span class="ss">member: </span><span class="n">member</span> <span class="cp">%&gt;</span>
+        <span class="nt">&lt;/li&gt;</span>
+      <span class="cp">&lt;%</span> <span class="k">end</span> <span class="cp">%&gt;</span>
+    <span class="nt">&lt;/ul&gt;</span>
+...</code></pre></figure>
+
+<figure class="highlight"><pre><code class="language-erb" data-lang="erb"><span class="nt">&lt;b&gt;</span>Name:<span class="nt">&lt;/b&gt;</span> <span class="cp">&lt;%=</span> <span class="vi">@member</span><span class="p">.</span><span class="nf">name</span> <span class="cp">%&gt;</span></code></pre></figure>
+
+<h4>Rails&nbsp;(ERB)</h4>
+
+<figure class="highlight"><pre><code class="language-erb" data-lang="erb">...
+    <span class="nt">&lt;h4&gt;</span>Team Members<span class="nt">&lt;/h4&gt;</span>
+    <span class="nt">&lt;ul&gt;</span>
+      <span class="cp">&lt;%</span> <span class="k">for</span> <span class="n">member</span> <span class="k">in</span> <span class="vi">@members</span> <span class="k">do</span> <span class="cp">%&gt;</span>
+        <span class="nt">&lt;li&gt;</span>
+          <span class="cp">&lt;%=</span> <span class="n">render</span> <span class="ss">partial: </span><span class="s2">"bio.html"</span><span class="p">,</span> <span class="ss">locals: </span><span class="p">{</span><span class="ss">member: </span><span class="n">member</span><span class="p">}</span> <span class="cp">%&gt;</span>
+        <span class="nt">&lt;/li&gt;</span>
+      <span class="cp">&lt;%</span> <span class="k">end</span> <span class="cp">%&gt;</span>
+    <span class="nt">&lt;/ul&gt;</span>
+...</code></pre></figure>
+
+<figure class="highlight"><pre><code class="language-erb" data-lang="erb"><span class="nt">&lt;b&gt;</span>Name:<span class="nt">&lt;/b&gt;</span> <span class="cp">&lt;%=</span> <span class="n">member</span><span class="p">[</span><span class="ss">:name</span><span class="p">]</span> <span class="cp">%&gt;</span></code></pre></figure>
+
+<h2>Результаты для локального сервера</h2>
+<p>Phoenix показал <strong>в&nbsp;10,63 раза большую производительность</strong> и&nbsp;более устойчивое среднеквадратическое отклонение времени задержки. Такие результаты доказывают реальные преимущества конкурентной модели Elixir. Одна нода Elixir использует все необходимые ресурсы CPU и&nbsp;требуемый объём памяти, в&nbsp;то&nbsp;время как веб-сервер Puma (Rails) для реализации многопоточности создаёт по&nbsp;одному процессу на&nbsp;каждом ядре CPU.</p>
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash">Phoenix:
+req/s: 12,120.00
+Stdev: 3.35ms
+Max latency: 43.30ms
+
+Rails:
+req/s: 1,140.53
+Stdev: 18.96ms
+Max latency: 159.43ms</code></pre></figure>
+
+<h4>Phoenix</h4>
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash"><span class="nv">$ </span>mix <span class="k">do </span>deps.get, compile
+<span class="nv">$ MIX_ENV</span><span class="o">=</span>prod mix compile.protocols
+<span class="nv">$ MIX_ENV</span><span class="o">=</span>prod elixir <span class="nt">-pa</span> _build/prod/consolidated <span class="nt">-S</span> mix phoenix.start
+Running Elixir.Benchmarker.Router with Cowboy on port 4000
+
+<span class="nv">$ </span>wrk <span class="nt">-t4</span> <span class="nt">-c100</span> <span class="nt">-d30S</span> <span class="nt">--timeout</span> 2000 <span class="s2">"http://127.0.0.1:4000/showdown"</span>
+Running 10s <span class="nb">test</span> @ http://127.0.0.1:4000/showdown
+4 threads and 100 connections
+Thread Stats   Avg      Stdev     Max   +/- Stdev
+Latency     8.31ms    3.53ms  43.30ms   79.38%
+Req/Sec     3.11k   376.89     4.73k    79.83%
+121202 requests <span class="k">in </span>10.00s, 254.29MB <span class="nb">read
+</span>Requests/sec:  12120.94
+Transfer/sec:     25.43MB</code></pre></figure>
+
+<h4>Rails</h4>
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash"><span class="nv">$ </span>bundle
+<span class="nv">$ RACK_ENV</span><span class="o">=</span>production bundle <span class="nb">exec </span>puma <span class="nt">-w</span> 4
+<span class="o">[</span>13057] Puma starting <span class="k">in </span>cluster mode...
+<span class="o">[</span>13057] <span class="k">*</span> Version 2.8.2 <span class="o">(</span>ruby 2.1.0-p0<span class="o">)</span>, codename: Sir Edmund Percival Hillary
+<span class="o">[</span>13057] <span class="k">*</span> Min threads: 0, max threads: 16
+<span class="o">[</span>13057] <span class="k">*</span> Environment: production
+<span class="o">[</span>13057] <span class="k">*</span> Process workers: 4
+<span class="o">[</span>13057] <span class="k">*</span> Phased restart available
+<span class="o">[</span>13185] <span class="k">*</span> Listening on tcp://0.0.0.0:9292
+
+<span class="nv">$ </span>wrk <span class="nt">-t4</span> <span class="nt">-c100</span> <span class="nt">-d30S</span> <span class="nt">--timeout</span> 2000 <span class="s2">"http://127.0.0.1:9292/showdown"</span>
+Running 10s <span class="nb">test</span> @ http://127.0.0.1:9292/showdown
+4 threads and 100 connections
+Thread Stats   Avg      Stdev     Max   +/- Stdev
+Latency    21.67ms   18.96ms 159.43ms   85.53%
+Req/Sec   449.74    413.36     1.10k    63.82%
+11414 requests <span class="k">in </span>10.01s, 25.50MB <span class="nb">read
+</span>Requests/sec:   1140.53
+Transfer/sec:      2.55MB</code></pre></figure>
+
+<h2>Результаты для Heroku (1&nbsp;dyno)</h2>
+<p>Phoenix оказался <strong>в&nbsp;8,94 раза производительнее</strong>, снова показав намного более устойчивое среднеквадратическое отклонение времени задержки и&nbsp;<strong>в&nbsp;3,74 раза меньшую загрузку CPU</strong>. Пытаясь получить на&nbsp;сервере Phoenix такую&nbsp;же нагрузку на&nbsp;CPU, как и&nbsp;на&nbsp;сервере Rails, мы&nbsp;столкнулись с&nbsp;нехваткой доступных сокетов. Возможно, Phoenix-приложение показало&nbsp;бы большую производительность, если&nbsp;бы сети клиентов имели более высокую пропускную способность. В&nbsp;случае использования удалённого сервера значение среднеквадратического отклонения имеет особую важность. Rails-приложение не&nbsp;смогло обеспечить устойчивое время отклика, показав результат времени задержки более 8&nbsp;секунд. На&nbsp;практике, Phoenix-приложение в&nbsp;нагруженном состоянии должно работать намного более стабильно, чем приложение на&nbsp;Rails.</p>
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash">Phoenix:
+req/s: 2,691.03
+Stdev: 139.92ms
+Max latency: 1.39s
+
+Rails:
+req/s: 301.36
+Stdev: 2.06s
+Max latency: 8.36s</code></pre></figure>
+
+<h4>Phoenix (Cold)</h3>
+    <figure class="highlight"><pre><code class="language-bash" data-lang="bash"><span class="nv">$ </span>./wrk <span class="nt">-t12</span> <span class="nt">-c800</span> <span class="nt">-d30S</span> <span class="nt">--timeout</span> 2000 <span class="s2">"http://tranquil-brushlands-6459.herokuapp.com/showdown"</span>
+Running 30s <span class="nb">test</span> @ http://tranquil-brushlands-6459.herokuapp.com/showdown
+12 threads and 800 connections
+Thread Stats   Avg      Stdev     Max   +/- Stdev
+Latency   317.15ms  139.55ms 970.43ms   81.12%
+Req/Sec   231.43     66.07   382.00     63.92%
+83240 requests <span class="k">in </span>30.00s, 174.65MB <span class="nb">read
+</span>Socket errors: connect 0, <span class="nb">read </span>1, write 0, <span class="nb">timeout </span>0
+Requests/sec:   2774.59
+Transfer/sec:      5.82MB</code></pre></figure>
+
+    <h4>Phoenix (Warm)</h4>
+    <figure class="highlight"><pre><code class="language-bash" data-lang="bash"><span class="nv">$ </span>./wrk <span class="nt">-t12</span> <span class="nt">-c800</span> <span class="nt">-d180S</span> <span class="nt">--timeout</span> 2000 <span class="s2">"http://tranquil-brushlands-6459.herokuapp.com/showdown"</span>
+Running 3m <span class="nb">test</span> @ http://tranquil-brushlands-6459.herokuapp.com/showdown
+12 threads and 800 connections
+Thread Stats   Avg      Stdev     Max   +/- Stdev
+Latency   318.52ms  139.92ms   1.39s    82.03%
+Req/Sec   224.42     57.23   368.00     68.50%
+484444 requests <span class="k">in </span>3.00m, 0.99GB <span class="nb">read
+</span>Socket errors: connect 0, <span class="nb">read </span>9, write 0, <span class="nb">timeout </span>0
+Requests/sec:   2691.03
+Transfer/sec:      5.65MB</code></pre></figure>
+
+    <h4>Загрузка</h4>
+    <figure class="highlight"><pre><code class="language-bash" data-lang="bash"><span class="nv">load_avg_1m</span><span class="o">=</span>2.78
+
+sample#memory_total<span class="o">=</span>34.69MB
+sample#memory_rss<span class="o">=</span>33.57MB
+sample#memory_cache<span class="o">=</span>0.09MB
+sample#memory_swap<span class="o">=</span>1.03MB
+sample#memory_pgpgin<span class="o">=</span>204996pages sample#memory_pgpgout<span class="o">=</span>196379pages</code></pre></figure>
+
+    <h4>Rails (Cold)</h4>
+    <figure class="highlight"><pre><code class="language-bash" data-lang="bash"><span class="nv">$ </span>./wrk <span class="nt">-t12</span> <span class="nt">-c800</span> <span class="nt">-d30S</span> <span class="nt">--timeout</span> 2000 <span class="s2">"http://dry-ocean-9525.herokuapp.com/showdown"</span>
+Running 30s <span class="nb">test</span> @ http://dry-ocean-9525.herokuapp.com/showdown
+12 threads and 800 connections
+Thread Stats   Avg      Stdev     Max   +/- Stdev
+Latency     2.85s     1.33s    5.75s    65.73%
+Req/Sec    22.68      7.18    61.00     69.71%
+8276 requests <span class="k">in </span>30.03s, 18.70MB <span class="nb">read
+</span>Requests/sec:    275.64
+Transfer/sec:    637.86KB</code></pre></figure>
+
+    <h4>Rails (Warm)</h4>
+    <figure class="highlight"><pre><code class="language-bash" data-lang="bash"><span class="nv">$ </span>./wrk <span class="nt">-t12</span> <span class="nt">-c800</span> <span class="nt">-d180S</span> <span class="nt">--timeout</span> 2000 <span class="s2">"http://dry-ocean-9525.herokuapp.com/showdown"</span>
+Running 3m <span class="nb">test</span> @ http://dry-ocean-9525.herokuapp.com/showdown
+12 threads and 800 connections
+Thread Stats   Avg      Stdev     Max   +/- Stdev
+Latency     3.07s     2.06s    8.36s    70.39%
+Req/Sec    24.65      9.97    63.00     67.10%
+54256 requests <span class="k">in </span>3.00m, 122.50MB <span class="nb">read
+</span>Socket errors: connect 0, <span class="nb">read </span>1, write 0, <span class="nb">timeout </span>0
+Requests/sec:    301.36
+Transfer/sec:    696.77KB</code></pre></figure>
+
+    <h4>Загрузка</h4>
+    <figure class="highlight"><pre><code class="language-bash" data-lang="bash">sample#load_avg_1m<span class="o">=</span>10.40
+
+sample#memory_total<span class="o">=</span>235.37MB
+sample#memory_rss<span class="o">=</span>235.35MB
+sample#memory_cache<span class="o">=</span>0.02MB
+sample#memory_swap<span class="o">=</span>0.00MB
+sample#memory_pgpgin<span class="o">=</span>66703pages
+sample#memory_pgpgout<span class="o">=</span>6449pages</code></pre></figure>
+    <h2>Обобщённые результаты</h2>
+    <p>Elixir сочетает в&nbsp;себе удобство и&nbsp;скорость разработки Ruby с&nbsp;конкурентной моделью и&nbsp;отказоустойчивостью Erlang. Программируя на&nbsp;Elixir, можно одновременно пользоваться преимуществами двух этих языков, в&nbsp;связи с&nbsp;чем я&nbsp;призываю вас ознакомиться с&nbsp;Phoenix. Придётся ещё попотеть над доработкой Phoenix, чтобы он&nbsp;мог сравняться с&nbsp;мощной экосистемой Rails, но&nbsp;это только начало. На&nbsp;этот год у&nbsp;нас уже большие планы.</p>
+    <p>Если вы&nbsp;хотели&nbsp;бы собственноручно провести такое&nbsp;же тестирование, то&nbsp;созданные приложения находятся в&nbsp;свободном доступе <noindex><a href="https://twitter.com/peregrine" rel="nofollow">на&nbsp;сайте Github</a></noindex>. Интересно было&nbsp;бы посмотреть, какие результаты получились на&nbsp;разном железе, особенно на&nbsp;том, которое могло&nbsp;бы сильнее нагрузить Phoenix-приложение.</p>
+    <p>За&nbsp;предоставленную информацию об&nbsp;установке приложений Heroku и&nbsp;тестировании удалённых серверов благодарим <noindex><a href="https://twitter.com/peregrine" rel="nofollow">Джейсона Стибса</a></noindex>!</p>
+
+  </div>
+
+  <!-- uSocial -->
+  <div class="post__share_block share_block">
+    <script async src="https://usocial.pro/usocial/usocial.js?v=6.1.4" data-script="usocial" charset="utf-8"></script>
+    <div class="uSocial-Share" data-pid="2fd19544e551bce292425ee8adaa31be" data-type="share" data-options="round,style2,default,absolute,horizontal,size32,counter1,counter-before,upArrow-right,nomobile" data-social="telegram,fb,vk,gPlus,twi,bookmarks"></div>
+  </div>
+  <!-- /uSocial -->
+</article>
+
+
+        <footer class="footer">
+    &copy; 2020
+    / Россия
+
+    <span class="pull-right">Любые мысли и вопросы пишите на <a href="mailto:elixir@wunsh.ru">elixir@wunsh.ru</a>.</span>
+</footer>
+
+        <div id="subscribeModal" class="modal">
+    <div class="modal__content">
+        <a href="#close" title="Close" class="modal__close">x</a>
+
+        <h2 class="modal__title">Ламповая рассылка про&nbsp;Эликсир</h2>
+
+        <p>Один-два раза в&nbsp;неделю присылаем тёплые письма об&nbsp;Эликсире: переводы самых интересных статей до&nbsp;их&nbsp;появления в&nbsp;открытом доступе, анонсы событий и&nbsp;вкусные бонусы.</p>
+
+        <form action="//wunsh.us14.list-manage.com/subscribe/post?u=c81ca3d4693f62db7f7f67c71&amp;id=a192e2dfef" method="post" id="mc-embedded-subscribe-form" name="mc-embedded-subscribe-form" class="pure-form h-tc validate" target="_blank" novalidate>
+            <input type="email" value="" name="EMAIL" class="modal__input pure-input-rounded large" id="mce-EMAIL" placeholder="Твоя почта" required>
+            <div style="position: absolute; left: -5000px;" aria-hidden="true"><input type="text" name="b_c81ca3d4693f62db7f7f67c71_a192e2dfef" tabindex="-1" value=""></div>
+
+            <input type="submit" value="Присоединиться" name="subscribe" onClick="yaCounter39773490.reachGoal('SUBSCRIBED'); return true" id="mc-embedded-subscribe" class="pure-button button-success large">
+        </form>
+
+        <p>Обязательно подтверди почту, перейдя по&nbsp;ссылке в&nbsp;письме, иначе мы&nbsp;не&nbsp;сможем делиться с&nbsp;тобой полезностями.</p>
+
+        <p>Надоедать точно не&nbsp;будем :)</p>
+    </div>
+</div>
+
+        <script src="/assets/js/vendors/zepto.min.js"></script>
+
+<script>
+    if ($(".post--docs").length) {
+        $(".footer").addClass("footer--docs")
+    }
+
+    $(".modal--close_backdrop").click(function(){
+        window.location.hash = "";
+    });
+</script>
+
+        <!-- Yandex.Metrika counter -->
+<script type="text/javascript">
+    (function (d, w, c) {
+        (w[c] = w[c] || []).push(function() {
+            try {
+                w.yaCounter39773490 = new Ya.Metrika({
+                    id:39773490,
+                    clickmap:true,
+                    trackLinks:true,
+                    accurateTrackBounce:true,
+                    webvisor:true,
+                    ut:"noindex"
+                });
+            } catch(e) { }
+        });
+
+        var n = d.getElementsByTagName("script")[0],
+            s = d.createElement("script"),
+            f = function () { n.parentNode.insertBefore(s, n); };
+        s.type = "text/javascript";
+        s.async = true;
+        s.src = "https://mc.yandex.ru/metrika/watch.js";
+
+        if (w.opera == "[object Opera]") {
+            d.addEventListener("DOMContentLoaded", f, false);
+        } else { f(); }
+    })(document, window, "yandex_metrika_callbacks");
+</script>
+<noscript><div><img src="https://mc.yandex.ru/watch/39773490?ut=noindex" style="position:absolute; left:-9999px;" alt="" /></div></noscript>
+<!-- /Yandex.Metrika counter -->
+
+      </div>
+    </div>
+  </body>
+</html>

@@ -1,0 +1,745 @@
+<!DOCTYPE html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Масштабируемое приложение на Эликсире: от зонтичного проекта к распределённой системе |> Сообщество Elixir и Phoenix Framework</title>
+    <meta name="description" content="В данной статье приведены некоторые принципы проектирования при разработке более или менее сложных проектов на Эликсире.">
+
+    <link rel="alternate" type="application/rss+xml" title="Сообщество Elixir и Phoenix Framework" href="/feed.xml" />
+    <link rel="canonical" href="https://wunsh.ru/articles/designing-scalable-application-with-elixir.html">
+
+    <style type="text/css">@import url("//fonts.googleapis.com/css?family=Source+Sans+Pro:400,700&subset=cyrillic");</style>
+    <link rel="stylesheet" href="/assets/css/vendors/pure.min.css">
+    <link rel="stylesheet" href="/assets/css/vendors/pure-grids-responsive.min.css">
+    <link rel="stylesheet" href="/assets/css/style.css?1594516983">
+
+    <link rel="shortcut icon" type="image/png" href="/assets/favicon.png" >
+</head>
+
+
+  <body>
+    <div class="wunsh pure-g">
+      
+
+
+
+
+<div class="menu pure-u-1 pure-u-md-1-4">
+  <div class="header">
+    <h2 class="header__title">
+      
+        <a href="https://wunsh.ru" class="header__title_link" title="На главную">Эликсир и&nbsp;Вунш</a>
+      
+    </h2>
+    <h3 class="header__tagline">Erlang + Ruby = &#10084;</h3>
+
+    <nav class="nav">
+      <ul class="nav_list">
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/elixir" class="nav_list__item_link pure-button">О языке</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/install/linux-asdf" class="nav_list__item_link pure-button">Установка</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/docs/" class="nav_list__item_link pure-button">Документация</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/guides" class="nav_list__item_link pure-button">Гайды</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/news" class="nav_list__item_link pure-button">Новости</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/articles" class="nav_list__item_link pure-button">Статьи</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/videos" class="nav_list__item_link pure-button">Видео</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/vacancies" class="nav_list__item_link pure-button">Вакансии</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/faq" class="nav_list__item_link pure-button">FAQ</a>
+            </li>
+          
+        
+      </ul>
+    </nav>
+
+    <a href="#subscribeModal" class="pure-button header__subscribe_link">Подписаться на рассылку</a>
+  </div>
+</div>
+
+
+      <div class="content pure-u-1 pure-u-md-3-4">
+        
+
+<article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+  <header class="post__header">
+    
+    <h1 class="post__title" itemprop="name headline">Масштабируемое приложение на Эликсире: от зонтичного проекта к распределённой системе</h1>
+
+    <div class="post__meta post_meta">
+      <ul class="meta_list">
+        <li class="meta_list__item">
+          
+          <span class="">
+            <small class="meta_list__item_name">Дата</small>
+            <time class="h-bold" datetime="2018-06-08T00:00:00+00:00" itemprop="datePublished">
+              
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+08 июня 2018
+
+            </time>
+          </span>
+          
+
+          
+        </li>
+        
+        <li class="meta_list__item">
+            <span class="tag_cloud tags_cloud--inline h-no_margin">
+              <small class="meta_list__item_name">Теги</small> 
+
+
+<ul class="tags_cloud__list">
+  
+    <a href="/tags/#genserver" class="tags_cloud__link tag tag--genserver">genserver</a>
+  
+    <a href="/tags/#howto" class="tags_cloud__link tag tag--howto">howto</a>
+  
+    <a href="/tags/#practical" class="tags_cloud__link tag tag--practical">practical</a>
+  
+</ul>
+
+            </span>
+        </li>
+        
+        <li class="meta_list__item">
+          <span itemprop="author" itemscope itemtype="http://schema.org/Person">
+            <small class="meta_list__item_name">
+              
+                Перевод
+              
+            </small>
+            <span itemprop="name" class="h-bold">Надежда Нестерова</span>
+          </span>
+        </li>
+
+        <li class="meta_list__item">
+          
+            <div >
+              <small>Оригинал</small>
+              <strong>
+                &laquo;<a href="https://medium.com/matic-insurance/designing-scalable-application-with-elixir-from-umbrella-project-to-distributed-system-42f28c7e62f1" style="text-transform: none; text-decoration: underline; color: #4b2e39;">Designing scalable application with Elixir: from umbrella project to distributed system</a>&raquo;
+              </strong>
+              <small>&copy;</small>
+              <strong>Anton Mishchuk</strong>
+            </div>
+          
+        </li>
+      </ul>
+    </div>
+  </header>
+
+  <div class="post__content" itemprop="articleBody">
+    <p>Абстракции OTP Эликсира и Эрланга буквально вынуждают разработчиков разбивать программы на независимые части. Серверы GenServer инкапсулируют элементы бизнес-логики на микроуровне, в то время как приложения являются более общей (сервисной) составляющей системы. <strong>Сложные программы, написанные на Эликсире, всегда представляют собой набор взаимодействующих OTP-приложений.</strong></p>
+
+<p>Основной вопрос, возникающий в процессе создания таких программ, — это вопрос о разделении сложной системы на составные части. Но ещё более важной проблемой является организация связи между частями.</p>
+
+<p>В данной статье приведены некоторые принципы проектирования при разработке более или менее сложных проектов на Эликсире. Мы поговорим о том, как разбивать проект на более мелкие поддерживаемые микросервисы (приложения) и как создавать внутри них модули, используя «контексты».</p>
+
+<p>Но всё же основное внимание будет уделено проектированию гибких интерфейсов между приложениями на Эликсире. Вы увидите, как они будут меняться в процессе перехода от простого зонтичного проекта к распределённой системе. Будут рассмотрены такие подходы, как удалённый вызов процедуры Эрланга, распределённые задачи и HTTP-протокол. И в качестве бонуса вы узнаете, как ограничить конкурентный доступ к микросервисам.</p>
+
+<h2 id="зонтичный-проект">Зонтичный проект</h2>
+
+<p><img src="https://cdn-images-1.medium.com/max/1600/1*_bpJ-3mlGFEUAr1KocbyUg.png" alt="Зонтичный проект" /></p>
+
+<p>Структура зонтичного проекта на Эликсире позволяет разбить сложную логику на отдельные части в самом начале процесса разработки, и в то же время хранить всё в одном репозитории. Отсюда следует, что можно начать разработку будущих микросервисов без лишних усилий.</p>
+
+<p>Вот этот <a href="https://github.com/antonmi/ml_tools">демо-проект</a> сегодня послужит нам в качестве примера. Проект называется <code class="highlighter-rouge">ml_tools</code>, а в полном варианте <strong>«Machine Learning Tools»</strong>. Он позволяет пользователям применять к своим данным различные модели предсказания и выбирать из них наиболее подходящую. Им также предоставляется возможность выбора различных алгоритмов и визуализации результатов.</p>
+
+<p>Принципы разделения проекта на несколько приложений достаточно очевидны и определяются из требований:</p>
+
+<ul>
+  <li><code class="highlighter-rouge">datasets</code> —  приложение, отвечающее за операции с данными: создание, чтение и обновление.</li>
+  <li><code class="highlighter-rouge">utils</code> —  набор вспомогательных сервисов для предварительной обработки и визуализации данных.</li>
+  <li><code class="highlighter-rouge">models</code>  — сервис, реализующий различные алгоритмы предиктивного моделирования: линейная модель, «случайный лес», метод опорных векторов.</li>
+  <li><code class="highlighter-rouge">main</code>  — приложение верхнего уровня, задействующее остальные приложения и API верхнего уровня.</li>
+</ul>
+
+<p>Каждое приложение запускается под контролем отдельного супервизора, а следовательно, является независимым сервисом.</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>apps/
+  datasets/
+    lib/
+      datasets/
+        fetchers/
+          fetchers.ex
+          aws.ex
+          kaggle.ex
+        collections/
+          ...
+        interfaces/
+          fetchers.ex 
+          collections.ex
+  models/
+  utils/
+  main/
+...
+</code></pre></div></div>
+
+<p>Разбив логику верхнего уровня на несколько частей, рассмотрим каждую из них более подробно. Внутри каждого приложения код следует структурировать в виде модулей или наборов модулей. Можно определить модули верхнего уровня, основываясь на контекстах конкретного приложения.</p>
+
+<p>К примеру, приложение <code class="highlighter-rouge">datasets</code> отвечает за хранение наборов данных в своей базе данных и выборку данных из других источников. Значит, приложение будет иметь две папки в директории <code class="highlighter-rouge">lib/datasets</code>: <strong>«collections»</strong> и <strong>«fetchers»</strong>. В каждой из них будет присутствовать файл с расширением <code class="highlighter-rouge">.ex</code>, реализующий интерфейс контекста и другие вспомогательные модули.</p>
+
+<p>Заглянем в папку <code class="highlighter-rouge">lib/datasets/fetchers</code>. В ней находится модуль <code class="highlighter-rouge">Datasets.Fetchers</code>, реализующий интерфейс для fetchers-контекста — функции, возвращающие данные с платформ AWS и Kaggle. Помимо этого, есть <code class="highlighter-rouge">Datasets.Fetchers.Aws</code> и <code class="highlighter-rouge">Datasets.Fetchers.Kaggle</code>, реализующие доступ к соответствующим источникам данных.</p>
+
+<p>Такое же разделение по контекстному признаку можно осуществить и в остальных приложениях. Приложение <code class="highlighter-rouge">models</code> разбить по алгоритмам: <code class="highlighter-rouge">Models.Lm</code> (линейная модель), <code class="highlighter-rouge">Models.Rf</code> (случайный лес). Приложение <code class="highlighter-rouge">utils</code> отвечает за предварительную обработку данных (<code class="highlighter-rouge">Utils.PreProcessing</code>) и визуализацию (<code class="highlighter-rouge">Utils.Visualization</code>).</p>
+
+<p>И осталось последнее приложение верхнего уровня (<code class="highlighter-rouge">main</code>), использующее все остальные микросервисы. Оно имеет несколько контекстов: Модуль <code class="highlighter-rouge">Main.Zillow</code> для <a href="https://www.kaggle.com/c/zillow-prize-1">конкурса от Zillow</a> и <code class="highlighter-rouge">Main.Screening</code> для <a href="https://www.kaggle.com/c/passenger-screening-algorithm-challenge">задачи по улучшению алгоритма досмотра пассажиров</a>.</p>
+
+<p>Все приложения подключены к приложению Main в списке зависимостей в <code class="highlighter-rouge">Main.Mixfile</code>:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">defp</span> <span class="n">deps</span> <span class="k">do</span>
+  <span class="p">[</span>
+    <span class="p">{</span><span class="ss">:datasets</span><span class="p">,</span> <span class="ss">in_umbrella:</span> <span class="no">true</span><span class="p">},</span>
+    <span class="p">{</span><span class="ss">:models</span><span class="p">,</span> <span class="ss">in_umbrella:</span> <span class="no">true</span><span class="p">},</span>
+    <span class="p">{</span><span class="ss">:utils</span><span class="p">,</span> <span class="ss">in_umbrella:</span> <span class="no">true</span><span class="p">}</span>
+  <span class="p">]</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<p>Таким образом, главному приложению доступны модули всех других.</p>
+
+<p>Итак, в общем случае существуют три уровня организации кода в проектах, написанных на Эликсире:</p>
+
+<ul>
+  <li>
+    <p><strong>Уровень сервиса</strong> —  наиболее очевидный способ разбиения сложных систем на отдельные приложения (<code class="highlighter-rouge">datasets</code>, <code class="highlighter-rouge">models</code>, <code class="highlighter-rouge">utils</code>).</p>
+  </li>
+  <li>
+    <p><strong>Уровень контекста</strong> — разделение ответственности внутри того или иного сервиса с помощью реализации модулей контекста (<code class="highlighter-rouge">Datasets.Fetchers, Datasets.Collections</code>).</p>
+  </li>
+  <li>
+    <p><strong>Уровень реализации</strong> —  создание нескольких модулей, определяющих функции и структуры данных (<code class="highlighter-rouge">Datasets.Fetchers.Aws</code>, <code class="highlighter-rouge">Datasets.Fetchers.Kaggle</code>).</p>
+  </li>
+</ul>
+
+<h2 id="плюсы-иминусы-зонтичного-проекта">Плюсы и минусы зонтичного проекта</h2>
+
+<p>Как было отмечено выше, главное преимущество зонтичного проекта — хранение кода в одном месте и возможность использовать его целиком на стадиях разработки и тестирования. Можно экспериментировать с целой системой и, самое главное, тестировать все взаимодействующие компоненты в интеграционных тестах, что действительно важно на ранних стадиях разработки проекта.</p>
+
+<p>В то же время проект разделён на несколько относительно независимых частей и готов к масштабированию.</p>
+
+<p>Работая на других языках программирования, обычно создают один монолитный проект, а потом уже пытаются поместить некоторые части в отдельные приложения. Всё потому, что микросервисный подход невероятно усложняет процесс разработки.</p>
+
+<h2 id="однако-порабы-подумать-иобинкапсуляции">Однако пора бы подумать и об инкапсуляции.</h2>
+
+<p>Наверняка вы заметили, что подключение всех приложений к главному в его зависимостях не есть хорошо.</p>
+
+<p>Эликсиру не хватает конструкций для должной реализации инкапсуляции. Все, что у него есть, — это модули и функции (публичные и приватные). Если указать другой проект в зависимостях, то станут доступны все его модули, а значит, и все публичные функции. Реализация подбора данных для Zillow в главном приложении будет выглядеть так:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">defmodule</span> <span class="no">Main</span><span class="o">.</span><span class="no">Zillow</span> <span class="k">do</span>
+  <span class="k">def</span> <span class="n">rf_fit</span> <span class="k">do</span>
+    <span class="no">Datasets</span><span class="o">.</span><span class="no">Fetchers</span><span class="o">.</span><span class="n">zillow_data</span>
+    <span class="o">|&gt;</span> <span class="no">Utils</span><span class="o">.</span><span class="no">PreProcessing</span><span class="o">.</span><span class="n">normalize_data</span>
+    <span class="o">|&gt;</span> <span class="no">Models</span><span class="o">.</span><span class="no">Rf</span><span class="o">.</span><span class="n">fit_model</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<p><code class="highlighter-rouge">Datasets.Fetchers</code>, <code class="highlighter-rouge">Utils.PreProcessing</code> и <code class="highlighter-rouge">Models.Rf</code> — модули других приложений. Такое беспечное использование модулей из других приложений приведёт к объединению сервисов и превращению системы обратно в монолит.</p>
+
+<p>С одной стороны, хотелось бы, чтобы все части проекта были доступны на стадиях разработки и тестирования, но при этом необходимо каким-то образом запретить связывание приложений.</p>
+
+<p>Единственный способ это осуществить — создать соглашения о том, какие функции одного приложения могут быть использованы в другом. Лучше всего вытащить все публичные функции и поместить их в отдельные модули интерфейса.</p>
+
+<h2 id="модули-интерфейса">Модули интерфейса</h2>
+
+<p><img src="https://cdn-images-1.medium.com/max/1600/1*2P4KFrdxd1W5KJ-TEeqmfw.png" alt="Интерфейсы" /></p>
+
+<p>Задача: переместить все публичные функции приложения (функции, которые могут быть вызваны другим приложением) в отдельные модули. Например, в приложении <code class="highlighter-rouge">datasets</code> имеется специальный модуль интерфейса для функций приложения <code class="highlighter-rouge">Fetchers</code>:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">defmodule</span> <span class="no">Datasets</span><span class="o">.</span><span class="no">Interfaces</span><span class="o">.</span><span class="no">Fetchers</span> <span class="k">do</span>
+  <span class="n">alias</span> <span class="no">Datasets</span><span class="o">.</span><span class="no">Fetchers</span>
+
+  <span class="k">defdelegate</span> <span class="n">zillow_data</span><span class="p">,</span> <span class="ss">to:</span> <span class="no">Fetchers</span>
+  <span class="k">defdelegate</span> <span class="n">landsat_data</span><span class="p">,</span> <span class="ss">to:</span> <span class="no">Fetchers</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<p>С помощью такой простой реализации можно делегировать вызовы функций соответствующему модулю. А в будущем, если будет решено перенести запущенное приложение <code class="highlighter-rouge">datasets</code> на другую ноду, этот модуль будет содержать основную часть логики взаимодействия.</p>
+
+<p>В других приложениях можно сделать то же самое, просто переписав модуль <code class="highlighter-rouge">Main.Zillow</code>:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">def</span> <span class="n">rf_fit</span> <span class="k">do</span>
+  <span class="no">Datasets</span><span class="o">.</span><span class="no">Interfaces</span><span class="o">.</span><span class="no">Fetchers</span><span class="o">.</span><span class="n">zillow_data</span>
+  <span class="o">|&gt;</span> <span class="no">Utils</span><span class="o">.</span><span class="no">Interfaces</span><span class="o">.</span><span class="no">PreProcessing</span><span class="o">.</span><span class="n">normalize_data</span>
+  <span class="o">|&gt;</span> <span class="no">Models</span><span class="o">.</span><span class="no">Interfaces</span><span class="o">.</span><span class="no">Rf</span><span class="o">.</span><span class="n">fit_model</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<p>В общем, принцип таков: чтобы вызвать какую-либо функцию другого приложения, необходимо использовать модуль интерфейса.</p>
+
+<p>Такой подход так же не усложняет разработку и тестирование, но привносит ряд простых правил, которые предотвращают сильную связность кода и выстаивают основу для будущего масштабирования.</p>
+
+<h2 id="переход-краспределённой-системе">Переход к распределённой системе</h2>
+
+<p><img src="https://cdn-images-1.medium.com/max/1600/1*ZYJRmGpXHg9rs9kNXGi4Zg.png" alt="Интерфейсные приложения" /></p>
+
+<p>Предположим, обработка данных стала занимать слишком много времени, и было решено запускать приложение <code class="highlighter-rouge">models</code> на отдельной ноде. Получается, необходимо удалить <code class="highlighter-rouge">{:models, in_umbrella: true}</code> из списка зависимостей и запустить это приложение на другой ноде.</p>
+
+<p>Запустив консоль (<code class="highlighter-rouge">iex -S mix</code>) из папки с главным приложением (<code class="highlighter-rouge">main</code>), можно увидеть, что доступ к модулям приложения <code class="highlighter-rouge">models</code> закрыт:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>iex(1)&gt; Models.Interfaces.Rf.fit_model(“data”)
+** (UndefinedFunctionError) function Models.Interfaces.Rf.fit_model/1 is undefined (module Models.Interfaces.Rf is not available)
+</code></pre></div></div>
+
+<p>Код приложения <code class="highlighter-rouge">models</code> все ещё находится внутри зонтичного проекта, но он не запускается с главным предложением и находится вне доступа. Модули и функции приложения <code class="highlighter-rouge">models</code> существуют на другой ноде, которая запускает только его.</p>
+
+<p>Но, как известно, виртуальная машина BEAM была создана для распределённых приложений, поэтому существует множество способов получить доступ к коду, запущенному на другой машине.</p>
+
+<h2 id="модуль-rpc">Модуль <code class="highlighter-rouge">:rpc</code></h2>
+
+<p>Сравнительно просто запустить функцию на удалённой ноде с помощью модуля <code class="highlighter-rouge">:rpc</code> Эрланга. Для взаимодействия между нодами <code class="highlighter-rouge">:rpc</code> использует <a href="http://erlang.org/doc/apps/erts/erl_dist_protocol.html"><strong>Erlang Distribution Protocol</strong></a>.</p>
+
+<p>Можно даже провести небольшой эксперимент: запустить приложение <code class="highlighter-rouge">main</code> с помощью опции <code class="highlighter-rouge">--sname main</code> в одной вкладке терминала</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>iex --sname main -S mix
+</code></pre></div></div>
+
+<p>а проект <code class="highlighter-rouge">models</code> — в другой:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>iex --sname models -S mix
+</code></pre></div></div>
+
+<p>Теперь можно что-нибудь посчитать:</p>
+
+<pre><code class="language-beam.assembly">iex(main@ip-192–168–1–150)1&gt; :rpc.call(:”models@ip-192–168–1–150", Models.Interfaces.Rf, :fit_model, [“data”])
+%{__struct__: Models.Rf.Coefficient, a: 1, b: 2, data: “data”}
+</code></pre>
+
+<p>Как же изменить текущий проект так, чтобы можно было воспользоваться приведённым выше способом?</p>
+
+<p>Идея очень проста: нужно добавить в проект ещё одно приложение, реализующее логику взаимодействия, — <code class="highlighter-rouge">models_interface</code>.</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>models_interface/ 
+  config/
+  lib/
+    models_interface/
+      models_interface.ex
+        lm.ex
+        rf.ex
+    mix.ex
+</code></pre></div></div>
+
+<p>Вот такая небольшая правка предоставляет main доступ к функциям <code class="highlighter-rouge">Models.Interface</code>. Пару небольших модулей просто дублируют функции модулей <code class="highlighter-rouge">Interfaces</code>:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">defmodule</span> <span class="no">ModelsInterface</span><span class="o">.</span><span class="no">Rf</span> <span class="k">do</span>
+  <span class="k">def</span> <span class="n">fit_model</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="k">do</span>
+    <span class="no">ModelsInterface</span><span class="o">.</span><span class="n">remote_call</span><span class="p">(</span><span class="no">Models</span><span class="o">.</span><span class="no">Interfaces</span><span class="o">.</span><span class="no">Rf</span><span class="p">,</span> <span class="ss">:fit_model</span><span class="p">,</span> <span class="p">[</span><span class="n">data</span><span class="p">])</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<p>Данный модуль просто вызывает функцию <code class="highlighter-rouge">Models.Interfaces.Rf.fit_model/1</code>, а реализация функции <code class="highlighter-rouge">remote_call</code> уже находится в модуле <code class="highlighter-rouge">ModelsInterface</code>:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">defmodule</span> <span class="no">ModelsInterface</span> <span class="k">do</span>
+  <span class="k">def</span> <span class="n">remote_call</span><span class="p">(</span><span class="n">module</span><span class="p">,</span> <span class="n">fun</span><span class="p">,</span> <span class="n">args</span><span class="p">,</span> <span class="n">env</span> <span class="p">\\</span> <span class="no">Mix</span><span class="o">.</span><span class="n">env</span><span class="p">)</span> <span class="k">do</span>
+    <span class="n">do_remote_call</span><span class="p">({</span><span class="n">module</span><span class="p">,</span> <span class="n">fun</span><span class="p">,</span> <span class="n">args</span><span class="p">},</span> <span class="n">env</span><span class="p">)</span>
+  <span class="k">end</span>
+
+  <span class="k">def</span> <span class="n">remote_node</span> <span class="k">do</span>
+    <span class="no">Application</span><span class="o">.</span><span class="n">get_env</span><span class="p">(</span><span class="ss">:models_interface</span><span class="p">,</span> <span class="ss">:node</span><span class="p">)</span>
+  <span class="k">end</span>
+
+  <span class="k">defp</span> <span class="n">do_remote_call</span><span class="p">({</span><span class="n">module</span><span class="p">,</span> <span class="n">fun</span><span class="p">,</span> <span class="n">args</span><span class="p">},</span> <span class="ss">:test</span><span class="p">)</span> <span class="k">do</span>
+    <span class="n">apply</span><span class="p">(</span><span class="n">module</span><span class="p">,</span> <span class="n">fun</span><span class="p">,</span> <span class="n">args</span><span class="p">)</span>
+  <span class="k">end</span>
+  
+  <span class="k">defp</span> <span class="n">do_remote_call</span><span class="p">({</span><span class="n">module</span><span class="p">,</span> <span class="n">fun</span><span class="p">,</span> <span class="n">args</span><span class="p">},</span> <span class="n">_</span><span class="p">)</span> <span class="k">do</span>
+    <span class="ss">:rpc</span><span class="o">.</span><span class="n">call</span><span class="p">(</span><span class="n">remote_node</span><span class="p">(),</span> <span class="n">module</span><span class="p">,</span> <span class="n">fun</span><span class="p">,</span> <span class="n">args</span><span class="p">)</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<p>Данный модуль получает расположение ноды из конфигурации и осуществляет удалённый вызов процедуры. Обратите внимание на особую реализацию <code class="highlighter-rouge">do_remote_call</code>, которая позволяет упростить процесс тестирования, но об этом позже.</p>
+
+<p>И последнее: нужно лишь заменить <code class="highlighter-rouge">Models.Interfaces</code> на <code class="highlighter-rouge">ModelsInterface</code> и всё готово! Только не забудьте добавить models_interface в список зависимостей главного приложения.</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">defp</span> <span class="n">deps</span> <span class="k">do</span>
+  <span class="p">[</span>
+    <span class="p">{</span><span class="ss">:datasets</span><span class="p">,</span> <span class="ss">in_umbrella:</span> <span class="no">true</span><span class="p">},</span>
+    <span class="p">{</span><span class="ss">:models</span><span class="p">,</span> <span class="ss">in_umbrella:</span> <span class="no">true</span><span class="p">,</span> <span class="ss">only:</span> <span class="p">[</span><span class="ss">:test</span><span class="p">]},</span>
+    <span class="p">{</span><span class="ss">:models_interface</span><span class="p">,</span> <span class="ss">in_umbrella:</span> <span class="no">true</span><span class="p">},</span>
+    <span class="p">{</span><span class="ss">:utils</span><span class="p">,</span> <span class="ss">in_umbrella:</span> <span class="no">true</span><span class="p">},</span>
+    <span class="p">{</span><span class="ss">:espec</span><span class="p">,</span> <span class="sd">"</span><span class="s2">1.4.6"</span><span class="p">,</span> <span class="ss">only:</span> <span class="ss">:test</span><span class="p">}</span>
+  <span class="p">]</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<p>Приложение <code class="highlighter-rouge">models</code> указано в зависимостях, но только в тестовом окружении. Это позволяет осуществлять прямые вызовы приложения в тестовом окружении.</p>
+
+<p>Вот и всё. Теперь можно получить доступ к <code class="highlighter-rouge">models</code> через консоль <code class="highlighter-rouge">iex</code>:</p>
+
+<pre><code class="language-beam.assembly">iex(main@ip-192–168–1–150)1&gt; ModelsInterface.Rf.fit_model(“data”)
+%{__struct__: Models.Rf.Coefficient, a: 1, b: 2, data: “data”}
+</code></pre>
+
+<p>Итак, подведём итоги. Единственное изменение, которое необходимо было сделать, — это создание нового интерфейсного приложения. Весь код по-прежнему находится в одном месте, и все тесты пройдены.</p>
+
+<p>##Распределённые задачи</p>
+
+<p>Прямые удалённые вызовы процедур подойдут, если необходим простой синхронный интерфейс с другим приложением. Но когда дело касается запуска асинхронного кода на удалённой ноде, лучше всего использовать распределённые задачи.</p>
+
+<p>Для динамического контроля задач в Эликсире используется специальный модуль <code class="highlighter-rouge">Task.Supervisor</code>. Он запускает супервизор внутри удалённого приложения и осуществляет надзор за задачами, исполняющими код. Воспользуемся распределёнными задачами, чтобы получить доступ к приложению <code class="highlighter-rouge">datasets</code>.</p>
+
+<p>Прежде всего, добавим <code class="highlighter-rouge">Task.Supervisor</code> к списку потомков супервизора приложения <code class="highlighter-rouge">datasets</code>:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">defmodule</span> <span class="no">Datasets</span><span class="o">.</span><span class="no">Application</span> <span class="k">do</span>
+  <span class="nv">@moduledoc</span> <span class="no">false</span>
+
+  <span class="kn">use</span> <span class="no">Application</span>
+  <span class="kn">import</span> <span class="no">Supervisor</span><span class="o">.</span><span class="no">Spec</span>
+
+  <span class="k">def</span> <span class="n">start</span><span class="p">(</span><span class="n">_type</span><span class="p">,</span> <span class="n">_args</span><span class="p">)</span> <span class="k">do</span>
+    <span class="n">children</span> <span class="o">=</span> <span class="p">[</span>
+      <span class="n">supervisor</span><span class="p">(</span><span class="no">Task</span><span class="o">.</span><span class="no">Supervisor</span><span class="p">,</span> 
+        <span class="p">[[</span><span class="ss">name:</span> <span class="no">Datasets</span><span class="o">.</span><span class="no">Task</span><span class="o">.</span><span class="no">Supervisor</span><span class="p">]],</span>
+        <span class="p">[</span><span class="ss">restart:</span> <span class="ss">:temporary</span><span class="p">,</span> <span class="ss">shutdown:</span> <span class="m">10000</span><span class="p">])</span>
+    <span class="p">]</span>
+
+    <span class="n">opts</span> <span class="o">=</span> <span class="p">[</span><span class="ss">strategy:</span> <span class="ss">:one_for_one</span><span class="p">,</span> <span class="ss">name:</span> <span class="no">Datasets</span><span class="o">.</span><span class="no">Supervisor</span><span class="p">]</span>
+    <span class="no">Supervisor</span><span class="o">.</span><span class="n">start_link</span><span class="p">(</span><span class="n">children</span><span class="p">,</span> <span class="n">opts</span><span class="p">)</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<p>Модуль <code class="highlighter-rouge">DatasetsInterface</code> (отдельное интерфейсное приложение) выглядит так:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">defmodule</span> <span class="no">DatasetsInterface</span> <span class="k">do</span>
+  <span class="k">def</span> <span class="n">spawn_task</span><span class="p">(</span><span class="n">module</span><span class="p">,</span> <span class="n">fun</span><span class="p">,</span> <span class="n">args</span><span class="p">,</span> <span class="n">env</span> <span class="p">\\</span> <span class="no">Mix</span><span class="o">.</span><span class="n">env</span><span class="p">)</span> <span class="k">do</span>
+    <span class="n">do_spawn_task</span><span class="p">({</span><span class="n">module</span><span class="p">,</span> <span class="n">fun</span><span class="p">,</span> <span class="n">args</span><span class="p">},</span> <span class="n">env</span><span class="p">)</span>
+  <span class="k">end</span>
+
+  <span class="k">defp</span> <span class="n">do_spawn_task</span><span class="p">({</span><span class="n">module</span><span class="p">,</span> <span class="n">fun</span><span class="p">,</span> <span class="n">args</span><span class="p">},</span> <span class="ss">:test</span><span class="p">)</span> <span class="k">do</span>
+    <span class="n">apply</span><span class="p">(</span><span class="n">module</span><span class="p">,</span> <span class="n">fun</span><span class="p">,</span> <span class="n">args</span><span class="p">)</span>
+  <span class="k">end</span>
+
+  <span class="k">defp</span> <span class="n">do_spawn_task</span><span class="p">({</span><span class="n">module</span><span class="p">,</span> <span class="n">fun</span><span class="p">,</span> <span class="n">args</span><span class="p">},</span> <span class="n">_</span><span class="p">)</span> <span class="k">do</span>
+    <span class="no">Task</span><span class="o">.</span><span class="no">Supervisor</span><span class="o">.</span><span class="n">async</span><span class="p">(</span><span class="n">remote_supervisor</span><span class="p">(),</span> <span class="n">module</span><span class="p">,</span> <span class="n">fun</span><span class="p">,</span> <span class="n">args</span><span class="p">)</span>
+    <span class="o">|&gt;</span> <span class="no">Task</span><span class="o">.</span><span class="n">await</span>
+  <span class="k">end</span>
+
+  <span class="k">defp</span> <span class="n">remote_supervisor</span> <span class="k">do</span>
+    <span class="p">{</span>
+      <span class="no">Application</span><span class="o">.</span><span class="n">get_env</span><span class="p">(</span><span class="ss">:datasets_interface</span><span class="p">,</span> <span class="ss">:task_supervisor</span><span class="p">),</span>
+      <span class="no">Application</span><span class="o">.</span><span class="n">get_env</span><span class="p">(</span><span class="ss">:datasets_interface</span><span class="p">,</span> <span class="ss">:node</span><span class="p">)</span>
+    <span class="p">}</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<p>Будем использовать паттерн async/await. Отличие заключается в том, что задачи порождаются на удалённой ноде и контролируются удалённым супервизором, имя и расположение которого указаны в файле конфигурации:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">config</span> <span class="ss">:datasets_interface</span><span class="p">,</span>
+       <span class="ss">task_supervisor:</span> <span class="no">Datasets</span><span class="o">.</span><span class="no">Task</span><span class="o">.</span><span class="no">Supervisor</span><span class="p">,</span>
+       <span class="ss">node:</span> <span class="ss">:"models@ip-192-168-1-150"</span>
+</code></pre></div></div>
+
+<p>И снова тот же трюк с тестовым окружением!</p>
+
+<h2 id="другие-протоколы">Другие протоколы</h2>
+
+<p>RPC и распределённые задачи — встроенные в Эрланг и Эликсир абстракции, позволяющие приложениям на Эликсире взаимодействовать без сериализации и десериализации. Но если требуется наладить связь с приложением, написанным на другом языке, то поможет более распространённый подход, такой как протокол HTTP.</p>
+
+<p>В качестве примера реализуем простенький интерфейс HTTP для приложения <code class="highlighter-rouge">utils</code>. Как и в прошлый раз, сначала создаём новое приложение <code class="highlighter-rouge">utils_interface</code>:</p>
+
+<p>Модуль <code class="highlighter-rouge">UtilsInterface</code> имеет похожую на <code class="highlighter-rouge">ModelsInterface</code> структуру, однако функция d<code class="highlighter-rouge">o_remote_call/2</code> выглядит так:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">defp</span> <span class="n">do_remote_call</span><span class="p">({</span><span class="n">module</span><span class="p">,</span> <span class="n">fun</span><span class="p">,</span> <span class="n">args</span><span class="p">},</span> <span class="n">_</span><span class="p">)</span> <span class="k">do</span>
+  <span class="p">{</span><span class="ss">:ok</span><span class="p">,</span> <span class="n">resp</span><span class="p">}</span> <span class="o">=</span> <span class="no">HTTPoison</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="n">remote_url</span><span class="p">(),</span>
+                               <span class="n">serialize</span><span class="p">({</span><span class="n">module</span><span class="p">,</span> <span class="n">fun</span><span class="p">,</span> <span class="n">args</span><span class="p">}))</span>
+  <span class="n">deserialize</span><span class="p">(</span><span class="n">resp</span><span class="o">.</span><span class="n">body</span><span class="p">)</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<p>В данном примере будем использовать элементарную сериализацию Эрланга <code class="highlighter-rouge">term_to_binary</code> и <code class="highlighter-rouge">binary_to_term</code>:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">defp</span> <span class="n">serialize</span><span class="p">(</span><span class="n">term</span><span class="p">),</span> <span class="k">do</span><span class="p">:</span> <span class="ss">:erlang</span><span class="o">.</span><span class="n">term_to_binary</span><span class="p">(</span><span class="n">term</span><span class="p">)</span>
+<span class="k">defp</span> <span class="n">deserialize</span><span class="p">(</span><span class="n">data</span><span class="p">),</span> <span class="k">do</span><span class="p">:</span> <span class="ss">:erlang</span><span class="o">.</span><span class="n">binary_to_term</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p>Проекту <code class="highlighter-rouge">utils</code> понадобится HTTP-сервер для прослушивания входящих запросов. Для этого воспользуемся <code class="highlighter-rouge">cowboy</code> и <code class="highlighter-rouge">plug</code>:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">defp</span> <span class="n">deps</span> <span class="k">do</span>
+  <span class="p">[</span>
+    <span class="p">{</span><span class="ss">:cowboy</span><span class="p">,</span> <span class="sd">"</span><span class="s2">~&gt; 1.0.0"</span><span class="p">},</span>
+    <span class="p">{</span><span class="ss">:plug</span><span class="p">,</span> <span class="sd">"</span><span class="s2">~&gt; 1.0"</span><span class="p">},</span>
+    <span class="p">{</span><span class="ss">:espec</span><span class="p">,</span> <span class="sd">"</span><span class="s2">1.4.6"</span><span class="p">,</span> <span class="ss">only:</span> <span class="ss">:test</span><span class="p">}</span>
+  <span class="p">]</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<p>Так выглядит плаг, отвечающий за обработку запросов:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">defmodule</span> <span class="no">Utils</span><span class="o">.</span><span class="no">Interfaces</span><span class="o">.</span><span class="no">Plug</span> <span class="k">do</span>
+  <span class="kn">use</span> <span class="no">Plug</span><span class="o">.</span><span class="no">Router</span>
+
+  <span class="n">plug</span> <span class="ss">:match</span>
+  <span class="n">plug</span> <span class="ss">:dispatch</span>
+
+  <span class="n">post</span> <span class="sd">"</span><span class="s2">/remote"</span> <span class="k">do</span>
+    <span class="p">{</span><span class="ss">:ok</span><span class="p">,</span> <span class="n">body</span><span class="p">,</span> <span class="n">conn</span><span class="p">}</span> <span class="o">=</span> <span class="no">Plug</span><span class="o">.</span><span class="no">Conn</span><span class="o">.</span><span class="n">read_body</span><span class="p">(</span><span class="n">conn</span><span class="p">)</span>
+    <span class="p">{</span><span class="n">module</span><span class="p">,</span> <span class="n">fun</span><span class="p">,</span> <span class="n">args</span><span class="p">}</span> <span class="o">=</span> <span class="n">deserialize</span><span class="p">(</span><span class="n">body</span><span class="p">)</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="n">apply</span><span class="p">(</span><span class="n">module</span><span class="p">,</span> <span class="n">fun</span><span class="p">,</span> <span class="n">args</span><span class="p">)</span>
+    <span class="n">send_resp</span><span class="p">(</span><span class="n">conn</span><span class="p">,</span> <span class="m">200</span><span class="p">,</span> <span class="n">serialize</span><span class="p">(</span><span class="n">result</span><span class="p">))</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<p>Он попросту десериализует кортеж <code class="highlighter-rouge">{module, fun, args}</code>, вызывает функцию и отправляет результат обратно клиенту.</p>
+
+<p>Не забудьте запустить плаг чепез сервер <code class="highlighter-rouge">cowboy</code> в приложении <code class="highlighter-rouge">utils</code>:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">children</span> <span class="o">=</span> <span class="p">[</span>
+  <span class="no">Plug</span><span class="o">.</span><span class="no">Adapters</span><span class="o">.</span><span class="no">Cowboy</span><span class="o">.</span><span class="n">child_spec</span><span class="p">(</span><span class="ss">:http</span><span class="p">,</span>  
+       <span class="no">Utils</span><span class="o">.</span><span class="no">Interfaces</span><span class="o">.</span><span class="no">Plug</span><span class="p">,</span> <span class="p">[],</span> <span class="p">[</span><span class="ss">port:</span> <span class="m">4001</span><span class="p">])</span>
+<span class="p">]</span>
+</code></pre></div></div>
+
+<p>Обратите внимание, что вызывать функции напрямую из десериализованных данных не самый лучший ход. Здесь это сделано только в целях упрощения примера, на практике потребуется более продуманный метод.</p>
+
+<h2 id="ограниченная-конкурентность-сpoolboy">Ограниченная конкурентность с <code class="highlighter-rouge">poolboy</code></h2>
+
+<p>И последнее, о чём мы поговорим сегодня, поможет защитить приложение и его ресурсы от перегрузки. Представим, например, что приложение models использует слишком много памяти для подбора моделей. Соответственно, необходимо уменьшить количество клиентов, желающих получить доступ к этому приложению. Для этого на уровне интерфейса создадим ограниченный пул процессов-воркеров, используя библиотеку <code class="highlighter-rouge">poolboy</code>.</p>
+
+<p><code class="highlighter-rouge">poolboy</code> нужно запустить через супервизор приложения:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">defmodule</span> <span class="no">Models</span><span class="o">.</span><span class="no">Application</span> <span class="k">do</span>
+  <span class="kn">use</span> <span class="no">Application</span>
+
+  <span class="k">def</span> <span class="n">start</span><span class="p">(</span><span class="n">_type</span><span class="p">,</span> <span class="n">_args</span><span class="p">)</span> <span class="k">do</span>
+    <span class="n">pool_options</span> <span class="o">=</span> <span class="p">[</span>
+      <span class="ss">name:</span> <span class="p">{</span><span class="ss">:local</span><span class="p">,</span> <span class="no">Models</span><span class="o">.</span><span class="no">Interface</span><span class="p">},</span>
+      <span class="ss">worker_module:</span> <span class="no">Models</span><span class="o">.</span><span class="no">Interfaces</span><span class="o">.</span><span class="no">Worker</span><span class="p">,</span>
+      <span class="ss">size:</span> <span class="m">5</span><span class="p">,</span> <span class="ss">max_overflow:</span> <span class="m">5</span><span class="p">]</span>
+
+    <span class="n">children</span> <span class="o">=</span> <span class="p">[</span>
+      <span class="ss">:poolboy</span><span class="o">.</span><span class="n">child_spec</span><span class="p">(</span><span class="no">Models</span><span class="o">.</span><span class="no">Interface</span><span class="p">,</span> <span class="n">pool_options</span><span class="p">,</span> <span class="p">[]),</span>
+    <span class="p">]</span>
+
+    <span class="n">opts</span> <span class="o">=</span> <span class="p">[</span><span class="ss">strategy:</span> <span class="ss">:one_for_one</span><span class="p">,</span> <span class="ss">name:</span> <span class="no">Models</span><span class="o">.</span><span class="no">Supervisor</span><span class="p">]</span>
+    <span class="no">Supervisor</span><span class="o">.</span><span class="n">start_link</span><span class="p">(</span><span class="n">children</span><span class="p">,</span> <span class="n">opts</span><span class="p">)</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<p>Видно, что у <code class="highlighter-rouge">poolboy</code> есть несколько опций: имя супервизора, модуль-воркер, размер пула и максимальная загрузка.</p>
+
+<p>Модуль-воркер — простой GenServer, вызывающий соответствующую функцию:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">defmodule</span> <span class="no">Models</span><span class="o">.</span><span class="no">Interfaces</span><span class="o">.</span><span class="no">Worker</span> <span class="k">do</span>
+  <span class="kn">use</span> <span class="no">GenServer</span>
+
+  <span class="k">def</span> <span class="n">start_link</span><span class="p">(</span><span class="n">_opts</span><span class="p">)</span> <span class="k">do</span>
+    <span class="no">GenServer</span><span class="o">.</span><span class="n">start_link</span><span class="p">(</span><span class="bp">__MODULE__</span><span class="p">,</span> <span class="ss">:ok</span><span class="p">,</span> <span class="p">[])</span>
+  <span class="k">end</span>
+
+  <span class="k">def</span> <span class="n">init</span><span class="p">(</span><span class="ss">:ok</span><span class="p">),</span> <span class="k">do</span><span class="p">:</span> <span class="p">{</span><span class="ss">:ok</span><span class="p">,</span> <span class="p">%{}}</span>
+
+  <span class="k">def</span> <span class="n">handle_call</span><span class="p">({</span><span class="n">module</span><span class="p">,</span> <span class="n">fun</span><span class="p">,</span> <span class="n">args</span><span class="p">},</span> <span class="n">_from</span><span class="p">,</span> <span class="n">state</span><span class="p">)</span> <span class="k">do</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="n">apply</span><span class="p">(</span><span class="n">module</span><span class="p">,</span> <span class="n">fun</span><span class="p">,</span> <span class="n">args</span><span class="p">)</span>
+    <span class="p">{</span><span class="ss">:reply</span><span class="p">,</span> <span class="n">result</span><span class="p">,</span> <span class="n">state</span><span class="p">}</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<p>И последнее изменение касается модуля <code class="highlighter-rouge">Models.Interfaces.Rf</code>: вместо делегации функций, он будет порождать в пуле процесс-воркер:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">defmodule</span> <span class="no">Models</span><span class="o">.</span><span class="no">Interfaces</span><span class="o">.</span><span class="no">Rf</span> <span class="k">do</span>
+  <span class="k">def</span> <span class="n">fit_model</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="k">do</span>
+    <span class="n">with_poolboy</span><span class="p">({</span><span class="no">Models</span><span class="o">.</span><span class="no">Rf</span><span class="p">,</span> <span class="ss">:fit_model</span><span class="p">,</span> <span class="p">[</span><span class="n">data</span><span class="p">]})</span>
+  <span class="k">end</span>
+
+  <span class="k">def</span> <span class="n">with_poolboy</span><span class="p">(</span><span class="n">args</span><span class="p">)</span> <span class="k">do</span>
+    <span class="n">worker</span> <span class="o">=</span> <span class="ss">:poolboy</span><span class="o">.</span><span class="n">checkout</span><span class="p">(</span><span class="no">Models</span><span class="o">.</span><span class="no">Interface</span><span class="p">)</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="no">GenServer</span><span class="o">.</span><span class="n">call</span><span class="p">(</span><span class="n">worker</span><span class="p">,</span> <span class="n">args</span><span class="p">,</span> <span class="ss">:infinity</span><span class="p">)</span>
+    <span class="ss">:poolboy</span><span class="o">.</span><span class="n">checkin</span><span class="p">(</span><span class="no">Models</span><span class="o">.</span><span class="no">Interface</span><span class="p">,</span> <span class="n">worker</span><span class="p">)</span>
+    <span class="n">result</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<p>Теперь беспокоиться не о чем: приложение <code class="highlighter-rouge">models</code> сможет обработать только ограниченное число запросов.</p>
+
+<h2 id="заключение">Заключение</h2>
+
+<p>И в заключение пара рекомендаций:</p>
+
+<ul>
+  <li>
+    <p>С самого начала разработки <strong>думайте в сторону микросервисов</strong>. С зонтичным проектом на Эликсире это проще, чем вы думаете.</p>
+  </li>
+  <li>
+    <p>Для организации логики внутри приложений создавайте модули <strong>контекста</strong> и <strong>реализации</strong>.</p>
+  </li>
+  <li>
+    <p>Тщательно <strong>продумывайте интерфейсы приложений</strong>. Никаких прямых вызовов реализаций функций быть не должно.</p>
+  </li>
+  <li>
+    <p>Масштабируя проект в распределённую систему, <strong>помещайте логику взаимодействия в отдельное приложение</strong>. Для взаимодействия между приложениями, запущенными на BEAM, используйте Erlang Distribution Protocol.</p>
+  </li>
+</ul>
+
+<p>Надеемся, подходы и абстракции, описанные в данной статье, помогут вам более грамотно работать на Эликсире.</p>
+
+  </div>
+
+  <!-- uSocial -->
+  <div class="post__share_block share_block">
+    <script async src="https://usocial.pro/usocial/usocial.js?v=6.1.4" data-script="usocial" charset="utf-8"></script>
+    <div class="uSocial-Share" data-pid="2fd19544e551bce292425ee8adaa31be" data-type="share" data-options="round,style2,default,absolute,horizontal,size32,counter1,counter-before,upArrow-right,nomobile" data-social="telegram,fb,vk,gPlus,twi,bookmarks"></div>
+  </div>
+  <!-- /uSocial -->
+</article>
+
+
+        <footer class="footer">
+    &copy; 2020
+    / Россия
+
+    <span class="pull-right">Любые мысли и вопросы пишите на <a href="mailto:elixir@wunsh.ru">elixir@wunsh.ru</a>.</span>
+</footer>
+
+        <div id="subscribeModal" class="modal">
+    <div class="modal__content">
+        <a href="#close" title="Close" class="modal__close">x</a>
+
+        <h2 class="modal__title">Ламповая рассылка про&nbsp;Эликсир</h2>
+
+        <p>Один-два раза в&nbsp;неделю присылаем тёплые письма об&nbsp;Эликсире: переводы самых интересных статей до&nbsp;их&nbsp;появления в&nbsp;открытом доступе, анонсы событий и&nbsp;вкусные бонусы.</p>
+
+        <form action="//wunsh.us14.list-manage.com/subscribe/post?u=c81ca3d4693f62db7f7f67c71&amp;id=a192e2dfef" method="post" id="mc-embedded-subscribe-form" name="mc-embedded-subscribe-form" class="pure-form h-tc validate" target="_blank" novalidate>
+            <input type="email" value="" name="EMAIL" class="modal__input pure-input-rounded large" id="mce-EMAIL" placeholder="Твоя почта" required>
+            <div style="position: absolute; left: -5000px;" aria-hidden="true"><input type="text" name="b_c81ca3d4693f62db7f7f67c71_a192e2dfef" tabindex="-1" value=""></div>
+
+            <input type="submit" value="Присоединиться" name="subscribe" onClick="yaCounter39773490.reachGoal('SUBSCRIBED'); return true" id="mc-embedded-subscribe" class="pure-button button-success large">
+        </form>
+
+        <p>Обязательно подтверди почту, перейдя по&nbsp;ссылке в&nbsp;письме, иначе мы&nbsp;не&nbsp;сможем делиться с&nbsp;тобой полезностями.</p>
+
+        <p>Надоедать точно не&nbsp;будем :)</p>
+    </div>
+</div>
+
+        <script src="/assets/js/vendors/zepto.min.js"></script>
+
+<script>
+    if ($(".post--docs").length) {
+        $(".footer").addClass("footer--docs")
+    }
+
+    $(".modal--close_backdrop").click(function(){
+        window.location.hash = "";
+    });
+</script>
+
+        <!-- Yandex.Metrika counter -->
+<script type="text/javascript">
+    (function (d, w, c) {
+        (w[c] = w[c] || []).push(function() {
+            try {
+                w.yaCounter39773490 = new Ya.Metrika({
+                    id:39773490,
+                    clickmap:true,
+                    trackLinks:true,
+                    accurateTrackBounce:true,
+                    webvisor:true,
+                    ut:"noindex"
+                });
+            } catch(e) { }
+        });
+
+        var n = d.getElementsByTagName("script")[0],
+            s = d.createElement("script"),
+            f = function () { n.parentNode.insertBefore(s, n); };
+        s.type = "text/javascript";
+        s.async = true;
+        s.src = "https://mc.yandex.ru/metrika/watch.js";
+
+        if (w.opera == "[object Opera]") {
+            d.addEventListener("DOMContentLoaded", f, false);
+        } else { f(); }
+    })(document, window, "yandex_metrika_callbacks");
+</script>
+<noscript><div><img src="https://mc.yandex.ru/watch/39773490?ut=noindex" style="position:absolute; left:-9999px;" alt="" /></div></noscript>
+<!-- /Yandex.Metrika counter -->
+
+      </div>
+    </div>
+  </body>
+</html>

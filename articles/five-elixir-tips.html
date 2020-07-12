@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Пять хитростей Elixir, о которых должен знать каждый |> Сообщество Elixir и Phoenix Framework</title>
+    <meta name="description" content="Интересные трюки, овладев которыми вы сможете писать код на Эликсире ещё продуктивнее.">
+
+    <link rel="alternate" type="application/rss+xml" title="Сообщество Elixir и Phoenix Framework" href="/feed.xml" />
+    <link rel="canonical" href="https://wunsh.ru/articles/five-elixir-tips.html">
+
+    <style type="text/css">@import url("//fonts.googleapis.com/css?family=Source+Sans+Pro:400,700&subset=cyrillic");</style>
+    <link rel="stylesheet" href="/assets/css/vendors/pure.min.css">
+    <link rel="stylesheet" href="/assets/css/vendors/pure-grids-responsive.min.css">
+    <link rel="stylesheet" href="/assets/css/style.css?1594516983">
+
+    <link rel="shortcut icon" type="image/png" href="/assets/favicon.png" >
+</head>
+
+
+  <body>
+    <div class="wunsh pure-g">
+      
+
+
+
+
+<div class="menu pure-u-1 pure-u-md-1-4">
+  <div class="header">
+    <h2 class="header__title">
+      
+        <a href="https://wunsh.ru" class="header__title_link" title="На главную">Эликсир и&nbsp;Вунш</a>
+      
+    </h2>
+    <h3 class="header__tagline">Erlang + Ruby = &#10084;</h3>
+
+    <nav class="nav">
+      <ul class="nav_list">
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/elixir" class="nav_list__item_link pure-button">О языке</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/install/linux-asdf" class="nav_list__item_link pure-button">Установка</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/docs/" class="nav_list__item_link pure-button">Документация</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/guides" class="nav_list__item_link pure-button">Гайды</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/news" class="nav_list__item_link pure-button">Новости</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/articles" class="nav_list__item_link pure-button">Статьи</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/videos" class="nav_list__item_link pure-button">Видео</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/vacancies" class="nav_list__item_link pure-button">Вакансии</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/faq" class="nav_list__item_link pure-button">FAQ</a>
+            </li>
+          
+        
+      </ul>
+    </nav>
+
+    <a href="#subscribeModal" class="pure-button header__subscribe_link">Подписаться на рассылку</a>
+  </div>
+</div>
+
+
+      <div class="content pure-u-1 pure-u-md-3-4">
+        
+
+<article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+  <header class="post__header">
+    
+    <h1 class="post__title" itemprop="name headline">Пять хитростей Elixir, о которых должен знать каждый</h1>
+
+    <div class="post__meta post_meta">
+      <ul class="meta_list">
+        <li class="meta_list__item">
+          
+          <span class="">
+            <small class="meta_list__item_name">Дата</small>
+            <time class="h-bold" datetime="2017-10-13T00:00:00+00:00" itemprop="datePublished">
+              
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+13 октября 2017
+
+            </time>
+          </span>
+          
+
+          
+        </li>
+        
+        <li class="meta_list__item">
+            <span class="tag_cloud tags_cloud--inline h-no_margin">
+              <small class="meta_list__item_name">Теги</small> 
+
+
+<ul class="tags_cloud__list">
+  
+    <a href="/tags/#beginner" class="tags_cloud__link tag tag--beginner">beginner</a>
+  
+    <a href="/tags/#practical" class="tags_cloud__link tag tag--practical">practical</a>
+  
+</ul>
+
+            </span>
+        </li>
+        
+        <li class="meta_list__item">
+          <span itemprop="author" itemscope itemtype="http://schema.org/Person">
+            <small class="meta_list__item_name">
+              
+                Перевод
+              
+            </small>
+            <span itemprop="name" class="h-bold">Надежда Нестерова</span>
+          </span>
+        </li>
+
+        <li class="meta_list__item">
+          
+            <div >
+              <small>Оригинал</small>
+              <strong>
+                &laquo;<a href="https://dockyard.com/blog/2017/08/15/elixir-tips" style="text-transform: none; text-decoration: underline; color: #4b2e39;">5 Elixir tricks you should know</a>&raquo;
+              </strong>
+              <small>&copy;</small>
+              <strong>Daniel Xu</strong>
+            </div>
+          
+        </li>
+      </ul>
+    </div>
+  </header>
+
+  <div class="post__content" itemprop="articleBody">
+    <h2 id="алиас-для-__module__">Алиас для <code class="highlighter-rouge">__MODULE__</code></h2>
+
+<p>Комбинация <code class="highlighter-rouge">alias __MODULE__</code> на первый взгляд кажется замудрённой, но, если познакомиться с ней поближе, всё становится предельно ясно. Директива <code class="highlighter-rouge">alias</code> позволяет назначать псевдонимы для имени модуля. Например, <code class="highlighter-rouge">alias Foo.Bar</code> установит псевдоним <code class="highlighter-rouge">Bar</code> для модуля <code class="highlighter-rouge">Foo.Bar</code>.</p>
+
+<p><code class="highlighter-rouge">__MODULE__</code> — это макрос среды компиляции, представляющий имя модуля в виде атома. Таким образом, с помощью <code class="highlighter-rouge">alias __MODULE__</code> можно назначать псевдонимы для модулей Elixir, что лучше всего делать со структурой <code class="highlighter-rouge">defstruct</code>, о которой мы поговорим дальше.</p>
+
+<p>В примере ниже для проверки данных передаётся структура <code class="highlighter-rouge">API.User</code>. Вместо того, чтобы прописывать полное имя модуля, назначим ему псевдоним <code class="highlighter-rouge">User</code>, и дальше будем работать уже с ним. Получаем лаконичный и читабельный код.</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">defmodule</span> <span class="no">API</span><span class="o">.</span><span class="no">User</span> <span class="k">do</span>
+  <span class="n">alias</span> <span class="bp">__MODULE__</span>
+
+  <span class="n">defstruct</span> <span class="ss">name:</span> <span class="no">nil</span><span class="p">,</span> <span class="ss">age:</span> <span class="m">0</span>
+
+  <span class="k">def</span> <span class="n">old?</span><span class="p">(%</span><span class="no">User</span><span class="p">{</span><span class="ss">name:</span> <span class="n">name</span><span class="p">,</span> <span class="ss">age:</span> <span class="n">age</span><span class="p">}</span> <span class="o">=</span> <span class="n">user</span><span class="p">)</span> <span class="k">do</span>
+    <span class="o">...</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<p>При необходимости смены имени модуля можно сделать следующее:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">alias</span> <span class="bp">__MODULE__</span><span class="p">,</span> <span class="ss">as:</span> <span class="no">SomeOtherName</span>
+</code></pre></div></div>
+
+<h2 id="макрос-defstruct-с-атрибутом-модуля-enforce_keys">Макрос <code class="highlighter-rouge">defstruct</code> с атрибутом модуля <code class="highlighter-rouge">@enforce_keys</code></h2>
+
+<p>Представить данные в виде словаря можно и с помощью структур, ведь структура — это тегированный словарь, позволяющий проводить проверки по ключам во время компиляции и проверки типа структуры во время выполнения программы.</p>
+
+<p>Например, у вас не получится создать структуру с полем, которое не определено. А теперь посмотрим на пример с псевдонимом:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">defmodule</span> <span class="no">Fun</span><span class="o">.</span><span class="no">Game</span> <span class="k">do</span>
+  <span class="n">alias</span> <span class="bp">__MODULE__</span>
+  <span class="n">defstruct</span><span class="p">(</span>
+    <span class="ss">time:</span> <span class="no">nil</span><span class="p">,</span>
+    <span class="ss">status:</span> <span class="ss">:init</span>
+  <span class="p">)</span>
+
+  <span class="k">def</span> <span class="n">new</span><span class="p">()</span> <span class="k">do</span>
+    <span class="p">%</span><span class="no">Game</span><span class="p">{</span><span class="ss">step:</span> <span class="m">1</span><span class="p">}</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+
+<span class="n">iex</span><span class="o">&gt;</span> <span class="no">IO</span><span class="o">.</span><span class="n">inspect</span> <span class="no">Fun</span><span class="o">.</span><span class="no">Game</span><span class="o">.</span><span class="n">new</span><span class="p">()</span>
+<span class="n">iex</span><span class="o">&gt;</span> <span class="o">**</span> <span class="p">(</span><span class="no">KeyError</span><span class="p">)</span> <span class="n">key</span> <span class="ss">:step</span> <span class="ow">not</span> <span class="n">found</span> <span class="ow">in</span><span class="p">:</span> <span class="p">%{</span><span class="ss">__struct__:</span> <span class="no">Fun</span><span class="o">.</span><span class="no">Game</span><span class="p">,</span> <span class="ss">status:</span> <span class="ss">:init</span><span class="p">,</span> <span class="ss">time:</span> <span class="no">nil</span><span class="p">}</span>
+</code></pre></div></div>
+
+<p>При создании новой структуры иногда необходимо убедиться в том, что поля существуют. Специально для этого в Elixir имеется атрибут модуля <code class="highlighter-rouge">@enforce_keys</code>:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">defmodule</span> <span class="no">Fun</span><span class="o">.</span><span class="no">Game</span> <span class="k">do</span>
+  <span class="nv">@enforce_keys</span> <span class="p">[</span><span class="ss">:status</span><span class="p">]</span>
+
+  <span class="n">alias</span> <span class="bp">__MODULE__</span>
+  <span class="n">defstruct</span><span class="p">(</span>
+    <span class="ss">time:</span> <span class="no">nil</span><span class="p">,</span>
+    <span class="ss">status:</span> <span class="ss">:init</span>
+  <span class="p">)</span>
+
+  <span class="k">def</span> <span class="n">new</span><span class="p">()</span> <span class="k">do</span>
+    <span class="p">%</span><span class="no">Game</span><span class="p">{}</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+
+<span class="n">iex</span><span class="o">&gt;</span> <span class="no">Fun</span><span class="o">.</span><span class="no">Game</span><span class="o">.</span><span class="n">new</span><span class="p">()</span>
+<span class="n">iex</span><span class="o">&gt;</span> <span class="o">**</span> <span class="p">(</span><span class="no">ArgumentError</span><span class="p">)</span> <span class="n">the</span> <span class="n">following</span> <span class="n">keys</span> <span class="n">must</span> <span class="n">also</span> <span class="n">be</span> <span class="n">given</span> <span class="ow">when</span> <span class="n">building</span> <span class="n">struct</span> <span class="no">Fun</span><span class="o">.</span><span class="ss">Game:</span> <span class="p">[</span><span class="ss">:status</span><span class="p">]</span>
+</code></pre></div></div>
+
+<p>На основе результата можно заключить, что в данном случае нельзя полагаться на значение <code class="highlighter-rouge">status</code> по умолчанию, а нужно определить это значение при создании новой структуры <code class="highlighter-rouge">Game</code>:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">def</span> <span class="n">new</span><span class="p">(</span><span class="n">status</span><span class="p">)</span> <span class="k">do</span>
+  <span class="p">%</span><span class="no">Game</span><span class="p">{</span><span class="ss">status:</span> <span class="n">status</span><span class="p">}</span>
+<span class="k">end</span>
+
+<span class="n">iex</span><span class="o">&gt;</span> <span class="no">Fun</span><span class="o">.</span><span class="no">Game</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="ss">:won</span><span class="p">)</span>
+<span class="n">iex</span><span class="o">&gt;</span> <span class="p">%</span><span class="no">Fun</span><span class="o">.</span><span class="no">Game</span><span class="p">{</span><span class="ss">status:</span> <span class="ss">:won</span><span class="p">,</span> <span class="ss">time:</span> <span class="no">nil</span><span class="p">}</span>
+</code></pre></div></div>
+
+<h2 id="функция-v-вiex">Функция <code class="highlighter-rouge">v()</code> в IEx</h2>
+
+<p>При создании модуля <code class="highlighter-rouge">GenServer</code> часто возникает желание запустить сервер и проверить результат в IEx. При этом действительно важно не забывать про сопоставление идентификатора процесса с образцом, как здесь:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">iex</span><span class="p">(</span><span class="m">1</span><span class="p">)</span><span class="o">&gt;</span> <span class="no">Metex</span><span class="o">.</span><span class="no">Worker</span><span class="o">.</span><span class="n">start_link</span><span class="p">()</span>
+<span class="p">{</span><span class="ss">:ok</span><span class="p">,</span> <span class="c1">#PID&lt;0.472.0&gt;}</span>
+</code></pre></div></div>
+
+<p>Иначе придётся прописывать эту команду и сопоставление с образцом заново:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">{</span><span class="ss">:ok</span><span class="p">,</span> <span class="n">pid</span><span class="p">}</span> <span class="o">=</span> <span class="no">Metex</span><span class="o">.</span><span class="no">Worker</span><span class="o">.</span><span class="n">start_link</span><span class="p">()</span>
+</code></pre></div></div>
+
+<p>Чтобы избавить себя от лишней работы, используйте функцию <code class="highlighter-rouge">v()</code>, возвращающую результат последней команды:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">iex</span><span class="p">(</span><span class="m">1</span><span class="p">)</span><span class="o">&gt;</span> <span class="no">Metex</span><span class="o">.</span><span class="no">Worker</span><span class="o">.</span><span class="n">start_link</span><span class="p">()</span>
+<span class="p">{</span><span class="ss">:ok</span><span class="p">,</span> <span class="c1">#PID&lt;0.472.0&gt;}</span>
+
+<span class="n">iex</span><span class="p">(</span><span class="m">2</span><span class="p">)</span><span class="o">&gt;</span> <span class="p">{</span><span class="ss">:ok</span><span class="p">,</span> <span class="n">pid</span><span class="p">}</span> <span class="o">=</span> <span class="n">v</span><span class="p">()</span>
+<span class="p">{</span><span class="ss">:ok</span><span class="p">,</span> <span class="c1">#PID&lt;0.472.0&gt;}</span>
+
+<span class="n">iex</span><span class="p">(</span><span class="m">3</span><span class="p">)</span><span class="o">&gt;</span>  <span class="n">pid</span>
+<span class="c1">#PID&lt;0.472.0&gt;</span>
+</code></pre></div></div>
+
+<p>Эта полезная функция позволит вам немного сократить время разработки.</p>
+
+<h2 id="отмена-нежелательных-команд-вiex">Отмена нежелательных команд в IEx</h2>
+
+<p>Случалось ли у вас подобное при использовании IEx?</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">iex</span><span class="p">(</span><span class="m">1</span><span class="p">)</span><span class="o">&gt;</span> <span class="n">a</span> <span class="o">=</span> <span class="m">1</span> <span class="o">+</span> <span class="m">1</span><span class="err">'</span>
+<span class="o">...</span><span class="p">(</span><span class="m">2</span><span class="p">)</span><span class="o">&gt;</span>
+<span class="o">...</span><span class="p">(</span><span class="m">2</span><span class="p">)</span><span class="o">&gt;</span>
+<span class="o">...</span><span class="p">(</span><span class="m">2</span><span class="p">)</span><span class="o">&gt;</span>
+<span class="ss">BREAK:</span> <span class="p">(</span><span class="n">a</span><span class="p">)</span><span class="n">bort</span> <span class="p">(</span><span class="n">c</span><span class="p">)</span><span class="n">ontinue</span> <span class="p">(</span><span class="n">p</span><span class="p">)</span><span class="n">roc</span> <span class="n">info</span> <span class="p">(</span><span class="n">i</span><span class="p">)</span><span class="n">nfo</span> <span class="p">(</span><span class="n">l</span><span class="p">)</span><span class="n">oaded</span>
+       <span class="p">(</span><span class="n">v</span><span class="p">)</span><span class="n">ersion</span> <span class="p">(</span><span class="n">k</span><span class="p">)</span><span class="n">ill</span> <span class="p">(</span><span class="no">D</span><span class="p">)</span><span class="n">b</span><span class="o">-</span><span class="n">tables</span> <span class="p">(</span><span class="n">d</span><span class="p">)</span><span class="n">istribution</span>
+</code></pre></div></div>
+
+<p>Обычно достаточно дважды нажать <code class="highlighter-rouge">Ctrl + C</code>, чтобы выйти и создать новый сеанс. Но всё же иной раз, набрав внушительный список команд, не хочется начинать всё с начала. Команда <code class="highlighter-rouge">#iex:break</code> — вот что можно сделать.</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">iex</span><span class="p">(</span><span class="m">2</span><span class="p">)</span><span class="o">&gt;</span> <span class="n">a</span> <span class="o">=</span> <span class="m">1</span> <span class="o">+</span> <span class="m">1</span>
+<span class="n">iex</span><span class="p">(</span><span class="m">2</span><span class="p">)</span><span class="o">&gt;</span> <span class="n">b</span> <span class="o">=</span> <span class="m">1</span> <span class="o">+</span> <span class="m">1</span><span class="err">'</span>
+<span class="o">...</span><span class="p">(</span><span class="m">2</span><span class="p">)</span><span class="o">&gt;</span>
+<span class="o">...</span><span class="p">(</span><span class="m">2</span><span class="p">)</span><span class="o">&gt;</span> <span class="c1">#iex:break</span>
+<span class="o">**</span> <span class="p">(</span><span class="no">TokenMissingError</span><span class="p">)</span> <span class="ss">iex:</span><span class="m">1</span><span class="p">:</span> <span class="n">incomplete</span> <span class="n">expression</span>
+
+<span class="n">iex</span><span class="p">(</span><span class="m">2</span><span class="p">)</span><span class="o">&gt;</span> <span class="n">a</span>
+<span class="m">2</span>
+</code></pre></div></div>
+
+<p>Из приведённого выше кода видно, что после отмены команды сеанс всё ещё продолжается.</p>
+
+<h2 id="привязка-значения-кнеобязательной-переменной">Привязка значения к необязательной переменной</h2>
+
+<p>Многие наверняка знают, что можно привязывать значение к необязательным переменным следующим образом:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">_dont_care</span> <span class="o">=</span> <span class="m">1</span>
+</code></pre></div></div>
+
+<p>Применив этот приём к аргументам функций, можно увеличить читабельность кода:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">defp</span> <span class="n">accept_move</span><span class="p">(</span><span class="n">game</span><span class="p">,</span> <span class="n">_guess</span><span class="p">,</span> <span class="n">_already_used</span> <span class="o">=</span> <span class="no">true</span><span class="p">)</span> <span class="k">do</span>
+  <span class="no">Map</span><span class="o">.</span><span class="n">put</span><span class="p">(</span><span class="n">game</span><span class="p">,</span> <span class="ss">:state</span><span class="p">,</span> <span class="ss">:already_used</span><span class="p">)</span>
+<span class="k">end</span>
+
+<span class="k">defp</span> <span class="n">accept_move</span><span class="p">(</span><span class="n">game</span><span class="p">,</span> <span class="n">guess</span><span class="p">,</span> <span class="n">_not_used</span><span class="p">)</span> <span class="k">do</span>
+  <span class="no">Map</span><span class="o">.</span><span class="n">put</span><span class="p">(</span><span class="n">game</span><span class="p">,</span> <span class="ss">:used</span><span class="p">,</span> <span class="no">MapSet</span><span class="o">.</span><span class="n">put</span><span class="p">(</span><span class="n">game</span><span class="o">.</span><span class="n">used</span><span class="p">,</span> <span class="n">guess</span><span class="p">))</span>
+  <span class="o">|&gt;</span> <span class="n">score_guess</span><span class="p">(</span><span class="no">Enum</span><span class="o">.</span><span class="n">member?</span><span class="p">(</span><span class="n">game</span><span class="o">.</span><span class="n">letters</span><span class="p">,</span> <span class="n">guess</span><span class="p">))</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+  </div>
+
+  <!-- uSocial -->
+  <div class="post__share_block share_block">
+    <script async src="https://usocial.pro/usocial/usocial.js?v=6.1.4" data-script="usocial" charset="utf-8"></script>
+    <div class="uSocial-Share" data-pid="2fd19544e551bce292425ee8adaa31be" data-type="share" data-options="round,style2,default,absolute,horizontal,size32,counter1,counter-before,upArrow-right,nomobile" data-social="telegram,fb,vk,gPlus,twi,bookmarks"></div>
+  </div>
+  <!-- /uSocial -->
+</article>
+
+
+        <footer class="footer">
+    &copy; 2020
+    / Россия
+
+    <span class="pull-right">Любые мысли и вопросы пишите на <a href="mailto:elixir@wunsh.ru">elixir@wunsh.ru</a>.</span>
+</footer>
+
+        <div id="subscribeModal" class="modal">
+    <div class="modal__content">
+        <a href="#close" title="Close" class="modal__close">x</a>
+
+        <h2 class="modal__title">Ламповая рассылка про&nbsp;Эликсир</h2>
+
+        <p>Один-два раза в&nbsp;неделю присылаем тёплые письма об&nbsp;Эликсире: переводы самых интересных статей до&nbsp;их&nbsp;появления в&nbsp;открытом доступе, анонсы событий и&nbsp;вкусные бонусы.</p>
+
+        <form action="//wunsh.us14.list-manage.com/subscribe/post?u=c81ca3d4693f62db7f7f67c71&amp;id=a192e2dfef" method="post" id="mc-embedded-subscribe-form" name="mc-embedded-subscribe-form" class="pure-form h-tc validate" target="_blank" novalidate>
+            <input type="email" value="" name="EMAIL" class="modal__input pure-input-rounded large" id="mce-EMAIL" placeholder="Твоя почта" required>
+            <div style="position: absolute; left: -5000px;" aria-hidden="true"><input type="text" name="b_c81ca3d4693f62db7f7f67c71_a192e2dfef" tabindex="-1" value=""></div>
+
+            <input type="submit" value="Присоединиться" name="subscribe" onClick="yaCounter39773490.reachGoal('SUBSCRIBED'); return true" id="mc-embedded-subscribe" class="pure-button button-success large">
+        </form>
+
+        <p>Обязательно подтверди почту, перейдя по&nbsp;ссылке в&nbsp;письме, иначе мы&nbsp;не&nbsp;сможем делиться с&nbsp;тобой полезностями.</p>
+
+        <p>Надоедать точно не&nbsp;будем :)</p>
+    </div>
+</div>
+
+        <script src="/assets/js/vendors/zepto.min.js"></script>
+
+<script>
+    if ($(".post--docs").length) {
+        $(".footer").addClass("footer--docs")
+    }
+
+    $(".modal--close_backdrop").click(function(){
+        window.location.hash = "";
+    });
+</script>
+
+        <!-- Yandex.Metrika counter -->
+<script type="text/javascript">
+    (function (d, w, c) {
+        (w[c] = w[c] || []).push(function() {
+            try {
+                w.yaCounter39773490 = new Ya.Metrika({
+                    id:39773490,
+                    clickmap:true,
+                    trackLinks:true,
+                    accurateTrackBounce:true,
+                    webvisor:true,
+                    ut:"noindex"
+                });
+            } catch(e) { }
+        });
+
+        var n = d.getElementsByTagName("script")[0],
+            s = d.createElement("script"),
+            f = function () { n.parentNode.insertBefore(s, n); };
+        s.type = "text/javascript";
+        s.async = true;
+        s.src = "https://mc.yandex.ru/metrika/watch.js";
+
+        if (w.opera == "[object Opera]") {
+            d.addEventListener("DOMContentLoaded", f, false);
+        } else { f(); }
+    })(document, window, "yandex_metrika_callbacks");
+</script>
+<noscript><div><img src="https://mc.yandex.ru/watch/39773490?ut=noindex" style="position:absolute; left:-9999px;" alt="" /></div></noscript>
+<!-- /Yandex.Metrika counter -->
+
+      </div>
+    </div>
+  </body>
+</html>

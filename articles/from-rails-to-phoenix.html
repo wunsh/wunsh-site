@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Опыт переноса приложения с Rails на Elixir/Phoenix |> Сообщество Elixir и Phoenix Framework</title>
+    <meta name="description" content="Рассказываем об опыте переноса приложения с Rails на Phoenix.">
+
+    <link rel="alternate" type="application/rss+xml" title="Сообщество Elixir и Phoenix Framework" href="/feed.xml" />
+    <link rel="canonical" href="https://wunsh.ru/articles/from-rails-to-phoenix.html">
+
+    <style type="text/css">@import url("//fonts.googleapis.com/css?family=Source+Sans+Pro:400,700&subset=cyrillic");</style>
+    <link rel="stylesheet" href="/assets/css/vendors/pure.min.css">
+    <link rel="stylesheet" href="/assets/css/vendors/pure-grids-responsive.min.css">
+    <link rel="stylesheet" href="/assets/css/style.css?1594516983">
+
+    <link rel="shortcut icon" type="image/png" href="/assets/favicon.png" >
+</head>
+
+
+  <body>
+    <div class="wunsh pure-g">
+      
+
+
+
+
+<div class="menu pure-u-1 pure-u-md-1-4">
+  <div class="header">
+    <h2 class="header__title">
+      
+        <a href="https://wunsh.ru" class="header__title_link" title="На главную">Эликсир и&nbsp;Вунш</a>
+      
+    </h2>
+    <h3 class="header__tagline">Erlang + Ruby = &#10084;</h3>
+
+    <nav class="nav">
+      <ul class="nav_list">
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/elixir" class="nav_list__item_link pure-button">О языке</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/install/linux-asdf" class="nav_list__item_link pure-button">Установка</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/docs/" class="nav_list__item_link pure-button">Документация</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/guides" class="nav_list__item_link pure-button">Гайды</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/news" class="nav_list__item_link pure-button">Новости</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/articles" class="nav_list__item_link pure-button">Статьи</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/videos" class="nav_list__item_link pure-button">Видео</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/vacancies" class="nav_list__item_link pure-button">Вакансии</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/faq" class="nav_list__item_link pure-button">FAQ</a>
+            </li>
+          
+        
+      </ul>
+    </nav>
+
+    <a href="#subscribeModal" class="pure-button header__subscribe_link">Подписаться на рассылку</a>
+  </div>
+</div>
+
+
+      <div class="content pure-u-1 pure-u-md-3-4">
+        
+
+<article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+  <header class="post__header">
+    
+    <h1 class="post__title" itemprop="name headline">Опыт переноса приложения с Rails на Elixir/Phoenix</h1>
+
+    <div class="post__meta post_meta">
+      <ul class="meta_list">
+        <li class="meta_list__item">
+          
+          <span class="">
+            <small class="meta_list__item_name">Дата</small>
+            <time class="h-bold" datetime="2016-11-25T00:00:00+00:00" itemprop="datePublished">
+              
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+25 ноября 2016
+
+            </time>
+          </span>
+          
+
+          
+        </li>
+        
+        <li class="meta_list__item">
+            <span class="tag_cloud tags_cloud--inline h-no_margin">
+              <small class="meta_list__item_name">Теги</small> 
+
+
+<ul class="tags_cloud__list">
+  
+    <a href="/tags/#phoenix" class="tags_cloud__link tag tag--phoenix">phoenix</a>
+  
+    <a href="/tags/#rails" class="tags_cloud__link tag tag--rails">rails</a>
+  
+    <a href="/tags/#practical" class="tags_cloud__link tag tag--practical">practical</a>
+  
+</ul>
+
+            </span>
+        </li>
+        
+        <li class="meta_list__item">
+          <span itemprop="author" itemscope itemtype="http://schema.org/Person">
+            <small class="meta_list__item_name">
+              
+                Перевод
+              
+            </small>
+            <span itemprop="name" class="h-bold">Надежда Нестерова</span>
+          </span>
+        </li>
+
+        <li class="meta_list__item">
+          
+            <div >
+              <small>Оригинал</small>
+              <strong>
+                &laquo;<a href="https://medium.com/@stueccles/what-i-learned-migrating-a-rails-app-to-elixir-phoenix-f707436749aa" style="text-transform: none; text-decoration: underline; color: #4b2e39;">What I Learned Migrating a Rails App to Elixir/Phoenix</a>&raquo;
+              </strong>
+              <small>&copy;</small>
+              <strong>Stuart Eccles</strong>
+            </div>
+          
+        </li>
+      </ul>
+    </div>
+  </header>
+
+  <div class="post__content" itemprop="articleBody">
+    <p>Прошло уже немало времени с&nbsp;тех пор, как я&nbsp;с&nbsp;головой ушёл в&nbsp;Elixir. Для нашей команды в&nbsp;компании Made by&nbsp;Many язык Ruby, многообещающая продуктивность которого не&nbsp;наносит ущерба чистой производительности и&nbsp;масштабируемости, становится победителем в&nbsp;номинации «лучший серверный язык программирования».</p>
+<p>Я&nbsp;всячески пытался ускорить процесс изучения Elixir: <a href="/first_contest.html">читал книгу Дэйва Томаса</a> и&nbsp;выполнял приведенные в&nbsp;ней задания, посетил конференцию в&nbsp;Остине, посвященную Elixir, а&nbsp;ещё я&nbsp;попробовал перенести Rails-приложение моего коллеги на&nbsp;Phoenix.</p>
+<p>Речь пойдёт о&nbsp;нестандартном приложении для электронной коммерции его довольно прибыльного чулочно-носочного бизнеса на&nbsp;сайте Form &amp;Thread. В&nbsp;процессе переноса я&nbsp;отметил не&nbsp;только кое-какие любопытные факты, но&nbsp;и&nbsp;несколько подводных камней. Конечно, если кто-то ещё проделает ту&nbsp;же работу, у&nbsp;него, вероятно, сложится совершенно иное мнение и&nbsp;возникнут свои трудности. Прежде чем перейти к&nbsp;деталям, рассмотрим три основных момента.</p>
+<p><em>Примечание: я&nbsp;не&nbsp;собираюсь расписывать азы Elixir, процесс установки Phoenix и&nbsp;тому подобные вещи. Предполагается, что вы&nbsp;уже на&nbsp;должном уровне знакомы с&nbsp;этим языком и&nbsp;его фреймворком.</em></p>
+<p><strong>1. Необходимо выкинуть из&nbsp;головы основы объектно-ориентированного подхода, особенно применительно к&nbsp;моделям.</strong></p>
+<p>Для Ruby-разработчика изменить эту психологическую установку&nbsp;— то, что в&nbsp;обязательном порядке нужно сделать в&nbsp;первую очередь. Принцип «толстых» моделей и&nbsp;«тонких» контроллеров настолько прочно сидит у&nbsp;рубистов в&nbsp;голове, что облегчить модели не&nbsp;получается даже при условии использования паттернов декоратора/презентера или сервисных объектов.</p>
+<p>Вместо этого старайтесь мыслить отдельными функциями, объединяя их&nbsp;в&nbsp;единое целое. Осуществив перенос приложения, я&nbsp;осознал, что не&nbsp;так уж&nbsp;всё и&nbsp;сложно. Волшебство тут почти ни&nbsp;при чём.</p>
+<p><strong>2. Кое-какие модули интеграции нужно будет написать самому.</strong></p>
+<p>Экосистема Elixir пока не&nbsp;располагает интеграционными библиотеками для каждого из&nbsp;используемых сервисов. Возможно, придётся засучить рукава и&nbsp;проделать эту работу самостоятельно и&nbsp;тем самым внести свой вклад в&nbsp;развитие экосистемы. Именно с&nbsp;этой целью я&nbsp;и&nbsp;создал для Elixir <noindex><a href="https://github.com/stueccles/analytics-elixir/" rel="nofollow">библиотеку segment.com</a></noindex>.</p>
+<p>Для Phoenix также существует намного меньше расширений и&nbsp;вспомогательных библиотек, но&nbsp;я&nbsp;выяснил, что возможности языка Elixir способны это компенсировать, правда, нужно будет дописать пару лишних строчек кода.</p>
+<p><strong>3. Кое-что в&nbsp;Elixir/Phoenix устроено совсем по-другому.</strong></p>
+<p>Следует отметить, что при программировании на&nbsp;Elixir некоторые шаблоны проектирования должны быть реализованы иным образом. Возьмём, к&nbsp;примеру, асинхронный подход. В&nbsp;Rails-приложениях обычно используются очереди Sidekiq или DelayedJob, которые исполняют задачи в&nbsp;фоновых процессах. Конкурентная модель Elixir позволяет этого избежать. Как правило, достаточно просто обернуть функцию в&nbsp;<code>Task.async</code> или создать своё OTP-приложение.</p>
+<blockquote>«<em>Волшебство тут почти ни&nbsp;при чём».</em></blockquote>
+<h4><strong>Процесс переноса сборки фронтенда на&nbsp;brunch</strong></h4>
+<p>Первым шагом после создания нового приложения стал перенос сборки фронтенда на&nbsp;<noindex><a href="http://brunch.io/" rel="nofollow">Brunch</a></noindex>, который является предпочтительным для Phoenix.</p>
+<p>Первой проблемой, с&nbsp;которой я&nbsp;столкнулся, стало отсутствие в&nbsp;Brunch обработчика SASS, который в&nbsp;Rails идёт по&nbsp;умолчанию. Однако SAAS можно легко подключить при помощи модуля sass-brunch. Я&nbsp;добавил его вместе с&nbsp;другими необходимыми модулями Node в&nbsp;файл
+  <code>package.json</code>.</p>
+
+<figure class="highlight"><pre><code class="language-elixir" data-lang="elixir"><span class="sd">"</span><span class="s2">sass-brunch"</span><span class="p">:</span> <span class="sd">"</span><span class="s2">^1.8.10"</span><span class="p">,</span>
+<span class="sd">"</span><span class="s2">bourbon"</span><span class="p">:</span> <span class="sd">"</span><span class="s2">^4.2.6"</span><span class="p">,</span>
+<span class="sd">"</span><span class="s2">css-patterns"</span><span class="p">:</span> <span class="sd">"</span><span class="s2">^0.2.0"</span><span class="p">,</span>
+<span class="sd">"</span><span class="s2">normalize.css"</span><span class="p">:</span> <span class="sd">"</span><span class="s2">^3.0.3"</span></code></pre></figure>
+                    
+<p>Необходимо произвести кое-какие модификации в&nbsp;<code>brunch.config</code>&nbsp;— настроить модуль <code>sass-brunch</code> так, чтобы тот включал путь к&nbsp;директории
+  <code>node_modules</code>. Таким образом, мы&nbsp;подключим библиотеку bourbon, файл
+  <code>normalize.css</code> и&nbsp; css-шаблоны компании Mady by&nbsp;Many.</p>
+
+<figure class="highlight"><pre><code class="language-ruby" data-lang="ruby"><span class="ss">plugins: </span><span class="p">{</span>
+  <span class="ss">babel: </span><span class="p">{</span>
+    <span class="sr">//</span> <span class="no">Do</span> <span class="n">not</span> <span class="n">use</span> <span class="no">ES6</span> <span class="n">compiler</span> <span class="k">in</span> <span class="n">vendor</span> <span class="n">code</span>
+    <span class="ss">ignore: </span><span class="p">[</span><span class="sr">/web\/static\/vendor/</span><span class="p">]</span>
+  <span class="p">},</span>
+  <span class="ss">sass: </span><span class="p">{</span>
+    <span class="ss">options: </span><span class="p">{</span>
+      <span class="ss">includePaths: </span><span class="p">[</span> <span class="s1">'node_modules'</span> <span class="p">]</span>
+    <span class="p">}</span>
+  <span class="p">}</span>
+<span class="p">}</span></code></pre></figure>
+                    
+<p>Затем импортируем в&nbsp;<code>application.scss</code> пути, соответствующие директории модулей
+  <code>node_modules</code>.</p>
+
+<figure class="highlight"><pre><code class="language-sass" data-lang="sass"><span class="k">@import</span> <span class="s">“bourbon/app/assets/stylesheets/bourbon";</span>
+<span class="k">@import</span> <span class="s">“normalize.css/normalize.css";</span>
+<span class="k">@import</span> <span class="s">“css-patterns/stylesheets/patterns";</span></code></pre></figure>
+                    
+<p>Также нужно выполнить следующие действия: переместить файлы с&nbsp;расширением <code>js</code>&nbsp;и&nbsp;<code>css</code> из&nbsp;директории
+  <code>assets</code> в&nbsp;директорию <code>web/static</code>, в&nbsp;то&nbsp;время как изображения и&nbsp;шрифты&nbsp;— в&nbsp;директорию
+  <code>web/static/assets</code>.</p>
+<p>Ещё одно важное отличие в&nbsp;области фронтенда&nbsp;— это&nbsp;то, что в&nbsp;Phoenix не&nbsp;существует гема sass-rails, который волшебным образом предоставлял&nbsp;бы
+  <code>asset_path</code> или <code>asset_url</code>. Придётся вычистить из&nbsp;кода всё, что к&nbsp;нему относится, и&nbsp;прописать необходимые пути вручную.</p>
+
+<figure class="highlight"><pre><code class="language-sass" data-lang="sass"><span class="nt">url</span><span class="o">(</span><span class="nt">asset-path</span><span class="o">(</span><span class="s1">'Apercu Bold-webfont.eot'</span><span class="o">));</span></code></pre></figure>
+<p><i><small>Превращается в...</small></i></p>
+<figure class="highlight"><pre><code class="language-sass" data-lang="sass"><span class="nt">url</span><span class="o">(</span><span class="s1">'/fonts/Apercu Bold-webfont.eot'</span><span class="o">);</span></code></pre></figure>
+
+                    
+<h4><strong>Перевод моделей с&nbsp;ActiveRecord на&nbsp;Ecto</strong></h4>
+<p><em>Примечание: хотя в&nbsp;Phoenix подобные компоненты называются моделями, в&nbsp;Ecto используется название «schema», и&nbsp;я&nbsp;хотел&nbsp;бы, чтобы Phoenix перенял именно этот термин. Это помогает <strong>не&nbsp;думать</strong> о&nbsp;них, как о&nbsp;моделях, и&nbsp;избавиться от&nbsp;устоев ООП. Но&nbsp;на&nbsp;данный момент, говоря о&nbsp;Phoenix, я&nbsp;всё-таки буду называть их&nbsp;моделями.</em></p>
+<p>Задание оказалось относительно простым: взять файл schema.rb и&nbsp;создать соответствующие файлы модели в&nbsp;Phoenix при помощи команды mix phoenix.gen.model. Я&nbsp;отловил несколько исключений, но&nbsp;в&nbsp;вашем случае их&nbsp;может и&nbsp;не&nbsp;быть.</p>
+<ol>
+    <li><p>В&nbsp;Ecto отсутствует функция <code>has_and_belongs_to_many</code>, поэтому существует необходимость создавать свою промежуточную модель. Затем её&nbsp;можно использовать простым вызовом
+      <code>has_many :through</code>.</p>
+    </li>
+    <li><p>Расширение HSTORE не&nbsp;реализовано для Ecto.</p>
+    </li>
+</ol>
+<p>Существующая модель данных использует Postgres HSTORE для хранения пар ключ-значение у&nbsp;некоторых моделей. Ecto пока не&nbsp;поддерживает HSTORE, а&nbsp;решение этого вопроса заняло&nbsp;бы слишком много времени. Вместо этого я&nbsp;перевёл данные в&nbsp;формат jsonb, имеющий внутреннее представление в&nbsp;виде словаря Elixir. Подробнее
+  <noindex><a href="https://robots.thoughtbot.com/embedding-elixir-structs-in-ecto-models" rel="nofollow">об&nbsp;этом здесь</a>
+  </noindex>.</p>
+<p>На&nbsp;этом этапе важно проверить, чтобы расширение JSON было включено в&nbsp;настройках окружения:</p>
+                    
+<figure class="highlight"><pre><code class="language-elixir" data-lang="elixir"><span class="n">config</span> <span class="ss">:form_and_thread</span><span class="p">,</span> <span class="no">FormAndThread</span><span class="o">.</span><span class="no">Repo</span><span class="p">,</span>
+  <span class="ss">adapter:</span> <span class="no">Ecto</span><span class="o">.</span><span class="no">Adapters</span><span class="o">.</span><span class="no">Postgres</span><span class="p">,</span>
+  <span class="ss">extensions:</span> <span class="p">[{</span><span class="no">Postgrex</span><span class="o">.</span><span class="no">Extensions</span><span class="o">.</span><span class="no">JSON</span><span class="p">,</span> <span class="p">[</span><span class="ss">library:</span> <span class="no">nil</span><span class="p">]}],</span></code></pre></figure>
+
+<p>Далее проводим перенос всех начальных данных из&nbsp;файла <code>priv/repo/seeds.exs</code> в&nbsp;Elixir-приложение с&nbsp;помощью выполнения команды:</p>
+
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash">mix run priv/repo/seeds.exs</code></pre></figure>
+
+<h4><strong>Использование моделей</strong></h4>
+<p>Ecto и&nbsp;ActiveRecord&nbsp;— это не&nbsp;одно и&nbsp;то&nbsp;же, и&nbsp;нужно будет обратить внимание на&nbsp;некоторые моменты. Например, вот&nbsp;то, что попалось мне на&nbsp;глаза.</p>
+<p><strong>Отсутствие скоупов</strong></p>
+<p>Скоупы в&nbsp;Ecto не&nbsp;используются. Вместо этого запросы хранятся в&nbsp;модуле, а&nbsp;разработчику остаётся только составить из&nbsp;них более сложный запрос. Подробнее <noindex><a href="http://blog.drewolson.org/composable-queries-ecto/" rel="nofollow">здесь</a></noindex>.</p>
+
+<figure class="highlight"><pre><code class="language-ruby" data-lang="ruby"><span class="k">class</span> <span class="nc">Order</span> <span class="o">&lt;</span> <span class="no">ActiveRecord</span><span class="o">::</span><span class="no">Base</span>
+  <span class="n">scope</span> <span class="ss">:received_or_shipped</span><span class="p">,</span> <span class="o">-&gt;</span> <span class="p">{</span> <span class="n">where</span><span class="p">(</span><span class="ss">state: </span><span class="p">[</span><span class="s1">'received'</span><span class="p">,</span> <span class="s1">'shipped'</span><span class="p">])</span> <span class="p">}</span></code></pre></figure>
+
+<p><i><small>Превращается в...</small></i></p>
+
+<figure class="highlight"><pre><code class="language-elixir" data-lang="elixir"><span class="k">defmodule</span> <span class="no">FormAndThread</span><span class="o">.</span><span class="no">Order</span> <span class="k">do</span>
+  <span class="k">def</span> <span class="n">received_or_shipped_query</span><span class="p">(</span><span class="n">query</span><span class="p">)</span> <span class="k">do</span>
+    <span class="n">from</span> <span class="n">o</span> <span class="ow">in</span> <span class="n">query</span><span class="p">,</span>
+    <span class="ss">where:</span> <span class="n">o</span><span class="o">.</span><span class="n">state</span> <span class="o">==</span> <span class="s1">'received'</span> <span class="ow">or</span> <span class="n">o</span><span class="o">.</span><span class="n">state</span> <span class="o">==</span> <span class="s1">'shipped'</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+
+<span class="no">Order</span> <span class="o">|&gt;</span> <span class="no">Order</span><span class="o">.</span><span class="n">received_or_shipped_query</span> <span class="o">|&gt;</span> <span class="no">Repo</span><span class="o">.</span><span class="n">all</span></code></pre></figure>
+
+                    
+<p><strong>Отсутствие отложенной загрузки ассоциаций</strong></p>
+<p>Как вы&nbsp;знаете, ActiveRecord реализует отложенную загрузку ассоциаций. Однако в&nbsp;Ecto во&nbsp;избежание ошибок для этого необходимо использовать функцию
+  <code>Repo.preload</code>. Мы&nbsp;используем подход, при котором сохраняем часто используемые связи в&nbsp;отдельной функции, а&nbsp;потом передаём её&nbsp;внутрь
+  <code>Repo.preload</code> (обратите внимание, что здесь возможно выполнять глубоко вложенные предзагрузки).</p>
+                    
+<figure class="highlight"><pre><code class="language-elixir" data-lang="elixir"><span class="k">defmodule</span> <span class="no">FormAndThread</span><span class="o">.</span><span class="no">Order</span> <span class="k">do</span>
+  <span class="k">def</span> <span class="n">preloaded</span> <span class="k">do</span>
+    <span class="p">[</span><span class="ss">:shipping_address</span><span class="p">,</span> <span class="ss">line_items:</span> <span class="p">[</span><span class="ss">variant:</span> <span class="p">[</span><span class="ss">:product</span><span class="p">]]]</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+
+<span class="n">order</span> <span class="o">=</span> <span class="n">get_current_order</span><span class="p">(</span><span class="n">conn</span><span class="p">)</span> <span class="o">|&gt;</span> <span class="no">Repo</span><span class="o">.</span><span class="n">preload</span><span class="p">(</span><span class="no">Order</span><span class="o">.</span><span class="n">preloaded</span><span class="p">)</span></code></pre></figure>
+
+<p><strong>Набор изменений вместо функций обратного вызова</strong></p>
+<p>Подход с&nbsp;набором изменений позволяет вам модифицировать модели, обеспечивая иммутабельность. При этом вам нужно использовать различные наборы изменений для разных целей вместо написания функций обратного вызова.</p>
+
+<figure class="highlight"><pre><code class="language-elixir" data-lang="elixir"><span class="n">before_create</span> <span class="ss">:set_default_shipping_country</span><span class="p">,</span> <span class="ss">:set_random_number</span></code></pre></figure>
+<p><i><small>Превращается в...</small></i></p>
+<figure class="highlight"><pre><code class="language-elixir" data-lang="elixir"><span class="k">def</span> <span class="n">create_changeset</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">params</span> <span class="p">\\</span> <span class="ss">:empty</span><span class="p">)</span> <span class="k">do</span>
+  <span class="n">changeset</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">params</span><span class="p">)</span>
+  <span class="o">|&gt;</span> <span class="n">put_change</span><span class="p">(</span><span class="ss">:number</span><span class="p">,</span> <span class="n">random_unique_order_number</span><span class="p">)</span>
+  <span class="o">|&gt;</span> <span class="n">put_change</span><span class="p">(</span><span class="ss">:shipping_country</span><span class="p">,</span> <span class="nv">@default_shipping_country</span><span class="p">)</span>
+<span class="k">end</span></code></pre></figure>
+
+                    
+<blockquote>«<em>Ecto и&nbsp;ActiveRecord&nbsp;— это не&nbsp;одно и&nbsp;то&nbsp;же»</em></blockquote>
+<h4><strong>Перенос контроллера</strong></h4>
+<p>Структуры контроллеров Rails и&nbsp;Phoenix настолько похожи, что я&nbsp;даже не&nbsp;буду вдаваться в&nbsp;систему маршрутов. При всём при том кое-что всё-таки требует изменений.</p>
+<p>Выбранное мной Rails-приложение для вызова данных использует в&nbsp;контроллерах множество событий <code>before_action</code>. В&nbsp;Phoenix можно было&nbsp;бы заменить их&nbsp;на&nbsp;плаги, но&nbsp;я&nbsp;вместо этого объединил в&nbsp;пайплайн различные функции внутри действий. Теперь можно отчётливо видеть, что происходит при каждом рендере пайплайна:</p>
+
+<figure class="highlight"><pre><code class="language-ruby" data-lang="ruby"><span class="n">before_action</span> <span class="ss">:fetch_product</span><span class="p">,</span> <span class="ss">only: </span><span class="p">[</span><span class="ss">:show</span><span class="p">]</span>
+
+<span class="k">def</span> <span class="nf">fetch_product</span>
+  <span class="vi">@product</span> <span class="o">=</span> <span class="no">Product</span><span class="p">.</span><span class="nf">includes</span><span class="p">(</span><span class="ss">:variants</span><span class="p">).</span><span class="nf">find_by</span><span class="p">(</span><span class="ss">slug: </span><span class="n">params</span><span class="p">[</span><span class="ss">:id</span><span class="p">])</span>
+<span class="k">end</span></code></pre></figure>
+<p><i><small>Превращается в...</small></i></p>
+<figure class="highlight"><pre><code class="language-elixir" data-lang="elixir"><span class="k">def</span> <span class="n">show</span><span class="p">(</span><span class="n">conn</span><span class="p">,</span> <span class="p">%{</span><span class="sd">"</span><span class="s2">id"</span> <span class="o">=&gt;</span> <span class="n">id</span><span class="p">})</span> <span class="k">do</span>
+  <span class="n">conn</span>
+  <span class="o">|&gt;</span> <span class="n">assign_current_order</span>
+  <span class="o">|&gt;</span> <span class="n">assign_product</span><span class="p">(</span><span class="n">id</span><span class="p">)</span>
+  <span class="o">|&gt;</span> <span class="n">render</span><span class="p">(</span><span class="sd">"</span><span class="s2">show.html"</span><span class="p">)</span>
+<span class="k">end</span>
+
+<span class="k">defp</span> <span class="n">assign_product</span><span class="p">(</span><span class="n">conn</span><span class="p">,</span> <span class="n">id</span><span class="p">)</span> <span class="k">do</span>
+  <span class="n">assign</span><span class="p">(</span><span class="n">conn</span><span class="p">,</span> <span class="ss">:product</span><span class="p">,</span> <span class="no">Repo</span><span class="o">.</span><span class="n">get!</span><span class="p">(</span><span class="no">Product</span><span class="p">,</span> <span class="n">id</span><span class="p">,</span> <span class="n">preload</span> <span class="p">[</span><span class="ss">:variants</span><span class="p">]))</span>
+<span class="k">end</span></code></pre></figure>
+
+                    
+<p>В&nbsp;некоторых случаях помещаем плаги, чтобы проверять выполнение требований перед осуществлением действий.</p>
+
+<figure class="highlight"><pre><code class="language-ruby" data-lang="ruby"><span class="n">before_action</span> <span class="ss">:check_for_order</span><span class="p">,</span> <span class="ss">only: </span><span class="p">[</span><span class="ss">:show</span><span class="p">,</span> <span class="ss">:update</span><span class="p">]</span>
+
+<span class="k">def</span> <span class="nf">check_for_order</span>
+  <span class="n">redirect_to</span> <span class="n">root_path</span> <span class="k">unless</span> <span class="n">current_order</span><span class="p">.</span><span class="nf">present?</span>
+<span class="k">end</span></code></pre></figure>
+
+<p><i><small>Превращается в...</small></i></p>
+
+<figure class="highlight"><pre><code class="language-elixir" data-lang="elixir"><span class="n">plug</span> <span class="ss">:check_for_order</span>
+
+<span class="k">defp</span> <span class="n">check_for_order</span><span class="p">(</span><span class="n">conn</span><span class="p">,</span> <span class="n">_params</span><span class="p">)</span> <span class="k">do</span>
+  <span class="k">case</span> <span class="n">get_current_order</span><span class="p">(</span><span class="n">conn</span><span class="p">)</span> <span class="k">do</span>
+    <span class="no">nil</span> <span class="o">-&gt;</span>
+      <span class="n">conn</span> <span class="o">|&gt;</span> <span class="n">redirect</span><span class="p">(</span><span class="ss">to:</span> <span class="sd">"</span><span class="s2">/"</span><span class="p">)</span> <span class="o">|&gt;</span> <span class="n">halt</span>
+    <span class="n">order</span> <span class="o">-&gt;</span>
+      <span class="n">assign</span><span class="p">(</span><span class="n">conn</span><span class="p">,</span> <span class="ss">:order</span><span class="p">,</span> <span class="n">order</span><span class="p">)</span>
+  <span class="k">end</span>
+<span class="k">end</span></code></pre></figure>
+<h4><strong>Шаблоны/Представления</strong></h4>
+<p>Здесь имеет место небольшая терминологическая замена: то, что для Rails является представлением, в&nbsp;Phoenix будет называться шаблоном. Файл шаблона компилируется в&nbsp;функцию внутри модуля представления. Представления в&nbsp;Phoenix также являются местом для функций, аналогов хелперов из&nbsp;Rails. Вот простой пример вычисления общего количества отображаемых позиций заказа:</p>
+
+<figure class="highlight"><pre><code class="language-elixir" data-lang="elixir"><span class="k">def</span> <span class="n">line_item_amount</span><span class="p">(</span><span class="n">line_item</span><span class="p">)</span> <span class="k">do</span>
+  <span class="no">Decimal</span><span class="o">.</span><span class="n">mult</span><span class="p">(</span><span class="n">line_item</span><span class="o">.</span><span class="n">price</span><span class="p">,</span> <span class="no">Decimal</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="n">line_item</span><span class="o">.</span><span class="n">quantity</span><span class="p">))</span>
+<span class="k">end</span></code></pre></figure>
+
+<p>В&nbsp;представлении возможно получить доступ только к&nbsp;явно объявленным переменным, тогда как в&nbsp;Rails по&nbsp;умолчанию доступны все переменные экземпляра. Rails-приложение, переносом которого я&nbsp;занимался, также использует декораторы из&nbsp;гема Draper для расширения моделей. А&nbsp;мы&nbsp;предоставим эти действия функциям в&nbsp;представлении:</p>
+
+<figure class="highlight"><pre><code class="language-ruby" data-lang="ruby"><span class="o">&lt;</span><span class="sx">% product.imagery.each_with_index </span><span class="k">do</span> <span class="o">|</span><span class="n">image</span><span class="p">,</span> <span class="n">index</span><span class="o">|</span> <span class="sx">%&gt;</span></code></pre></figure>
+
+<p><i><small>Превращается в...</small></i></p>
+
+<figure class="highlight"><pre><code class="language-elixir" data-lang="elixir"><span class="o">&lt;%=</span> <span class="n">for</span> <span class="p">{</span><span class="n">img</span><span class="p">,</span> <span class="n">index</span><span class="p">}</span> <span class="o">&lt;-</span> <span class="no">Enum</span><span class="o">.</span><span class="n">with_index</span><span class="p">(</span><span class="n">product_images</span><span class="p">(</span><span class="nv">@product</span><span class="p">))</span> <span class="k">do</span> <span class="p">%</span><span class="o">&gt;</span></code></pre></figure>
+
+Функция <code>product_images</code> находится в <code>FormAndThread.ProductView</code>.
+
+
+<h4><strong>Сервисы</strong></h4>
+<p>Ещё одна основная составляющая приложения&nbsp;— это сервисы, вбирающие в&nbsp;себя основную бизнес-логику внутри действий. Чтобы сохранить функциональность, я&nbsp;создал Elixir-модули.</p>
+<p>Большим преимуществом Elixir является&nbsp;то, что можно с&nbsp;лёгкостью понять порядок выполнения действий. Здесь реализуется такой паттерн, при котором каждому действию, изменяющему некоторую запись заказа в&nbsp;базе данных, возвращается новое состояние, прежде чем осуществится переход к&nbsp;следующему действию.</p>
+
+<figure class="highlight"><pre><code class="language-elixir" data-lang="elixir"><span class="k">defmodule</span> <span class="no">FormAndThread</span><span class="o">.</span><span class="no">Checkout</span> <span class="k">do</span>
+<span class="o">...</span>
+<span class="k">def</span> <span class="n">complete</span><span class="p">(</span><span class="n">changeset</span><span class="p">)</span> <span class="k">do</span>
+  <span class="n">changeset</span>
+  <span class="o">|&gt;</span> <span class="no">Repo</span><span class="o">.</span><span class="n">update!</span>
+  <span class="o">|&gt;</span> <span class="no">Repo</span><span class="o">.</span><span class="n">preload</span><span class="p">(</span><span class="no">Order</span><span class="o">.</span><span class="n">preloaded</span><span class="p">)</span>
+  <span class="o">|&gt;</span> <span class="n">charge_customer</span>
+  <span class="o">|&gt;</span> <span class="n">deliver_confirmation_email</span>
+  <span class="o">|&gt;</span> <span class="n">reconcile_stock_levels</span>
+  <span class="o">|&gt;</span> <span class="n">mark_as_received</span>
+<span class="k">end</span>
+
+<span class="k">def</span> <span class="n">charge_customer</span><span class="p">(</span><span class="n">order</span><span class="p">)</span> <span class="k">do</span>
+  <span class="no">Gateway</span><span class="o">.</span><span class="n">charge_customer</span><span class="p">(</span><span class="n">order</span><span class="p">)</span>
+<span class="k">end</span>
+
+<span class="k">def</span> <span class="n">deliver_confirmation_email</span><span class="p">(</span><span class="n">order</span><span class="p">)</span> <span class="k">do</span>
+  <span class="no">Mailer</span><span class="o">.</span><span class="n">send_order_received_email</span><span class="p">(</span><span class="n">order</span><span class="p">)</span>
+<span class="k">end</span>
+
+<span class="k">def</span> <span class="n">reconcile_stock_levels</span><span class="p">(</span><span class="n">order</span><span class="p">)</span> <span class="k">do</span>
+  <span class="no">Repo</span><span class="o">.</span><span class="n">transaction</span><span class="p">(</span><span class="k">fn</span> <span class="o">-&gt;</span>
+    <span class="n">for</span> <span class="n">li</span> <span class="o">&lt;-</span> <span class="n">order</span><span class="o">.</span><span class="n">line_items</span> <span class="k">do</span>
+      <span class="no">Repo</span><span class="o">.</span><span class="n">update!</span><span class="p">(%{</span><span class="n">li</span><span class="o">.</span><span class="n">variant</span> <span class="o">|</span> <span class="ss">stock_level:</span> <span class="n">li</span><span class="o">.</span><span class="n">variant</span><span class="o">.</span><span class="n">stock_level</span> <span class="o">-</span> <span class="n">li</span><span class="o">.</span><span class="n">quantity</span><span class="p">})</span>
+    <span class="k">end</span>
+  <span class="k">end</span><span class="p">)</span>
+
+  <span class="n">order</span>
+<span class="k">end</span>
+
+<span class="k">def</span> <span class="n">mark_as_received</span><span class="p">(</span><span class="n">order</span><span class="p">)</span> <span class="k">do</span>
+  <span class="no">Order</span><span class="o">.</span><span class="n">changeset</span><span class="p">(</span><span class="n">order</span><span class="p">,</span> <span class="p">%{</span><span class="ss">state:</span> <span class="sd">"</span><span class="s2">received"</span><span class="p">,</span> <span class="ss">completed_at:</span> <span class="no">Ecto</span><span class="o">.</span><span class="no">DateTime</span><span class="o">.</span><span class="n">local</span><span class="p">()})</span>
+  <span class="o">|&gt;</span> <span class="no">Repo</span><span class="o">.</span><span class="n">update!</span>
+<span class="k">end</span></code></pre></figure>
+
+<h4><strong>Подведение итогов</strong></h4>
+<p>Я&nbsp;уверен, что со&nbsp;временем появится множество различных схем переноса Rails-приложений, но&nbsp;для себя я&nbsp;отметил, что этот процесс не&nbsp;только оказался «безболезненным», но&nbsp;и&nbsp;позволил получить превосходные результаты. Не&nbsp;говоря уже о&nbsp;том, что Elixir-приложение работает гораздо быстрее (показатель времени отклика менее 100&nbsp;мс льёт мне бальзам на&nbsp;душу).</p>
+
+  </div>
+
+  <!-- uSocial -->
+  <div class="post__share_block share_block">
+    <script async src="https://usocial.pro/usocial/usocial.js?v=6.1.4" data-script="usocial" charset="utf-8"></script>
+    <div class="uSocial-Share" data-pid="2fd19544e551bce292425ee8adaa31be" data-type="share" data-options="round,style2,default,absolute,horizontal,size32,counter1,counter-before,upArrow-right,nomobile" data-social="telegram,fb,vk,gPlus,twi,bookmarks"></div>
+  </div>
+  <!-- /uSocial -->
+</article>
+
+
+        <footer class="footer">
+    &copy; 2020
+    / Россия
+
+    <span class="pull-right">Любые мысли и вопросы пишите на <a href="mailto:elixir@wunsh.ru">elixir@wunsh.ru</a>.</span>
+</footer>
+
+        <div id="subscribeModal" class="modal">
+    <div class="modal__content">
+        <a href="#close" title="Close" class="modal__close">x</a>
+
+        <h2 class="modal__title">Ламповая рассылка про&nbsp;Эликсир</h2>
+
+        <p>Один-два раза в&nbsp;неделю присылаем тёплые письма об&nbsp;Эликсире: переводы самых интересных статей до&nbsp;их&nbsp;появления в&nbsp;открытом доступе, анонсы событий и&nbsp;вкусные бонусы.</p>
+
+        <form action="//wunsh.us14.list-manage.com/subscribe/post?u=c81ca3d4693f62db7f7f67c71&amp;id=a192e2dfef" method="post" id="mc-embedded-subscribe-form" name="mc-embedded-subscribe-form" class="pure-form h-tc validate" target="_blank" novalidate>
+            <input type="email" value="" name="EMAIL" class="modal__input pure-input-rounded large" id="mce-EMAIL" placeholder="Твоя почта" required>
+            <div style="position: absolute; left: -5000px;" aria-hidden="true"><input type="text" name="b_c81ca3d4693f62db7f7f67c71_a192e2dfef" tabindex="-1" value=""></div>
+
+            <input type="submit" value="Присоединиться" name="subscribe" onClick="yaCounter39773490.reachGoal('SUBSCRIBED'); return true" id="mc-embedded-subscribe" class="pure-button button-success large">
+        </form>
+
+        <p>Обязательно подтверди почту, перейдя по&nbsp;ссылке в&nbsp;письме, иначе мы&nbsp;не&nbsp;сможем делиться с&nbsp;тобой полезностями.</p>
+
+        <p>Надоедать точно не&nbsp;будем :)</p>
+    </div>
+</div>
+
+        <script src="/assets/js/vendors/zepto.min.js"></script>
+
+<script>
+    if ($(".post--docs").length) {
+        $(".footer").addClass("footer--docs")
+    }
+
+    $(".modal--close_backdrop").click(function(){
+        window.location.hash = "";
+    });
+</script>
+
+        <!-- Yandex.Metrika counter -->
+<script type="text/javascript">
+    (function (d, w, c) {
+        (w[c] = w[c] || []).push(function() {
+            try {
+                w.yaCounter39773490 = new Ya.Metrika({
+                    id:39773490,
+                    clickmap:true,
+                    trackLinks:true,
+                    accurateTrackBounce:true,
+                    webvisor:true,
+                    ut:"noindex"
+                });
+            } catch(e) { }
+        });
+
+        var n = d.getElementsByTagName("script")[0],
+            s = d.createElement("script"),
+            f = function () { n.parentNode.insertBefore(s, n); };
+        s.type = "text/javascript";
+        s.async = true;
+        s.src = "https://mc.yandex.ru/metrika/watch.js";
+
+        if (w.opera == "[object Opera]") {
+            d.addEventListener("DOMContentLoaded", f, false);
+        } else { f(); }
+    })(document, window, "yandex_metrika_callbacks");
+</script>
+<noscript><div><img src="https://mc.yandex.ru/watch/39773490?ut=noindex" style="position:absolute; left:-9999px;" alt="" /></div></noscript>
+<!-- /Yandex.Metrika counter -->
+
+      </div>
+    </div>
+  </body>
+</html>

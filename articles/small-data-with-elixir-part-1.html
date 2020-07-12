@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Малые данные в&nbsp;Elixir |> Сообщество Elixir и Phoenix Framework</title>
+    <meta name="description" content="Первая статья в&nbsp;цикле статей о&nbsp;малых данных в&nbsp;Elixir. Начнём с&nbsp;определения &laquo;малые данные&raquo;, поговорим о&nbsp;том, почему они в...">
+
+    <link rel="alternate" type="application/rss+xml" title="Сообщество Elixir и Phoenix Framework" href="/feed.xml" />
+    <link rel="canonical" href="https://wunsh.ru/articles/small-data-with-elixir-part-1.html">
+
+    <style type="text/css">@import url("//fonts.googleapis.com/css?family=Source+Sans+Pro:400,700&subset=cyrillic");</style>
+    <link rel="stylesheet" href="/assets/css/vendors/pure.min.css">
+    <link rel="stylesheet" href="/assets/css/vendors/pure-grids-responsive.min.css">
+    <link rel="stylesheet" href="/assets/css/style.css?1594516983">
+
+    <link rel="shortcut icon" type="image/png" href="/assets/favicon.png" >
+</head>
+
+
+  <body>
+    <div class="wunsh pure-g">
+      
+
+
+
+
+<div class="menu pure-u-1 pure-u-md-1-4">
+  <div class="header">
+    <h2 class="header__title">
+      
+        <a href="https://wunsh.ru" class="header__title_link" title="На главную">Эликсир и&nbsp;Вунш</a>
+      
+    </h2>
+    <h3 class="header__tagline">Erlang + Ruby = &#10084;</h3>
+
+    <nav class="nav">
+      <ul class="nav_list">
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/elixir" class="nav_list__item_link pure-button">О языке</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/install/linux-asdf" class="nav_list__item_link pure-button">Установка</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/docs/" class="nav_list__item_link pure-button">Документация</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/guides" class="nav_list__item_link pure-button">Гайды</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/news" class="nav_list__item_link pure-button">Новости</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/articles" class="nav_list__item_link pure-button">Статьи</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/videos" class="nav_list__item_link pure-button">Видео</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/vacancies" class="nav_list__item_link pure-button">Вакансии</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/faq" class="nav_list__item_link pure-button">FAQ</a>
+            </li>
+          
+        
+      </ul>
+    </nav>
+
+    <a href="#subscribeModal" class="pure-button header__subscribe_link">Подписаться на рассылку</a>
+  </div>
+</div>
+
+
+      <div class="content pure-u-1 pure-u-md-3-4">
+        
+
+<article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+  <header class="post__header">
+    
+    <h1 class="post__title" itemprop="name headline">Малые данные в&nbsp;Elixir</h1>
+
+    <div class="post__meta post_meta">
+      <ul class="meta_list">
+        <li class="meta_list__item">
+          
+          <span class="">
+            <small class="meta_list__item_name">Дата</small>
+            <time class="h-bold" datetime="2017-06-18T00:00:00+00:00" itemprop="datePublished">
+              
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+18 июня 2017
+
+            </time>
+          </span>
+          
+
+          
+        </li>
+        
+        <li class="meta_list__item">
+            <span class="tag_cloud tags_cloud--inline h-no_margin">
+              <small class="meta_list__item_name">Теги</small> 
+
+
+<ul class="tags_cloud__list">
+  
+    <a href="/tags/#genstage" class="tags_cloud__link tag tag--genstage">genstage</a>
+  
+    <a href="/tags/#flow" class="tags_cloud__link tag tag--flow">flow</a>
+  
+    <a href="/tags/#overview" class="tags_cloud__link tag tag--overview">overview</a>
+  
+</ul>
+
+            </span>
+        </li>
+        
+        <li class="meta_list__item">
+          <span itemprop="author" itemscope itemtype="http://schema.org/Person">
+            <small class="meta_list__item_name">
+              
+                Перевод
+              
+            </small>
+            <span itemprop="name" class="h-bold">Надежда Нестерова</span>
+          </span>
+        </li>
+
+        <li class="meta_list__item">
+          
+            <div >
+              <small>Оригинал</small>
+              <strong>
+                &laquo;<a href="http://blog.plataformatec.com.br/2017/03/small-data-with-elixir/" style="text-transform: none; text-decoration: underline; color: #4b2e39;">Small Data with Elixir</a>&raquo;
+              </strong>
+              <small>&copy;</small>
+              <strong>José Valim</strong>
+            </div>
+          
+        </li>
+      </ul>
+    </div>
+  </header>
+
+  <div class="post__content" itemprop="articleBody">
+    <p>Первая статья в&nbsp;цикле статей о&nbsp;малых данных в&nbsp;Elixir. Начнём с&nbsp;определения &laquo;малые данные&raquo;, поговорим о&nbsp;том, почему они важны, вкратце рассмотрим инструмент Flow и&nbsp;пробежимся по&nbsp;содержанию следующих статей цикла.</p>
+<h2>Насколько малы малые данные?</h2>
+<p>Малые данные&nbsp;&mdash; это данные, которые за&nbsp;требуемое количество времени может обработать одна машина. Такая обработка может проводиться пакетами, где объём данных известен заранее, либо в&nbsp;поточном режиме, где одна или несколько машин управляются с&nbsp;поступающими событиями без необходимости в&nbsp;синхронизации.</p>
+<p>Группа учёных из&nbsp;Калифорнийского университета <a href="https://people.eecs.berkeley.edu/~alspaugh/papers/mapred_workloads_vldb_2012.pdf">проанализировали различные профили нагрузки MapReduce</a> и&nbsp;пришли к&nbsp;следующему выводу:</p>
+<blockquote>Все профили нагрузки содержат большое количество типов заданий для планирования на&nbsp;уровне заданий и&nbsp;планирования выполнения, причём большинство из&nbsp;них работают именно с&nbsp;малыми данными. Эти задания являются &laquo;малыми&raquo; во&nbsp;всех смыслах по&nbsp;сравнению с&nbsp;остальными заданиями каждого профиля нагрузки. Они оперируют данными размером от&nbsp;десятков килобайт до&nbsp;одного гигабайта, содержат большое количество различных образцов данных и&nbsp;выполняются за&nbsp;время от&nbsp;10&nbsp;секунд до&nbsp;нескольких минут.</blockquote>
+<p>Разработчики <a href="http://www.cl.cam.ac.uk/research/srg/netos/camsas/pubs/eurosys15-musketeer.pdf">Musketeer</a> во&nbsp;время работы над проектом провели сравнительный анализ нескольких программных решений и&nbsp;заключили:</p>
+<blockquote>Система MapReduce с&nbsp;использованием библиотеки Metis, запущенная на&nbsp;одной машине, показывает наивысшую производительность при работе с&nbsp;малыми данными (&le; 0,5&nbsp;ГБ). Это действительно важно, ведь на&nbsp;практике более распространенными являются именно малые объёмы входных данных: 40-80% MapReduce-заданий клиентов Cloudera и&nbsp;70% заданий Facebook имеют не&nbsp;более 1&nbsp;ГБ входных данных.</blockquote>
+<p>Зачастую узким местом является не&nbsp;расчёт, а&nbsp;чтение данных из&nbsp;внешних источников. Для подобных систем исключительно важна способность параллельной потоковой работы с&nbsp;внешними источниками.</p>
+<p>И&nbsp;наконец, обратим внимание на&nbsp;публикацию <a href="http://www.frankmcsherry.org/assets/COST.pdf">&laquo;Масштабируемость, но&nbsp;какой ценой?&raquo;</a>. &laquo;Цена&raquo; конкретной платформы для решения конкретной задачи&nbsp;&mdash; это необходимость конфигурации платформы для превосхождения производительности <strong>однопоточной реализации</strong>.</p>
+<blockquote>Вычислительная среда кластера и&nbsp;вычислительная среда одного ПК&nbsp;&mdash; разные вещи. Для первой важны высокая пропускная способность и сокращение задержек, при наличии менее производительных ядер и&nbsp;памяти. Для ПК&nbsp;же характерны более производительные ядра и&nbsp;память с&nbsp;низкой пропускной способностью. Поскольку ресурсы кластера обычно отлично подходят для реализации масштабируемых систем, в&nbsp;целях достижения максимальной производительности стоит рассматривать различные варианты железа.</blockquote>
+<p>Другими словами, существует большое количество задач, решение которых гораздо более эффективно производить на&nbsp;одном компьютере, так как это поможет избежать характерные для больших данных сложность алгоритмов, сетевую передачу данных и&nbsp;сохранение состояния в&nbsp;контрольных точках.</p>
+<p>Что из&nbsp;себя представляют малые данные в&nbsp;том или ином случае зависит от&nbsp;конкретной задачи, объёма данных (или частоты их&nbsp;поступления) и&nbsp;ожидаемого времени их&nbsp;обработки. В&nbsp;данном цикле статей рассматриваются решения различных задач с&nbsp;помощью <a href="https://github.com/elixir-lang/flow">библиотеки</a> <a href="https://github.com/elixir-lang/flow">Flow</a>. Flow обеспечивает конкурентность в&nbsp;одномашинных системах, а&nbsp;также подходит для работы с&nbsp;&laquo;малыми&raquo; задачами, тем самым избавляя разработчиков от&nbsp;необходимости прибегать к&nbsp;готовым программным решениям обработки больших данных.</p>
+<h2>GenStage и&nbsp;Flow</h2>
+<p>В&nbsp;прошлом году <a href="http://elixir-lang.org/blog/2016/07/14/announcing-genstage/">был&nbsp;представлен GenStage</a>&nbsp;&mdash; абстракция, предназначенная для обмена данными между процессами Elixir. GenStage разработан с&nbsp;учётом возможности использования данных из&nbsp;внешних систем (таких как Apache Kafka, RabbitMQ, баз данных, файлов и&nbsp;т.п.) без перегрузки системы, обрабатывающей эти данные.</p>
+<p>Этапы могут как производить данные, так и&nbsp;потреблять&nbsp;их. Один этап-поставщик может иметь несколько потребителей, которые будут получать события в&nbsp;соответствии с&nbsp;выбранной стратегией. Это означает, что разработчики могут произвольно объединять этапы в&nbsp;пайплайны, обеспечивая тем самым конкурентность.</p>
+<p>Однако с&nbsp;таким неконтролируемым подходом схемы работы приложений, скорее всего, будут далеки от&nbsp;оптимальных. Именно поэтому был разработан инструмент Flow, построенный на&nbsp;основе GenStage. Flow позволяет разработчикам производить обработку данных с&nbsp;помощью функциональных операций map, reduce, filter и&nbsp;т.п. Flow также предоставляет комфортные средства для секционирования данных и&nbsp;управления окнами. После задания всех необходимых параметров Flow создаёт из&nbsp;подключенных этапов сеть, через которую затем будут проходить данные. Ниже приведён простой пример использования Flow для подсчёта количества слов в&nbsp;файле:</p>
+<figure class="highlight"><pre><code class="language-elixir" data-lang="elixir"><span class="no">File</span><span class="o">.</span><span class="n">stream!</span><span class="p">(</span><span class="sd">"</span><span class="s2">path/to/file"</span><span class="p">)</span>
+<span class="o">|&gt;</span> <span class="no">Flow</span><span class="o">.</span><span class="n">from_enumerable</span><span class="p">()</span>
+<span class="o">|&gt;</span> <span class="no">Flow</span><span class="o">.</span><span class="n">flat_map</span><span class="p">(</span><span class="o">&amp;</span><span class="no">String</span><span class="o">.</span><span class="n">split</span><span class="o">/</span><span class="m">1</span><span class="p">)</span>
+<span class="o">|&gt;</span> <span class="no">Flow</span><span class="o">.</span><span class="n">partition</span><span class="p">()</span>
+<span class="o">|&gt;</span> <span class="no">Flow</span><span class="o">.</span><span class="n">reduce</span><span class="p">(</span><span class="k">fn</span> <span class="o">-&gt;</span> <span class="p">%{}</span> <span class="k">end</span><span class="p">,</span> <span class="k">fn</span> <span class="n">word</span><span class="p">,</span> <span class="n">map</span> <span class="o">-&gt;</span>
+     <span class="no">Map</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">map</span><span class="p">,</span> <span class="n">word</span><span class="p">,</span> <span class="m">1</span><span class="p">,</span> <span class="o">&amp;</span> <span class="nv">&amp;1</span> <span class="o">+</span> <span class="m">1</span><span class="p">)</span>
+   <span class="k">end</span><span class="p">)</span>
+<span class="o">|&gt;</span> <span class="no">Enum</span><span class="o">.</span><span class="n">into</span><span class="p">(%{})</span></code></pre></figure>
+<p>Приведённый выше пример будет подробнее рассмотрен в&nbsp;следующих статьях.</p>
+<h2>Что дальше</h2>
+<p>В&nbsp;следующей статье пойдёт речь об&nbsp;отложенных вычислениях и&nbsp;асинхронных потоках данных, которые предоставляют отличную базу для использования Flow.</p>
+
+  </div>
+
+  <!-- uSocial -->
+  <div class="post__share_block share_block">
+    <script async src="https://usocial.pro/usocial/usocial.js?v=6.1.4" data-script="usocial" charset="utf-8"></script>
+    <div class="uSocial-Share" data-pid="2fd19544e551bce292425ee8adaa31be" data-type="share" data-options="round,style2,default,absolute,horizontal,size32,counter1,counter-before,upArrow-right,nomobile" data-social="telegram,fb,vk,gPlus,twi,bookmarks"></div>
+  </div>
+  <!-- /uSocial -->
+</article>
+
+
+        <footer class="footer">
+    &copy; 2020
+    / Россия
+
+    <span class="pull-right">Любые мысли и вопросы пишите на <a href="mailto:elixir@wunsh.ru">elixir@wunsh.ru</a>.</span>
+</footer>
+
+        <div id="subscribeModal" class="modal">
+    <div class="modal__content">
+        <a href="#close" title="Close" class="modal__close">x</a>
+
+        <h2 class="modal__title">Ламповая рассылка про&nbsp;Эликсир</h2>
+
+        <p>Один-два раза в&nbsp;неделю присылаем тёплые письма об&nbsp;Эликсире: переводы самых интересных статей до&nbsp;их&nbsp;появления в&nbsp;открытом доступе, анонсы событий и&nbsp;вкусные бонусы.</p>
+
+        <form action="//wunsh.us14.list-manage.com/subscribe/post?u=c81ca3d4693f62db7f7f67c71&amp;id=a192e2dfef" method="post" id="mc-embedded-subscribe-form" name="mc-embedded-subscribe-form" class="pure-form h-tc validate" target="_blank" novalidate>
+            <input type="email" value="" name="EMAIL" class="modal__input pure-input-rounded large" id="mce-EMAIL" placeholder="Твоя почта" required>
+            <div style="position: absolute; left: -5000px;" aria-hidden="true"><input type="text" name="b_c81ca3d4693f62db7f7f67c71_a192e2dfef" tabindex="-1" value=""></div>
+
+            <input type="submit" value="Присоединиться" name="subscribe" onClick="yaCounter39773490.reachGoal('SUBSCRIBED'); return true" id="mc-embedded-subscribe" class="pure-button button-success large">
+        </form>
+
+        <p>Обязательно подтверди почту, перейдя по&nbsp;ссылке в&nbsp;письме, иначе мы&nbsp;не&nbsp;сможем делиться с&nbsp;тобой полезностями.</p>
+
+        <p>Надоедать точно не&nbsp;будем :)</p>
+    </div>
+</div>
+
+        <script src="/assets/js/vendors/zepto.min.js"></script>
+
+<script>
+    if ($(".post--docs").length) {
+        $(".footer").addClass("footer--docs")
+    }
+
+    $(".modal--close_backdrop").click(function(){
+        window.location.hash = "";
+    });
+</script>
+
+        <!-- Yandex.Metrika counter -->
+<script type="text/javascript">
+    (function (d, w, c) {
+        (w[c] = w[c] || []).push(function() {
+            try {
+                w.yaCounter39773490 = new Ya.Metrika({
+                    id:39773490,
+                    clickmap:true,
+                    trackLinks:true,
+                    accurateTrackBounce:true,
+                    webvisor:true,
+                    ut:"noindex"
+                });
+            } catch(e) { }
+        });
+
+        var n = d.getElementsByTagName("script")[0],
+            s = d.createElement("script"),
+            f = function () { n.parentNode.insertBefore(s, n); };
+        s.type = "text/javascript";
+        s.async = true;
+        s.src = "https://mc.yandex.ru/metrika/watch.js";
+
+        if (w.opera == "[object Opera]") {
+            d.addEventListener("DOMContentLoaded", f, false);
+        } else { f(); }
+    })(document, window, "yandex_metrika_callbacks");
+</script>
+<noscript><div><img src="https://mc.yandex.ru/watch/39773490?ut=noindex" style="position:absolute; left:-9999px;" alt="" /></div></noscript>
+<!-- /Yandex.Metrika counter -->
+
+      </div>
+    </div>
+  </body>
+</html>

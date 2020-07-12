@@ -1,0 +1,555 @@
+<!DOCTYPE html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Модули и функции |> Сообщество Elixir и Phoenix Framework</title>
+    <meta name="description" content="Русскоязычное сообщество Elixir и Phoenix Framework
+">
+
+    <link rel="alternate" type="application/rss+xml" title="Сообщество Elixir и Phoenix Framework" href="/feed.xml" />
+    <link rel="canonical" href="https://wunsh.ru/docs/modules-and-functions">
+
+    <style type="text/css">@import url("//fonts.googleapis.com/css?family=Source+Sans+Pro:400,700&subset=cyrillic");</style>
+    <link rel="stylesheet" href="/assets/css/vendors/pure.min.css">
+    <link rel="stylesheet" href="/assets/css/vendors/pure-grids-responsive.min.css">
+    <link rel="stylesheet" href="/assets/css/style.css?1594516983">
+
+    <link rel="shortcut icon" type="image/png" href="/assets/favicon.png" >
+</head>
+
+
+  <body>
+    <div class="wunsh pure-g">
+      
+
+
+
+
+<div class="menu pure-u-1 pure-u-md-1-4">
+  <div class="header">
+    <h2 class="header__title">
+      
+        <a href="https://wunsh.ru" class="header__title_link" title="На главную">Эликсир и&nbsp;Вунш</a>
+      
+    </h2>
+    <h3 class="header__tagline">Erlang + Ruby = &#10084;</h3>
+
+    <nav class="nav">
+      <ul class="nav_list">
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/elixir" class="nav_list__item_link pure-button">О языке</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/install/linux-asdf" class="nav_list__item_link pure-button">Установка</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/docs/" class="nav_list__item_link pure-button">Документация</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/guides" class="nav_list__item_link pure-button">Гайды</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/news" class="nav_list__item_link pure-button">Новости</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/articles" class="nav_list__item_link pure-button">Статьи</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/videos" class="nav_list__item_link pure-button">Видео</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/vacancies" class="nav_list__item_link pure-button">Вакансии</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/faq" class="nav_list__item_link pure-button">FAQ</a>
+            </li>
+          
+        
+      </ul>
+    </nav>
+
+    <a href="#subscribeModal" class="pure-button header__subscribe_link">Подписаться на рассылку</a>
+  </div>
+</div>
+
+
+      <div class="content pure-u-1 pure-u-md-3-4">
+        <article class="post post--docs" itemscope itemtype="http://schema.org/BlogPosting">
+    <header class="post__header">
+        <h1 class="post__title" itemprop="name headline">
+            <p>Модули и функции</p>
+
+        </h1>
+    </header>
+
+    <div class="post__content" itemprop="articleBody">
+        <p>В Эликсире принято объединять функции в модули. Мы уже использовали много разных модулей в предыдущих главах, например <a href="https://hexdocs.pm/elixir/String.html">модуль <code class="highlighter-rouge">String</code></a>:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">iex</span><span class="o">&gt;</span> <span class="no">String</span><span class="o">.</span><span class="n">length</span><span class="p">(</span><span class="sd">"</span><span class="s2">hello"</span><span class="p">)</span>
+<span class="m">5</span>
+</code></pre></div></div>
+
+<p>Чтобы создать свой модуль в Эликсире, используется макрос <code class="highlighter-rouge">defmodule</code>. А для объявления функций в этом модуле используется макрос <code class="highlighter-rouge">def</code>:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">iex</span><span class="o">&gt;</span> <span class="k">defmodule</span> <span class="no">Math</span> <span class="k">do</span>
+<span class="o">...&gt;</span>   <span class="k">def</span> <span class="n">sum</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">)</span> <span class="k">do</span>
+<span class="o">...&gt;</span>     <span class="n">a</span> <span class="o">+</span> <span class="n">b</span>
+<span class="o">...&gt;</span>   <span class="k">end</span>
+<span class="o">...&gt;</span> <span class="k">end</span>
+
+<span class="n">iex</span><span class="o">&gt;</span> <span class="no">Math</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="m">1</span><span class="p">,</span> <span class="m">2</span><span class="p">)</span>
+<span class="m">3</span>
+</code></pre></div></div>
+
+<p>В следующих главах примеры будут больше, и будет не очень удобно набирать их в консоли. Самое время научиться компилировать код и запускать скрипты на Эликсире.</p>
+
+<h2 id="компиляция">Компиляция</h2>
+
+<p>Как правило, очень удобно писать модули в файлы, так их можно скомпилировать и использовать повторно. Допустим, у нас есть файл с именем <code class="highlighter-rouge">math.ex</code> со следующим содержимым:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">defmodule</span> <span class="no">Math</span> <span class="k">do</span>
+  <span class="k">def</span> <span class="n">sum</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">)</span> <span class="k">do</span>
+    <span class="n">a</span> <span class="o">+</span> <span class="n">b</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<p>Этот файл может быть скомпилирован, используя <code class="highlighter-rouge">elixirc</code>:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span>elixirc math.ex
+</code></pre></div></div>
+
+<p>Данная команда создаст файл <code class="highlighter-rouge">Elixir.Math.beam</code>, содержащий байткод описанного модуля. Если мы снова запустим <code class="highlighter-rouge">iex</code> снова, модуль будет доступен (<code class="highlighter-rouge">iex</code> должен быть запущен в той же директории, где лежит файл с байткодом):</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">iex</span><span class="o">&gt;</span> <span class="no">Math</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="m">1</span><span class="p">,</span> <span class="m">2</span><span class="p">)</span>
+<span class="m">3</span>
+</code></pre></div></div>
+
+<p>Проекты на Эликсире обычно организованы в три директории:</p>
+
+<ul>
+  <li><code class="highlighter-rouge">ebin</code> – содержит скомпилированный байткод;</li>
+  <li><code class="highlighter-rouge">lib</code> – содержит код на Эликсире (как правило файлы <code class="highlighter-rouge">.ex</code>);</li>
+  <li><code class="highlighter-rouge">test</code> – содержит тесты (обычно файлы <code class="highlighter-rouge">.exs</code>).</li>
+</ul>
+
+<p>Во время работы над реальными проектам, инструмент сборки <code class="highlighter-rouge">mix</code> будет отвечать за компиляцию и настройки правильных путей вместо вас. Для образовательных целей Эликсир также поддерживает скриптовый режим, более гибкий и без генерации каких-либо скомпилированных артефактов.</p>
+
+<h2 id="скриптовый-режим">Скриптовый режим</h2>
+
+<p>В дополнение к расширению файлов <code class="highlighter-rouge">.ex</code> в Эликсире также поддерживаются файлы с расширением<code class="highlighter-rouge">.exs</code> для написания скриптов. C точки зрения Эликсира такие файлы идентичны, разница лишь в их назначении. <code class="highlighter-rouge">.ex</code> файлы будут скомпилированы, в то время как <code class="highlighter-rouge">.exs</code> файлы используются для скриптов. При исполнении, оба расширения компилируются и загружаются свои модули в память, но только <code class="highlighter-rouge">.ex</code> файлы записывают свой байткод на диск в формате <code class="highlighter-rouge">.beam</code>.</p>
+
+<p>Например, мы можем создать файл с названием <code class="highlighter-rouge">math.exs</code>:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">defmodule</span> <span class="no">Math</span> <span class="k">do</span>
+  <span class="k">def</span> <span class="n">sum</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">)</span> <span class="k">do</span>
+    <span class="n">a</span> <span class="o">+</span> <span class="n">b</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+
+<span class="no">IO</span><span class="o">.</span><span class="n">puts</span> <span class="no">Math</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="m">1</span><span class="p">,</span> <span class="m">2</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p>И выполнить его:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span>elixir math.exs
+</code></pre></div></div>
+
+<p>Файл скомпилируется в оперативную память и выполнится, напечатает результат <code class="highlighter-rouge">3</code>. Файл с байткодом не будет создан. В следующих примерах мы рекомендуем вам писать ваш код в скриптовые файлы и выполнять их как показано выше.</p>
+
+<h2 id="именованные-функции">Именованные функции</h2>
+
+<p>Внутри модуля мы можем определить функцию при помощи макроса <code class="highlighter-rouge">def/2</code> и приватную функцию, используя макрос <code class="highlighter-rouge">defp/2</code>. Функция, определённая через макрос <code class="highlighter-rouge">def/2</code> может быть вызвана из другого модуля, а приватная функция может быть вызвана только локально.</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">defmodule</span> <span class="no">Math</span> <span class="k">do</span>
+  <span class="k">def</span> <span class="n">sum</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">)</span> <span class="k">do</span>
+    <span class="n">do_sum</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">)</span>
+  <span class="k">end</span>
+
+  <span class="k">defp</span> <span class="n">do_sum</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">)</span> <span class="k">do</span>
+    <span class="n">a</span> <span class="o">+</span> <span class="n">b</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+
+<span class="no">IO</span><span class="o">.</span><span class="n">puts</span> <span class="no">Math</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="m">1</span><span class="p">,</span> <span class="m">2</span><span class="p">)</span>    <span class="c1">#=&gt; 3</span>
+<span class="no">IO</span><span class="o">.</span><span class="n">puts</span> <span class="no">Math</span><span class="o">.</span><span class="n">do_sum</span><span class="p">(</span><span class="m">1</span><span class="p">,</span> <span class="m">2</span><span class="p">)</span> <span class="c1">#=&gt; ** (UndefinedFunctionError)</span>
+</code></pre></div></div>
+
+<p>В определении функции также поддерживаются охранные условия и множественные варианты аргументов. Эликсир будет проверять каждый вариант, пока не найдёт подходящий. Вот реализация функции, которая проверяет, является ли переданное ей число нулём:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">defmodule</span> <span class="no">Math</span> <span class="k">do</span>
+  <span class="k">def</span> <span class="n">zero?</span><span class="p">(</span><span class="m">0</span><span class="p">)</span> <span class="k">do</span>
+    <span class="no">true</span>
+  <span class="k">end</span>
+
+  <span class="k">def</span> <span class="n">zero?</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="ow">when</span> <span class="n">is_integer</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">do</span>
+    <span class="no">false</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+
+<span class="no">IO</span><span class="o">.</span><span class="n">puts</span> <span class="no">Math</span><span class="o">.</span><span class="n">zero?</span><span class="p">(</span><span class="m">0</span><span class="p">)</span>         <span class="c1">#=&gt; true</span>
+<span class="no">IO</span><span class="o">.</span><span class="n">puts</span> <span class="no">Math</span><span class="o">.</span><span class="n">zero?</span><span class="p">(</span><span class="m">1</span><span class="p">)</span>         <span class="c1">#=&gt; false</span>
+<span class="no">IO</span><span class="o">.</span><span class="n">puts</span> <span class="no">Math</span><span class="o">.</span><span class="n">zero?</span><span class="p">([</span><span class="m">1</span><span class="p">,</span> <span class="m">2</span><span class="p">,</span> <span class="m">3</span><span class="p">])</span> <span class="c1">#=&gt; ** (FunctionClauseError)</span>
+<span class="no">IO</span><span class="o">.</span><span class="n">puts</span> <span class="no">Math</span><span class="o">.</span><span class="n">zero?</span><span class="p">(</span><span class="m">0.0</span><span class="p">)</span>       <span class="c1">#=&gt; ** (FunctionClauseError)</span>
+</code></pre></div></div>
+
+<p>Передача аргумента, который не подходит ни одному из вариантов, вызовет ошибку.</p>
+
+<p>Аналогично конструкциям, вроде <code class="highlighter-rouge">if</code>, именованные функции поддерживают как синтаксис блоков <code class="highlighter-rouge">do:</code>, так и <code class="highlighter-rouge">do</code>/<code class="highlighter-rouge">end</code>, который <a href="/docs/case-cond-and-if.html#doend-blocks">мы изучили вместе с ключевыми списками</a>. Например, мы можем привести <code class="highlighter-rouge">math.exs</code> к следующему виду:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">defmodule</span> <span class="no">Math</span> <span class="k">do</span>
+  <span class="k">def</span> <span class="n">zero?</span><span class="p">(</span><span class="m">0</span><span class="p">),</span> <span class="k">do</span><span class="p">:</span> <span class="no">true</span>
+  <span class="k">def</span> <span class="n">zero?</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="ow">when</span> <span class="n">is_integer</span><span class="p">(</span><span class="n">x</span><span class="p">),</span> <span class="k">do</span><span class="p">:</span> <span class="no">false</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<p>Такой вариант даст нам аналогичное поведение. Вы можете использовать <code class="highlighter-rouge">do:</code> для записи в одну строку, но для многострочного кода всегда нужны <code class="highlighter-rouge">do</code>/<code class="highlighter-rouge">end</code>.</p>
+
+<h2 id="отлов-функций">Отлов функций</h2>
+
+<p>На протяжении этого руководства мы использовали нотацию <code class="highlighter-rouge">имя_функции/арность</code> для обозначений функций. Такая нотация также может быть использована для получения именованной функции в качестве типа «функция». Запустите <code class="highlighter-rouge">iex</code>, открыв описанный выше файл <code class="highlighter-rouge">math.exs</code>:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span>iex math.exs
+</code></pre></div></div>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">iex</span><span class="o">&gt;</span> <span class="no">Math</span><span class="o">.</span><span class="n">zero?</span><span class="p">(</span><span class="m">0</span><span class="p">)</span>
+<span class="no">true</span>
+
+<span class="n">iex</span><span class="o">&gt;</span> <span class="n">fun</span> <span class="o">=</span> <span class="o">&amp;</span><span class="no">Math</span><span class="o">.</span><span class="n">zero?</span><span class="o">/</span><span class="m">1</span>
+<span class="o">&amp;</span><span class="no">Math</span><span class="o">.</span><span class="n">zero?</span><span class="o">/</span><span class="m">1</span>
+
+<span class="n">iex</span><span class="o">&gt;</span> <span class="n">is_function</span><span class="p">(</span><span class="n">fun</span><span class="p">)</span>
+<span class="no">true</span>
+
+<span class="n">iex</span><span class="o">&gt;</span> <span class="n">fun</span><span class="o">.</span><span class="p">(</span><span class="m">0</span><span class="p">)</span>
+<span class="no">true</span>
+</code></pre></div></div>
+
+<p>Помните, что в Эликсире есть разница между анонимными и именованными функциями. В первых для вызова должна быть указана точка (<code class="highlighter-rouge">.</code>) между именем переменной и скобками. <abbr title="CAPTURE OPERATOR">Оператор захвата</abbr> <code class="highlighter-rouge">&amp;</code> позволяет именованным функциям быть привязанным к переменным и переданным в качестве арумента так же, как мы привязываем, исполняем и передаём анонимные функции.</p>
+
+<p>Локальные или импортированные функции, такие как <code class="highlighter-rouge">is_function/1</code>, могут быть использованы без модуля:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">iex</span><span class="o">&gt;</span> <span class="o">&amp;</span><span class="n">is_function</span><span class="o">/</span><span class="m">1</span>
+<span class="o">&amp;</span><span class="ss">:erlang</span><span class="o">.</span><span class="n">is_function</span><span class="o">/</span><span class="m">1</span>
+
+<span class="n">iex</span><span class="o">&gt;</span> <span class="p">(</span><span class="o">&amp;</span><span class="n">is_function</span><span class="o">/</span><span class="m">1</span><span class="p">)</span><span class="o">.</span><span class="p">(</span><span class="n">fun</span><span class="p">)</span>
+<span class="no">true</span>
+</code></pre></div></div>
+
+<p>Обратите внимание, что синтаксис захвата может быть также использован в качестве сокращения для создания функций:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">iex</span><span class="o">&gt;</span> <span class="n">fun</span> <span class="o">=</span> <span class="o">&amp;</span><span class="p">(</span><span class="nv">&amp;1</span> <span class="o">+</span> <span class="m">1</span><span class="p">)</span>
+<span class="c1">#Function&lt;6.71889879/1 in :erl_eval.expr/5&gt;</span>
+
+<span class="n">iex</span><span class="o">&gt;</span> <span class="n">fun</span><span class="o">.</span><span class="p">(</span><span class="m">1</span><span class="p">)</span>
+<span class="m">2</span>
+</code></pre></div></div>
+
+<p><code class="highlighter-rouge">&amp;1</code> воспринимается как первый аргумент, переданный в функцию. <code class="highlighter-rouge">&amp;(&amp;1+1)</code> выше, то же самое, что <code class="highlighter-rouge">fn x -&gt; x + 1 end</code>. Синтаксис выше полезен для объявления коротких функций.</p>
+
+<p>Если вы хотите захватить функцию из модуля, вы можете использовать <code class="highlighter-rouge">&amp;Module.function()</code>:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">iex</span><span class="o">&gt;</span> <span class="n">fun</span> <span class="o">=</span> <span class="o">&amp;</span><span class="no">List</span><span class="o">.</span><span class="n">flatten</span><span class="p">(</span><span class="nv">&amp;1</span><span class="p">,</span> <span class="nv">&amp;2</span><span class="p">)</span>
+<span class="o">&amp;</span><span class="no">List</span><span class="o">.</span><span class="n">flatten</span><span class="o">/</span><span class="m">2</span>
+<span class="n">iex</span><span class="o">&gt;</span> <span class="n">fun</span><span class="o">.</span><span class="p">([</span><span class="m">1</span><span class="p">,</span> <span class="p">[[</span><span class="m">2</span><span class="p">],</span> <span class="m">3</span><span class="p">]],</span> <span class="p">[</span><span class="m">4</span><span class="p">,</span> <span class="m">5</span><span class="p">])</span>
+<span class="p">[</span><span class="m">1</span><span class="p">,</span> <span class="m">2</span><span class="p">,</span> <span class="m">3</span><span class="p">,</span> <span class="m">4</span><span class="p">,</span> <span class="m">5</span><span class="p">]</span>
+</code></pre></div></div>
+
+<p><code class="highlighter-rouge">&amp;List.flatten(&amp;1, &amp;2)</code> аналогично <code class="highlighter-rouge">fn(list, tail) -&gt; List.flatten(list, tail) end</code>, а это в данном случае равноценно <code class="highlighter-rouge">&amp;List.flatten/2</code>. Вы можете получить больше информации об операторе <code class="highlighter-rouge">&amp;</code> в <a href="https://hexdocs.pm/elixir/Kernel.SpecialForms.html#&amp;/1">документации по <code class="highlighter-rouge">Kernel.SpecialForms</code></a>.</p>
+
+<h2 id="стандартные-значения-аргументов">Стандартные значения аргументов</h2>
+
+<p>Именованные функции в Эликсире также поддерживают стандартные значения аргументов:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">defmodule</span> <span class="no">Concat</span> <span class="k">do</span>
+  <span class="k">def</span> <span class="n">join</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">sep</span> <span class="p">\\</span> <span class="sd">"</span><span class="s2"> "</span><span class="p">)</span> <span class="k">do</span>
+    <span class="n">a</span> <span class="o">&lt;&gt;</span> <span class="n">sep</span> <span class="o">&lt;&gt;</span> <span class="n">b</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+
+<span class="no">IO</span><span class="o">.</span><span class="n">puts</span> <span class="no">Concat</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="sd">"</span><span class="s2">Hello"</span><span class="p">,</span> <span class="sd">"</span><span class="s2">world"</span><span class="p">)</span>      <span class="c1">#=&gt; Hello world</span>
+<span class="no">IO</span><span class="o">.</span><span class="n">puts</span> <span class="no">Concat</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="sd">"</span><span class="s2">Hello"</span><span class="p">,</span> <span class="sd">"</span><span class="s2">world"</span><span class="p">,</span> <span class="sd">"</span><span class="s2">_"</span><span class="p">)</span> <span class="c1">#=&gt; Hello_world</span>
+</code></pre></div></div>
+
+<p>Любое выражение может быть принято в качестве стандартного значения, но при описании функции оно не будет оценено. При каждом вызове функции, когда нужно использовать стандартное значение, оно будет подставляться во время исполнения:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">defmodule</span> <span class="no">DefaultTest</span> <span class="k">do</span>
+  <span class="k">def</span> <span class="n">dowork</span><span class="p">(</span><span class="n">x</span> <span class="p">\\</span> <span class="sd">"</span><span class="s2">hello"</span><span class="p">)</span> <span class="k">do</span>
+    <span class="n">x</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">iex</span><span class="o">&gt;</span> <span class="no">DefaultTest</span><span class="o">.</span><span class="n">dowork</span>
+<span class="sd">"</span><span class="s2">hello"</span>
+<span class="n">iex</span><span class="o">&gt;</span> <span class="no">DefaultTest</span><span class="o">.</span><span class="n">dowork</span> <span class="m">123</span>
+<span class="m">123</span>
+<span class="n">iex</span><span class="o">&gt;</span> <span class="no">DefaultTest</span><span class="o">.</span><span class="n">dowork</span>
+<span class="sd">"</span><span class="s2">hello"</span>
+</code></pre></div></div>
+
+<p>Если функция со стандартным значением имеет несколько вариантов исполнения, нужно сначала объявить функцию без её описания (название и список аргументов без тела функции), чтобы задать значения по умолчанию:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">defmodule</span> <span class="no">Concat</span> <span class="k">do</span>
+  <span class="k">def</span> <span class="n">join</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span> <span class="p">\\</span> <span class="no">nil</span><span class="p">,</span> <span class="n">sep</span> <span class="p">\\</span> <span class="sd">"</span><span class="s2"> "</span><span class="p">)</span>
+
+  <span class="k">def</span> <span class="n">join</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">_sep</span><span class="p">)</span> <span class="ow">when</span> <span class="n">is_nil</span><span class="p">(</span><span class="n">b</span><span class="p">)</span> <span class="k">do</span>
+    <span class="n">a</span>
+  <span class="k">end</span>
+
+  <span class="k">def</span> <span class="n">join</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">sep</span><span class="p">)</span> <span class="k">do</span>
+    <span class="n">a</span> <span class="o">&lt;&gt;</span> <span class="n">sep</span> <span class="o">&lt;&gt;</span> <span class="n">b</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+
+<span class="no">IO</span><span class="o">.</span><span class="n">puts</span> <span class="no">Concat</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="sd">"</span><span class="s2">Hello"</span><span class="p">,</span> <span class="sd">"</span><span class="s2">world"</span><span class="p">)</span>      <span class="c1">#=&gt; Hello world</span>
+<span class="no">IO</span><span class="o">.</span><span class="n">puts</span> <span class="no">Concat</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="sd">"</span><span class="s2">Hello"</span><span class="p">,</span> <span class="sd">"</span><span class="s2">world"</span><span class="p">,</span> <span class="sd">"</span><span class="s2">_"</span><span class="p">)</span> <span class="c1">#=&gt; Hello_world</span>
+<span class="no">IO</span><span class="o">.</span><span class="n">puts</span> <span class="no">Concat</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="sd">"</span><span class="s2">Hello"</span><span class="p">)</span>               <span class="c1">#=&gt; Hello</span>
+</code></pre></div></div>
+
+<p>При использовании стандартных значений следует быть осторожным во избежание перекрытия описаний функции. Рассмотрите следующий пример:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">defmodule</span> <span class="no">Concat</span> <span class="k">do</span>
+  <span class="k">def</span> <span class="n">join</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">)</span> <span class="k">do</span>
+    <span class="no">IO</span><span class="o">.</span><span class="n">puts</span> <span class="sd">"</span><span class="s2">***First join"</span>
+    <span class="n">a</span> <span class="o">&lt;&gt;</span> <span class="n">b</span>
+  <span class="k">end</span>
+
+  <span class="k">def</span> <span class="n">join</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">sep</span> <span class="p">\\</span> <span class="sd">"</span><span class="s2"> "</span><span class="p">)</span> <span class="k">do</span>
+    <span class="no">IO</span><span class="o">.</span><span class="n">puts</span> <span class="sd">"</span><span class="s2">***Second join"</span>
+    <span class="n">a</span> <span class="o">&lt;&gt;</span> <span class="n">sep</span> <span class="o">&lt;&gt;</span> <span class="n">b</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<p>Если мы сохраним код выше в файл с названием <code class="highlighter-rouge">concat.ex</code> и скомпилируем его, Эликсир покажет следующее предупреждение:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>warning: this clause cannot match because a previous clause at line 2 always matches
+</code></pre></div></div>
+
+<p>Компилятор говорит нам, что вызов функции <code class="highlighter-rouge">join</code> с двумя аргументами всегда выберет первое определение, а второе будет выполнено только с тремя переданными аргументами:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span>iex concat.exs
+</code></pre></div></div>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">iex</span><span class="o">&gt;</span> <span class="no">Concat</span><span class="o">.</span><span class="n">join</span> <span class="sd">"</span><span class="s2">Hello"</span><span class="p">,</span> <span class="sd">"</span><span class="s2">world"</span>
+<span class="o">***</span><span class="no">First</span> <span class="n">join</span>
+<span class="sd">"</span><span class="s2">Helloworld"</span>
+</code></pre></div></div>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">iex</span><span class="o">&gt;</span> <span class="no">Concat</span><span class="o">.</span><span class="n">join</span> <span class="sd">"</span><span class="s2">Hello"</span><span class="p">,</span> <span class="sd">"</span><span class="s2">world"</span><span class="p">,</span> <span class="sd">"</span><span class="s2">_"</span>
+<span class="o">***</span><span class="no">Second</span> <span class="n">join</span>
+<span class="sd">"</span><span class="s2">Hello_world"</span>
+</code></pre></div></div>
+
+<p>На этом мы закончим наше краткое введение в модули. В следующих главах мы изучим, как использовать именованные функции для рекурсии, рассмотрим лексические директивы Эликсира, которые можно использовать для импорта функций из других модулей и поговорим об атрибутах модулей.</p>
+
+    </div>
+</article>
+
+<nav class="docs_nav pure-g">
+    <div class="docs_nav__inner pure-u-1 pure-u-md-3-4">
+        <div class="pure-g">
+            <div class="docs_nav__column docs_nav__column--prev pure-u-1-3">
+                
+                    <a href="/docs/keywords-and-maps.html" class="docs_nav__link pure-button">
+                        &larr;<span class="h-hidden_mobile"> Назад</span></a>
+                
+            </div>
+
+            <div class="docs_nav__column docs_nav__column--contents pure-u-1-3">
+                <a href="#docsContents" class="docs_nav__link docs_nav__link--contents pure-button">☰</a>
+            </div>
+
+            <div class="docs_nav__column docs_nav__column--next pure-u-1-3">
+                
+                    <a href="/docs/recursion.html" class="docs_nav__link pure-button">
+                        <span class="h-hidden_mobile">Вперёд </span>&rarr;
+                    </a>
+                
+            </div>
+        </div>
+    </div>
+</nav>
+
+<div id="docsContents" class="modal modal--docs_contents modal--close_backdrop">
+    <div class="modal__content">
+        <a href="#close" title="Закрыть" class="modal__close">x</a>
+
+        <h2 class="modal__title">Содержание</h2>
+
+        
+        <h3 id="руководство-для-начинающих">Руководство для начинающих</h3>
+<ul>
+  <li><a href="/docs">Введение</a></li>
+  <li><a href="/docs/basic-types.html">Базовые типы</a></li>
+  <li><a href="/docs/basic-operators.html">Базовые операторы</a></li>
+  <li><a href="/docs/pattern-matching.html">Сопоставление с образцом</a></li>
+  <li><a href="/docs/case-cond-and-if.html">Конструкции ветвления</a></li>
+  <li><a href="/docs/binaries-strings-and-char-lists.html">Двоичные данные, строки и списки символов</a></li>
+  <li><a href="/docs/keywords-and-maps.html">Ключевые списки и словари</a></li>
+  <li><a href="/docs/modules-and-functions.html">Модули и функции</a></li>
+  <li><a href="/docs/recursion.html">Рекурсия</a></li>
+  <li><a href="/docs/enumerables-and-streams.html">Перечисления и потоки</a></li>
+  <li><a href="/docs/processes.html">Процессы</a></li>
+  <li><a href="/docs/io-and-the-file-system.html">Ввод/вывод и файловая система</a></li>
+  <li><a href="/docs/alias-require-and-import.html">Директивы <code class="highlighter-rouge">alias</code>, <code class="highlighter-rouge">require</code> и <code class="highlighter-rouge">import</code></a></li>
+  <li><a href="/docs/module-attributes.html">Атрибуты модулей</a></li>
+  <li><a href="/docs/structs.html">Структуры</a></li>
+  <li><a href="/docs/protocols.html">Протоколы</a></li>
+  <li><a href="/docs/comprehensions.html">Списковые выражения</a></li>
+  <li><a href="/docs/sigils.html">Сигилы</a></li>
+  <li><a href="/docs/try-catch-and-rescue.html">Конструкция <code class="highlighter-rouge">try</code>, <code class="highlighter-rouge">catch</code> и <code class="highlighter-rouge">rescue</code></a></li>
+  <li><a href="/docs/typespecs-and-behaviours.html">Спецификации типов и поведения</a></li>
+  <li><a href="/docs/erlang-libraries.html">Библиотеки Эрланга</a></li>
+  <li><a href="/docs/where-to-go-next.html">Куда двигаться дальше</a></li>
+</ul>
+
+<h3 id="микс-и-otp">Микс и <code class="highlighter-rouge">OTP</code></h3>
+<ul>
+  <li><a href="/docs/mix-otp/introduction-to-mix.html">Введение в Микс</a></li>
+  <li><a href="/docs/mix-otp/agent.html">Агент</a></li>
+  <li><a href="/docs/mix-otp/genserver.html">GenServer</a></li>
+  <li><a href="/docs/mix-otp/supervisor-and-application.html">Супервизор и приложение</a></li>
+  <li><a href="/docs/mix-otp/dynamic-supervisor.html">Динамический супервизор</a></li>
+  <li><a href="/docs/mix-otp/ets.html">ETS</a></li>
+  <li><a href="/docs/mix-otp/dependencies-and-umbrella-apps.html">Зависимости и зонтичные проекты</a></li>
+  <li><a href="/docs/mix-otp/task-and-gen-tcp.html">Модули <code class="highlighter-rouge">Task</code> и <code class="highlighter-rouge">:gen_tcp</code></a></li>
+  <li><a href="/docs/mix-otp/docs-tests-and-with.html">Доктесты, паттерны и оператор <code class="highlighter-rouge">with</code></a></li>
+  <li><a href="/docs/mix-otp/distributed-tasks-and-configuration.html">Распределенные задачи и конфигурация</a></li>
+</ul>
+
+<h3 id="метапрограммирование">Метапрограммирование</h3>
+<ul>
+  <li><a href="/docs/meta/quote-and-unquote.html">Конструкции <code class="highlighter-rouge">quote</code> и <code class="highlighter-rouge">unquote</code></a></li>
+  <li><a href="/docs/meta/macros.html">Макросы</a></li>
+  <li><a href="/docs/meta/domain-specific-languages.html">Предметно-ориентированные языки</a></li>
+</ul>
+
+    </div>
+</div>
+
+
+
+        <footer class="footer">
+    &copy; 2020
+    / Россия
+
+    <span class="pull-right">Любые мысли и вопросы пишите на <a href="mailto:elixir@wunsh.ru">elixir@wunsh.ru</a>.</span>
+</footer>
+
+        <div id="subscribeModal" class="modal">
+    <div class="modal__content">
+        <a href="#close" title="Close" class="modal__close">x</a>
+
+        <h2 class="modal__title">Ламповая рассылка про&nbsp;Эликсир</h2>
+
+        <p>Один-два раза в&nbsp;неделю присылаем тёплые письма об&nbsp;Эликсире: переводы самых интересных статей до&nbsp;их&nbsp;появления в&nbsp;открытом доступе, анонсы событий и&nbsp;вкусные бонусы.</p>
+
+        <form action="//wunsh.us14.list-manage.com/subscribe/post?u=c81ca3d4693f62db7f7f67c71&amp;id=a192e2dfef" method="post" id="mc-embedded-subscribe-form" name="mc-embedded-subscribe-form" class="pure-form h-tc validate" target="_blank" novalidate>
+            <input type="email" value="" name="EMAIL" class="modal__input pure-input-rounded large" id="mce-EMAIL" placeholder="Твоя почта" required>
+            <div style="position: absolute; left: -5000px;" aria-hidden="true"><input type="text" name="b_c81ca3d4693f62db7f7f67c71_a192e2dfef" tabindex="-1" value=""></div>
+
+            <input type="submit" value="Присоединиться" name="subscribe" onClick="yaCounter39773490.reachGoal('SUBSCRIBED'); return true" id="mc-embedded-subscribe" class="pure-button button-success large">
+        </form>
+
+        <p>Обязательно подтверди почту, перейдя по&nbsp;ссылке в&nbsp;письме, иначе мы&nbsp;не&nbsp;сможем делиться с&nbsp;тобой полезностями.</p>
+
+        <p>Надоедать точно не&nbsp;будем :)</p>
+    </div>
+</div>
+
+        <script src="/assets/js/vendors/zepto.min.js"></script>
+
+<script>
+    if ($(".post--docs").length) {
+        $(".footer").addClass("footer--docs")
+    }
+
+    $(".modal--close_backdrop").click(function(){
+        window.location.hash = "";
+    });
+</script>
+
+        <!-- Yandex.Metrika counter -->
+<script type="text/javascript">
+    (function (d, w, c) {
+        (w[c] = w[c] || []).push(function() {
+            try {
+                w.yaCounter39773490 = new Ya.Metrika({
+                    id:39773490,
+                    clickmap:true,
+                    trackLinks:true,
+                    accurateTrackBounce:true,
+                    webvisor:true,
+                    ut:"noindex"
+                });
+            } catch(e) { }
+        });
+
+        var n = d.getElementsByTagName("script")[0],
+            s = d.createElement("script"),
+            f = function () { n.parentNode.insertBefore(s, n); };
+        s.type = "text/javascript";
+        s.async = true;
+        s.src = "https://mc.yandex.ru/metrika/watch.js";
+
+        if (w.opera == "[object Opera]") {
+            d.addEventListener("DOMContentLoaded", f, false);
+        } else { f(); }
+    })(document, window, "yandex_metrika_callbacks");
+</script>
+<noscript><div><img src="https://mc.yandex.ru/watch/39773490?ut=noindex" style="position:absolute; left:-9999px;" alt="" /></div></noscript>
+<!-- /Yandex.Metrika counter -->
+
+      </div>
+    </div>
+  </body>
+</html>

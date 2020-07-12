@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Безболезненная эксплуатация через рефакторинг |> Сообщество Elixir и Phoenix Framework</title>
+    <meta name="description" content="Эликсир – это не только модули и функции, но также и протоколы с поведениями. О том, как рефакторить код с помощью этих абстракций, читайте в статье.">
+
+    <link rel="alternate" type="application/rss+xml" title="Сообщество Elixir и Phoenix Framework" href="/feed.xml" />
+    <link rel="canonical" href="https://wunsh.ru/articles/refactoring-elixir-for-maintainability.html">
+
+    <style type="text/css">@import url("//fonts.googleapis.com/css?family=Source+Sans+Pro:400,700&subset=cyrillic");</style>
+    <link rel="stylesheet" href="/assets/css/vendors/pure.min.css">
+    <link rel="stylesheet" href="/assets/css/vendors/pure-grids-responsive.min.css">
+    <link rel="stylesheet" href="/assets/css/style.css?1594516983">
+
+    <link rel="shortcut icon" type="image/png" href="/assets/favicon.png" >
+</head>
+
+
+  <body>
+    <div class="wunsh pure-g">
+      
+
+
+
+
+<div class="menu pure-u-1 pure-u-md-1-4">
+  <div class="header">
+    <h2 class="header__title">
+      
+        <a href="https://wunsh.ru" class="header__title_link" title="На главную">Эликсир и&nbsp;Вунш</a>
+      
+    </h2>
+    <h3 class="header__tagline">Erlang + Ruby = &#10084;</h3>
+
+    <nav class="nav">
+      <ul class="nav_list">
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/elixir" class="nav_list__item_link pure-button">О языке</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/install/linux-asdf" class="nav_list__item_link pure-button">Установка</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/docs/" class="nav_list__item_link pure-button">Документация</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/guides" class="nav_list__item_link pure-button">Гайды</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/news" class="nav_list__item_link pure-button">Новости</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/articles" class="nav_list__item_link pure-button">Статьи</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/videos" class="nav_list__item_link pure-button">Видео</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/vacancies" class="nav_list__item_link pure-button">Вакансии</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/faq" class="nav_list__item_link pure-button">FAQ</a>
+            </li>
+          
+        
+      </ul>
+    </nav>
+
+    <a href="#subscribeModal" class="pure-button header__subscribe_link">Подписаться на рассылку</a>
+  </div>
+</div>
+
+
+      <div class="content pure-u-1 pure-u-md-3-4">
+        
+
+<article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+  <header class="post__header">
+    
+    <h1 class="post__title" itemprop="name headline">Безболезненная эксплуатация через рефакторинг</h1>
+
+    <div class="post__meta post_meta">
+      <ul class="meta_list">
+        <li class="meta_list__item">
+          
+          <span class="">
+            <small class="meta_list__item_name">Дата</small>
+            <time class="h-bold" datetime="2017-12-19T00:00:00+00:00" itemprop="datePublished">
+              
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+19 декабря 2017
+
+            </time>
+          </span>
+          
+
+          
+        </li>
+        
+        <li class="meta_list__item">
+            <span class="tag_cloud tags_cloud--inline h-no_margin">
+              <small class="meta_list__item_name">Теги</small> 
+
+
+<ul class="tags_cloud__list">
+  
+    <a href="/tags/#advanced" class="tags_cloud__link tag tag--advanced">advanced</a>
+  
+    <a href="/tags/#refactoring" class="tags_cloud__link tag tag--refactoring">refactoring</a>
+  
+</ul>
+
+            </span>
+        </li>
+        
+        <li class="meta_list__item">
+          <span itemprop="author" itemscope itemtype="http://schema.org/Person">
+            <small class="meta_list__item_name">
+              
+                Перевод
+              
+            </small>
+            <span itemprop="name" class="h-bold">Надежда Нестерова</span>
+          </span>
+        </li>
+
+        <li class="meta_list__item">
+          
+            <div >
+              <small>Оригинал</small>
+              <strong>
+                &laquo;<a href="https://blog.usejournal.com/beyond-functions-in-elixir-refactoring-for-maintainability-5c73daba77f3" style="text-transform: none; text-decoration: underline; color: #4b2e39;">Beyond Functions in Elixir: Refactoring for Maintainability</a>&raquo;
+              </strong>
+              <small>&copy;</small>
+              <strong>Dave Lucia</strong>
+            </div>
+          
+        </li>
+      </ul>
+    </div>
+  </header>
+
+  <div class="post__content" itemprop="articleBody">
+    <p>Как правило, новичкам рекомендуется организовывать код на Эликсире в модули и функции. Придумывайте хорошее именование функций, а схожие по решаемым проблемам функции группируйте в модули. Вот и вся магия. Но такой подход с ростом кодовой базы, может сильно усложнить код. В статье рассказываются приёмы для избежания подобных проблем на примере использования Феникса.</p>
+
+<p>Рассмотрим создание блога на Эликсире и Фениксе пошагово. Блог состоит из множества постов, каждый из которых содержит заголовок, имя автора и текст.</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">defmodule</span> <span class="no">Blog</span><span class="o">.</span><span class="no">Post</span> <span class="k">do</span>
+  <span class="kn">use</span> <span class="no">Blog</span><span class="o">.</span><span class="no">Web</span><span class="p">,</span> <span class="ss">:model</span>
+  <span class="n">schema</span> <span class="err">“</span><span class="n">posts</span><span class="err">”</span> <span class="k">do</span>
+    <span class="n">field</span> <span class="ss">:title</span><span class="p">,</span> <span class="ss">:string</span>
+    <span class="n">field</span> <span class="ss">:author</span><span class="p">,</span> <span class="ss">:string</span>
+    <span class="n">field</span> <span class="ss">:body</span><span class="p">,</span> <span class="ss">:string</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<p>Создадим EEX-шаблон для рендеринга этих данных.</p>
+
+<div class="language-html highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nt">&lt;article&gt;</span>
+  <span class="nt">&lt;header&gt;</span>
+    <span class="nt">&lt;h1&gt;&lt;</span><span class="err">%=</span> <span class="err">@</span><span class="na">post</span><span class="err">.</span><span class="na">title</span> <span class="err">%</span><span class="nt">&gt;&lt;/h1&gt;</span>
+    <span class="nt">&lt;address&gt;&lt;</span><span class="err">%=</span> <span class="err">@</span><span class="na">post</span><span class="err">.</span><span class="na">author</span> <span class="err">%</span><span class="nt">&gt;&lt;/address&gt;</span>
+  <span class="nt">&lt;/header&gt;</span>
+  <span class="nt">&lt;section&gt;</span>
+    <span class="nt">&lt;</span><span class="err">%=</span> <span class="err">@</span><span class="na">post</span><span class="err">.</span><span class="na">body</span> <span class="err">%</span><span class="nt">&gt;</span>
+  <span class="nt">&lt;/section&gt;</span>
+<span class="nt">&lt;/article&gt;</span>
+</code></pre></div></div>
+
+<p>Отличное начало! Можно рендерить HTML-код с помощью структуры <code class="highlighter-rouge">%Blog.Post{}</code>, но чего-то тут явно недостаёт. Зачастую, вкладывая душу в свой пост, хочется в итоге получить что-то большее, чем один сухой абзац текста. А это, собственно, всё, на что мы пока способны. Хорошие новости: сообщество Эликсира усердно поддерживает <a href="https://github.com/h4cc/awesome-elixir#markdown">Markdown</a> – облегчённый язык разметки, преобразующийся в HTML. Воспользуемся NIF-библиотекой <a href="https://github.com/asaaki/cmark.ex"><code class="highlighter-rouge">cmark</code></a>, чтобы конвертировать Markdown в HTML.</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">defmodule</span> <span class="no">Blog</span><span class="o">.</span><span class="no">Web</span><span class="o">.</span><span class="no">PostView</span> <span class="k">do</span>
+  <span class="nv">@moduledoc</span> <span class="sd">"</span><span class="s2">View for rendering posts"</span>
+  <span class="kn">use</span> <span class="no">Blog</span><span class="o">.</span><span class="no">Web</span><span class="p">,</span> <span class="ss">:view</span>
+  
+  <span class="n">alias</span> <span class="no">Blog</span><span class="o">.</span><span class="no">Markdown</span>
+  <span class="k">def</span> <span class="n">render_markdown</span><span class="p">(</span><span class="n">binary</span><span class="p">)</span> <span class="k">do</span>
+    <span class="no">Markdown</span><span class="o">.</span><span class="n">to_html</span><span class="p">(</span><span class="n">binary</span><span class="p">)</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+<span class="k">defmodule</span> <span class="no">Blog</span><span class="o">.</span><span class="no">Markdown</span> <span class="k">do</span>
+  <span class="nv">@moduledoc</span> <span class="sd">"</span><span class="s2">Utility for rendering markdown -&gt; html"</span>
+  <span class="k">def</span> <span class="n">to_html</span><span class="p">(</span><span class="n">binary</span><span class="p">)</span> <span class="ow">when</span> <span class="n">is_binary</span><span class="p">(</span><span class="n">binary</span><span class="p">)</span> <span class="k">do</span>
+    <span class="no">Cmark</span><span class="o">.</span><span class="n">to_html</span><span class="p">(</span><span class="n">binary</span><span class="p">)</span>
+  <span class="k">end</span>
+  <span class="k">def</span> <span class="n">to_html</span><span class="p">(</span><span class="n">_other</span><span class="p">),</span> <span class="k">do</span><span class="p">:</span> <span class="sd">"</span><span class="s2">"</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<p>Нужно изменить в шаблоне ещё кое-что.</p>
+
+<div class="language-html highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nt">&lt;section&gt;</span>
+  <span class="nt">&lt;</span><span class="err">%#</span> <span class="na">Convert</span> <span class="na">the</span> <span class="na">markdown</span> <span class="na">-</span><span class="nt">&gt;</span> HTML %&gt;
+  <span class="nt">&lt;</span><span class="err">%=</span> <span class="na">render_markdown</span> <span class="err">@</span><span class="na">post</span><span class="err">.</span><span class="na">body</span> <span class="err">%</span><span class="nt">&gt;</span>
+<span class="nt">&lt;/section&gt;</span>
+</code></pre></div></div>
+
+<p>Код выглядит довольно неплохо, но если попробовать вывести первый пост:</p>
+
+<p><img src="https://cdn-images-1.medium.com/max/1600/1*CLCnOAFRokW59ZdDpLo53A.png" alt="" /></p>
+
+<p>Получаем экранированный HTML-код :(</p>
+
+<p>Что же произошло? Если вызвать <code class="highlighter-rouge">render</code> в представлении и проанализировать результат, то можно увидеть кое-что интересное.</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">iex</span><span class="p">(</span><span class="m">2</span><span class="p">)</span><span class="o">&gt;</span> <span class="no">Phoenix</span><span class="o">.</span><span class="no">View</span><span class="o">.</span><span class="n">render</span><span class="p">(</span><span class="no">Blog</span><span class="o">.</span><span class="no">Web</span><span class="o">.</span><span class="no">PostView</span><span class="p">,</span> <span class="sd">"</span><span class="s2">show.html"</span><span class="p">,</span> <span class="ss">post:</span> <span class="n">post</span><span class="p">)</span>
+<span class="p">{</span><span class="ss">:safe</span><span class="p">,</span>
+ <span class="p">[[[[[[[</span><span class="sd">"</span><span class="s2">"</span> <span class="o">|</span> <span class="sd">"</span><span class="s2">&lt;article&gt;\n  &lt;header&gt;\n    &lt;h1&gt;"</span><span class="p">]</span> <span class="o">|</span> <span class="sd">"</span><span class="s2">First post"</span><span class="p">]</span> <span class="o">|</span>
+      <span class="sd">"</span><span class="s2">&lt;/h1&gt;\n    &lt;address&gt;"</span><span class="p">]</span> <span class="o">|</span> <span class="sd">"</span><span class="s2">Dave"</span><span class="p">]</span> <span class="o">|</span>
+    <span class="sd">"</span><span class="s2">&lt;/address&gt;\n  &lt;/header&gt;\n  &lt;section&gt;\n"</span><span class="p">]</span> <span class="o">|</span>
+   <span class="sd">"</span><span class="s2">&amp;lt;p&amp;gt;&amp;lt;em&amp;gt;Hello&amp;lt;/em&amp;gt; &amp;lt;strong&amp;gt;World&amp;lt;/strong&amp;gt;!&amp;lt;/p&amp;gt;\n"</span><span class="p">]</span> <span class="o">|</span>
+  <span class="sd">"</span><span class="s2">  &lt;/section&gt;\n&lt;/article&gt;\n"</span><span class="p">]}</span>
+</code></pre></div></div>
+
+<p>Феникс очень умён: вместо рендеринга HTML-кода в шаблоне, он возвращает экранированный HTML, который появляется на веб-странице. К сожалению, то, что рационально для вычислительных машин, не всегда приемлемо для разработчиков. Феникс подчищает вывод на шаблон и экранирует его, защищая от <a href="https://en.wikipedia.org/wiki/Code_injection#HTML_script_injection">нежелательных атак</a>. <a href="https://hexdocs.pm/phoenix/Phoenix.View.html#module-rendering">Документация <code class="highlighter-rouge">Phoenix.View</code></a> раскрывает это поведение следующим способом:</p>
+
+<blockquote>
+  <p>Кортеж с пометкой <code class="highlighter-rouge">safe</code> означает, что шаблон безопасен и нет необходимости экранировать его содержимое, так как все данные уже закодированы.</p>
+</blockquote>
+
+<p>Внешняя часть возвращаемого результата – кортеж <code class="highlighter-rouge">{:safe, iodata}</code>. Он сигнализирует Фениксу,
+что содержимое кортежа было экранировано и выведено в виде
+очищенного HTML. Под капотом Феникс вызывает функцию <code class="highlighter-rouge">Phoenix.HTML.html_escape</code> на приходящее в шаблон значение (если вам действительно интересно покопаться во внутренностях, начать можно <a href="https://github.com/phoenixframework/phoenix_html/blob/4dd3e3266d8810c7da05eba8ff9c80ac23163ca5/lib/phoenix_html/engine.ex#L73">отсюда</a>).</p>
+
+<p>Для того, чтобы Феникс передал HTML-код напрямую, можно воспользоваться функцией <a href="https://hexdocs.pm/phoenix_html/Phoenix.HTML.html#raw/1"><code class="highlighter-rouge">Phoenix.HTML.raw</code></a>, которая обернёт код в кортеж <code class="highlighter-rouge">:safe</code> за вас. Немного преобразим реализацию функции <code class="highlighter-rouge">render_markdown</code>:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">def</span> <span class="n">render_markdown</span><span class="p">(</span><span class="n">binary</span><span class="p">)</span> <span class="k">do</span>
+  <span class="n">binary</span>
+  <span class="o">|&gt;</span> <span class="no">Markdown</span><span class="o">.</span><span class="n">to_html</span><span class="p">()</span>
+  <span class="o">|&gt;</span> <span class="no">Phoenix</span><span class="o">.</span><span class="no">HTML</span><span class="o">.</span><span class="n">raw</span><span class="p">()</span> <span class="c1"># Конвертирование в кортеж вида {:safe, iodata}</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<p>Теперь при преобразовании из Markdown в HTML текст передаётся в функцию <code class="highlighter-rouge">Phoenix.HTML.raw()</code>, предотвращающую экранирование этой части входных данных.</p>
+
+<p><img src="https://cdn-images-1.medium.com/max/1600/1*Bld7NHNgiO22GU8hpqFZAA.png" alt="" /></p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">iex</span><span class="p">(</span><span class="m">2</span><span class="p">)</span><span class="o">&gt;</span> <span class="no">Phoenix</span><span class="o">.</span><span class="no">View</span><span class="o">.</span><span class="n">render</span><span class="p">(</span><span class="no">Blog</span><span class="o">.</span><span class="no">Web</span><span class="o">.</span><span class="no">PostView</span><span class="p">,</span> <span class="sd">"</span><span class="s2">show.html"</span><span class="p">,</span> <span class="ss">post:</span> <span class="n">post</span><span class="p">)</span>
+<span class="p">{</span><span class="ss">:safe</span><span class="p">,</span>
+ <span class="p">[[[[[[[</span><span class="sd">"</span><span class="s2">"</span> <span class="o">|</span> <span class="sd">"</span><span class="s2">&lt;article&gt;\n  &lt;header&gt;\n    &lt;h1&gt;"</span><span class="p">]</span> <span class="o">|</span> <span class="sd">"</span><span class="s2">First post"</span><span class="p">]</span> <span class="o">|</span>
+      <span class="sd">"</span><span class="s2">&lt;/h1&gt;\n    &lt;address&gt;"</span><span class="p">]</span> <span class="o">|</span> <span class="sd">"</span><span class="s2">Dave"</span><span class="p">]</span> <span class="o">|</span>
+    <span class="sd">"</span><span class="s2">&lt;/address&gt;\n  &lt;/header&gt;\n  &lt;section&gt;\n"</span><span class="p">]</span> <span class="o">|</span>
+   <span class="sd">"</span><span class="s2">&lt;p&gt;&lt;em&gt;Hello&lt;/em&gt; &lt;strong&gt;World&lt;/strong&gt;!&lt;/p&gt;\n"</span><span class="p">]</span> <span class="o">|</span>
+  <span class="sd">"</span><span class="s2">  &lt;/section&gt;\n&lt;/article&gt;\n"</span><span class="p">]}</span>
+</code></pre></div></div>
+
+<p>Отличное начало Мы получили работающий блог, позволяющий форматировать содержимое постов без написания HTML вручную. Уже можно переносить его в продакшн, на какое-то время забыв о доработках. Эликсирщики уже привыкли к концепции модулей и функций. И в нашем случае она работает безотказно, но есть несколько «но». К примеру, текущая реализация никак не помешает пользователю ввести тег <code class="highlighter-rouge">&lt;script</code>&gt;. Конечно, для данного сценария использования мы можем допустить, что этого не случится.</p>
+
+<p>В дальнейшем при развитии проекта он будет обрастать дополнительными бизнес-требованиями. Возможно, вам захочется расширить свой блог и добавить описание, поддерживающее Markdown. А может, создать индексную страницу, на которой показывались бы краткие описания постов, и домашнюю страницу, содержащую различные представления имеющихся данных. Продолжая размышлять о нововведениях, вы будете стараться обобщить существующие шаблоны для того, чтобы использовать их повторно для разных нужд.</p>
+
+<div class="language-html highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nt">&lt;section&gt;</span>
+  <span class="nt">&lt;h1&gt;&lt;</span><span class="err">%=</span> <span class="err">@</span><span class="na">title</span> <span class="err">%</span><span class="nt">&gt;&lt;/h1&gt;</span>
+  <span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">"description"</span><span class="nt">&gt;</span>
+    <span class="nt">&lt;</span><span class="err">%=</span> <span class="err">@</span><span class="na">description</span> <span class="err">%</span><span class="nt">&gt;</span> <span class="nt">&lt;</span><span class="err">%#</span> <span class="na">Wait</span> <span class="na">is</span> <span class="na">description</span> <span class="na">markdown</span><span class="err">?</span> <span class="err">%</span><span class="nt">&gt;</span>
+  <span class="nt">&lt;/div&gt;</span>
+<span class="nt">&lt;/section&gt;</span>
+</code></pre></div></div>
+
+<p>Достигнув максимально возможного числа многократных использований шаблонов, подключив контексты и усложнив код до бесконечности,
+отследить каждые введённые в шаблон данные становится гораздо сложнее. Вполне возможно, что на входе в <code class="highlighter-rouge">@description</code> окажется <em>простой текст</em> или <em>текст в формате Markdown</em>. Вот здесь-то и придётся поразмыслить о наличии иных вариантов, помимо модулей и функций.</p>
+
+<h2 id="добавляем-протоколы">Добавляем протоколы</h2>
+
+<p>Из <a href="/docs/protocols.html">документации Эликсира</a>:</p>
+
+<blockquote>
+  <p>Протоколы – это механизм для реализации полиморфизма в Эликсире. Обращение к протоколу доступно для любого типа данных, если этот тип реализует протокол.</p>
+</blockquote>
+
+<p><a href="http://bit.ly/2kgUOJg">Понятие полиморфизма</a> относится к функциям, имеющим различные реализации для разных типов данных. Протоколы в Эликсире – своеобразное представление
+полиморфизма, встроенное в язык. Сочетая такой полиморфизм и структуры, можно по-настоящему познать мощь языка. Функция протокола, получая на входе структуру, позволяет перейти в тело данной структуры.</p>
+
+<p>В Эликсире прямо из коробки доступны несколько протоколов: <a href="https://hexdocs.pm/elixir/Collectable.html">Collectable</a>, <a href="https://hexdocs.pm/elixir/Enumerable.html">Enumerable</a>, <a href="https://hexdocs.pm/elixir/Inspect.html">Inspect</a>, <a href="https://hexdocs.pm/elixir/List.Chars.html">List.Chars</a> и <a href="https://hexdocs.pm/elixir/String.Chars.html">String.Chars</a>.</p>
+
+<p>Если вызвать <code class="highlighter-rouge">inspect</code> с каким-нибудь значением, Эликсир перенаправит в соответствующую реализацию протокола <code class="highlighter-rouge">Inspect</code> для заданного типа. Например, вызвав <code class="highlighter-rouge">inspect %{foo: :bar}</code>, мы перейдём в реализацию <code class="highlighter-rouge">Map</code> протокола <code class="highlighter-rouge">Inspect</code>. Использование протоколов напоминает сопоставление с образцом при наличии нескольких заголовков функций. Фактически, так оно и будет выглядеть, если код на Эликсир скомпилировать в режиме <code class="highlighter-rouge">production</code>.</p>
+
+<p>Главное отличие протоколов от сопоставления различных значений с образцом – <em>инверсия управления</em>. Протоколы позволяют добавить больше <a href="/docs/modules-and-functions.html#именованные-функции">заголовков функций</a>, чтобы разработчики приложений и библиотек могли провести сопоставление нужных типов вне протокола.</p>
+
+<p>Это особенно важно для нашего случая с Markdown-текстом. Феникс определяет собственный протокол – <code class="highlighter-rouge">Phoenix.HTML.Safe</code>.</p>
+
+<blockquote>
+  <p>В целях обеспечения безопасности HTML в шаблонах Феникса для конвертации различных типов данных в строки не используется функция <code class="highlighter-rouge">Kernel.to_string/1</code>. Вместо этого в нём на основе структур данных реализован протокол Phoenix.HTML.Safe, гарантирующий возвращение HTML-кода в безопасном виде.</p>
+</blockquote>
+
+<p>Так это же замечательно! Достаточно создать структуру в модуле <code class="highlighter-rouge">Blog.Markdown</code> и реализовать под неё протокол <code class="highlighter-rouge">Phoenix.HTML.Safe</code>. Теперь, если понадобится отрендерить markdown-текст в шаблон, можно просто обернуть строку в структуру <code class="highlighter-rouge">%Blog.Markdown{}</code>, а всё остальное сделает протокол! Всё, что осталось сделать, – это немного подправить модуль <code class="highlighter-rouge">Markdown</code>, добавив в него структуру и реализацию протокола.</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">defmodule</span> <span class="no">Blog</span><span class="o">.</span><span class="no">Markdown</span> <span class="k">do</span>
+  <span class="n">defstruct</span> <span class="ss">text:</span> <span class="sd">"</span><span class="s2">"</span><span class="p">,</span> <span class="ss">html:</span> <span class="no">nil</span>
+  <span class="k">def</span> <span class="n">to_html</span><span class="p">(%</span><span class="bp">__MODULE__</span><span class="p">{</span><span class="ss">html:</span> <span class="n">html</span><span class="p">})</span> <span class="ow">when</span> <span class="n">is_binary</span><span class="p">(</span><span class="n">html</span><span class="p">)</span> <span class="k">do</span>
+    <span class="n">html</span>
+  <span class="k">end</span>
+  <span class="k">def</span> <span class="n">to_html</span><span class="p">(%</span><span class="bp">__MODULE__</span><span class="p">{</span><span class="ss">text:</span> <span class="n">text</span><span class="p">}),</span> <span class="k">do</span><span class="p">:</span> <span class="n">to_html</span><span class="p">(</span><span class="n">text</span><span class="p">)</span>
+  <span class="k">def</span> <span class="n">to_html</span><span class="p">(</span><span class="n">binary</span><span class="p">)</span> <span class="ow">when</span> <span class="n">is_binary</span><span class="p">(</span><span class="n">binary</span><span class="p">)</span> <span class="k">do</span>
+    <span class="no">Cmark</span><span class="o">.</span><span class="n">to_html</span><span class="p">(</span><span class="n">binary</span><span class="p">)</span>
+  <span class="k">end</span>
+  <span class="k">def</span> <span class="n">to_html</span><span class="p">(</span><span class="n">_other</span><span class="p">),</span> <span class="k">do</span><span class="p">:</span> <span class="sd">"</span><span class="s2">"</span>
+  <span class="k">defimpl</span> <span class="no">Phoenix</span><span class="o">.</span><span class="no">HTML</span><span class="o">.</span><span class="no">Safe</span> <span class="k">do</span>    
+    <span class="k">def</span> <span class="n">to_iodata</span><span class="p">(%</span><span class="no">Blog</span><span class="o">.</span><span class="no">Markdown</span><span class="p">{}</span> <span class="o">=</span> <span class="n">markdown</span><span class="p">)</span> <span class="k">do</span>
+      <span class="no">Blog</span><span class="o">.</span><span class="no">Markdown</span><span class="o">.</span><span class="n">to_html</span><span class="p">(</span><span class="n">markdown</span><span class="p">)</span>
+    <span class="k">end</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<p>После этого все поля <code class="highlighter-rouge">:string</code>, содежащие Markdown-текст в структуре <code class="highlighter-rouge">%Markdown{}</code> будут конвертироваться в HTML без лишних движений. Изначальный шаблон блога теперь будет выглядеть так:</p>
+
+<div class="language-html highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nt">&lt;article&gt;</span>
+  <span class="nt">&lt;header&gt;</span>
+    <span class="nt">&lt;h1&gt;&lt;</span><span class="err">%=</span> <span class="err">@</span><span class="na">post</span><span class="err">.</span><span class="na">title</span> <span class="err">%</span><span class="nt">&gt;&lt;/h1&gt;</span>
+    <span class="nt">&lt;address&gt;&lt;</span><span class="err">%=</span> <span class="err">@</span><span class="na">post</span><span class="err">.</span><span class="na">author</span> <span class="err">%</span><span class="nt">&gt;&lt;/address&gt;</span>
+  <span class="nt">&lt;/header&gt;</span>
+  <span class="nt">&lt;section&gt;</span>
+    <span class="nt">&lt;</span><span class="err">%=</span> <span class="err">@</span><span class="na">post</span><span class="err">.</span><span class="na">body</span> <span class="err">%</span><span class="nt">&gt;</span>
+  <span class="nt">&lt;/section&gt;</span>
+<span class="nt">&lt;/article&gt;</span>
+</code></pre></div></div>
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="no">Phoenix</span><span class="o">.</span><span class="no">View</span><span class="o">.</span><span class="n">render</span><span class="p">(</span>
+  <span class="no">Blog</span><span class="o">.</span><span class="no">Web</span><span class="o">.</span><span class="no">PostView</span><span class="p">,</span>
+  <span class="sd">"</span><span class="s2">show.html"</span><span class="p">,</span> 
+  <span class="ss">post:</span> <span class="p">%{</span><span class="n">post</span> <span class="o">|</span> <span class="ss">body:</span> <span class="p">%</span><span class="no">Blog</span><span class="o">.</span><span class="no">Markdown</span><span class="p">{</span><span class="ss">text:</span> <span class="n">post</span><span class="o">.</span><span class="n">body</span><span class="p">}}</span>
+<span class="p">)</span>
+</code></pre></div></div>
+
+<p>Итак, проблема решена. Теперь шаблоны знают, когда стоит рендерить Markdown-текст, а когда нет. Как только шаблон получает входящее значение, Феникс вызывает <code class="highlighter-rouge">to_iodate</code>. Если это значение оказывается структурой <code class="highlighter-rouge">%Markdown{}</code>, оно будет автоматически преобразовано в HTML.</p>
+
+<p><em>Можно ли сделать лучше?</em></p>
+
+<p>Мы решили вопрос для шаблонов, но представления и модели, прежде чем передать данные в шаблон, всё ещё должны конвертировать содержимое поля <code class="highlighter-rouge">:body</code> в структуру <code class="highlighter-rouge">Markdown</code>. Что если автоматизировать и этот пункт?</p>
+
+<h2 id="поведение-ectotype-спешит-на-помощь">Поведение <code class="highlighter-rouge">Ecto.Type</code> спешит на помощь</h2>
+
+<p>На данный момент схема <code class="highlighter-rouge">Blog.Post</code> содержит три поля <code class="highlighter-rouge">:string</code>, которые представляют собой <a href="https://hexdocs.pm/ecto/Ecto.Schema.html#module-primitive-types">примитивные типы <code class="highlighter-rouge">Ecto</code></a>. Ecto предоставляет крайне эффективную возможность: разработчики могут создавать собственные типы через <a href="https://hexdocs.pm/elixir/behaviours.html">поведение <code class="highlighter-rouge">Ecto.Type</code></a>. Проще говоря, поведение – это контракт интерфейса. Если в собственном типе, основанном на примитиве, реализованы все колбеки <code class="highlighter-rouge">Ecto.Type</code>, Ecto преобразует содержимое поля в значение данного типа на входе и выходе базы данных.</p>
+
+<p>Для того, чтобы при извлечении поста из базы данных его тело оборачивалось в структуру <code class="highlighter-rouge">%Markdown{}</code>, реализуем свой тип Ecto – <code class="highlighter-rouge">Blog.Markdown.Ecto</code>.</p>
+
+<p>Начнём с обновления схемы <code class="highlighter-rouge">Blog.Post</code>.</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">defmodule</span> <span class="no">Blog</span><span class="o">.</span><span class="no">Post</span> <span class="k">do</span>
+  <span class="kn">use</span> <span class="no">Blog</span><span class="o">.</span><span class="no">Web</span><span class="p">,</span> <span class="ss">:model</span>
+  <span class="n">alias</span> <span class="no">Blog</span><span class="o">.</span><span class="no">Markdown</span>
+  <span class="n">schema</span> <span class="err">“</span><span class="n">posts</span><span class="err">”</span> <span class="k">do</span>
+    <span class="n">field</span> <span class="ss">:title</span><span class="p">,</span> <span class="ss">:string</span>
+    <span class="n">field</span> <span class="ss">:author</span><span class="p">,</span> <span class="ss">:string</span>
+    <span class="n">field</span> <span class="ss">:body</span><span class="p">,</span> <span class="no">Markdown</span><span class="o">.</span><span class="no">Ecto</span> <span class="c1"># The custom Ecto.Type</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<p>Первый шаг сделан, теперь самое время реализовать поведение, которое будет автоматически конвертировать <code class="highlighter-rouge">:body</code> в <code class="highlighter-rouge">%Blog.Markdown{}</code> при выполнении <code class="highlighter-rouge">post = Repo.get(Blog.Post, id)</code>.</p>
+
+<p>В <code class="highlighter-rouge">Ecto.Type</code> необходимо реализовать четыре функции: <a href="https://hexdocs.pm/ecto/Ecto.Type.html#c:cast/1"><code class="highlighter-rouge">cast</code></a>, <a href="https://hexdocs.pm/ecto/Ecto.Type.html#c:dump/1"><code class="highlighter-rouge">dump</code></a>, <a href="https://hexdocs.pm/ecto/Ecto.Type.html#c:load/1"><code class="highlighter-rouge">load</code></a> и <a href="https://hexdocs.pm/ecto/Ecto.Type.html#c:type/0"><code class="highlighter-rouge">type</code></a>.</p>
+
+<p><strong><code class="highlighter-rouge">Type</code></strong> определяет базовый тип поля <code class="highlighter-rouge">Markdown.Ecto</code>, то есть <code class="highlighter-rouge">:string</code>.</p>
+
+<p><strong><code class="highlighter-rouge">Load</code></strong> загружает данные из базы (поле <code class="highlighter-rouge">:body</code> типа <code class="highlighter-rouge">:string</code>) и возвращает структуру <code class="highlighter-rouge">%Markdown{}</code>. Примем допущение, что на этом этапе данные валидны.</p>
+
+<p><strong><code class="highlighter-rouge">Dump</code></strong> принимает структуру <code class="highlighter-rouge">%Markdown{}</code>, проверяет данные и возвращает <code class="highlighter-rouge">:string</code>.</p>
+
+<p><strong><code class="highlighter-rouge">Cast</code></strong> используется для приведения значений в <code class="highlighter-rouge">Ecto.Changeset</code> или для передачи аргументов в <code class="highlighter-rouge">Ecto.Query</code>. Она конвертирует допустимые типы в структуру <code class="highlighter-rouge">%Markdown{}</code>.</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">defmodule</span> <span class="no">Blog</span><span class="o">.</span><span class="no">Markdown</span><span class="o">.</span><span class="no">Ecto</span> <span class="k">do</span>
+  <span class="n">alias</span> <span class="no">Blog</span><span class="o">.</span><span class="no">Markdown</span>
+  <span class="nv">@behaviour</span> <span class="no">Ecto</span><span class="o">.</span><span class="no">Type</span>
+  
+  <span class="nv">@impl</span> <span class="no">Ecto</span><span class="o">.</span><span class="no">Type</span>  
+  <span class="k">def</span> <span class="n">type</span><span class="p">,</span> <span class="k">do</span><span class="p">:</span> <span class="ss">:string</span> 
+  
+  <span class="nv">@impl</span> <span class="no">Ecto</span><span class="o">.</span><span class="no">Type</span>  
+  <span class="k">def</span> <span class="n">cast</span><span class="p">(</span><span class="n">binary</span><span class="p">)</span> <span class="ow">when</span> <span class="n">is_binary</span><span class="p">(</span><span class="n">binary</span><span class="p">)</span> <span class="k">do</span>
+    <span class="p">{</span><span class="ss">:ok</span><span class="p">,</span> <span class="p">%</span><span class="no">Markdown</span><span class="p">{</span><span class="ss">text:</span> <span class="n">binary</span><span class="p">}}</span>
+  <span class="k">end</span>
+  <span class="k">def</span> <span class="n">cast</span><span class="p">(%</span><span class="no">Markdown</span><span class="p">{}</span> <span class="o">=</span> <span class="n">markdown</span><span class="p">),</span> <span class="k">do</span><span class="p">:</span> <span class="p">{</span><span class="ss">:ok</span><span class="p">,</span> <span class="n">markdown</span><span class="p">}</span>
+  <span class="k">def</span> <span class="n">cast</span><span class="p">(</span><span class="n">_other</span><span class="p">),</span> <span class="k">do</span><span class="p">:</span> <span class="ss">:error</span>
+  <span class="nv">@impl</span> <span class="no">Ecto</span><span class="o">.</span><span class="no">Type</span>
+  <span class="k">def</span> <span class="n">load</span><span class="p">(</span><span class="n">binary</span><span class="p">)</span> <span class="ow">when</span> <span class="n">is_binary</span><span class="p">(</span><span class="n">binary</span><span class="p">)</span> <span class="k">do</span>
+    <span class="p">{</span><span class="ss">:ok</span><span class="p">,</span> <span class="p">%</span><span class="no">Markdown</span><span class="p">{</span><span class="ss">text:</span> <span class="n">binary</span><span class="p">,</span> <span class="ss">html:</span> <span class="no">Markdown</span><span class="o">.</span><span class="n">to_html</span><span class="p">(</span><span class="n">binary</span><span class="p">)}}</span>
+  <span class="k">end</span>
+  <span class="k">def</span> <span class="n">load</span><span class="p">(</span><span class="n">_other</span><span class="p">),</span> <span class="k">do</span><span class="p">:</span> <span class="ss">:error</span>
+  <span class="nv">@impl</span> <span class="no">Ecto</span><span class="o">.</span><span class="no">Type</span>
+  <span class="k">def</span> <span class="n">dump</span><span class="p">(%</span><span class="no">Markdown</span><span class="p">{</span><span class="ss">text:</span> <span class="n">binary</span><span class="p">})</span> <span class="ow">when</span> <span class="n">is_binary</span><span class="p">(</span><span class="n">bibary</span><span class="p">)</span> <span class="k">do</span>
+    <span class="p">{</span><span class="ss">:ok</span><span class="p">,</span> <span class="n">binary</span><span class="p">}</span>
+  <span class="k">end</span>
+  <span class="k">def</span> <span class="n">dump</span><span class="p">(</span><span class="n">binary</span><span class="p">)</span> <span class="ow">when</span> <span class="n">is_binary</span><span class="p">(</span><span class="n">binary</span><span class="p">),</span> <span class="k">do</span><span class="p">:</span> <span class="p">{</span><span class="ss">:ok</span><span class="p">,</span> <span class="n">binary</span><span class="p">}</span>
+  <span class="k">def</span> <span class="n">dump</span><span class="p">(</span><span class="n">_other</span><span class="p">),</span> <span class="k">do</span><span class="p">:</span> <span class="ss">:error</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<p>После всех проделанных действий Markdown-текст будет переноситься непосредственно из базы данных в шаблон и превращаться в HTML без необходимости явного вызова функций <code class="highlighter-rouge">render_markdown</code> или осуществления приведения типов. Неявное поведение такого рода вполне оправданно, поскольку позволяет полностью избежать скрытых ошибок и постоянных проверок данных на соответствие формату Markdown.</p>
+
+<p>Стоит ли усложнять своё приложение до такой степени ради повышения его эргономики? Решение только за вами, и его нужно хорошо обдумать. Помните, в большинстве случаев дублирование кода лучше, чем <a href="https://www.sandimetz.com/blog/2016/1/20/the-wrong-abstraction">неверная абстракция</a>. Поднабравшись опыта и досконально изучив предметную область проблемы, будет легче выбрать правильную абстракцию и принять уже  обоснованное решение.</p>
+
+
+  </div>
+
+  <!-- uSocial -->
+  <div class="post__share_block share_block">
+    <script async src="https://usocial.pro/usocial/usocial.js?v=6.1.4" data-script="usocial" charset="utf-8"></script>
+    <div class="uSocial-Share" data-pid="2fd19544e551bce292425ee8adaa31be" data-type="share" data-options="round,style2,default,absolute,horizontal,size32,counter1,counter-before,upArrow-right,nomobile" data-social="telegram,fb,vk,gPlus,twi,bookmarks"></div>
+  </div>
+  <!-- /uSocial -->
+</article>
+
+
+        <footer class="footer">
+    &copy; 2020
+    / Россия
+
+    <span class="pull-right">Любые мысли и вопросы пишите на <a href="mailto:elixir@wunsh.ru">elixir@wunsh.ru</a>.</span>
+</footer>
+
+        <div id="subscribeModal" class="modal">
+    <div class="modal__content">
+        <a href="#close" title="Close" class="modal__close">x</a>
+
+        <h2 class="modal__title">Ламповая рассылка про&nbsp;Эликсир</h2>
+
+        <p>Один-два раза в&nbsp;неделю присылаем тёплые письма об&nbsp;Эликсире: переводы самых интересных статей до&nbsp;их&nbsp;появления в&nbsp;открытом доступе, анонсы событий и&nbsp;вкусные бонусы.</p>
+
+        <form action="//wunsh.us14.list-manage.com/subscribe/post?u=c81ca3d4693f62db7f7f67c71&amp;id=a192e2dfef" method="post" id="mc-embedded-subscribe-form" name="mc-embedded-subscribe-form" class="pure-form h-tc validate" target="_blank" novalidate>
+            <input type="email" value="" name="EMAIL" class="modal__input pure-input-rounded large" id="mce-EMAIL" placeholder="Твоя почта" required>
+            <div style="position: absolute; left: -5000px;" aria-hidden="true"><input type="text" name="b_c81ca3d4693f62db7f7f67c71_a192e2dfef" tabindex="-1" value=""></div>
+
+            <input type="submit" value="Присоединиться" name="subscribe" onClick="yaCounter39773490.reachGoal('SUBSCRIBED'); return true" id="mc-embedded-subscribe" class="pure-button button-success large">
+        </form>
+
+        <p>Обязательно подтверди почту, перейдя по&nbsp;ссылке в&nbsp;письме, иначе мы&nbsp;не&nbsp;сможем делиться с&nbsp;тобой полезностями.</p>
+
+        <p>Надоедать точно не&nbsp;будем :)</p>
+    </div>
+</div>
+
+        <script src="/assets/js/vendors/zepto.min.js"></script>
+
+<script>
+    if ($(".post--docs").length) {
+        $(".footer").addClass("footer--docs")
+    }
+
+    $(".modal--close_backdrop").click(function(){
+        window.location.hash = "";
+    });
+</script>
+
+        <!-- Yandex.Metrika counter -->
+<script type="text/javascript">
+    (function (d, w, c) {
+        (w[c] = w[c] || []).push(function() {
+            try {
+                w.yaCounter39773490 = new Ya.Metrika({
+                    id:39773490,
+                    clickmap:true,
+                    trackLinks:true,
+                    accurateTrackBounce:true,
+                    webvisor:true,
+                    ut:"noindex"
+                });
+            } catch(e) { }
+        });
+
+        var n = d.getElementsByTagName("script")[0],
+            s = d.createElement("script"),
+            f = function () { n.parentNode.insertBefore(s, n); };
+        s.type = "text/javascript";
+        s.async = true;
+        s.src = "https://mc.yandex.ru/metrika/watch.js";
+
+        if (w.opera == "[object Opera]") {
+            d.addEventListener("DOMContentLoaded", f, false);
+        } else { f(); }
+    })(document, window, "yandex_metrika_callbacks");
+</script>
+<noscript><div><img src="https://mc.yandex.ru/watch/39773490?ut=noindex" style="position:absolute; left:-9999px;" alt="" /></div></noscript>
+<!-- /Yandex.Metrika counter -->
+
+      </div>
+    </div>
+  </body>
+</html>

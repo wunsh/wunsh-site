@@ -1,0 +1,662 @@
+<!DOCTYPE html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Распределенные задачи и конфигурация |> Сообщество Elixir и Phoenix Framework</title>
+    <meta name="description" content="Русскоязычное сообщество Elixir и Phoenix Framework
+">
+
+    <link rel="alternate" type="application/rss+xml" title="Сообщество Elixir и Phoenix Framework" href="/feed.xml" />
+    <link rel="canonical" href="https://wunsh.ru/docs/mix-otp/distributed-tasks-and-configuration">
+
+    <style type="text/css">@import url("//fonts.googleapis.com/css?family=Source+Sans+Pro:400,700&subset=cyrillic");</style>
+    <link rel="stylesheet" href="/assets/css/vendors/pure.min.css">
+    <link rel="stylesheet" href="/assets/css/vendors/pure-grids-responsive.min.css">
+    <link rel="stylesheet" href="/assets/css/style.css?1594516983">
+
+    <link rel="shortcut icon" type="image/png" href="/assets/favicon.png" >
+</head>
+
+
+  <body>
+    <div class="wunsh pure-g">
+      
+
+
+
+
+<div class="menu pure-u-1 pure-u-md-1-4">
+  <div class="header">
+    <h2 class="header__title">
+      
+        <a href="https://wunsh.ru" class="header__title_link" title="На главную">Эликсир и&nbsp;Вунш</a>
+      
+    </h2>
+    <h3 class="header__tagline">Erlang + Ruby = &#10084;</h3>
+
+    <nav class="nav">
+      <ul class="nav_list">
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/elixir" class="nav_list__item_link pure-button">О языке</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/install/linux-asdf" class="nav_list__item_link pure-button">Установка</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/docs/" class="nav_list__item_link pure-button">Документация</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/guides" class="nav_list__item_link pure-button">Гайды</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/news" class="nav_list__item_link pure-button">Новости</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/articles" class="nav_list__item_link pure-button">Статьи</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/videos" class="nav_list__item_link pure-button">Видео</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/vacancies" class="nav_list__item_link pure-button">Вакансии</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/faq" class="nav_list__item_link pure-button">FAQ</a>
+            </li>
+          
+        
+      </ul>
+    </nav>
+
+    <a href="#subscribeModal" class="pure-button header__subscribe_link">Подписаться на рассылку</a>
+  </div>
+</div>
+
+
+      <div class="content pure-u-1 pure-u-md-3-4">
+        <article class="post post--docs" itemscope itemtype="http://schema.org/BlogPosting">
+    <header class="post__header">
+        <h1 class="post__title" itemprop="name headline">
+            <p>Распределенные задачи и конфигурация</p>
+
+        </h1>
+    </header>
+
+    <div class="post__content" itemprop="articleBody">
+        <p>В последней главе мы вернёмся к приложению <code class="highlighter-rouge">:kv</code> и добавим слой маршрутизации, который позволит нам распределять задачи между узлами, основываясь на имени корзины.</p>
+
+<p>Слой маршрутизации будет получать таблицу маршрутизации в следующем формате:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">[{</span><span class="sx">?a</span><span class="o">..</span><span class="sx">?m</span><span class="p">,</span> <span class="ss">:"foo@computer-name"</span><span class="p">},</span>
+ <span class="p">{</span><span class="sx">?n</span><span class="o">..</span><span class="sx">?z</span><span class="p">,</span> <span class="ss">:"bar@computer-name"</span><span class="p">}]</span>
+</code></pre></div></div>
+
+<p>Маршрутизатор будет искать первый байт имени корзины в таблице и передавать запрос нужному узлу. Например, если имя начинается с буквы «a» (<code class="highlighter-rouge">?a</code> представляет код буквы «a» в Юникоде), запрос будет передан узлу <code class="highlighter-rouge">foo@computer-name</code>.</p>
+
+<p>Если подходящий узел тот, что обрабатывает запрос, мы закончили маршрутизацию, и узел выполнит запрошенную операцию. Если же подошел другой узел, мы отправим запрос этому узлу, который будет проверять свою таблицу маршрутизации (которая может отличаться от той, что была на первом узле) и действовать аналогично. Если ни один узел не подошел, будет выброшена ошибка.</p>
+
+<p>Вы можете удивиться, почему мы не запрашиваем у найденного в таблице узла выполнение запроса напрямую, а вместо этого посылаем запрос на дальнейшую маршрутизацию этому узлу. Пока таблица маршрутизации такая простая, как показано выше, её логично использовать для всех узлов, но пересылка запросов маршрутизации позволяет гораздо проще разделить таблицу маршрутизации на небольшие части, когда приложение начинает расти. Возможно в какой-то момент <code class="highlighter-rouge">foo@computer-name</code> будет отвечать только за маршрутизацию запросов к хранилищу, а корзины будут храниться на разных узлах. При этом <code class="highlighter-rouge">bar@computer-name</code> не должен ничего знать о таких изменениях.</p>
+
+<blockquote>
+  <p>Замечание: Мы будем использовать оба узла на одной машине в этой главе. Вы можете использовать две (или больше) разных машины в одной сети, но для этого нужно будет сделать некоторые приготовления. Для начала нужно убедиться, что на машинах есть файл <code class="highlighter-rouge">~/.erlang.cookie</code> с одинаковым значением. Далее необходимо, чтобы <a href="http://www.erlang.org/doc/man/epmd.html"><code class="highlighter-rouge">epmd</code></a> был запущен на незаблокированном порту (вы можете запустить <code class="highlighter-rouge">epmd -d</code> для получения отладочной информации). И наконец, если вы хотите больше узнать о распределенности, мы рекомендуем <a href="http://learnyousomeerlang.com/distribunomicon">замечательную главу «Distribunomicon» из книги «Learn You Some Erlang»</a>.</p>
+</blockquote>
+
+<h2 id="наш-первый-распределённый-код">Наш первый распределённый код</h2>
+
+<p>В Эликсире из коробки есть возможность подключать узлы и обмениваться информацией между ними. Фактически мы используем ту же концепцию, что и с процессами, сообщения отправляются и принимаются в распределённом окружении, потому что процессы Эликсира имеют <em>прозрачное расположение</em>. Это значит, что при отправке сообщения нам неважно, находится процесс-получатель на этом или на другом узле, виртуальная машина доставит его в любом случае.</p>
+
+<p>Чтобы запустить распределённый код, нам нужно запустить виртуальную машину, задав ей имя. Имя может быть коротким (при расположении узлов в одной сети) или длинным (включающим полный адрес машины). Запустим новую IEx-сессию:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span>iex <span class="nt">--sname</span> foo
+</code></pre></div></div>
+
+<p>Вы можете увидеть, что приглашение строки ввода отличается и показывает имя узла после имени машины:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Interactive Elixir – press Ctrl+C to exit (type h() ENTER for help)
+iex(foo@jv)1&gt;
+</code></pre></div></div>
+
+<p>Компьютер в данном примере назван <code class="highlighter-rouge">jv</code>, поэтому можно увидеть <code class="highlighter-rouge">foo@jv</code> в примере выше, но вы получите другой результат. Мы будем использовать <code class="highlighter-rouge">foo@computer-name</code> в дальнейших примерах, а вам нужно будет изменить их в соответствии с именем своей машины для запуска кода.</p>
+
+<p>Объявим модуль <code class="highlighter-rouge">Hello</code> в этом терминале:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">iex</span><span class="o">&gt;</span> <span class="k">defmodule</span> <span class="no">Hello</span> <span class="k">do</span>
+<span class="o">...&gt;</span>   <span class="k">def</span> <span class="n">world</span><span class="p">,</span> <span class="k">do</span><span class="p">:</span> <span class="no">IO</span><span class="o">.</span><span class="n">puts</span> <span class="sd">"</span><span class="s2">hello world"</span>
+<span class="o">...&gt;</span> <span class="k">end</span>
+</code></pre></div></div>
+
+<p>Если у вас есть другой компьютер в той же сети с установленными Эрлангом и Эликсиром, вы можете запустить на нём вторую IEx-сессию. Если нет, запустите её в другом терминале. В обоих случаях дайте ей короткое имя <code class="highlighter-rouge">bar</code>:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span>iex <span class="nt">--sname</span> bar
+</code></pre></div></div>
+
+<p>Обратите внимание, что внутри этой новой сессии у нас нет доступа к функции <code class="highlighter-rouge">Hello.world/0</code>:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">iex</span><span class="o">&gt;</span> <span class="no">Hello</span><span class="o">.</span><span class="n">world</span>
+<span class="o">**</span> <span class="p">(</span><span class="no">UndefinedFunctionError</span><span class="p">)</span> <span class="n">undefined</span> <span class="ss">function:</span> <span class="no">Hello</span><span class="o">.</span><span class="n">world</span><span class="o">/</span><span class="m">0</span>
+    <span class="no">Hello</span><span class="o">.</span><span class="n">world</span><span class="p">()</span>
+</code></pre></div></div>
+
+<p>Однако, мы можем порождать новые процессы на <code class="highlighter-rouge">foo@computer-name</code>, находясь на <code class="highlighter-rouge">bar@computer-name</code>! Попробуйте (только укажите вместо <code class="highlighter-rouge">@computer-name</code> то имя, которое видите у себя):</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">iex</span><span class="o">&gt;</span> <span class="no">Node</span><span class="o">.</span><span class="n">spawn_link</span> <span class="ss">:"foo@computer-name"</span><span class="p">,</span> <span class="k">fn</span> <span class="o">-&gt;</span> <span class="no">Hello</span><span class="o">.</span><span class="n">world</span> <span class="k">end</span>
+<span class="c1">#PID&lt;9014.59.0&gt;</span>
+<span class="n">hello</span> <span class="n">world</span>
+</code></pre></div></div>
+
+<p>Эликсир породил процесс на другом узле и вернул его <code class="highlighter-rouge">pid</code>. Затем код выполнился на другом узле, где существует функция <code class="highlighter-rouge">Hello.world/0</code> и вызвал эту функцию. Обратите внимание, что результат «hello world» был выведен на текущем узле <code class="highlighter-rouge">bar</code>, но не на <code class="highlighter-rouge">foo</code>. Другими словами, сообщение было отправлено назад с <code class="highlighter-rouge">foo</code> на <code class="highlighter-rouge">bar</code>. Это происходит, потому что процесс, порождённый на другом узле (<code class="highlighter-rouge">foo</code>) всё ещё имеет лидера группы на текущем узле (<code class="highlighter-rouge">bar</code>). Мы кратко говорили о лидерах групп в <a href="/docs/io-and-the-file-system.html#processes-and-group-leaders">главе <strong>«Ввод/вывод и файловая система»</strong></a>.</p>
+
+<p>Мы также можем посылать и принимать сообщения на <code class="highlighter-rouge">pid</code>, возвращённый <code class="highlighter-rouge">Node.spawn_link/2</code>, как обычно. Попробуем простой ping-pong пример:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">iex</span><span class="o">&gt;</span> <span class="n">pid</span> <span class="o">=</span> <span class="no">Node</span><span class="o">.</span><span class="n">spawn_link</span> <span class="ss">:"foo@computer-name"</span><span class="p">,</span> <span class="k">fn</span> <span class="o">-&gt;</span>
+<span class="o">...&gt;</span>   <span class="k">receive</span> <span class="k">do</span>
+<span class="o">...&gt;</span>     <span class="p">{</span><span class="ss">:ping</span><span class="p">,</span> <span class="n">client</span><span class="p">}</span> <span class="o">-&gt;</span> <span class="n">send</span> <span class="n">client</span><span class="p">,</span> <span class="ss">:pong</span>
+<span class="o">...&gt;</span>   <span class="k">end</span>
+<span class="o">...&gt;</span> <span class="k">end</span>
+<span class="c1">#PID&lt;9014.59.0&gt;</span>
+
+<span class="n">iex</span><span class="o">&gt;</span> <span class="n">send</span> <span class="n">pid</span><span class="p">,</span> <span class="p">{</span><span class="ss">:ping</span><span class="p">,</span> <span class="n">self</span><span class="p">()}</span>
+<span class="p">{</span><span class="ss">:ping</span><span class="p">,</span> <span class="c1">#PID&lt;0.73.0&gt;}</span>
+
+<span class="n">iex</span><span class="o">&gt;</span> <span class="n">flush</span><span class="p">()</span>
+<span class="ss">:pong</span>
+<span class="ss">:ok</span>
+</code></pre></div></div>
+
+<p>Из нашего небольшого исследования мы можем заключить, что нужно использовать функцию <code class="highlighter-rouge">Node.spawn_link/2</code> для порождения процессов на удалённом узле каждый раз, когда нам нужны распределенные вычисления. Однако, мы также выяснили в этом руководстве, что порождение процессов вне дерева супервизора следует максимально избегать, поэтому нам нужно найти другие варианты.</p>
+
+<p>Есть три лучших альтернативы <code class="highlighter-rouge">Node.spawn_link/2</code>, которые можно использовать в нашем примере:</p>
+
+<ol>
+  <li>
+    <p>Можно использовать <a href="http://www.erlang.org/doc/man/rpc.html">модуль <code class="highlighter-rouge">:rpc</code></a> из Эрланга для выполнения функций на удалённом узле. В оболочке <code class="highlighter-rouge">bar@computer-name</code> выше, вы можете вызвать <code class="highlighter-rouge">:rpc.call(:"foo@computer-name", Hello, :world, [])</code> и получите «hello world».</p>
+  </li>
+  <li>
+    <p>Можно запустить сервер на другом узле и посылать запросы через API <a href="https://hexdocs.pm/elixir/GenServer.html">модуля <code class="highlighter-rouge">GenServer</code></a>. Например, можно осуществить вызов к другому серверу через <code class="highlighter-rouge">GenServer.call({name, node}, arg)</code> или отправку <code class="highlighter-rouge">PID</code> удалённого процесса в качестве первого аргумента.</p>
+  </li>
+  <li>
+    <p>Можно исользовать <a href="https://hexdocs.pm/elixir/Task.html">задачи</a>, которые мы изучили в <a href="/docs/mix-otp/task-and-gen-tcp.html">предыдущей главе</a>, т. к. они могут быть порождены и на локальном, и на удалённом узле.</p>
+  </li>
+</ol>
+
+<p>Варианты выше имеют свои особенности. Модуль <code class="highlighter-rouge">:rpc</code> и использование <code class="highlighter-rouge">GenServer</code> сериализуют запрос к одному серверу, тогда как задачи будут запущены асинхронно на удалённом узле, сериализация будет произведена только на уровне порождения супервизором.</p>
+
+<p>На нашем уровне маршрутизации мы будем использовать задачи, но вы также можете попробовать остальные альтернативы.</p>
+
+<h2 id="шаблон-asyncawait">Шаблон <code class="highlighter-rouge">async/await</code></h2>
+
+<p>До сих пор мы использовали задачи, которые запускаются и работают в изоляции, игнорируя возвращаемые ими значения. Однако, иногда полезно запустить задачу для вычисления значения и прочитать этот результат после. Для этого в задачах есть шаблон <code class="highlighter-rouge">async/await</code>:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">task</span> <span class="o">=</span> <span class="no">Task</span><span class="o">.</span><span class="n">async</span><span class="p">(</span><span class="k">fn</span> <span class="o">-&gt;</span> <span class="n">compute_something_expensive</span> <span class="k">end</span><span class="p">)</span>
+<span class="n">res</span>  <span class="o">=</span> <span class="n">compute_something_else</span><span class="p">()</span>
+<span class="n">res</span> <span class="o">+</span> <span class="no">Task</span><span class="o">.</span><span class="n">await</span><span class="p">(</span><span class="n">task</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p>Шаблон <code class="highlighter-rouge">async/await</code> предоставляет очень простой механизм параллельного вычисления значений. Кроме того, шаблон <code class="highlighter-rouge">async/await</code> может быть использован с тем же <a href="https://hexdocs.pm/elixir/Task.Supervisor.html">модулем <code class="highlighter-rouge">Task.Supervisor</code></a>, который мы использовали в предыдущих главах. Достаточно вызвать <code class="highlighter-rouge">Task.Supervisor.async/2</code> вместо <code class="highlighter-rouge">Task.Supervisor.start_child/2</code> и использовать <code class="highlighter-rouge">Task.await/2</code> для чтения результата.</p>
+
+<h2 id="распределённые-задачи">Распределённые задачи</h2>
+
+<p>Распределённые задачи – ровно то же самое, что контролируемые супервизором задачи. Единственная разница в том, что мы передаём имя узла супервизору при порождении задачи. Откройте файл <code class="highlighter-rouge">lib/kv/supervisor.ex</code> из приложения <code class="highlighter-rouge">:kv</code>. Давайте добавим супервизор задач как последнего потомка в дереве:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">{</span><span class="no">Task</span><span class="o">.</span><span class="no">Supervisor</span><span class="p">,</span> <span class="ss">name:</span> <span class="no">KV</span><span class="o">.</span><span class="no">RouterTasks</span><span class="p">},</span>
+</code></pre></div></div>
+
+<p>Теперь запустим два именованных узла снова, но внутри приложения <code class="highlighter-rouge">:kv</code>:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span>iex <span class="nt">--sname</span> foo <span class="nt">-S</span> mix
+<span class="nv">$ </span>iex <span class="nt">--sname</span> bar <span class="nt">-S</span> mix
+</code></pre></div></div>
+
+<p>Изнутри <code class="highlighter-rouge">bar@computer-name</code> мы теперь можем порождать задачи прямо на другом узле через супервизор:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">iex</span><span class="o">&gt;</span> <span class="n">task</span> <span class="o">=</span> <span class="no">Task</span><span class="o">.</span><span class="no">Supervisor</span><span class="o">.</span><span class="n">async</span> <span class="p">{</span><span class="no">KV</span><span class="o">.</span><span class="no">RouterTasks</span><span class="p">,</span> <span class="ss">:"foo@computer-name"</span><span class="p">},</span> <span class="k">fn</span> <span class="o">-&gt;</span>
+<span class="o">...&gt;</span>   <span class="p">{</span><span class="ss">:ok</span><span class="p">,</span> <span class="n">node</span><span class="p">()}</span>
+<span class="o">...&gt;</span> <span class="k">end</span>
+<span class="p">%</span><span class="no">Task</span><span class="p">{</span><span class="ss">owner:</span> <span class="c1">#PID&lt;0.122.0&gt;, pid: #PID&lt;12467.88.0&gt;, ref: #Reference&lt;0.0.0.400&gt;}</span>
+
+<span class="n">iex</span><span class="o">&gt;</span> <span class="no">Task</span><span class="o">.</span><span class="n">await</span><span class="p">(</span><span class="n">task</span><span class="p">)</span>
+<span class="p">{</span><span class="ss">:ok</span><span class="p">,</span> <span class="ss">:"foo@computer-name"</span><span class="p">}</span>
+</code></pre></div></div>
+
+<p>Наша первая распределённая задача получает имя узла, на котором запускать задачу. Обратите внимание, что мы передали анонимную функцию в <code class="highlighter-rouge">Task.Supervisor.async/2</code>, но для распределённых случаев предпочтительно передавать модуль, функцию и аргументы явно:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">iex</span><span class="o">&gt;</span> <span class="n">task</span> <span class="o">=</span> <span class="no">Task</span><span class="o">.</span><span class="no">Supervisor</span><span class="o">.</span><span class="n">async</span> <span class="p">{</span><span class="no">KV</span><span class="o">.</span><span class="no">RouterTasks</span><span class="p">,</span> <span class="ss">:"foo@computer-name"</span><span class="p">},</span> <span class="no">Kernel</span><span class="p">,</span> <span class="ss">:node</span><span class="p">,</span> <span class="p">[]</span>
+<span class="p">%</span><span class="no">Task</span><span class="p">{</span><span class="ss">owner:</span> <span class="c1">#PID&lt;0.122.0&gt;, pid: #PID&lt;12467.89.0&gt;, ref: #Reference&lt;0.0.0.404&gt;}</span>
+
+<span class="n">iex</span><span class="o">&gt;</span> <span class="no">Task</span><span class="o">.</span><span class="n">await</span><span class="p">(</span><span class="n">task</span><span class="p">)</span>
+<span class="ss">:"foo@computer-name"</span>
+</code></pre></div></div>
+
+<p>Разница в том, что анонимная функция обязывает иметь одинаковый код на узле выполнения и узле, который осуществляет вызов. Использование модуля, функции и аргументов более надёжный вариант, вам достаточно найти функцию, которая подходит по арности в переданном модуле.</p>
+
+<p>С этими знаниями можно наконец написать код маршрутизации.</p>
+
+<h2 id="слой-маршрутизации">Слой маршрутизации</h2>
+
+<p>Создайте файл <code class="highlighter-rouge">lib/kv/router.ex</code> со следующим содержимым:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">defmodule</span> <span class="no">KV</span><span class="o">.</span><span class="no">Router</span> <span class="k">do</span>
+  <span class="nv">@doc</span> <span class="sd">"""
+  Направленяет данный `mod`, `fun`, `args` запрос
+  на нужную ноду, основываясь на корзине `bucket`.
+  """</span>
+  <span class="k">def</span> <span class="n">route</span><span class="p">(</span><span class="n">bucket</span><span class="p">,</span> <span class="n">mod</span><span class="p">,</span> <span class="n">fun</span><span class="p">,</span> <span class="n">args</span><span class="p">)</span> <span class="k">do</span>
+    <span class="c1"># Берёт первый байт из двоичных данных</span>
+    <span class="n">first</span> <span class="o">=</span> <span class="ss">:binary</span><span class="o">.</span><span class="n">first</span><span class="p">(</span><span class="n">bucket</span><span class="p">)</span>
+
+    <span class="c1"># Пытается найти запись в table() или выкидывает ошибку</span>
+    <span class="n">entry</span> <span class="o">=</span>
+      <span class="no">Enum</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="n">table</span><span class="p">(),</span> <span class="k">fn</span> <span class="p">{</span><span class="n">enum</span><span class="p">,</span> <span class="n">_node</span><span class="p">}</span> <span class="o">-&gt;</span>
+        <span class="n">first</span> <span class="ow">in</span> <span class="n">enum</span>
+      <span class="k">end</span><span class="p">)</span> <span class="o">||</span> <span class="n">no_entry_error</span><span class="p">(</span><span class="n">bucket</span><span class="p">)</span>
+
+    <span class="c1"># Если мы уже на искомой ноде</span>
+    <span class="k">if</span> <span class="n">elem</span><span class="p">(</span><span class="n">entry</span><span class="p">,</span> <span class="m">1</span><span class="p">)</span> <span class="o">==</span> <span class="n">node</span><span class="p">()</span> <span class="k">do</span>
+      <span class="n">apply</span><span class="p">(</span><span class="n">mod</span><span class="p">,</span> <span class="n">fun</span><span class="p">,</span> <span class="n">args</span><span class="p">)</span>
+    <span class="k">else</span>
+      <span class="p">{</span><span class="no">KV</span><span class="o">.</span><span class="no">RouterTasks</span><span class="p">,</span> <span class="n">elem</span><span class="p">(</span><span class="n">entry</span><span class="p">,</span> <span class="m">1</span><span class="p">)}</span>
+      <span class="o">|&gt;</span> <span class="no">Task</span><span class="o">.</span><span class="no">Supervisor</span><span class="o">.</span><span class="n">async</span><span class="p">(</span><span class="no">KV</span><span class="o">.</span><span class="no">Router</span><span class="p">,</span> <span class="ss">:route</span><span class="p">,</span> <span class="p">[</span><span class="n">bucket</span><span class="p">,</span> <span class="n">mod</span><span class="p">,</span> <span class="n">fun</span><span class="p">,</span> <span class="n">args</span><span class="p">])</span>
+      <span class="o">|&gt;</span> <span class="no">Task</span><span class="o">.</span><span class="n">await</span><span class="p">()</span>
+    <span class="k">end</span>
+  <span class="k">end</span>
+
+  <span class="k">defp</span> <span class="n">no_entry_error</span><span class="p">(</span><span class="n">bucket</span><span class="p">)</span> <span class="k">do</span>
+    <span class="k">raise</span> <span class="sd">"</span><span class="s2">could not find entry for </span><span class="si">#{</span><span class="n">inspect</span> <span class="n">bucket</span><span class="si">}</span><span class="s2"> in table </span><span class="si">#{</span><span class="n">inspect</span> <span class="n">table</span><span class="p">()</span><span class="si">}</span><span class="s2">"</span>
+  <span class="k">end</span>
+
+  <span class="nv">@doc</span> <span class="sd">"""
+  Таблица маршрутизации.
+  """</span>
+  <span class="k">def</span> <span class="n">table</span> <span class="k">do</span>
+    <span class="c1"># Замените имя компьютера на свои данные.</span>
+    <span class="p">[{</span><span class="sx">?a</span><span class="o">..</span><span class="sx">?m</span><span class="p">,</span> <span class="ss">:"foo@computer-name"</span><span class="p">},</span>
+     <span class="p">{</span><span class="sx">?n</span><span class="o">..</span><span class="sx">?z</span><span class="p">,</span> <span class="ss">:"bar@computer-name"</span><span class="p">}]</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<p>Давайте напишем тест, чтобы убедиться, что наш маршрутизатор работает. Создайте файл <code class="highlighter-rouge">test/kv/router_test.exs</code>, содержащий:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">defmodule</span> <span class="no">KV</span><span class="o">.</span><span class="no">RouterTest</span> <span class="k">do</span>
+  <span class="kn">use</span> <span class="no">ExUnit</span><span class="o">.</span><span class="no">Case</span><span class="p">,</span> <span class="ss">async:</span> <span class="no">true</span>
+
+  <span class="n">test</span> <span class="sd">"</span><span class="s2">route requests across nodes"</span> <span class="k">do</span>
+    <span class="n">assert</span> <span class="no">KV</span><span class="o">.</span><span class="no">Router</span><span class="o">.</span><span class="n">route</span><span class="p">(</span><span class="sd">"</span><span class="s2">hello"</span><span class="p">,</span> <span class="no">Kernel</span><span class="p">,</span> <span class="ss">:node</span><span class="p">,</span> <span class="p">[])</span> <span class="o">==</span>
+           <span class="ss">:"foo@computer-name"</span>
+    <span class="n">assert</span> <span class="no">KV</span><span class="o">.</span><span class="no">Router</span><span class="o">.</span><span class="n">route</span><span class="p">(</span><span class="sd">"</span><span class="s2">world"</span><span class="p">,</span> <span class="no">Kernel</span><span class="p">,</span> <span class="ss">:node</span><span class="p">,</span> <span class="p">[])</span> <span class="o">==</span>
+           <span class="ss">:"bar@computer-name"</span>
+  <span class="k">end</span>
+
+  <span class="n">test</span> <span class="sd">"</span><span class="s2">raises on unknown entries"</span> <span class="k">do</span>
+    <span class="n">assert_raise</span> <span class="no">RuntimeError</span><span class="p">,</span> <span class="sr">~r/could not find entry/</span><span class="p">,</span> <span class="k">fn</span> <span class="o">-&gt;</span>
+      <span class="no">KV</span><span class="o">.</span><span class="no">Router</span><span class="o">.</span><span class="n">route</span><span class="p">(</span><span class="o">&lt;&lt;</span><span class="m">0</span><span class="o">&gt;&gt;</span><span class="p">,</span> <span class="no">Kernel</span><span class="p">,</span> <span class="ss">:node</span><span class="p">,</span> <span class="p">[])</span>
+    <span class="k">end</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<p>Первый тест вызывает функцию <code class="highlighter-rouge">Kernel.node/0</code>, которая возвращает имя текущего узла, основываясь на именах корзин «hello» и «world». Согласно нашей таблице маршрутизации, мы должны получить <code class="highlighter-rouge">foo@computer-name</code> и <code class="highlighter-rouge">bar@computer-name</code> в качестве ответов, соответственно.</p>
+
+<p>Второй тест проверяет, что код падает на вводе неизвестных значений.</p>
+
+<p>Для запуска первого теста нам нужно два запущенных узла. Перейдём в <code class="highlighter-rouge">apps/kv</code> и перезапустим узел с именем <code class="highlighter-rouge">bar</code>, чтобы использовать его в тестах.</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span>iex <span class="nt">--sname</span> bar <span class="nt">-S</span> mix
+</code></pre></div></div>
+
+<p>И запустим тест следующим образом:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span>elixir <span class="nt">--sname</span> foo <span class="nt">-S</span> mix <span class="nb">test</span>
+</code></pre></div></div>
+
+<p>Тест должен пройти без ошибок.</p>
+
+<h2 id="фильтры-тестов-и-теги">Фильтры тестов и теги</h2>
+
+<p>Хотя наши тесты проходят, структура тестов становится более сложной. А именно, запуск тестов командой <code class="highlighter-rouge">mix test</code> приведёт к ошибкам, т. к. наш тест предусматривает подключение к другому узлу.</p>
+
+<p>К счастью, в ExUnit есть средства для тегирования тестов, которые позволяют запускать определённые обратные вызовы или даже фильтровать тесты по этим тегам. Мы уже использовали тег <code class="highlighter-rouge">:capture_log</code> в предыдущей главе, семантику которого определяет сам <code class="highlighter-rouge">ExUnit</code>.</p>
+
+<p>Теперь давайте добавим тег <code class="highlighter-rouge">:distributed</code> в файл <code class="highlighter-rouge">test/kv/router_test.exs</code>:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">@tag</span> <span class="ss">:distributed</span>
+<span class="n">test</span> <span class="sd">"</span><span class="s2">route requests across nodes"</span> <span class="k">do</span>
+</code></pre></div></div>
+
+<p>Формулировка <code class="highlighter-rouge">@tag :distributed</code> эквивалентна <code class="highlighter-rouge">@tag distributed: true</code>.</p>
+
+<p>Когда тесты отмечены нужными тегами, мы можем проверить, запущен ли узел в сети, и, если нет, мы можем исключить все распределённые тесты. Откройте <code class="highlighter-rouge">test/test_helper.exs</code> внутри приложения <code class="highlighter-rouge">:kv</code> и добавьте следующее:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">exclude</span> <span class="o">=</span>
+  <span class="k">if</span> <span class="no">Node</span><span class="o">.</span><span class="n">alive?</span><span class="p">,</span> <span class="k">do</span><span class="p">:</span> <span class="p">[],</span> <span class="k">else</span><span class="p">:</span> <span class="p">[</span><span class="ss">distributed:</span> <span class="no">true</span><span class="p">]</span>
+
+<span class="no">ExUnit</span><span class="o">.</span><span class="n">start</span><span class="p">(</span><span class="ss">exclude:</span> <span class="n">exclude</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p>Теперь выполните команду <code class="highlighter-rouge">mix test</code>:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span>mix <span class="nb">test
+</span>Excluding tags: <span class="o">[</span>distributed: <span class="nb">true</span><span class="o">]</span>
+
+.......
+
+Finished <span class="k">in </span>0.1 seconds <span class="o">(</span>0.1s on load, 0.01s on tests<span class="o">)</span>
+7 tests, 0 failures, 1 skipped
+</code></pre></div></div>
+
+<p>На этот раз все тесты прошл и <code class="highlighter-rouge">ExUnit</code> предупреждает нас, что распределённые тесты были исключены. Если вы запустите <code class="highlighter-rouge">$ elixir --sname foo -S mix test</code>, один дополнительный тест должен запуститься и проходить, пока узел <code class="highlighter-rouge">bar@computer-name</code> доступен.</p>
+
+<p>Команда <code class="highlighter-rouge">mix test</code> также позволяет нам динамически включать и исключать теги. Например, мы можем запустить <code class="highlighter-rouge">$ mix test --include distributed</code> для запуска распределенных тестов независимо от значения в <code class="highlighter-rouge">test/test_helper.exs</code>. Мы также можем передать <code class="highlighter-rouge">--exclude</code> чтобы исключить тег. Наконец, <code class="highlighter-rouge">--only</code> можно использовать для запуска только тестов с определённым тегом:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span>elixir <span class="nt">--sname</span> foo <span class="nt">-S</span> mix <span class="nb">test</span> <span class="nt">--only</span> distributed
+</code></pre></div></div>
+
+<p>Вы можете прочитать больше о фильтрах, тегах и стандартных тегах в <a href="https://hexdocs.pm/ex_unit/ExUnit.Case.html">документации модуля <code class="highlighter-rouge">ExUnit.Case</code></a>.</p>
+
+<h2 id="окружение-приложения-и-конфигурация">Окружение приложения и конфигурация</h2>
+
+<p>До сих пор мы задавали таблицу маршрутизации статически в модуле <code class="highlighter-rouge">KV.Router</code>. Однако, мы бы хотели сделать таблицу динамической. Это позволит нам не только сконфигурировать окружение для разработки/тестирования/продакшена, но также позволит разным узлам запускаться с разными значениями в таблице маршрутизации. В <abbr title="OPEN TELECOM PLATFORM">OTP</abbr> есть возможность задавать окружение приложения.</p>
+
+<p>Каждое приложение имеет окружение, которое хранит конфигурацию приложения по ключу. Например, мы могли бы сохранить таблицу маршрутизации в окружении <code class="highlighter-rouge">:kv</code>, задать ему стандартные значения и позволить другим приложениям изменять таблицу, если необходимо.</p>
+
+<p>Откройте <code class="highlighter-rouge">apps/kv/mix.exs</code> и измените функцию <code class="highlighter-rouge">application/0</code>:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">def</span> <span class="n">application</span> <span class="k">do</span>
+  <span class="p">[</span><span class="ss">extra_applications:</span> <span class="p">[</span><span class="ss">:logger</span><span class="p">],</span>
+   <span class="ss">env:</span> <span class="p">[</span><span class="ss">routing_table:</span> <span class="p">[]],</span>
+   <span class="ss">mod:</span> <span class="p">{</span><span class="no">KV</span><span class="p">,</span> <span class="p">[]}]</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<p>Мы добавили новый ключ <code class="highlighter-rouge">:env</code> в приложение. Он возвращает стандартное окружение приложения, которое имеет ключ <code class="highlighter-rouge">:routing_table</code> и пустой список в качестве значения. Есть смысл в том, чтобы приложение изначально было с пустой таблицей, т. к. вид таблицы будет зависеть от структуры тестирования/разработки.</p>
+
+<p>Для использования окружения в нашем коде, нам нужно заменить <code class="highlighter-rouge">KV.Router.table/0</code> на код ниже:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">@doc</span> <span class="sd">"""
+Таблица маршрутизации.
+"""</span>
+<span class="k">def</span> <span class="n">table</span> <span class="k">do</span>
+  <span class="no">Application</span><span class="o">.</span><span class="n">fetch_env!</span><span class="p">(</span><span class="ss">:kv</span><span class="p">,</span> <span class="ss">:routing_table</span><span class="p">)</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<p>Мы используем функцию <code class="highlighter-rouge">Application.fetch_env!/2</code> для чтения записи <code class="highlighter-rouge">:routing_table</code> в окружени <code class="highlighter-rouge">:kv</code>. Вы можете найти больше информации и другие функции для работы с окружением приложения в <a href="https://hexdocs.pm/elixir/Application.html">модуле <code class="highlighter-rouge">Application</code></a>.</p>
+
+<p>Т. к. наша таблица маршрутизации теперь пуста, распределённые тесты должны упасть. Перезапустите приложение и тесты, чтобы увидеть падение:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span>iex <span class="nt">--sname</span> bar <span class="nt">-S</span> mix
+<span class="nv">$ </span>elixir <span class="nt">--sname</span> foo <span class="nt">-S</span> mix <span class="nb">test</span> <span class="nt">--only</span> distributed
+</code></pre></div></div>
+
+<p>Интересная особенность окружении приложения состоит в том, что оно может быть настроено не только для текущего приложения, но и для всех приложений. Такая конфигурация осуществляется в файле <code class="highlighter-rouge">config/config/exs</code>. Например, мы можем изменить стандартную IEx-консоль на другое значение. Просто откройте файл <code class="highlighter-rouge">apps/kv/config/config.exs</code> и добавьте в конец:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">config</span> <span class="ss">:iex</span><span class="p">,</span> <span class="ss">default_prompt:</span> <span class="sd">"</span><span class="s2">&gt;&gt;&gt;"</span>
+</code></pre></div></div>
+
+<p>Запустите IEx командой <code class="highlighter-rouge">iex -S mis</code> и вы сможете увидеть, что приглашение строки ввода изменилось.</p>
+
+<p>Это значит, что мы также можем настроить нашу <code class="highlighter-rouge">:routing_table</code> прямо в файле <code class="highlighter-rouge">apps/kv/config/config.exs</code>:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># Замените имя компьютера на свои данные.</span>
+<span class="n">config</span> <span class="ss">:kv</span><span class="p">,</span> <span class="ss">:routing_table</span><span class="p">,</span>
+       <span class="p">[{</span><span class="sx">?a</span><span class="o">..</span><span class="sx">?m</span><span class="p">,</span> <span class="ss">:"foo@computer-name"</span><span class="p">},</span>
+        <span class="p">{</span><span class="sx">?n</span><span class="o">..</span><span class="sx">?z</span><span class="p">,</span> <span class="ss">:"bar@computer-name"</span><span class="p">}]</span>
+</code></pre></div></div>
+
+<p>Перезапустите все узлы и запустите распределённые тесты снова. Теперь они снова должны пройти.</p>
+
+<p>Начиная с Эликсира версии 1.2, все зонтичные приложения имеют общую конфигурацию, благодаря этой строке в <code class="highlighter-rouge">config/config.exs</code> в корне зонтичного проекта, которая загружает конфигурацию всем потомкам:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">import_config</span> <span class="sd">"</span><span class="s2">../apps/*/config/config.exs"</span>
+</code></pre></div></div>
+
+<p>Команда <code class="highlighter-rouge">mix run</code> также принимает флаг <code class="highlighter-rouge">--config</code>, который позволяет файлам конфигурации быть переданными по требованию. Это можно использовать для запуска разных узлов, каждый из которых имеет отличающуюся конфигурацию (например, разные таблицы маршрутизации).</p>
+
+<p>Более того, встроенная возможность конфигурировать приложения и тот факт, что мы сделали наш проект зонтичным, позволяет нам по-разному деплоить его. Мы можем:</p>
+
+<ul>
+  <li>
+    <p>деплоить зонтичное приложение на узел, который будет и TCP-сервером, и хранилищем ключ-значение;</p>
+  </li>
+  <li>
+    <p>деплоить приложение <code class="highlighter-rouge">:kv_server</code> для работы только в качестве TCP-сервера, а в таблице маршрутизации указать другие узлы;</p>
+  </li>
+  <li>
+    <p>деплоить только приложение <code class="highlighter-rouge">:kv</code>, когда мы хотим узел с хранилищем (без TCP-доступа).</p>
+  </li>
+</ul>
+
+<p>По мере добавления новых приложений в будущем, мы можем продолжить контролировать наш деплой с тем же уровнем контроля, какие приложения и с какими конфигурациями уйдут в продакшн.</p>
+
+<p>Вы также можете решить создавать разные релизы с инструментом вроде <a href="https://github.com/bitwalker/distillery"><code class="highlighter-rouge">Distillery</code></a>, который будет упаковывать выбранные приложения и конфигурации, включая выбранные дистрибутивы Эрланга и Эликсира, поэтому приложения можно будет деплоить даже если рантайм не предустановлен на выбранной системе.</p>
+
+<p>Наконец, в этой главе мы изучили несколько новых вещей, и они могут быть применены в приложении <code class="highlighter-rouge">:kv_server</code>. Мы оставим следующие задачи на самостоятельную работу:</p>
+
+<ul>
+  <li>
+    <p>изменить приложение <code class="highlighter-rouge">:kv_server</code> для использования порта из окружения, вместо использования жестко заданного <code class="highlighter-rouge">4040</code>;</p>
+  </li>
+  <li>
+    <p>изменить и настроить приложение <code class="highlighter-rouge">:kv_server</code> для использования маршрутизации вместо прямых вызовов локального <code class="highlighter-rouge">KV.Registry</code>. Для тестирования <code class="highlighter-rouge">:kv_server</code> вы можете создать таблицу маршрутизации, которая указывает на текущий узел.</p>
+  </li>
+</ul>
+
+<h2 id="заключение">Заключение</h2>
+
+<p>В этой главе мы создали простой маршрутизатор, чтобы попробовать на практике возможности распределённой работы Эликсира и виртуальной машины Эрланга, а также изучили конфигурирование таблиц маршрутизации. Это последняя глава в нашем руководстве по Миксу и <abbr title="OPEN TELECOM PLATFORM">OTP</abbr></p>
+
+<p>В этом руководстве мы сделали очень простое распределённое хранилище пар ключ-значение, чтобы исследовать многие конструкции, например, <code class="highlighter-rouge">GenServer</code>, супервизоры, задачи, агенты, приложения и другие. Кроме того, мы написали тесты для всего нашего приложения, познакомились с <code class="highlighter-rouge">ExUnit</code>, и изучили использование средства сборки Микс для решения многих задач.</p>
+
+<p>Если вы ищете распределённое хранилище ключ-значение для продакшна, вам определённо стоит посмотреть <a href="http://basho.com/riak/"><code class="highlighter-rouge">Riak</code></a>, который также работает в виртуальной машине Эрланга. В <code class="highlighter-rouge">Riak</code> корзины реплицируются во избежание потери данных, и, в отличие от маршрутизатора, они используют <a href="https://ru.wikipedia.org/wiki/%D0%9A%D0%BE%D0%BD%D1%81%D0%B8%D1%81%D1%82%D0%B5%D0%BD%D1%82%D0%BD%D0%BE%D0%B5_%D1%85%D0%B5%D1%88%D0%B8%D1%80%D0%BE%D0%B2%D0%B0%D0%BD%D0%B8%D0%B5">консистентное хеширование</a> для сопоставления корзины и узла сети. Алгоритм консистентного хеширования помогает уменьшить количество данных, которые нужно мигрировать, когда в инфраструктуру добавляется новый узел для хранения корзин.</p>
+
+<p>Приятного кодинга!</p>
+
+    </div>
+</article>
+
+<nav class="docs_nav pure-g">
+    <div class="docs_nav__inner pure-u-1 pure-u-md-3-4">
+        <div class="pure-g">
+            <div class="docs_nav__column docs_nav__column--prev pure-u-1-3">
+                
+                    <a href="/docs/mix-otp/docs-tests-and-with.html" class="docs_nav__link pure-button">
+                        &larr;<span class="h-hidden_mobile"> Назад</span></a>
+                
+            </div>
+
+            <div class="docs_nav__column docs_nav__column--contents pure-u-1-3">
+                <a href="#docsContents" class="docs_nav__link docs_nav__link--contents pure-button">☰</a>
+            </div>
+
+            <div class="docs_nav__column docs_nav__column--next pure-u-1-3">
+                
+                    <a href="/docs/meta/quote-and-unquote.html" class="docs_nav__link pure-button">
+                        <span class="h-hidden_mobile">Вперёд </span>&rarr;
+                    </a>
+                
+            </div>
+        </div>
+    </div>
+</nav>
+
+<div id="docsContents" class="modal modal--docs_contents modal--close_backdrop">
+    <div class="modal__content">
+        <a href="#close" title="Закрыть" class="modal__close">x</a>
+
+        <h2 class="modal__title">Содержание</h2>
+
+        
+        <h3 id="руководство-для-начинающих">Руководство для начинающих</h3>
+<ul>
+  <li><a href="/docs">Введение</a></li>
+  <li><a href="/docs/basic-types.html">Базовые типы</a></li>
+  <li><a href="/docs/basic-operators.html">Базовые операторы</a></li>
+  <li><a href="/docs/pattern-matching.html">Сопоставление с образцом</a></li>
+  <li><a href="/docs/case-cond-and-if.html">Конструкции ветвления</a></li>
+  <li><a href="/docs/binaries-strings-and-char-lists.html">Двоичные данные, строки и списки символов</a></li>
+  <li><a href="/docs/keywords-and-maps.html">Ключевые списки и словари</a></li>
+  <li><a href="/docs/modules-and-functions.html">Модули и функции</a></li>
+  <li><a href="/docs/recursion.html">Рекурсия</a></li>
+  <li><a href="/docs/enumerables-and-streams.html">Перечисления и потоки</a></li>
+  <li><a href="/docs/processes.html">Процессы</a></li>
+  <li><a href="/docs/io-and-the-file-system.html">Ввод/вывод и файловая система</a></li>
+  <li><a href="/docs/alias-require-and-import.html">Директивы <code class="highlighter-rouge">alias</code>, <code class="highlighter-rouge">require</code> и <code class="highlighter-rouge">import</code></a></li>
+  <li><a href="/docs/module-attributes.html">Атрибуты модулей</a></li>
+  <li><a href="/docs/structs.html">Структуры</a></li>
+  <li><a href="/docs/protocols.html">Протоколы</a></li>
+  <li><a href="/docs/comprehensions.html">Списковые выражения</a></li>
+  <li><a href="/docs/sigils.html">Сигилы</a></li>
+  <li><a href="/docs/try-catch-and-rescue.html">Конструкция <code class="highlighter-rouge">try</code>, <code class="highlighter-rouge">catch</code> и <code class="highlighter-rouge">rescue</code></a></li>
+  <li><a href="/docs/typespecs-and-behaviours.html">Спецификации типов и поведения</a></li>
+  <li><a href="/docs/erlang-libraries.html">Библиотеки Эрланга</a></li>
+  <li><a href="/docs/where-to-go-next.html">Куда двигаться дальше</a></li>
+</ul>
+
+<h3 id="микс-и-otp">Микс и <code class="highlighter-rouge">OTP</code></h3>
+<ul>
+  <li><a href="/docs/mix-otp/introduction-to-mix.html">Введение в Микс</a></li>
+  <li><a href="/docs/mix-otp/agent.html">Агент</a></li>
+  <li><a href="/docs/mix-otp/genserver.html">GenServer</a></li>
+  <li><a href="/docs/mix-otp/supervisor-and-application.html">Супервизор и приложение</a></li>
+  <li><a href="/docs/mix-otp/dynamic-supervisor.html">Динамический супервизор</a></li>
+  <li><a href="/docs/mix-otp/ets.html">ETS</a></li>
+  <li><a href="/docs/mix-otp/dependencies-and-umbrella-apps.html">Зависимости и зонтичные проекты</a></li>
+  <li><a href="/docs/mix-otp/task-and-gen-tcp.html">Модули <code class="highlighter-rouge">Task</code> и <code class="highlighter-rouge">:gen_tcp</code></a></li>
+  <li><a href="/docs/mix-otp/docs-tests-and-with.html">Доктесты, паттерны и оператор <code class="highlighter-rouge">with</code></a></li>
+  <li><a href="/docs/mix-otp/distributed-tasks-and-configuration.html">Распределенные задачи и конфигурация</a></li>
+</ul>
+
+<h3 id="метапрограммирование">Метапрограммирование</h3>
+<ul>
+  <li><a href="/docs/meta/quote-and-unquote.html">Конструкции <code class="highlighter-rouge">quote</code> и <code class="highlighter-rouge">unquote</code></a></li>
+  <li><a href="/docs/meta/macros.html">Макросы</a></li>
+  <li><a href="/docs/meta/domain-specific-languages.html">Предметно-ориентированные языки</a></li>
+</ul>
+
+    </div>
+</div>
+
+
+
+        <footer class="footer">
+    &copy; 2020
+    / Россия
+
+    <span class="pull-right">Любые мысли и вопросы пишите на <a href="mailto:elixir@wunsh.ru">elixir@wunsh.ru</a>.</span>
+</footer>
+
+        <div id="subscribeModal" class="modal">
+    <div class="modal__content">
+        <a href="#close" title="Close" class="modal__close">x</a>
+
+        <h2 class="modal__title">Ламповая рассылка про&nbsp;Эликсир</h2>
+
+        <p>Один-два раза в&nbsp;неделю присылаем тёплые письма об&nbsp;Эликсире: переводы самых интересных статей до&nbsp;их&nbsp;появления в&nbsp;открытом доступе, анонсы событий и&nbsp;вкусные бонусы.</p>
+
+        <form action="//wunsh.us14.list-manage.com/subscribe/post?u=c81ca3d4693f62db7f7f67c71&amp;id=a192e2dfef" method="post" id="mc-embedded-subscribe-form" name="mc-embedded-subscribe-form" class="pure-form h-tc validate" target="_blank" novalidate>
+            <input type="email" value="" name="EMAIL" class="modal__input pure-input-rounded large" id="mce-EMAIL" placeholder="Твоя почта" required>
+            <div style="position: absolute; left: -5000px;" aria-hidden="true"><input type="text" name="b_c81ca3d4693f62db7f7f67c71_a192e2dfef" tabindex="-1" value=""></div>
+
+            <input type="submit" value="Присоединиться" name="subscribe" onClick="yaCounter39773490.reachGoal('SUBSCRIBED'); return true" id="mc-embedded-subscribe" class="pure-button button-success large">
+        </form>
+
+        <p>Обязательно подтверди почту, перейдя по&nbsp;ссылке в&nbsp;письме, иначе мы&nbsp;не&nbsp;сможем делиться с&nbsp;тобой полезностями.</p>
+
+        <p>Надоедать точно не&nbsp;будем :)</p>
+    </div>
+</div>
+
+        <script src="/assets/js/vendors/zepto.min.js"></script>
+
+<script>
+    if ($(".post--docs").length) {
+        $(".footer").addClass("footer--docs")
+    }
+
+    $(".modal--close_backdrop").click(function(){
+        window.location.hash = "";
+    });
+</script>
+
+        <!-- Yandex.Metrika counter -->
+<script type="text/javascript">
+    (function (d, w, c) {
+        (w[c] = w[c] || []).push(function() {
+            try {
+                w.yaCounter39773490 = new Ya.Metrika({
+                    id:39773490,
+                    clickmap:true,
+                    trackLinks:true,
+                    accurateTrackBounce:true,
+                    webvisor:true,
+                    ut:"noindex"
+                });
+            } catch(e) { }
+        });
+
+        var n = d.getElementsByTagName("script")[0],
+            s = d.createElement("script"),
+            f = function () { n.parentNode.insertBefore(s, n); };
+        s.type = "text/javascript";
+        s.async = true;
+        s.src = "https://mc.yandex.ru/metrika/watch.js";
+
+        if (w.opera == "[object Opera]") {
+            d.addEventListener("DOMContentLoaded", f, false);
+        } else { f(); }
+    })(document, window, "yandex_metrika_callbacks");
+</script>
+<noscript><div><img src="https://mc.yandex.ru/watch/39773490?ut=noindex" style="position:absolute; left:-9999px;" alt="" /></div></noscript>
+<!-- /Yandex.Metrika counter -->
+
+      </div>
+    </div>
+  </body>
+</html>

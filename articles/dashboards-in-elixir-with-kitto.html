@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Создание дашбордов на Elixir с помощью Kitto |> Сообщество Elixir и Phoenix Framework</title>
+    <meta name="description" content="В этой статье рассказывается о фреймворке для создания дашбордов - Kitto.">
+
+    <link rel="alternate" type="application/rss+xml" title="Сообщество Elixir и Phoenix Framework" href="/feed.xml" />
+    <link rel="canonical" href="https://wunsh.ru/articles/dashboards-in-elixir-with-kitto.html">
+
+    <style type="text/css">@import url("//fonts.googleapis.com/css?family=Source+Sans+Pro:400,700&subset=cyrillic");</style>
+    <link rel="stylesheet" href="/assets/css/vendors/pure.min.css">
+    <link rel="stylesheet" href="/assets/css/vendors/pure-grids-responsive.min.css">
+    <link rel="stylesheet" href="/assets/css/style.css?1594516983">
+
+    <link rel="shortcut icon" type="image/png" href="/assets/favicon.png" >
+</head>
+
+
+  <body>
+    <div class="wunsh pure-g">
+      
+
+
+
+
+<div class="menu pure-u-1 pure-u-md-1-4">
+  <div class="header">
+    <h2 class="header__title">
+      
+        <a href="https://wunsh.ru" class="header__title_link" title="На главную">Эликсир и&nbsp;Вунш</a>
+      
+    </h2>
+    <h3 class="header__tagline">Erlang + Ruby = &#10084;</h3>
+
+    <nav class="nav">
+      <ul class="nav_list">
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/elixir" class="nav_list__item_link pure-button">О языке</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/install/linux-asdf" class="nav_list__item_link pure-button">Установка</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/docs/" class="nav_list__item_link pure-button">Документация</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/guides" class="nav_list__item_link pure-button">Гайды</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/news" class="nav_list__item_link pure-button">Новости</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/articles" class="nav_list__item_link pure-button">Статьи</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/videos" class="nav_list__item_link pure-button">Видео</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/vacancies" class="nav_list__item_link pure-button">Вакансии</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/faq" class="nav_list__item_link pure-button">FAQ</a>
+            </li>
+          
+        
+      </ul>
+    </nav>
+
+    <a href="#subscribeModal" class="pure-button header__subscribe_link">Подписаться на рассылку</a>
+  </div>
+</div>
+
+
+      <div class="content pure-u-1 pure-u-md-3-4">
+        
+
+<article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+  <header class="post__header">
+    
+    <h1 class="post__title" itemprop="name headline">Создание дашбордов на Elixir с помощью Kitto</h1>
+
+    <div class="post__meta post_meta">
+      <ul class="meta_list">
+        <li class="meta_list__item">
+          
+          <span class="">
+            <small class="meta_list__item_name">Дата</small>
+            <time class="h-bold" datetime="2016-12-09T00:00:00+00:00" itemprop="datePublished">
+              
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+09 декабря 2016
+
+            </time>
+          </span>
+          
+
+          
+        </li>
+        
+        <li class="meta_list__item">
+            <span class="tag_cloud tags_cloud--inline h-no_margin">
+              <small class="meta_list__item_name">Теги</small> 
+
+
+<ul class="tags_cloud__list">
+  
+    <a href="/tags/#kitto" class="tags_cloud__link tag tag--kitto">kitto</a>
+  
+    <a href="/tags/#overview" class="tags_cloud__link tag tag--overview">overview</a>
+  
+    <a href="/tags/#practical" class="tags_cloud__link tag tag--practical">practical</a>
+  
+</ul>
+
+            </span>
+        </li>
+        
+        <li class="meta_list__item">
+          <span itemprop="author" itemscope itemtype="http://schema.org/Person">
+            <small class="meta_list__item_name">
+              
+                Перевод
+              
+            </small>
+            <span itemprop="name" class="h-bold">Надежда Нестерова</span>
+          </span>
+        </li>
+
+        <li class="meta_list__item">
+          
+            <div >
+              <small>Оригинал</small>
+              <strong>
+                &laquo;<a href="https://davejlong.com/2016/11/17/writing-jobs-for-kitto/" style="text-transform: none; text-decoration: underline; color: #4b2e39;">Writing Jobs for Kitto</a>&raquo;
+              </strong>
+              <small>&copy;</small>
+              <strong>Dave Long</strong>
+            </div>
+          
+        </li>
+      </ul>
+    </div>
+  </header>
+
+  <div class="post__content" itemprop="articleBody">
+    <p>Kitto&nbsp;&mdash; новый фреймворк для Elixir, который, можно сказать, является возрождением фреймворка Dashing, изначально разработанного компанией Shopify для Ruby. Для тех, кто не&nbsp;слышал ни&nbsp;о&nbsp;том, ни&nbsp;о&nbsp;другом, Kitto&nbsp;&mdash; фреймворк для создания дашбордов для вывода данных. Данные для виджетов дашборда передаются через джобы&nbsp;&mdash; <strong>Jobs</strong>, которые опрашивают веб-сервисы, базы данных и&nbsp;другие источники информации по&nbsp;заранее определённому графику.</p>
+
+<p>Учитывая, что джобы&nbsp;&mdash; основное средство вывода данных в&nbsp;дашборд (<a href="https://github.com/kittoframework/kitto/issues/4">по&nbsp;крайней мере пока</a>), было&nbsp;бы неплохо рассказать о&nbsp;том, как написать простой джоб. При этом я&nbsp;хотел&nbsp;бы немного выйти за&nbsp;рамки возможностей обычных джобов из&nbsp;образца дашборда, который идёт в&nbsp;комплекте с&nbsp;Kitto. Отмечу, что со&nbsp;своими коллегами в&nbsp;Cage Data мы&nbsp;часто прибегаем к&nbsp;использованию системы JIRA и&nbsp;что джоб, о&nbsp;котором пойдёт речь, я&nbsp;написал для одного из&nbsp;наших дашбордов.</p>
+
+<p>В&nbsp;этой статье вопрос о&nbsp;том, как создать новый дашборд в&nbsp;Kitto освещаться не&nbsp;будет, так как <a href="https://github.com/kittoframework/kitto#kitto">в&nbsp;руководстве Kitto</a> подробнейшим образом расписано всё <a href="https://github.com/kittoframework/kitto#installation">об&nbsp;установке</a> и&nbsp;<a href="https://github.com/kittoframework/kitto#create-a-dashboard">создании дашбордов</a>. Создав дашборд, нужно добавить библиотеки HTTPoison и&nbsp;Poison в&nbsp;список зависимостей приложения.</p>
+
+<h2><a name="gettingthedata"></a> Получение данных</h2>
+
+<p>Вместо того, чтобы заворачивать запрос к&nbsp;API в&nbsp;джоб-файл, попробуем выделить как можно больше логики в&nbsp;отдельный модуль. Это позволит использовать одну и&nbsp;ту&nbsp;же логику во&nbsp;всех джобах&nbsp;и, если модуль окажется слишком объёмным, перенести часть кода в&nbsp;пакет, указав его в&nbsp;зависимостях.</p>
+
+<p>Для взаимодействия с&nbsp;интерфейсами JIRA нужно сначала где-то прописать сервер, имя пользователь и&nbsp;пароль. Где хранить всё это добро&nbsp;&mdash; решать только вам. В&nbsp;приведённом примере я&nbsp;добавлю их&nbsp;через&nbsp;переменные окружения приложения в&nbsp;виде <code>:jira_url</code>, <code>:jira_username</code> и <code>:jira_password</code>.</p>
+
+<p>Укромно спрятав данные доступа к&nbsp;базе, приступим к&nbsp;созданию модуля в&nbsp;<code>lib/apis/jira.ex</code>, который будет обмениваться данными с&nbsp;JIRA&nbsp;API. Я&nbsp;планирую отобразить на&nbsp;дашборде два виджета со&nbsp;следующей информацией: 1) количество открытых багов во&nbsp;всех проектах; 2) список блокирующих и&nbsp;приоритетных задач.</p>
+
+<figure class="highlight"><pre><code class="language-elixir" data-lang="elixir"><span class="k">defmodule</span> <span class="no">APIs</span><span class="o">.</span><span class="no">Jira</span> <span class="k">do</span>
+<span class="k">def</span> <span class="n">issues</span><span class="p">(</span><span class="n">filter</span><span class="p">)</span> <span class="k">do</span>
+<span class="k">end</span>
+
+<span class="k">def</span> <span class="n">count</span><span class="p">(</span><span class="n">issues</span><span class="p">)</span> <span class="k">do</span>
+<span class="k">end</span>
+
+<span class="k">defp</span> <span class="n">username</span><span class="p">,</span> <span class="k">do</span><span class="p">:</span> <span class="no">Application</span><span class="o">.</span><span class="n">get_env</span><span class="p">(</span><span class="ss">:sample_dashboard</span><span class="p">,</span> <span class="ss">:jira_username</span><span class="p">)</span>
+<span class="k">defp</span> <span class="n">password</span><span class="p">,</span> <span class="k">do</span><span class="p">:</span> <span class="no">Application</span><span class="o">.</span><span class="n">get_env</span><span class="p">(</span><span class="ss">:sample_dashboard</span><span class="p">,</span> <span class="ss">:jira_password</span><span class="p">)</span>
+<span class="k">defp</span> <span class="n">url</span><span class="p">,</span> <span class="k">do</span><span class="p">:</span> <span class="no">Application</span><span class="o">.</span><span class="n">get_env</span><span class="p">(</span><span class="ss">:sample_dashbaord</span><span class="p">,</span> <span class="ss">:jira_url</span><span class="p">)</span>
+
+<span class="k">defp</span> <span class="n">authentication</span><span class="p">,</span> <span class="k">do</span><span class="p">:</span> <span class="p">[</span><span class="sd">"</span><span class="s2">Authorization"</span><span class="p">:</span> <span class="sd">"</span><span class="s2">Basic "</span> <span class="o">&lt;&gt;</span> <span class="no">Base</span><span class="o">.</span><span class="n">encode64</span><span class="p">(</span><span class="sd">"</span><span class="si">#{</span><span class="n">username</span><span class="si">}</span><span class="s2">:</span><span class="si">#{</span><span class="n">password</span><span class="si">}</span><span class="s2">"</span><span class="p">)]</span>
+<span class="k">end</span></code></pre></figure>
+
+<p>Как можно заметить по&nbsp;аргументам, функции <code>count</code> необходим список задач, так что для начала займёмся методом для обработки задач.</p>
+
+<figure class="highlight"><pre><code class="language-elixir" data-lang="elixir"><span class="k">def</span> <span class="n">issues</span><span class="p">(</span><span class="n">filter</span><span class="p">)</span> <span class="k">do</span>
+  <span class="n">jql</span> <span class="o">=</span> <span class="no">URI</span><span class="o">.</span><span class="n">encode</span> <span class="sd">"</span><span class="s2">filter="</span> <span class="o">&lt;&gt;</span> <span class="n">to_string</span><span class="p">(</span><span class="n">filter</span><span class="p">)</span> <span class="o">&lt;&gt;</span> <span class="sd">"</span><span class="s2">+order+by+priority+DESC,updated+ASC"</span>
+  <span class="n">url</span> <span class="o">=</span> <span class="no">URI</span><span class="o">.</span><span class="n">parse</span> <span class="n">url</span> <span class="o">&lt;&gt;</span> <span class="sd">"</span><span class="s2">/rest/api/2/search?maxResults=25&amp;jql="</span> <span class="o">&lt;&gt;</span> <span class="n">jql</span>
+
+  <span class="no">HTTPoison</span><span class="o">.</span><span class="n">get!</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">authentication</span><span class="p">)</span><span class="o">.</span><span class="n">body</span>
+  <span class="o">|&gt;</span> <span class="no">Poison</span><span class="o">.</span><span class="n">decode!</span>
+<span class="k">end</span></code></pre></figure>
+
+<p>Давайте&nbsp;же разберёмся, что здесь происходит. Прежде всего, значение, передаваемое в&nbsp;метод <code>issues</code>&nbsp;&mdash; это идентификатор JIRA-фильтра, который требуется определить из&nbsp;экземпляра JIRA.</p>
+
+<img src="https://storage.googleapis.com/assets.davejlong.com/jira-filter-url.png" alt="Kitto">
+
+<p>Переменная <code>jql</code> содержит необходимые данные интерфейса задач JIRA: фильтры, упорядоченные по&nbsp;приоритету (от&nbsp;высокого к&nbsp;низкому) и&nbsp;по&nbsp;времени создания задач (начиная с&nbsp;самых ранних). Стоит отметить, что в&nbsp;среде <a href="https://developer.atlassian.com/jiradev/jira-apis/jira-rest-apis/jira-rest-api-tutorials/jira-rest-api-example-query-issues">Confluence</a> имеется гораздо большее количество опций для описания объектов ответа, но&nbsp;я&nbsp;не&nbsp;буду заострять на&nbsp;этом внимание. Составив запрос <code>jql</code>, поработаем над получением необходимого URL. Я&nbsp;присвоил значение 25&nbsp;переменной maxResults, чтобы ввести целесообразное ограничение на&nbsp;количество возвращаемых тикетов. Дашборды обычно выводят на&nbsp;экраны телевизоров или другие средства представления, в&nbsp;которых нет возможности реализовать полосу прокрутки.</p>
+
+<p>Теперь, имея необходимый URL, посылаем в&nbsp;JIRA запрос GET, указывая в&nbsp;его заголовке информацию аутентификации. Далее расшифруем полученный ответ в&nbsp;формате JSON с&nbsp;помощью Poison.</p>
+
+<p>Было&nbsp;бы ещё неплохо отследить такие ошибки со&nbsp;стороны JIRA, как превышение лимита по&nbsp;количеству запросов, ошибка аутентификации и&nbsp;т.п., но&nbsp;не&nbsp;буду сейчас засорять этим свой наглядный пример.</p>
+
+<p>Описанный метод подсчёта задач достаточно удобный, ведь JIRA возвращает количество задач в&nbsp;одном из&nbsp;полей JSON-файла. Я&nbsp;бы советовал разработчикам для передачи существующего возвращаемого объекта в&nbsp;метод <code>count</code> вместо отправки запросов к&nbsp;API использовать написанный мной модуль:</p>
+
+<figure class="highlight"><pre><code class="language-elixir" data-lang="elixir"><span class="k">def</span> <span class="n">count</span><span class="p">(</span><span class="n">issues</span><span class="p">)</span> <span class="k">do</span>
+  <span class="n">issues</span><span class="p">[</span><span class="sd">"</span><span class="s2">total"</span><span class="p">]</span>
+<span class="k">end</span></code></pre></figure>
+
+<p>И&nbsp;вот последний метод, который нужно добавить в&nbsp;<code>APIs.Jira</code> для форматирования задач, выводимых на&nbsp;дашборд:</p>
+
+<figure class="highlight"><pre><code class="language-elixir" data-lang="elixir"><span class="k">def</span> <span class="n">issue_for_dashboard</span><span class="p">(</span><span class="n">issue</span><span class="p">)</span> <span class="k">do</span>
+  <span class="p">%{</span><span class="ss">label:</span> <span class="n">issue</span><span class="p">[</span><span class="sd">"</span><span class="s2">fields"</span><span class="p">][</span><span class="sd">"</span><span class="s2">summary"</span><span class="p">],</span> <span class="ss">value:</span> <span class="n">issue</span><span class="p">[</span><span class="sd">"</span><span class="s2">key"</span><span class="p">]}</span>
+<span class="k">end</span></code></pre></figure>
+
+<p>Вот мы&nbsp;и&nbsp;создали модуль для взаимодействия с&nbsp;JIRA, позволяющий получить все необходимые для дашборда данные. Можно проверить результаты его работы, отправив запрос JIRA API через <code>iex</code>:</p>
+
+<figure class="highlight"><pre><code class="language-elixir" data-lang="elixir"><span class="n">iex</span><span class="o">&gt;</span> <span class="no">APIs</span><span class="o">.</span><span class="no">Jira</span><span class="o">.</span><span class="n">issues</span><span class="p">(</span><span class="m">10300</span><span class="p">)</span>
+<span class="p">%{</span><span class="o">...</span><span class="p">}</span>
+<span class="n">iex</span><span class="o">&gt;</span> <span class="no">APIs</span><span class="o">.</span><span class="no">Jira</span><span class="o">.</span><span class="n">issues</span><span class="p">(</span><span class="m">10300</span><span class="p">)</span> <span class="o">|&gt;</span> <span class="no">APIs</span><span class="o">.</span><span class="no">Jira</span><span class="o">.</span><span class="n">count</span>
+<span class="m">32</span></code></pre></figure>
+
+<p>Написать джоб, имея этот модуль, не&nbsp;составит труда. Создадим джоб в&nbsp;<code>jobs/jira.exs</code>:</p>
+
+<figure class="highlight"><pre><code class="language-elixir" data-lang="elixir"><span class="kn">use</span> <span class="no">Kitto</span><span class="o">.</span><span class="no">Job</span><span class="o">.</span><span class="no">DSL</span>
+
+<span class="n">filters</span> <span class="o">=</span> <span class="p">[</span>
+  <span class="sd">"</span><span class="s2">high_priority"</span><span class="p">:</span> <span class="sd">"</span><span class="s2">10300"</span><span class="p">,</span> <span class="c1"># &lt;= All open issues with critical or higher priority</span>
+  <span class="sd">"</span><span class="s2">bugs"</span><span class="p">:</span> <span class="sd">"</span><span class="s2">10100"</span> <span class="c1"># &lt;= All open issues that are bugs</span>
+<span class="p">]</span></code></pre></figure>
+
+<p>Этот джоб пока ничего не&nbsp;умеет. Всё, что мы&nbsp;имеем на&nbsp;данный момент,&nbsp;&mdash; это возможность сохранить&nbsp;ID фильтра в&nbsp;понятном разработчику виде для тех случаев, когда он&nbsp;не&nbsp;работает с&nbsp;JIRA, а&nbsp;просто читает код. Можно написать отдельные джобы для отображения количества багов и&nbsp;списка задач с&nbsp;высоким приоритетом, но, по-моему, разумнее было&nbsp;бы вывести на&nbsp;экран список и&nbsp;количество как багов, так и&nbsp;высокоприоритетных задач:</p>
+
+<figure class="highlight"><pre><code class="language-elixir" data-lang="elixir"><span class="no">Enum</span><span class="o">.</span><span class="n">each</span><span class="p">(</span><span class="n">filters</span><span class="p">,</span> <span class="k">fn</span> <span class="p">({</span><span class="n">name</span><span class="p">,</span> <span class="n">filter</span><span class="p">})</span> <span class="o">-&gt;</span>
+  <span class="n">job</span> <span class="n">name</span><span class="p">,</span> <span class="ss">every:</span> <span class="p">{</span><span class="m">5</span><span class="p">,</span> <span class="ss">:minutes</span><span class="p">}</span> <span class="k">do</span>
+    <span class="n">issues</span> <span class="o">=</span> <span class="no">APIs</span><span class="o">.</span><span class="no">Jira</span><span class="o">.</span><span class="n">issues</span><span class="p">(</span><span class="n">filter</span><span class="p">)</span>
+
+    <span class="n">list</span> <span class="o">=</span> <span class="p">%{</span><span class="ss">items:</span> <span class="n">issues</span><span class="p">[</span><span class="sd">"</span><span class="s2">issues"</span><span class="p">]</span> <span class="o">|&gt;</span> <span class="no">Enum</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="o">&amp;</span><span class="no">APIs</span><span class="o">.</span><span class="no">Jira</span><span class="o">.</span><span class="n">issue_for_dashboard</span><span class="o">/</span><span class="m">1</span><span class="p">)}</span>
+    <span class="n">count</span> <span class="o">=</span> <span class="p">%{</span><span class="ss">value:</span> <span class="no">APIs</span><span class="o">.</span><span class="no">Jira</span><span class="o">.</span><span class="n">count</span><span class="p">(</span><span class="n">issues</span><span class="p">)}</span>
+
+    <span class="n">broadcast!</span> <span class="n">to_string</span><span class="p">(</span><span class="n">name</span><span class="p">)</span> <span class="o">&lt;&gt;</span> <span class="sd">"</span><span class="s2">_list"</span><span class="p">,</span> <span class="n">list</span>
+    <span class="n">broadcast!</span> <span class="n">to_string</span><span class="p">(</span><span class="n">name</span><span class="p">)</span> <span class="o">&lt;&gt;</span> <span class="sd">"</span><span class="s2">_count"</span><span class="p">,</span> <span class="n">count</span>
+  <span class="k">end</span>
+<span class="k">end</span><span class="p">))</span></code></pre></figure>
+
+<p>Перебрав фильтры в&nbsp;цикле, получаем следующие доступные в&nbsp;виджетах на&nbsp;дашбордах источники данных:</p>
+
+<ul>
+    <li>
+        <p>high_priority_list;</p>
+    </li>
+    <li>
+        <p>high_priority_count;</p>
+    </li>
+    <li>
+        <p>bugs_list;</p>
+    </li>
+    <li>
+        <p>bugs_count.</p>
+    </li>
+</ul>
+
+<p>Названия источников данных основаны на&nbsp;том, что именно передаётся в&nbsp;качестве первого аргумента функции <code>broadcast!</code>.</p>
+
+<p>Чтобы в&nbsp;будущем добавить больше фильтров, нужно будет лишь внести их&nbsp;в&nbsp;список.</p>
+
+<h2><a name="showingthedata"></a> Отображение данных</h2>
+
+<p>Теперь, когда потоковая передача данных в&nbsp;дашборд уже реализована, осталось только добавить виджеты. Создадим новый дашборд в&nbsp;<code>dashboards/issues.html.eex</code>:</p>
+
+<figure class="highlight"><pre><code class="language-html" data-lang="html"><span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">"gridster"</span><span class="nt">&gt;</span>
+    <span class="nt">&lt;ul&gt;&lt;/ul&gt;</span>
+<span class="nt">&lt;/div&gt;</span></code></pre></figure>
+
+<p>Для того, чтобы выделить задачи с&nbsp;высоким приоритетом, добавим к&nbsp;списку тег&nbsp;<code>li</code>, как показано ниже.</p>
+
+<figure class="highlight"><pre><code class="language-html" data-lang="html"><span class="nt">&lt;li</span> <span class="na">data-row=</span><span class="s">"1"</span> <span class="na">data-col=</span><span class="s">"1"</span> <span class="na">data-sizex=</span><span class="s">"2"</span> <span class="na">data-sizey=</span><span class="s">"2"</span><span class="nt">&gt;</span>
+    <span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">"widget-jira"</span>
+         <span class="na">data-source=</span><span class="s">"high_priority_list"</span>
+         <span class="na">data-widget=</span><span class="s">"List"</span>
+         <span class="na">data-unordered=</span><span class="s">"true"</span>
+         <span class="na">data-title=</span><span class="s">"High Priority Issues"</span>
+         <span class="na">data-moreinfo=</span><span class="s">"Blocker and Critical"</span><span class="nt">&gt;&lt;/div&gt;</span>
+<span class="nt">&lt;/li&gt;</span></code></pre></figure>
+
+<p>Так, в&nbsp;первой колонке первого ряда создастся виджет две единицы в&nbsp;длину и&nbsp;две в&nbsp;ширину. Внутри <code>div</code> можно видеть несколько опциональных пунктов создания виджета. В&nbsp;<code>data-source</code> указывается источник данных, которые будут подгружаться в&nbsp;виджет. <code>data-widget</code> содержит название того виджета, на&nbsp;который выводятся данные. Все встроенные в&nbsp;Kitto виджеты располагаются в&nbsp;директории <code>widgets</code>. Остальные пункты уже относятся к&nbsp;конкретному виджету List.</p>
+
+<p>Для подсчёта багов воспользуемся встроенным виджетом Number:</p>
+
+<figure class="highlight"><pre><code class="language-html" data-lang="html"><span class="nt">&lt;li</span> <span class="na">data-row=</span><span class="s">"1"</span> <span class="na">data-col=</span><span class="s">"3"</span> <span class="na">data-sizex=</span><span class="s">"1"</span> <span class="na">data-sizey=</span><span class="s">"1"</span><span class="nt">&gt;</span>
+    <span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">"widget-jira"</span>
+         <span class="na">data-source=</span><span class="s">"bugs_count"</span>
+         <span class="na">data-widget=</span><span class="s">"Number"</span>
+         <span class="na">data-title=</span><span class="s">"Open Bugs"</span><span class="nt">&gt;&lt;/div&gt;</span>
+<span class="nt">&lt;/li&gt;</span></code></pre></figure>
+
+<p>Как было сказано ранее, <code>data-source</code> содержит название списка данных, передаваемое в&nbsp;функцию <code>broadcast!</code> при выводе данных на&nbsp;виджет, название которого хранится в&nbsp;<code>data-widget</code>.</p>
+
+<h2><a name="goingfurther"></a> Двигаемся дальше</h2>
+
+<p>Мы&nbsp;создали дашборд для экрана телевизора в&nbsp;офисе, с&nbsp;помощью которого специалисты смогут отслеживать открытые задачи прямо со&nbsp;своих рабочих мест. В&nbsp;целом приведённая схема работает хорошо, но&nbsp;всё&nbsp;же можно провести кое-какие доработки&nbsp;&mdash; показать приоритеты в&nbsp;виджете списка задач и&nbsp;добавить возможность реагирования на&nbsp;поступающие задачи. Или, например, создав блокировщик в&nbsp;JIRA, вы, возможно, захотите сменить фон виджета списка задач на&nbsp;красный. В&nbsp;следующей статье я&nbsp;пробегусь по&nbsp;тому, как создать свои собственные виджеты, с&nbsp;помощью Kitto React.</p>
+
+  </div>
+
+  <!-- uSocial -->
+  <div class="post__share_block share_block">
+    <script async src="https://usocial.pro/usocial/usocial.js?v=6.1.4" data-script="usocial" charset="utf-8"></script>
+    <div class="uSocial-Share" data-pid="2fd19544e551bce292425ee8adaa31be" data-type="share" data-options="round,style2,default,absolute,horizontal,size32,counter1,counter-before,upArrow-right,nomobile" data-social="telegram,fb,vk,gPlus,twi,bookmarks"></div>
+  </div>
+  <!-- /uSocial -->
+</article>
+
+
+        <footer class="footer">
+    &copy; 2020
+    / Россия
+
+    <span class="pull-right">Любые мысли и вопросы пишите на <a href="mailto:elixir@wunsh.ru">elixir@wunsh.ru</a>.</span>
+</footer>
+
+        <div id="subscribeModal" class="modal">
+    <div class="modal__content">
+        <a href="#close" title="Close" class="modal__close">x</a>
+
+        <h2 class="modal__title">Ламповая рассылка про&nbsp;Эликсир</h2>
+
+        <p>Один-два раза в&nbsp;неделю присылаем тёплые письма об&nbsp;Эликсире: переводы самых интересных статей до&nbsp;их&nbsp;появления в&nbsp;открытом доступе, анонсы событий и&nbsp;вкусные бонусы.</p>
+
+        <form action="//wunsh.us14.list-manage.com/subscribe/post?u=c81ca3d4693f62db7f7f67c71&amp;id=a192e2dfef" method="post" id="mc-embedded-subscribe-form" name="mc-embedded-subscribe-form" class="pure-form h-tc validate" target="_blank" novalidate>
+            <input type="email" value="" name="EMAIL" class="modal__input pure-input-rounded large" id="mce-EMAIL" placeholder="Твоя почта" required>
+            <div style="position: absolute; left: -5000px;" aria-hidden="true"><input type="text" name="b_c81ca3d4693f62db7f7f67c71_a192e2dfef" tabindex="-1" value=""></div>
+
+            <input type="submit" value="Присоединиться" name="subscribe" onClick="yaCounter39773490.reachGoal('SUBSCRIBED'); return true" id="mc-embedded-subscribe" class="pure-button button-success large">
+        </form>
+
+        <p>Обязательно подтверди почту, перейдя по&nbsp;ссылке в&nbsp;письме, иначе мы&nbsp;не&nbsp;сможем делиться с&nbsp;тобой полезностями.</p>
+
+        <p>Надоедать точно не&nbsp;будем :)</p>
+    </div>
+</div>
+
+        <script src="/assets/js/vendors/zepto.min.js"></script>
+
+<script>
+    if ($(".post--docs").length) {
+        $(".footer").addClass("footer--docs")
+    }
+
+    $(".modal--close_backdrop").click(function(){
+        window.location.hash = "";
+    });
+</script>
+
+        <!-- Yandex.Metrika counter -->
+<script type="text/javascript">
+    (function (d, w, c) {
+        (w[c] = w[c] || []).push(function() {
+            try {
+                w.yaCounter39773490 = new Ya.Metrika({
+                    id:39773490,
+                    clickmap:true,
+                    trackLinks:true,
+                    accurateTrackBounce:true,
+                    webvisor:true,
+                    ut:"noindex"
+                });
+            } catch(e) { }
+        });
+
+        var n = d.getElementsByTagName("script")[0],
+            s = d.createElement("script"),
+            f = function () { n.parentNode.insertBefore(s, n); };
+        s.type = "text/javascript";
+        s.async = true;
+        s.src = "https://mc.yandex.ru/metrika/watch.js";
+
+        if (w.opera == "[object Opera]") {
+            d.addEventListener("DOMContentLoaded", f, false);
+        } else { f(); }
+    })(document, window, "yandex_metrika_callbacks");
+</script>
+<noscript><div><img src="https://mc.yandex.ru/watch/39773490?ut=noindex" style="position:absolute; left:-9999px;" alt="" /></div></noscript>
+<!-- /Yandex.Metrika counter -->
+
+      </div>
+    </div>
+  </body>
+</html>

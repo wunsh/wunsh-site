@@ -1,0 +1,643 @@
+<!DOCTYPE html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Храним состояние веб-сокетов с помощью GenStage |> Сообщество Elixir и Phoenix Framework</title>
+    <meta name="description" content="Можно ли использовать эти технологии для создания последовательного поиска?">
+
+    <link rel="alternate" type="application/rss+xml" title="Сообщество Elixir и Phoenix Framework" href="/feed.xml" />
+    <link rel="canonical" href="https://wunsh.ru/articles/stateful-websockets-with-elixir-genstage.html">
+
+    <style type="text/css">@import url("//fonts.googleapis.com/css?family=Source+Sans+Pro:400,700&subset=cyrillic");</style>
+    <link rel="stylesheet" href="/assets/css/vendors/pure.min.css">
+    <link rel="stylesheet" href="/assets/css/vendors/pure-grids-responsive.min.css">
+    <link rel="stylesheet" href="/assets/css/style.css?1594516983">
+
+    <link rel="shortcut icon" type="image/png" href="/assets/favicon.png" >
+</head>
+
+
+  <body>
+    <div class="wunsh pure-g">
+      
+
+
+
+
+<div class="menu pure-u-1 pure-u-md-1-4">
+  <div class="header">
+    <h2 class="header__title">
+      
+        <a href="https://wunsh.ru" class="header__title_link" title="На главную">Эликсир и&nbsp;Вунш</a>
+      
+    </h2>
+    <h3 class="header__tagline">Erlang + Ruby = &#10084;</h3>
+
+    <nav class="nav">
+      <ul class="nav_list">
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/elixir" class="nav_list__item_link pure-button">О языке</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/install/linux-asdf" class="nav_list__item_link pure-button">Установка</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/docs/" class="nav_list__item_link pure-button">Документация</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/guides" class="nav_list__item_link pure-button">Гайды</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/news" class="nav_list__item_link pure-button">Новости</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/articles" class="nav_list__item_link pure-button">Статьи</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/videos" class="nav_list__item_link pure-button">Видео</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/vacancies" class="nav_list__item_link pure-button">Вакансии</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/faq" class="nav_list__item_link pure-button">FAQ</a>
+            </li>
+          
+        
+      </ul>
+    </nav>
+
+    <a href="#subscribeModal" class="pure-button header__subscribe_link">Подписаться на рассылку</a>
+  </div>
+</div>
+
+
+      <div class="content pure-u-1 pure-u-md-3-4">
+        
+
+<article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+  <header class="post__header">
+    
+    <h1 class="post__title" itemprop="name headline">Храним состояние веб-сокетов с помощью GenStage</h1>
+
+    <div class="post__meta post_meta">
+      <ul class="meta_list">
+        <li class="meta_list__item">
+          
+          <span class="">
+            <small class="meta_list__item_name">Дата</small>
+            <time class="h-bold" datetime="2017-08-11T00:00:00+00:00" itemprop="datePublished">
+              
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+11 августа 2017
+
+            </time>
+          </span>
+          
+
+          
+        </li>
+        
+        <li class="meta_list__item">
+            <span class="tag_cloud tags_cloud--inline h-no_margin">
+              <small class="meta_list__item_name">Теги</small> 
+
+
+<ul class="tags_cloud__list">
+  
+    <a href="/tags/#genstage" class="tags_cloud__link tag tag--genstage">genstage</a>
+  
+    <a href="/tags/#phoenix" class="tags_cloud__link tag tag--phoenix">phoenix</a>
+  
+    <a href="/tags/#practical" class="tags_cloud__link tag tag--practical">practical</a>
+  
+</ul>
+
+            </span>
+        </li>
+        
+        <li class="meta_list__item">
+          <span itemprop="author" itemscope itemtype="http://schema.org/Person">
+            <small class="meta_list__item_name">
+              
+                Перевод
+              
+            </small>
+            <span itemprop="name" class="h-bold">Надежда Нестерова</span>
+          </span>
+        </li>
+
+        <li class="meta_list__item">
+          
+            <div >
+              <small>Оригинал</small>
+              <strong>
+                &laquo;<a href="https://medium.com/mint-digital/stateful-websockets-with-elixirs-genstage-a29eab420c0d" style="text-transform: none; text-decoration: underline; color: #4b2e39;">Stateful WebSockets with Elixir’s GenStage</a>&raquo;
+              </strong>
+              <small>&copy;</small>
+              <strong>Ed Ellson</strong>
+            </div>
+          
+        </li>
+      </ul>
+    </div>
+  </header>
+
+  <div class="post__content" itemprop="articleBody">
+    <p><img src="https://cdn-images-1.medium.com/max/1600/1*NTJp5Vz4aJJnnyvv9Y8Efw.gif" alt="" /></p>
+
+<p>Недавно коллега поинтересовался, что я буду делать, если мне понадобится реализовать последовательный поиск через сторонний API. Задача многим хорошо знакома, уже давно придумано немало решений, но я решил внести свою лепту и попробовать кое-что другое.</p>
+
+<p>Пробежимся по основным способам решения поставленной задачи, прежде чем я расскажу о том, почему для этого я выбрал GenStage и веб-сокеты.</p>
+
+<h2 id="способы-решения-задачи">Способы решения задачи</h2>
+
+<p>Первый способ – создавать отдельный запрос при появлении каждой новой буквы в поле поиска.</p>
+
+<p>Пользователю это даст ощущение “умного” поиска с автодополнением , что, собственно, нам и нужно. Это как раз то, что из коробки делает механизм последовательного поиска платформы Algolia.</p>
+
+<p><img src="https://cdn-images-1.medium.com/max/1600/1*CAW4KsTjOnp_WwyD5oT5Kg.png" alt="" /></p>
+
+<p><em>Я пытался найти информацию o концепции debounce  в документации Algolia,  Поиск – дело сложное.</em></p>
+
+<p>Возможно, возникнет необходимость ограничить время и частоту отправки запросов к серверу. Быть может, нужно подключиться к API с ограничением на количество запросов, или вам просто не нравится затея посылать запрос после каждого нажатия клавиши. В конце концов, может, у вас собственный сервер, и вы не хотите посылать к нему столько запросов! Если это так, то, думаю, следующее решение покажется вам более целесообразным:</p>
+
+<p><img src="https://cdn-images-1.medium.com/max/1600/1*qqDpG-6DB7so3sW7uRdLDg.png" alt="" /></p>
+
+<p>Согласно приведенной схеме, вместо того, чтобы беспокоить сервер после каждого изменения в поле поиска, используется debounce или throttle для сокращения числа таких запросов. Поставщику API это понравится.</p>
+
+<p>Такие способы прекрасно подойдут для решения большинства практических задач, но каждый из них несовершенен:</p>
+
+<ul>
+  <li>
+    <p>Посылая запрос после каждого нажатия клавиши, мы не можем знать наверняка, дошел ли он до сервера, что становится проблемой, если на сервере установлено ограничение на количество запросов;</p>
+  </li>
+  <li>
+    <p>С помощью функции <code class="highlighter-rouge">debounce()</code> запрос посылается только если пользователь ничего не печатал в течение заданного количества времени. Это мешает получить ощущение мгновенного поиска с автодополнением;</p>
+  </li>
+  <li>
+    <p>С помощью функции <code class="highlighter-rouge">throttle()</code> запрос посылается по прошествии определённого интервала времени. Всё бы ничего, но может случиться ситуация, при которой в некоторых отдельных задачах запросы будут посылаться чаще, чем при использовании других методов;</p>
+  </li>
+  <li>
+    <p>Так или иначе, после отправки запроса необходимо ожидать ответ. В идеале, зачем вообще ждать? Почему бы не обработать результаты тогда, когда сервер сможет их предоставить?</p>
+  </li>
+</ul>
+
+<h2 id="мысли-о-новом-подходе">Мысли о новом подходе</h2>
+
+<p>По правде говоря, каждое из вышеописанных решений хорошо для определенных целей. В моём случае нужно разработать механизм последовательного поиска через сторонний API, где есть ограничение на количество запросов в единицу времени, которого я хочу избежать.</p>
+
+<p>В то же время мне бы хотелось, чтобы пользователь мог видеть промежуточные результаты поиска по мере ввода текста и не беспокоился о том, что лимит запросов будет превышен. Значит, вариант с функцией <code class="highlighter-rouge">debounce</code> выбывает из игры.</p>
+
+<p>Внешний API, с которым я работаю (GraphQL API на GitHub’s), содержит ограничение 5000 запросов в час. Значит, можно не беспокоиться о его превышении, если посылать не более 1,38 шт. запросов в секунду.</p>
+
+<p>Я мог бы использовать throttle, но недостаток этого метода в том, что он не учитывает предыдущие действия. Если за последние 5 секунд не было ни одного запроса, то, по идее, можно послать сразу пять прямо сейчас, не беспокоясь о превышении лимита.</p>
+
+<p>Только представьте, если ваше приложение научится различать следующие два состояния и действовать по-разному в соответствии с каждым из них:</p>
+
+<ul>
+  <li>
+    <p>За последнюю секунду уже был отправлен один запрос, значит, чтобы не превысить ограничение в 1 запрос в секунду, нужно подождать;</p>
+  </li>
+  <li>
+    <p>За последние две секунды не было создано ни одного запроса, значит, можно послать два прямо сейчас.</p>
+  </li>
+</ul>
+
+<p><img src="https://cdn-images-1.medium.com/max/1600/1*opZyC-LqCkUcrEPtAbE_PQ.png" alt="" /></p>
+
+<p>Данный подход в два раза эффективнее подхода с использованием функции throttle. Во-первых, неиспользованные запросы копятся в пределах лимита, и их можно использовать позже. Во-вторых, запросы, лежащие в “копилке”, можно использовать в большом количестве единовременно, как только это понадобится.</p>
+
+<p>Думаю, это вполне реализуемо на javascript, но на деле такая модель – один из случаев, для которых предназначен GenStage, поэтому я и решил использовать его для своего сервера. Для меня это вполне оправданный ход, особенно потому, что мне хотелось бы добавить кое-что своё к уже существующим немногочисленным примерам использования GenStage на практике.</p>
+
+<h3 id="genstage">GenStage</h3>
+
+<p>Вряд ли у меня получится объяснить, что такое GenStage, лучше определения из официальной документации:</p>
+
+<p>GenStage – новое поведение Elixir для обмена событиями между процессами с учётом “противодавления”. Разработчикам, использующим GenStage, стоит беспокоиться только о том, как создаются, обрабатываются и потребляются данные. Диспетчеризация данных и обеспечение противодавления происходят автоматически.</p>
+
+<p>Используя GenStage, можно оперировать этапами, выступающими либо в качестве производителя, создающего события, либо в качестве потребителя, запрашивающего события у производителя, как только они появляются. Применительно к нашему случаю, можно превратить в этапы каждое из следующих действий:</p>
+
+<ul>
+  <li>
+    <p>Запоминание последнего запроса после ввода данных пользователем;</p>
+  </li>
+  <li>
+    <p>Обработка последнего запроса со скоростью, не превышающей заданную;</p>
+  </li>
+  <li>
+    <p>Отправка запроса на сервер.</p>
+  </li>
+</ul>
+
+<p>Приведенная ниже схема даст приблизительное представление об операциях с данными в системе, где <code class="highlighter-rouge">Query</code>, <code class="highlighter-rouge">QueryRateLimiter</code>, и <code class="highlighter-rouge">QueryRunner</code> – этапы модели GenStage:</p>
+
+<p><img src="https://cdn-images-1.medium.com/max/1600/1*_i3JOmJbmbs0l_LQAAVlnQ.png" alt="" /></p>
+
+<p>Согласно данной схеме, браузер посылает все события на Elixir-сервер. Получаем пайплайн GenStage, состоящий из трех этапов:</p>
+
+<ul>
+  <li>
+    <p><code class="highlighter-rouge">Query</code> или производитель. Этот модуль считывает введенные пользователем значения и превращает каждое из них в событие.</p>
+  </li>
+  <li>
+    <p><code class="highlighter-rouge">QueryRateLimiter</code> или производитель-потребитель. Один раз в секунду запрашивает события у <code class="highlighter-rouge">Query</code>. Если у <code class="highlighter-rouge">Query</code> есть готовое событие, <code class="highlighter-rouge">QueryRateLimiter</code> получит его, в противном случае запрос помещается в буфер до тех пор, пока не появится новое событие.</p>
+  </li>
+  <li>
+    <p><code class="highlighter-rouge">QueryRunner</code> или потребитель. Получив событие от <code class="highlighter-rouge">QueryRateLimiter</code>, запрашивает новое, прежде чем отправить его к внешнему API.</p>
+  </li>
+</ul>
+
+<p>Такая схема позволяет более эффективно отслеживать количество запросов к API, чем другие рассмотренные ранее способы. Однако нельзя быть уверенным, что каждый запрос браузера дойдет до API.</p>
+
+<p>Кроме того, чтобы запрос все-таки дошёл до конца, придётся пересылать его в два захода: от браузера к серверу Elixir, а затем уже к API. Честно говоря, хотелось бы избежать подобных действий с запросами. В любом случае нужно еще подумать о том, как предоставить пользователю ответ на его запросы.</p>
+
+<h3 id="веб-сокеты">Веб-сокеты</h3>
+
+<p>Использовать Elixir было удачным решением, ведь его фреймворк Phoenix до невозможности упрощает работу с веб-сокетами.</p>
+
+<p>Создав пайплайн GenStage, и сделав так, чтобы клиент подключался через веб-сокет, можно обрабатывать события в свободное время, как это было описано выше, а затем через то же соединение посылать результаты обратно:</p>
+
+<p><img src="https://cdn-images-1.medium.com/max/1600/1*FmNrn9VKa-fPLpb__YBrjw.png" alt="" /></p>
+
+<h2 id="реализация">Реализация</h2>
+
+<p>Теперь, когда у нас есть представление о структуре системы, можно взяться за её реализацию. Ниже приведён код для каждого из трёх модулей и описание выполняемых ими действий.</p>
+
+<h3 id="query">Query</h3>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">defmodule</span> <span class="no">GithubProfiler</span><span class="o">.</span><span class="no">Query</span> <span class="k">do</span>
+  <span class="kn">use</span> <span class="no">GenStage</span>
+
+  <span class="c1"># Client</span>
+  <span class="k">def</span> <span class="n">start_link</span><span class="p">(</span><span class="n">socket</span><span class="p">),</span> <span class="k">do</span><span class="p">:</span> <span class="no">GenStage</span><span class="o">.</span><span class="n">start_link</span><span class="p">(</span><span class="bp">__MODULE__</span><span class="p">,</span> <span class="n">socket</span><span class="p">)</span>
+
+  <span class="k">def</span> <span class="n">update</span><span class="p">(</span><span class="n">pid</span><span class="p">,</span> <span class="n">event</span><span class="p">),</span> <span class="k">do</span><span class="p">:</span> <span class="no">GenStage</span><span class="o">.</span><span class="n">cast</span><span class="p">(</span><span class="n">pid</span><span class="p">,</span> <span class="p">{</span><span class="ss">:notify</span><span class="p">,</span> <span class="n">event</span><span class="p">})</span>
+
+  <span class="c1"># Server</span>
+  <span class="k">def</span> <span class="n">init</span><span class="p">(</span><span class="n">socket</span><span class="p">),</span> <span class="k">do</span><span class="p">:</span> <span class="p">{</span><span class="ss">:producer</span><span class="p">,</span> <span class="n">socket</span><span class="p">,</span> <span class="ss">buffer_size:</span> <span class="m">1</span><span class="p">}</span>
+
+  <span class="k">def</span> <span class="n">handle_cast</span><span class="p">({</span><span class="ss">:notify</span><span class="p">,</span> <span class="n">event</span><span class="p">},</span> <span class="n">socket</span><span class="p">)</span> <span class="k">do</span>
+    <span class="p">{</span><span class="ss">:noreply</span><span class="p">,</span> <span class="p">[{</span><span class="n">socket</span><span class="p">,</span> <span class="n">event</span><span class="p">}],</span> <span class="n">socket</span><span class="p">}</span>
+  <span class="k">end</span>
+
+  <span class="k">def</span> <span class="n">handle_demand</span><span class="p">(</span><span class="n">_demand</span><span class="p">,</span> <span class="n">state</span><span class="p">),</span> <span class="k">do</span><span class="p">:</span> <span class="p">{</span><span class="ss">:noreply</span><span class="p">,</span> <span class="p">[],</span> <span class="n">state</span><span class="p">}</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<p>Модуль <code class="highlighter-rouge">Query</code> совсем небольшой. Основные действия:</p>
+
+<ul>
+  <li>
+    <p>Вызывается функция <code class="highlighter-rouge">start_link(socket)</code>, где <code class="highlighter-rouge">socket</code> – это структура, представляющая собой соединение с веб-сокетом, к которому привязан запрос;</p>
+  </li>
+  <li>
+    <p>Вызывается функция <code class="highlighter-rouge">init/1</code>, определяющая, что данный этап является производителем и что единовременно в буфере будет храниться только одно событие (об этом чуть позже);</p>
+  </li>
+  <li>
+    <p>Как только запрос переходит к <code class="highlighter-rouge">socket</code>, вызывается функция <code class="highlighter-rouge">update/2</code> с указанием PID прежде запущенного процесса и входящего запроса;</p>
+  </li>
+  <li>
+    <p>Вызывается функция <code class="highlighter-rouge">handle_cast/2</code>, которая сразу же пытается передать событие указанному потребителю;</p>
+  </li>
+  <li>
+    <p>Поток входящих запросов будет обработан с помощью буфера, поэтому <code class="highlighter-rouge">handle_demand/2</code> не возвращает никаких результатов.</p>
+  </li>
+</ul>
+
+<p>Данная схема отлично подходит для решения поставленной задачи, так как:</p>
+
+<ul>
+  <li>
+    <p>Если количество исходящих запросов превышает допустимое значение (больше одного запроса в секунду), они будут храниться во внутреннем буфере GenStage. Для буфера задано ограничение равное единице, то есть запоминаться будет только последнее событие (незачем показывать пользователю устаревшие данные);</p>
+  </li>
+  <li>
+    <p>Если количество входящих событий меньше положенного (например, если за 5 секунд не было ни одного события, но на них было 4-5 запросов), это тоже помещается в буфер. Следовательно, в следующий раз можно будет послать 5 событий подряд, одно на каждое последующее нажатие клавиши.</p>
+  </li>
+</ul>
+
+<p>В перспективе было бы неплохо подумать о ручном управлении буферами, чтобы держать запросы под контролем. В данной статье эта тема не рассматривается, так как в моём приложении всё и без того прекрасно работает, но насколько я понимаю, запросов событий может быть сколько угодно, и, на мой взгляд, этот параметр нужно ограничить.</p>
+
+<h3 id="queryratelimiter">QueryRateLimiter</h3>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">defmodule</span> <span class="no">GithubProfiler</span><span class="o">.</span><span class="no">QueryRateLimiter</span> <span class="k">do</span>
+  <span class="kn">use</span> <span class="no">GenStage</span>
+
+  <span class="c1"># Client</span>
+  <span class="k">def</span> <span class="n">start_link</span><span class="p">(</span><span class="ss">:ok</span><span class="p">),</span> <span class="k">do</span><span class="p">:</span> <span class="no">GenStage</span><span class="o">.</span><span class="n">start_link</span><span class="p">(</span><span class="bp">__MODULE__</span><span class="p">,</span> <span class="ss">:ok</span><span class="p">)</span>
+
+  <span class="c1"># Server</span>
+  <span class="k">def</span> <span class="n">init</span><span class="p">(</span><span class="ss">:ok</span><span class="p">),</span> <span class="k">do</span><span class="p">:</span> <span class="p">{</span><span class="ss">:producer_consumer</span><span class="p">,</span> <span class="p">%{}}</span>
+
+  <span class="k">def</span> <span class="n">handle_subscribe</span><span class="p">(</span><span class="ss">:producer</span><span class="p">,</span> <span class="n">opts</span><span class="p">,</span> <span class="n">from</span><span class="p">,</span> <span class="n">producers</span><span class="p">)</span> <span class="k">do</span>
+    <span class="n">pending</span> <span class="o">=</span> <span class="n">opts</span><span class="p">[</span><span class="ss">:max_demand</span><span class="p">]</span> <span class="o">||</span> <span class="m">1</span>
+    <span class="n">interval</span> <span class="o">=</span> <span class="n">opts</span><span class="p">[</span><span class="ss">:interval</span><span class="p">]</span> <span class="o">||</span> <span class="m">1000</span>
+
+    <span class="n">producers</span> <span class="o">=</span>
+      <span class="n">producers</span>
+      <span class="o">|&gt;</span> <span class="no">Map</span><span class="o">.</span><span class="n">put</span><span class="p">(</span><span class="n">from</span><span class="p">,</span> <span class="p">{</span><span class="n">pending</span><span class="p">,</span> <span class="n">interval</span><span class="p">})</span>
+      <span class="o">|&gt;</span> <span class="n">ask_and_schedule</span><span class="p">(</span><span class="n">from</span><span class="p">)</span>
+
+    <span class="p">{</span><span class="ss">:manual</span><span class="p">,</span> <span class="n">producers</span><span class="p">}</span>
+  <span class="k">end</span>
+  <span class="k">def</span> <span class="n">handle_subscribe</span><span class="p">(</span><span class="ss">:consumer</span><span class="p">,</span> <span class="n">_opts</span><span class="p">,</span> <span class="n">_from</span><span class="p">,</span> <span class="n">consumers</span><span class="p">)</span> <span class="k">do</span>
+    <span class="p">{</span><span class="ss">:automatic</span><span class="p">,</span> <span class="n">consumers</span><span class="p">}</span>
+  <span class="k">end</span>
+
+  <span class="k">def</span> <span class="n">handle_cancel</span><span class="p">(</span><span class="n">_</span><span class="p">,</span> <span class="n">from</span><span class="p">,</span> <span class="n">producers</span><span class="p">),</span> <span class="k">do</span><span class="p">:</span> <span class="no">Map</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="n">producers</span><span class="p">,</span> <span class="n">from</span><span class="p">)</span>
+
+  <span class="k">def</span> <span class="n">handle_events</span><span class="p">(</span><span class="n">events</span><span class="p">,</span> <span class="n">_from</span><span class="p">,</span> <span class="n">state</span><span class="p">),</span> <span class="k">do</span><span class="p">:</span> <span class="p">{</span><span class="ss">:noreply</span><span class="p">,</span> <span class="n">events</span><span class="p">,</span> <span class="n">state</span><span class="p">}</span>
+
+  <span class="k">def</span> <span class="n">handle_info</span><span class="p">({</span><span class="ss">:ask</span><span class="p">,</span> <span class="n">from</span><span class="p">},</span> <span class="n">producers</span><span class="p">)</span> <span class="k">do</span>
+    <span class="p">{</span><span class="ss">:noreply</span><span class="p">,</span> <span class="p">[],</span> <span class="n">ask_and_schedule</span><span class="p">(</span><span class="n">producers</span><span class="p">,</span> <span class="n">from</span><span class="p">)}</span>
+  <span class="k">end</span>
+
+  <span class="k">defp</span> <span class="n">ask_and_schedule</span><span class="p">(</span><span class="n">producers</span><span class="p">,</span> <span class="n">from</span><span class="p">)</span> <span class="k">do</span>
+    <span class="k">case</span> <span class="n">producers</span> <span class="k">do</span>
+      <span class="p">%{</span><span class="o">^</span><span class="n">from</span> <span class="o">=&gt;</span> <span class="p">{</span><span class="n">pending</span><span class="p">,</span> <span class="n">interval</span><span class="p">}}</span> <span class="o">-&gt;</span>
+        <span class="no">GenStage</span><span class="o">.</span><span class="n">ask</span><span class="p">(</span><span class="n">from</span><span class="p">,</span> <span class="n">pending</span><span class="p">)</span>
+        <span class="no">Process</span><span class="o">.</span><span class="n">send_after</span><span class="p">(</span><span class="n">self</span><span class="p">(),</span> <span class="p">{</span><span class="ss">:ask</span><span class="p">,</span> <span class="n">from</span><span class="p">},</span> <span class="n">interval</span><span class="p">)</span>
+        <span class="n">producers</span>
+      <span class="p">%{}</span> <span class="o">-&gt;</span>
+        <span class="n">producers</span>
+    <span class="k">end</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<p>Этот модуль уже посложнее:</p>
+
+<ul>
+  <li>
+    <p>Как и в случае с производителем, этап начинается с вызова <code class="highlighter-rouge">start_link/1</code>, которая в свою очередь обращается к <code class="highlighter-rouge">init/1</code>. Этап инициализируется как производитель-потребитель, а его состояние представляет собой пустой map;</p>
+  </li>
+  <li>
+    <p>Как только модуль будет привязан к производителю (<code class="highlighter-rouge">Query</code>), вызывается <code class="highlighter-rouge">handle_subscribe/4</code>. Она запрашивает PID производителя, ссылку в <code class="highlighter-rouge">from</code> и помещает их в состояние производителя вместе со значениями для <code class="highlighter-rouge">pending</code> и <code class="highlighter-rouge">interval</code>. Следом вызываем функцию <code class="highlighter-rouge">ask_and_schedule/2</code> с обновлённым состоянием и новый производитель, прежде чем возвратить кортеж, обозначающий, что этот этап запросит события в ручном режиме;</p>
+  </li>
+  <li>
+    <p>В функции <code class="highlighter-rouge">ask_and_schedule/2</code> применяются <code class="highlighter-rouge">pending</code> и <code class="highlighter-rouge">interval</code>. Сначала обратимся к производителю с запросом ожидающих событий. Функция <code class="highlighter-rouge">handle_events/3</code> позаботится о каждом из них, оставив их без изменений;</p>
+  </li>
+  <li>
+    <p>Затем воспользуемся <code class="highlighter-rouge">interval</code>, чтобы послать сообщение к <code class="highlighter-rouge">self()</code> по прошествии обозначенного времени. Как только <code class="highlighter-rouge">handle_info/2</code> получит это сообщение, вызываем ещё раз <code class="highlighter-rouge">ask_and_schedule/2</code> и цикл начинается сначала.</p>
+  </li>
+</ul>
+
+<h2 id="queryrunner">QueryRunner</h2>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">defmodule</span> <span class="no">GithubProfiler</span><span class="o">.</span><span class="no">QueryRunner</span> <span class="k">do</span>
+  <span class="kn">use</span> <span class="no">GenStage</span>
+  <span class="kn">import</span> <span class="no">Phoenix</span><span class="o">.</span><span class="no">Channel</span><span class="p">,</span> <span class="ss">only:</span> <span class="p">[</span><span class="ss">push:</span> <span class="m">3</span><span class="p">]</span>
+
+  <span class="c1"># Client</span>
+  <span class="k">def</span> <span class="n">start_link</span><span class="p">(</span><span class="ss">:ok</span><span class="p">),</span> <span class="k">do</span><span class="p">:</span> <span class="no">GenStage</span><span class="o">.</span><span class="n">start_link</span><span class="p">(</span><span class="bp">__MODULE__</span><span class="p">,</span> <span class="ss">:ok</span><span class="p">)</span>
+
+  <span class="c1"># Server</span>
+  <span class="k">def</span> <span class="n">init</span><span class="p">(</span><span class="ss">:ok</span><span class="p">),</span> <span class="k">do</span><span class="p">:</span> <span class="p">{</span><span class="ss">:consumer</span><span class="p">,</span> <span class="ss">:ok</span><span class="p">}</span>
+
+  <span class="k">def</span> <span class="n">handle_events</span><span class="p">([{</span><span class="n">_socket</span><span class="p">,</span> <span class="sd">"</span><span class="s2">"</span><span class="p">}],</span> <span class="n">_from</span><span class="p">,</span> <span class="n">state</span><span class="p">),</span> <span class="k">do</span><span class="p">:</span> <span class="p">{</span><span class="ss">:noreply</span><span class="p">,</span> <span class="p">[],</span> <span class="n">state</span><span class="p">}</span>
+  <span class="k">def</span> <span class="n">handle_events</span><span class="p">([{</span><span class="n">socket</span><span class="p">,</span> <span class="n">query</span><span class="p">}],</span> <span class="n">_from</span><span class="p">,</span> <span class="n">state</span><span class="p">)</span> <span class="k">do</span>
+    <span class="no">GithubProfiler</span><span class="o">.</span><span class="no">Search</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">query</span><span class="p">)</span><span class="o">.</span><span class="n">body</span>
+    <span class="o">|&gt;</span> <span class="n">push_results</span><span class="p">(</span><span class="n">socket</span><span class="p">)</span>
+
+    <span class="p">{</span><span class="ss">:noreply</span><span class="p">,</span> <span class="p">[],</span> <span class="n">state</span><span class="p">}</span>
+  <span class="k">end</span>
+
+  <span class="k">defp</span> <span class="n">push_results</span><span class="p">(</span><span class="n">results</span><span class="p">,</span> <span class="n">socket</span><span class="p">)</span> <span class="k">do</span>
+    <span class="n">push</span> <span class="n">socket</span><span class="p">,</span> <span class="sd">"</span><span class="s2">results"</span><span class="p">,</span> <span class="p">%{</span><span class="sd">"</span><span class="s2">results"</span> <span class="o">=&gt;</span> <span class="n">results</span><span class="p">}</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<p>И наконец, потребитель. Всё, что делает этот модуль, –  это устанавливает соединение с <code class="highlighter-rouge">QueryRateLimiter</code> и обрабатывает события после их получения. Если входящее событие содержит запрос значения, оно отправляется к внешнему API (в коде этого нет, т. к. в рамках данной статьи это не имеет значения). Как только будут получены результаты,  можно  передать их через веб-сокет, на который ссылается событие.</p>
+
+<h3 id="веб-сокет">Веб-сокет</h3>
+
+<p>Благодаря каналам Phoenix реализовать серверную часть веб-сокета несложно. Единственная сложность – это привязка GenStage к сокету.</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">defmodule</span> <span class="no">GithubProfiler</span><span class="o">.</span><span class="no">Web</span><span class="o">.</span><span class="no">TypeaheadChannel</span> <span class="k">do</span>
+  <span class="kn">use</span> <span class="no">GithubProfiler</span><span class="o">.</span><span class="no">Web</span><span class="p">,</span> <span class="ss">:channel</span>
+
+  <span class="k">def</span> <span class="n">join</span><span class="p">(</span><span class="sd">"</span><span class="s2">typeahead:public"</span><span class="p">,</span> <span class="n">_payload</span><span class="p">,</span> <span class="n">socket</span><span class="p">)</span> <span class="k">do</span>
+    <span class="n">send</span><span class="p">(</span><span class="n">self</span><span class="p">(),</span> <span class="ss">:after_join</span><span class="p">)</span>
+    <span class="p">{</span><span class="ss">:ok</span><span class="p">,</span> <span class="n">socket</span><span class="p">}</span>
+  <span class="k">end</span>
+
+  <span class="k">def</span> <span class="n">handle_info</span><span class="p">(</span><span class="ss">:after_join</span><span class="p">,</span> <span class="n">socket</span><span class="p">)</span> <span class="k">do</span>
+    <span class="p">{</span><span class="ss">:ok</span><span class="p">,</span> <span class="n">producer_pid</span><span class="p">}</span> <span class="o">=</span> <span class="n">setup_genstage</span><span class="p">(</span><span class="n">socket</span><span class="p">)</span>
+    <span class="p">{</span><span class="ss">:noreply</span><span class="p">,</span> <span class="n">assign</span><span class="p">(</span><span class="n">socket</span><span class="p">,</span> <span class="ss">:producer_pid</span><span class="p">,</span> <span class="n">producer_pid</span><span class="p">)}</span>
+  <span class="k">end</span>
+
+  <span class="k">def</span> <span class="n">handle_in</span><span class="p">(</span><span class="sd">"</span><span class="s2">search"</span><span class="p">,</span> <span class="p">%{</span><span class="sd">"</span><span class="s2">query"</span> <span class="o">=&gt;</span> <span class="n">query</span><span class="p">},</span> <span class="n">socket</span><span class="p">)</span> <span class="k">do</span>
+    <span class="no">GithubProfiler</span><span class="o">.</span><span class="no">Query</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">socket</span><span class="o">.</span><span class="n">assigns</span><span class="o">.</span><span class="n">producer_pid</span><span class="p">,</span> <span class="n">query</span><span class="p">)</span>
+
+    <span class="p">{</span><span class="ss">:noreply</span><span class="p">,</span> <span class="n">socket</span><span class="p">}</span>
+  <span class="k">end</span>
+
+  <span class="k">defp</span> <span class="n">setup_genstage</span><span class="p">(</span><span class="n">socket</span><span class="p">)</span> <span class="k">do</span>
+    <span class="p">{</span><span class="ss">:ok</span><span class="p">,</span> <span class="n">producer</span><span class="p">}</span> <span class="o">=</span> <span class="no">GithubProfiler</span><span class="o">.</span><span class="no">Query</span><span class="o">.</span><span class="n">start_link</span><span class="p">(</span><span class="n">socket</span><span class="p">)</span>
+    <span class="p">{</span><span class="ss">:ok</span><span class="p">,</span> <span class="n">producer_consumer</span><span class="p">}</span> <span class="o">=</span> <span class="no">GithubProfiler</span><span class="o">.</span><span class="no">QueryRateLimiter</span><span class="o">.</span><span class="n">start_link</span><span class="p">(</span><span class="ss">:ok</span><span class="p">)</span>
+    <span class="p">{</span><span class="ss">:ok</span><span class="p">,</span> <span class="n">consumer</span><span class="p">}</span> <span class="o">=</span> <span class="no">GithubProfiler</span><span class="o">.</span><span class="no">QueryRunner</span><span class="o">.</span><span class="n">start_link</span><span class="p">(</span><span class="ss">:ok</span><span class="p">)</span>
+    <span class="no">GenStage</span><span class="o">.</span><span class="n">sync_subscribe</span><span class="p">(</span><span class="n">producer_consumer</span><span class="p">,</span> <span class="ss">to:</span> <span class="n">producer</span><span class="p">)</span>
+    <span class="no">GenStage</span><span class="o">.</span><span class="n">sync_subscribe</span><span class="p">(</span><span class="n">consumer</span><span class="p">,</span> <span class="ss">to:</span> <span class="n">producer_consumer</span><span class="p">)</span>
+    <span class="p">{</span><span class="ss">:ok</span><span class="p">,</span> <span class="n">producer</span><span class="p">}</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+</code></pre></div></div>
+<p>Здесь выполняются следующие действия:</p>
+
+<ul>
+  <li>
+    <p>После подсоединения к каналу организовываем пайплайн GenStage, помещая сокет в состояние производителя, а PID производителя в значение <code class="highlighter-rouge">assign</code> сокета;</p>
+  </li>
+  <li>
+    <p>Как только в канал поступят события поиска, передадим их модулю  <code class="highlighter-rouge">Query</code> вместе с PID сокета, что заставит производитель отправить событие.</p>
+  </li>
+</ul>
+
+<h3 id="фронтенд">Фронтенд</h3>
+
+<p>Фронтенд для всего этого я писал на Elm. Статья посвящена не этой теме, да и я только начал с ним разбираться, но код можно найти здесь, а дальше вкратце о том, что было сделано:</p>
+
+<ul>
+  <li>
+    <p>Elm-программа при загрузке инициализирует модель, в которой хранятся текущий запрос и  результаты. Подключаемся к каналу <code class="highlighter-rouge">typeahead:public</code> и создаём подписку на события.</p>
+  </li>
+  <li>
+    <p>Рендерим вывод <code class="highlighter-rouge">onInput</code>. Посылаем функции обновления сообщение <code class="highlighter-rouge">Search</code>, выводя текущее значение через сокет.</p>
+  </li>
+  <li>
+    <p>Когда результаты возвращаются через канал, создаётся сообщение обновления <code class="highlighter-rouge">Results</code>. Ответ в формате JSON декодируется, и модель обновляется в соответствии с полученными результатами. После этого происходит обновление представления.</p>
+  </li>
+</ul>
+
+<h2 id="заключение">Заключение</h2>
+
+<p>Соединив все части воедино, получаем рабочее решение, которым я вполне доволен. Я провёл неплохой эксперимент, но если бы мне захотелось пойти дальше, например, сделать модель пригодной для развёртывания в продакшн, пришлось бы подробнее остановиться на некоторых моментах:</p>
+
+<ul>
+  <li>
+    <p>Учесть то, что ограничение по количеству запросов распространяется на несколько клиентов;</p>
+  </li>
+  <li>
+    <p>Использовать супервизоры для процессов GenStage;</p>
+  </li>
+  <li>
+    <p>Разобраться с тем, что Phoenix разрывает связь с веб-сокетом после 60 секунд простоя;</p>
+  </li>
+  <li>
+    <p>Подробнее изучить схему работы GenStage.</p>
+  </li>
+</ul>
+
+<p>Это отличный шанс узнать больше о GenStage, и, устранив эти пробелы, можно получить отличное программное решение. Думаю, мной был реализован неплохой способ добавления состояния к соединению веб-сокета: мне удалось заставить его работать асинхронно и после этого посылать результаты через сокет.</p>
+
+<p>Исходный код приведенной модели можно найти <a href="https://github.com/mintdigital/weekly-tech-challenge/pull/12">здесь</a>. Буду рад любым комментариям.</p>
+
+
+  </div>
+
+  <!-- uSocial -->
+  <div class="post__share_block share_block">
+    <script async src="https://usocial.pro/usocial/usocial.js?v=6.1.4" data-script="usocial" charset="utf-8"></script>
+    <div class="uSocial-Share" data-pid="2fd19544e551bce292425ee8adaa31be" data-type="share" data-options="round,style2,default,absolute,horizontal,size32,counter1,counter-before,upArrow-right,nomobile" data-social="telegram,fb,vk,gPlus,twi,bookmarks"></div>
+  </div>
+  <!-- /uSocial -->
+</article>
+
+
+        <footer class="footer">
+    &copy; 2020
+    / Россия
+
+    <span class="pull-right">Любые мысли и вопросы пишите на <a href="mailto:elixir@wunsh.ru">elixir@wunsh.ru</a>.</span>
+</footer>
+
+        <div id="subscribeModal" class="modal">
+    <div class="modal__content">
+        <a href="#close" title="Close" class="modal__close">x</a>
+
+        <h2 class="modal__title">Ламповая рассылка про&nbsp;Эликсир</h2>
+
+        <p>Один-два раза в&nbsp;неделю присылаем тёплые письма об&nbsp;Эликсире: переводы самых интересных статей до&nbsp;их&nbsp;появления в&nbsp;открытом доступе, анонсы событий и&nbsp;вкусные бонусы.</p>
+
+        <form action="//wunsh.us14.list-manage.com/subscribe/post?u=c81ca3d4693f62db7f7f67c71&amp;id=a192e2dfef" method="post" id="mc-embedded-subscribe-form" name="mc-embedded-subscribe-form" class="pure-form h-tc validate" target="_blank" novalidate>
+            <input type="email" value="" name="EMAIL" class="modal__input pure-input-rounded large" id="mce-EMAIL" placeholder="Твоя почта" required>
+            <div style="position: absolute; left: -5000px;" aria-hidden="true"><input type="text" name="b_c81ca3d4693f62db7f7f67c71_a192e2dfef" tabindex="-1" value=""></div>
+
+            <input type="submit" value="Присоединиться" name="subscribe" onClick="yaCounter39773490.reachGoal('SUBSCRIBED'); return true" id="mc-embedded-subscribe" class="pure-button button-success large">
+        </form>
+
+        <p>Обязательно подтверди почту, перейдя по&nbsp;ссылке в&nbsp;письме, иначе мы&nbsp;не&nbsp;сможем делиться с&nbsp;тобой полезностями.</p>
+
+        <p>Надоедать точно не&nbsp;будем :)</p>
+    </div>
+</div>
+
+        <script src="/assets/js/vendors/zepto.min.js"></script>
+
+<script>
+    if ($(".post--docs").length) {
+        $(".footer").addClass("footer--docs")
+    }
+
+    $(".modal--close_backdrop").click(function(){
+        window.location.hash = "";
+    });
+</script>
+
+        <!-- Yandex.Metrika counter -->
+<script type="text/javascript">
+    (function (d, w, c) {
+        (w[c] = w[c] || []).push(function() {
+            try {
+                w.yaCounter39773490 = new Ya.Metrika({
+                    id:39773490,
+                    clickmap:true,
+                    trackLinks:true,
+                    accurateTrackBounce:true,
+                    webvisor:true,
+                    ut:"noindex"
+                });
+            } catch(e) { }
+        });
+
+        var n = d.getElementsByTagName("script")[0],
+            s = d.createElement("script"),
+            f = function () { n.parentNode.insertBefore(s, n); };
+        s.type = "text/javascript";
+        s.async = true;
+        s.src = "https://mc.yandex.ru/metrika/watch.js";
+
+        if (w.opera == "[object Opera]") {
+            d.addEventListener("DOMContentLoaded", f, false);
+        } else { f(); }
+    })(document, window, "yandex_metrika_callbacks");
+</script>
+<noscript><div><img src="https://mc.yandex.ru/watch/39773490?ut=noindex" style="position:absolute; left:-9999px;" alt="" /></div></noscript>
+<!-- /Yandex.Metrika counter -->
+
+      </div>
+    </div>
+  </body>
+</html>

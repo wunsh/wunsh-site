@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Структуры |> Сообщество Elixir и Phoenix Framework</title>
+    <meta name="description" content="Русскоязычное сообщество Elixir и Phoenix Framework
+">
+
+    <link rel="alternate" type="application/rss+xml" title="Сообщество Elixir и Phoenix Framework" href="/feed.xml" />
+    <link rel="canonical" href="https://wunsh.ru/docs/structs">
+
+    <style type="text/css">@import url("//fonts.googleapis.com/css?family=Source+Sans+Pro:400,700&subset=cyrillic");</style>
+    <link rel="stylesheet" href="/assets/css/vendors/pure.min.css">
+    <link rel="stylesheet" href="/assets/css/vendors/pure-grids-responsive.min.css">
+    <link rel="stylesheet" href="/assets/css/style.css?1594516983">
+
+    <link rel="shortcut icon" type="image/png" href="/assets/favicon.png" >
+</head>
+
+
+  <body>
+    <div class="wunsh pure-g">
+      
+
+
+
+
+<div class="menu pure-u-1 pure-u-md-1-4">
+  <div class="header">
+    <h2 class="header__title">
+      
+        <a href="https://wunsh.ru" class="header__title_link" title="На главную">Эликсир и&nbsp;Вунш</a>
+      
+    </h2>
+    <h3 class="header__tagline">Erlang + Ruby = &#10084;</h3>
+
+    <nav class="nav">
+      <ul class="nav_list">
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/elixir" class="nav_list__item_link pure-button">О языке</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/install/linux-asdf" class="nav_list__item_link pure-button">Установка</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/docs/" class="nav_list__item_link pure-button">Документация</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/guides" class="nav_list__item_link pure-button">Гайды</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/news" class="nav_list__item_link pure-button">Новости</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/articles" class="nav_list__item_link pure-button">Статьи</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/videos" class="nav_list__item_link pure-button">Видео</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/vacancies" class="nav_list__item_link pure-button">Вакансии</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/faq" class="nav_list__item_link pure-button">FAQ</a>
+            </li>
+          
+        
+      </ul>
+    </nav>
+
+    <a href="#subscribeModal" class="pure-button header__subscribe_link">Подписаться на рассылку</a>
+  </div>
+</div>
+
+
+      <div class="content pure-u-1 pure-u-md-3-4">
+        <article class="post post--docs" itemscope itemtype="http://schema.org/BlogPosting">
+    <header class="post__header">
+        <h1 class="post__title" itemprop="name headline">
+            <p>Структуры</p>
+
+        </h1>
+    </header>
+
+    <div class="post__content" itemprop="articleBody">
+        <h2 id="определение-структур">Определение структур</h2>
+
+<p>Для определения структуры в Эликсире используется  конструкция <code class="highlighter-rouge">defstruct</code>:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">iex</span><span class="o">&gt;</span> <span class="k">defmodule</span> <span class="no">User</span> <span class="k">do</span>
+<span class="o">...&gt;</span>   <span class="n">defstruct</span> <span class="ss">name:</span> <span class="sd">"</span><span class="s2">John"</span><span class="p">,</span> <span class="ss">age:</span> <span class="m">27</span>
+<span class="o">...&gt;</span> <span class="k">end</span>
+</code></pre></div></div>
+
+<p>Список ключевых слов, используемый при определении <code class="highlighter-rouge">defstruct</code>, определяет какие поля будет иметь структура вместе со значениями по умолчанию.</p>
+
+<p>Структуры берут имя модуля, в котором они определены. В приведенном выше примере мы определили структуру с именем <code class="highlighter-rouge">User</code>.</p>
+
+<p>Теперь мы можем создавать структуру <code class="highlighter-rouge">User</code> с помощью синтаксиса, аналогичного тому, который используется для создания словарей:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">iex</span><span class="o">&gt;</span> <span class="p">%</span><span class="no">User</span><span class="p">{}</span>
+<span class="p">%</span><span class="no">User</span><span class="p">{</span><span class="ss">age:</span> <span class="m">27</span><span class="p">,</span> <span class="ss">name:</span> <span class="sd">"</span><span class="s2">John"</span><span class="p">}</span>
+
+<span class="n">iex</span><span class="o">&gt;</span> <span class="p">%</span><span class="no">User</span><span class="p">{</span><span class="ss">name:</span> <span class="sd">"</span><span class="s2">Meg"</span><span class="p">}</span>
+<span class="p">%</span><span class="no">User</span><span class="p">{</span><span class="ss">age:</span> <span class="m">27</span><span class="p">,</span> <span class="ss">name:</span> <span class="sd">"</span><span class="s2">Meg"</span><span class="p">}</span>
+</code></pre></div></div>
+
+<p>Структуры предоставляют гарантии <em>времени компиляции</em> того, что только определенные через <code class="highlighter-rouge">defstruct</code> поля будут разрешены к существованию в структуре:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">iex</span><span class="o">&gt;</span> <span class="p">%</span><span class="no">User</span><span class="p">{</span><span class="ss">oops:</span> <span class="ss">:field</span><span class="p">}</span>
+<span class="o">**</span> <span class="p">(</span><span class="no">KeyError</span><span class="p">)</span> <span class="n">key</span> <span class="ss">:oops</span> <span class="ow">not</span> <span class="n">found</span> <span class="ow">in</span><span class="p">:</span> <span class="p">%</span><span class="no">User</span><span class="p">{</span><span class="ss">age:</span> <span class="m">27</span><span class="p">,</span> <span class="ss">name:</span> <span class="sd">"</span><span class="s2">John"</span><span class="p">}</span>
+</code></pre></div></div>
+<h2 id="доступ-к-данных-структуры-и-их-обновление">Доступ к данных структуры и их обновление</h2>
+
+<p>При обсуждении словарей мы показывали получение доступа к данным словаря и их обновление. Такой же подход (и такой же синтаксис) применим и к структурам:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">iex</span><span class="o">&gt;</span> <span class="n">john</span> <span class="o">=</span> <span class="p">%</span><span class="no">User</span><span class="p">{}</span>
+<span class="p">%</span><span class="no">User</span><span class="p">{</span><span class="ss">age:</span> <span class="m">27</span><span class="p">,</span> <span class="ss">name:</span> <span class="sd">"</span><span class="s2">John"</span><span class="p">}</span>
+
+<span class="n">iex</span><span class="o">&gt;</span> <span class="n">john</span><span class="o">.</span><span class="n">name</span>
+<span class="sd">"</span><span class="s2">John"</span>
+
+<span class="n">iex</span><span class="o">&gt;</span> <span class="n">meg</span> <span class="o">=</span> <span class="p">%{</span><span class="n">john</span> <span class="o">|</span> <span class="ss">name:</span> <span class="sd">"</span><span class="s2">Meg"</span><span class="p">}</span>
+<span class="p">%</span><span class="no">User</span><span class="p">{</span><span class="ss">age:</span> <span class="m">27</span><span class="p">,</span> <span class="ss">name:</span> <span class="sd">"</span><span class="s2">Meg"</span><span class="p">}</span>
+
+<span class="n">iex</span><span class="o">&gt;</span> <span class="p">%{</span><span class="n">meg</span> <span class="o">|</span> <span class="ss">oops:</span> <span class="ss">:field</span><span class="p">}</span>
+<span class="o">**</span> <span class="p">(</span><span class="no">KeyError</span><span class="p">)</span> <span class="n">key</span> <span class="ss">:oops</span> <span class="ow">not</span> <span class="n">found</span> <span class="ow">in</span><span class="p">:</span> <span class="p">%</span><span class="no">User</span><span class="p">{</span><span class="ss">age:</span> <span class="m">27</span><span class="p">,</span> <span class="ss">name:</span> <span class="sd">"</span><span class="s2">Meg"</span><span class="p">}</span>
+</code></pre></div></div>
+<p>При использовании синтаксиса обновления данных (<code class="highlighter-rouge">|</code>) виртуальная машина знает, что в структуру не будет добавлено новых ключей, позволяя тем самым словарям использовать общую память для хранения своей ключевой структуры. В приведенном выше примере обе структуры <code class="highlighter-rouge">john</code> и <code class="highlighter-rouge">meg</code> совместно используют одну и ту же ключевую структуру в памяти.</p>
+
+<p>Структуры также могут использоваться при сопоставлении с образцом, как для сопоставления значений конкретных ключей, так и для проверки того, что сопоставляемое значение является структурой того же типа, что и образец.</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">iex</span><span class="o">&gt;</span> <span class="p">%</span><span class="no">User</span><span class="p">{</span><span class="ss">name:</span> <span class="n">name</span><span class="p">}</span> <span class="o">=</span> <span class="n">john</span>
+<span class="p">%</span><span class="no">User</span><span class="p">{</span><span class="ss">age:</span> <span class="m">27</span><span class="p">,</span> <span class="ss">name:</span> <span class="sd">"</span><span class="s2">John"</span><span class="p">}</span>
+
+<span class="n">iex</span><span class="o">&gt;</span> <span class="n">name</span>
+<span class="sd">"</span><span class="s2">John"</span>
+
+<span class="n">iex</span><span class="o">&gt;</span> <span class="p">%</span><span class="no">User</span><span class="p">{}</span> <span class="o">=</span> <span class="p">%{}</span>
+<span class="o">**</span> <span class="p">(</span><span class="no">MatchError</span><span class="p">)</span> <span class="n">no</span> <span class="n">match</span> <span class="n">of</span> <span class="n">right</span> <span class="n">hand</span> <span class="n">side</span> <span class="ss">value:</span> <span class="p">%{}</span>
+</code></pre></div></div>
+
+<h2 id="структуры--это-голые-словари">Структуры – это голые словари</h2>
+
+<p>В приведенном выше примере сопоставление c образцом работает благодаря тому, что под капотом структуры представляют собой голые словари с фиксированным набором полей. Вместе со словарём в структуре хранится «специальное» поле <code class="highlighter-rouge">__struct__</code>, которое содержит название структуры:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">iex</span><span class="o">&gt;</span> <span class="n">is_map</span><span class="p">(</span><span class="n">john</span><span class="p">)</span>
+<span class="no">true</span>
+
+<span class="n">iex</span><span class="o">&gt;</span> <span class="n">john</span><span class="o">.</span><span class="n">__struct__</span>
+<span class="no">User</span>
+</code></pre></div></div>
+<p>Обратите внимание, что мы структуры являются <strong>голыми словарями</strong>, потому что ни один из протоколов, реализованных для словарей, не доступен для структур. Например, вы не можете ни перечислить значения, ни получить прямой доступ к значениям:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">iex</span><span class="o">&gt;</span> <span class="n">john</span> <span class="o">=</span> <span class="p">%</span><span class="no">User</span><span class="p">{}</span>
+<span class="p">%</span><span class="no">User</span><span class="p">{</span><span class="ss">age:</span> <span class="m">27</span><span class="p">,</span> <span class="ss">name:</span> <span class="sd">"</span><span class="s2">John"</span><span class="p">}</span>
+
+<span class="n">iex</span><span class="o">&gt;</span> <span class="n">john</span><span class="p">[</span><span class="ss">:name</span><span class="p">]</span>
+<span class="o">**</span> <span class="p">(</span><span class="no">UndefinedFunctionError</span><span class="p">)</span> <span class="n">function</span> <span class="no">User</span><span class="o">.</span><span class="n">fetch</span><span class="o">/</span><span class="m">2</span> <span class="n">is</span> <span class="n">undefined</span> <span class="p">(</span><span class="no">User</span> <span class="n">does</span> <span class="ow">not</span> <span class="n">implement</span> <span class="n">the</span> <span class="no">Access</span> <span class="n">behaviour</span><span class="p">)</span>
+
+<span class="no">User</span><span class="o">.</span><span class="n">fetch</span><span class="p">(%</span><span class="no">User</span><span class="p">{</span><span class="ss">age:</span> <span class="m">27</span><span class="p">,</span> <span class="ss">name:</span> <span class="sd">"</span><span class="s2">John"</span><span class="p">},</span> <span class="ss">:name</span><span class="p">)</span>
+<span class="n">iex</span><span class="o">&gt;</span> <span class="no">Enum</span><span class="o">.</span><span class="n">each</span> <span class="n">john</span><span class="p">,</span> <span class="k">fn</span><span class="p">({</span><span class="n">field</span><span class="p">,</span> <span class="n">value</span><span class="p">})</span> <span class="o">-&gt;</span> <span class="no">IO</span><span class="o">.</span><span class="n">puts</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="k">end</span>
+<span class="o">**</span> <span class="p">(</span><span class="no">Protocol</span><span class="o">.</span><span class="no">UndefinedError</span><span class="p">)</span> <span class="n">protocol</span> <span class="no">Enumerable</span> <span class="ow">not</span> <span class="n">implemented</span> <span class="n">for</span> <span class="p">%</span><span class="no">User</span><span class="p">{</span><span class="ss">age:</span> <span class="m">27</span><span class="p">,</span> <span class="ss">name:</span> <span class="sd">"</span><span class="s2">John"</span><span class="p">}</span>
+</code></pre></div></div>
+
+<p>Тем не менее, поскольку структуры являются всего лишь словарями, они работают с функциями из модуля <code class="highlighter-rouge">Map</code>:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">iex</span><span class="o">&gt;</span> <span class="n">kurt</span> <span class="o">=</span> <span class="no">Map</span><span class="o">.</span><span class="n">put</span><span class="p">(%</span><span class="no">User</span><span class="p">{},</span> <span class="ss">:name</span><span class="p">,</span> <span class="sd">"</span><span class="s2">Kurt"</span><span class="p">)</span>
+<span class="p">%</span><span class="no">User</span><span class="p">{</span><span class="ss">age:</span> <span class="m">27</span><span class="p">,</span> <span class="ss">name:</span> <span class="sd">"</span><span class="s2">Kurt"</span><span class="p">}</span>
+
+<span class="n">iex</span><span class="o">&gt;</span> <span class="no">Map</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span><span class="n">kurt</span><span class="p">,</span> <span class="p">%</span><span class="no">User</span><span class="p">{</span><span class="ss">name:</span> <span class="sd">"</span><span class="s2">Takashi"</span><span class="p">})</span>
+<span class="p">%</span><span class="no">User</span><span class="p">{</span><span class="ss">age:</span> <span class="m">27</span><span class="p">,</span> <span class="ss">name:</span> <span class="sd">"</span><span class="s2">Takashi"</span><span class="p">}</span>
+
+<span class="n">iex</span><span class="o">&gt;</span> <span class="no">Map</span><span class="o">.</span><span class="n">keys</span><span class="p">(</span><span class="n">john</span><span class="p">)</span>
+<span class="p">[</span><span class="ss">:__struct__</span><span class="p">,</span> <span class="ss">:age</span><span class="p">,</span> <span class="ss">:name</span><span class="p">]</span>
+</code></pre></div></div>
+
+<p>Структуры, наряду с протоколами, обеспечивают одну из наиболее важных функций для эликсирщиков: полиморфизм данных. Мы поговорим об этом в <a href="/docs/protocols.html">следующей главе</a>.</p>
+
+<h2 id="значения-по-умолчанию-и-обязательные-ключи">Значения по умолчанию и обязательные ключи</h2>
+
+<p>Если вы не укажете значение ключа по умолчанию при определении структуры, предполагается <code class="highlighter-rouge">nil</code>:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">iex</span><span class="o">&gt;</span> <span class="k">defmodule</span> <span class="no">Product</span> <span class="k">do</span>
+<span class="o">...&gt;</span>   <span class="n">defstruct</span> <span class="p">[</span><span class="ss">:name</span><span class="p">]</span>
+<span class="o">...&gt;</span> <span class="k">end</span>
+
+<span class="n">iex</span><span class="o">&gt;</span> <span class="p">%</span><span class="no">Product</span><span class="p">{}</span>
+<span class="p">%</span><span class="no">Product</span><span class="p">{</span><span class="ss">name:</span> <span class="no">nil</span><span class="p">}</span>
+</code></pre></div></div>
+
+<p>Вы также можете обозначить, что определенные ключи должны быть обязательно указаны при создании структуры:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">iex</span><span class="o">&gt;</span> <span class="k">defmodule</span> <span class="no">Car</span> <span class="k">do</span>
+<span class="o">...&gt;</span>   <span class="nv">@enforce_keys</span> <span class="p">[</span><span class="ss">:make</span><span class="p">]</span>
+<span class="o">...&gt;</span>   <span class="n">defstruct</span> <span class="p">[</span><span class="ss">:model</span><span class="p">,</span> <span class="ss">:make</span><span class="p">]</span>
+<span class="o">...&gt;</span> <span class="k">end</span>
+
+<span class="n">iex</span><span class="o">&gt;</span> <span class="p">%</span><span class="no">Car</span><span class="p">{}</span>
+<span class="o">**</span> <span class="p">(</span><span class="no">ArgumentError</span><span class="p">)</span> <span class="n">the</span> <span class="n">following</span> <span class="n">keys</span> <span class="n">must</span> <span class="n">also</span> <span class="n">be</span> <span class="n">given</span> <span class="ow">when</span> <span class="n">building</span> <span class="n">struct</span> <span class="ss">Car:</span> <span class="p">[</span><span class="ss">:make</span><span class="p">]</span>
+    <span class="n">expanding</span> <span class="ss">struct:</span> <span class="no">Car</span><span class="o">.</span><span class="n">__struct__</span><span class="o">/</span><span class="m">1</span>
+</code></pre></div></div>
+
+    </div>
+</article>
+
+<nav class="docs_nav pure-g">
+    <div class="docs_nav__inner pure-u-1 pure-u-md-3-4">
+        <div class="pure-g">
+            <div class="docs_nav__column docs_nav__column--prev pure-u-1-3">
+                
+                    <a href="/docs/module-attributes.html" class="docs_nav__link pure-button">
+                        &larr;<span class="h-hidden_mobile"> Назад</span></a>
+                
+            </div>
+
+            <div class="docs_nav__column docs_nav__column--contents pure-u-1-3">
+                <a href="#docsContents" class="docs_nav__link docs_nav__link--contents pure-button">☰</a>
+            </div>
+
+            <div class="docs_nav__column docs_nav__column--next pure-u-1-3">
+                
+                    <a href="/docs/protocols.html" class="docs_nav__link pure-button">
+                        <span class="h-hidden_mobile">Вперёд </span>&rarr;
+                    </a>
+                
+            </div>
+        </div>
+    </div>
+</nav>
+
+<div id="docsContents" class="modal modal--docs_contents modal--close_backdrop">
+    <div class="modal__content">
+        <a href="#close" title="Закрыть" class="modal__close">x</a>
+
+        <h2 class="modal__title">Содержание</h2>
+
+        
+        <h3 id="руководство-для-начинающих">Руководство для начинающих</h3>
+<ul>
+  <li><a href="/docs">Введение</a></li>
+  <li><a href="/docs/basic-types.html">Базовые типы</a></li>
+  <li><a href="/docs/basic-operators.html">Базовые операторы</a></li>
+  <li><a href="/docs/pattern-matching.html">Сопоставление с образцом</a></li>
+  <li><a href="/docs/case-cond-and-if.html">Конструкции ветвления</a></li>
+  <li><a href="/docs/binaries-strings-and-char-lists.html">Двоичные данные, строки и списки символов</a></li>
+  <li><a href="/docs/keywords-and-maps.html">Ключевые списки и словари</a></li>
+  <li><a href="/docs/modules-and-functions.html">Модули и функции</a></li>
+  <li><a href="/docs/recursion.html">Рекурсия</a></li>
+  <li><a href="/docs/enumerables-and-streams.html">Перечисления и потоки</a></li>
+  <li><a href="/docs/processes.html">Процессы</a></li>
+  <li><a href="/docs/io-and-the-file-system.html">Ввод/вывод и файловая система</a></li>
+  <li><a href="/docs/alias-require-and-import.html">Директивы <code class="highlighter-rouge">alias</code>, <code class="highlighter-rouge">require</code> и <code class="highlighter-rouge">import</code></a></li>
+  <li><a href="/docs/module-attributes.html">Атрибуты модулей</a></li>
+  <li><a href="/docs/structs.html">Структуры</a></li>
+  <li><a href="/docs/protocols.html">Протоколы</a></li>
+  <li><a href="/docs/comprehensions.html">Списковые выражения</a></li>
+  <li><a href="/docs/sigils.html">Сигилы</a></li>
+  <li><a href="/docs/try-catch-and-rescue.html">Конструкция <code class="highlighter-rouge">try</code>, <code class="highlighter-rouge">catch</code> и <code class="highlighter-rouge">rescue</code></a></li>
+  <li><a href="/docs/typespecs-and-behaviours.html">Спецификации типов и поведения</a></li>
+  <li><a href="/docs/erlang-libraries.html">Библиотеки Эрланга</a></li>
+  <li><a href="/docs/where-to-go-next.html">Куда двигаться дальше</a></li>
+</ul>
+
+<h3 id="микс-и-otp">Микс и <code class="highlighter-rouge">OTP</code></h3>
+<ul>
+  <li><a href="/docs/mix-otp/introduction-to-mix.html">Введение в Микс</a></li>
+  <li><a href="/docs/mix-otp/agent.html">Агент</a></li>
+  <li><a href="/docs/mix-otp/genserver.html">GenServer</a></li>
+  <li><a href="/docs/mix-otp/supervisor-and-application.html">Супервизор и приложение</a></li>
+  <li><a href="/docs/mix-otp/dynamic-supervisor.html">Динамический супервизор</a></li>
+  <li><a href="/docs/mix-otp/ets.html">ETS</a></li>
+  <li><a href="/docs/mix-otp/dependencies-and-umbrella-apps.html">Зависимости и зонтичные проекты</a></li>
+  <li><a href="/docs/mix-otp/task-and-gen-tcp.html">Модули <code class="highlighter-rouge">Task</code> и <code class="highlighter-rouge">:gen_tcp</code></a></li>
+  <li><a href="/docs/mix-otp/docs-tests-and-with.html">Доктесты, паттерны и оператор <code class="highlighter-rouge">with</code></a></li>
+  <li><a href="/docs/mix-otp/distributed-tasks-and-configuration.html">Распределенные задачи и конфигурация</a></li>
+</ul>
+
+<h3 id="метапрограммирование">Метапрограммирование</h3>
+<ul>
+  <li><a href="/docs/meta/quote-and-unquote.html">Конструкции <code class="highlighter-rouge">quote</code> и <code class="highlighter-rouge">unquote</code></a></li>
+  <li><a href="/docs/meta/macros.html">Макросы</a></li>
+  <li><a href="/docs/meta/domain-specific-languages.html">Предметно-ориентированные языки</a></li>
+</ul>
+
+    </div>
+</div>
+
+
+
+        <footer class="footer">
+    &copy; 2020
+    / Россия
+
+    <span class="pull-right">Любые мысли и вопросы пишите на <a href="mailto:elixir@wunsh.ru">elixir@wunsh.ru</a>.</span>
+</footer>
+
+        <div id="subscribeModal" class="modal">
+    <div class="modal__content">
+        <a href="#close" title="Close" class="modal__close">x</a>
+
+        <h2 class="modal__title">Ламповая рассылка про&nbsp;Эликсир</h2>
+
+        <p>Один-два раза в&nbsp;неделю присылаем тёплые письма об&nbsp;Эликсире: переводы самых интересных статей до&nbsp;их&nbsp;появления в&nbsp;открытом доступе, анонсы событий и&nbsp;вкусные бонусы.</p>
+
+        <form action="//wunsh.us14.list-manage.com/subscribe/post?u=c81ca3d4693f62db7f7f67c71&amp;id=a192e2dfef" method="post" id="mc-embedded-subscribe-form" name="mc-embedded-subscribe-form" class="pure-form h-tc validate" target="_blank" novalidate>
+            <input type="email" value="" name="EMAIL" class="modal__input pure-input-rounded large" id="mce-EMAIL" placeholder="Твоя почта" required>
+            <div style="position: absolute; left: -5000px;" aria-hidden="true"><input type="text" name="b_c81ca3d4693f62db7f7f67c71_a192e2dfef" tabindex="-1" value=""></div>
+
+            <input type="submit" value="Присоединиться" name="subscribe" onClick="yaCounter39773490.reachGoal('SUBSCRIBED'); return true" id="mc-embedded-subscribe" class="pure-button button-success large">
+        </form>
+
+        <p>Обязательно подтверди почту, перейдя по&nbsp;ссылке в&nbsp;письме, иначе мы&nbsp;не&nbsp;сможем делиться с&nbsp;тобой полезностями.</p>
+
+        <p>Надоедать точно не&nbsp;будем :)</p>
+    </div>
+</div>
+
+        <script src="/assets/js/vendors/zepto.min.js"></script>
+
+<script>
+    if ($(".post--docs").length) {
+        $(".footer").addClass("footer--docs")
+    }
+
+    $(".modal--close_backdrop").click(function(){
+        window.location.hash = "";
+    });
+</script>
+
+        <!-- Yandex.Metrika counter -->
+<script type="text/javascript">
+    (function (d, w, c) {
+        (w[c] = w[c] || []).push(function() {
+            try {
+                w.yaCounter39773490 = new Ya.Metrika({
+                    id:39773490,
+                    clickmap:true,
+                    trackLinks:true,
+                    accurateTrackBounce:true,
+                    webvisor:true,
+                    ut:"noindex"
+                });
+            } catch(e) { }
+        });
+
+        var n = d.getElementsByTagName("script")[0],
+            s = d.createElement("script"),
+            f = function () { n.parentNode.insertBefore(s, n); };
+        s.type = "text/javascript";
+        s.async = true;
+        s.src = "https://mc.yandex.ru/metrika/watch.js";
+
+        if (w.opera == "[object Opera]") {
+            d.addEventListener("DOMContentLoaded", f, false);
+        } else { f(); }
+    })(document, window, "yandex_metrika_callbacks");
+</script>
+<noscript><div><img src="https://mc.yandex.ru/watch/39773490?ut=noindex" style="position:absolute; left:-9999px;" alt="" /></div></noscript>
+<!-- /Yandex.Metrika counter -->
+
+      </div>
+    </div>
+  </body>
+</html>

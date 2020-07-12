@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Elixir для рубистов |> Сообщество Elixir и Phoenix Framework</title>
+    <meta name="description" content="Объясняем что такое Elixir для людей, знакомых с Ruby.">
+
+    <link rel="alternate" type="application/rss+xml" title="Сообщество Elixir и Phoenix Framework" href="/feed.xml" />
+    <link rel="canonical" href="https://wunsh.ru/articles/elixir-for-rubyists.html">
+
+    <style type="text/css">@import url("//fonts.googleapis.com/css?family=Source+Sans+Pro:400,700&subset=cyrillic");</style>
+    <link rel="stylesheet" href="/assets/css/vendors/pure.min.css">
+    <link rel="stylesheet" href="/assets/css/vendors/pure-grids-responsive.min.css">
+    <link rel="stylesheet" href="/assets/css/style.css?1594516983">
+
+    <link rel="shortcut icon" type="image/png" href="/assets/favicon.png" >
+</head>
+
+
+  <body>
+    <div class="wunsh pure-g">
+      
+
+
+
+
+<div class="menu pure-u-1 pure-u-md-1-4">
+  <div class="header">
+    <h2 class="header__title">
+      
+        <a href="https://wunsh.ru" class="header__title_link" title="На главную">Эликсир и&nbsp;Вунш</a>
+      
+    </h2>
+    <h3 class="header__tagline">Erlang + Ruby = &#10084;</h3>
+
+    <nav class="nav">
+      <ul class="nav_list">
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/elixir" class="nav_list__item_link pure-button">О языке</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/install/linux-asdf" class="nav_list__item_link pure-button">Установка</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/docs/" class="nav_list__item_link pure-button">Документация</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/guides" class="nav_list__item_link pure-button">Гайды</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/news" class="nav_list__item_link pure-button">Новости</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/articles" class="nav_list__item_link pure-button">Статьи</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/videos" class="nav_list__item_link pure-button">Видео</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/vacancies" class="nav_list__item_link pure-button">Вакансии</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/faq" class="nav_list__item_link pure-button">FAQ</a>
+            </li>
+          
+        
+      </ul>
+    </nav>
+
+    <a href="#subscribeModal" class="pure-button header__subscribe_link">Подписаться на рассылку</a>
+  </div>
+</div>
+
+
+      <div class="content pure-u-1 pure-u-md-3-4">
+        
+
+<article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+  <header class="post__header">
+    
+    <h1 class="post__title" itemprop="name headline">Elixir для рубистов</h1>
+
+    <div class="post__meta post_meta">
+      <ul class="meta_list">
+        <li class="meta_list__item">
+          
+          <span class="">
+            <small class="meta_list__item_name">Дата</small>
+            <time class="h-bold" datetime="2016-11-19T00:00:00+00:00" itemprop="datePublished">
+              
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+19 ноября 2016
+
+            </time>
+          </span>
+          
+
+          
+        </li>
+        
+        <li class="meta_list__item">
+            <span class="tag_cloud tags_cloud--inline h-no_margin">
+              <small class="meta_list__item_name">Теги</small> 
+
+
+<ul class="tags_cloud__list">
+  
+    <a href="/tags/#overview" class="tags_cloud__link tag tag--overview">overview</a>
+  
+    <a href="/tags/#ruby" class="tags_cloud__link tag tag--ruby">ruby</a>
+  
+</ul>
+
+            </span>
+        </li>
+        
+        <li class="meta_list__item">
+          <span itemprop="author" itemscope itemtype="http://schema.org/Person">
+            <small class="meta_list__item_name">
+              
+                Перевод
+              
+            </small>
+            <span itemprop="name" class="h-bold">Надежда Нестерова</span>
+          </span>
+        </li>
+
+        <li class="meta_list__item">
+          
+            <div >
+              <small>Оригинал</small>
+              <strong>
+                &laquo;<a href="https://robots.thoughtbot.com/elixir-for-rubyists" style="text-transform: none; text-decoration: underline; color: #4b2e39;">Elixir for Rubyists</a>&raquo;
+              </strong>
+              <small>&copy;</small>
+              <strong>Tute Costa</strong>
+            </div>
+          
+        </li>
+      </ul>
+    </div>
+  </header>
+
+  <div class="post__content" itemprop="articleBody">
+    <p>Создавая свой первый проект на&nbsp;языке Elixir, мыслями я&nbsp;всё еще находился с&nbsp;Ruby. Поначалу мне это не&nbsp;сильно мешало: оба языка программирования являются высокоуровневыми, имеют читабельный код и&nbsp;схожий синтаксис. С&nbsp;ними интересно работать. Сообщество отзывчивых разработчиков Elixir быстро набирало обороты и&nbsp;чем-то напомнило мне сообщество Ruby на&nbsp;заре фреймворка Rails.</p>
+
+<p>Некоторые особенности Ruby соотносятся со&nbsp;схожими явлениями в&nbsp;Elixir:</p>
+<table>
+    <thead>
+    <tr><th>
+        <p><strong>Ruby</strong></p>
+    </th> <th>
+        <p><strong>Elixir</strong></p>
+    </th></tr>
+    </thead>
+    <tbody>
+    <tr>
+        <td>
+            irb
+        </td>
+        <td>
+            iex
+        </td>
+    </tr>
+    <tr>
+        <td>
+            rake tasks
+        </td>
+        <td>
+            mix (встроенный)
+        </td>
+    </tr>
+    <tr>
+        <td>
+            bundler
+        </td>
+        <td>
+            mix (встроенный)
+        </td>
+    </tr>
+    <tr>
+        <td>
+            binding.pry
+        </td>
+        <td>
+            IEx.pry (встроенный)
+        </td>
+    </tr>
+    <tr>
+        <td>
+            Полиморфизм
+        </td>
+        <td>
+            Протоколы
+        </td>
+    </tr>
+    <tr>
+        <td>
+            Lazy Enumerables
+        </td>
+        <td>
+            Потоки
+        </td>
+    </tr>
+    <tr>
+        <td>
+            Метапрограммирование
+        </td>
+        <td>
+            Макросы (используются очень осторожно)
+        </td>
+    </tr>
+    <tr>
+        <td>
+            Rails
+        </td>
+        <td>
+            Phoenix
+        </td>
+    </tr>
+    </tbody>
+</table>
+
+<p>На&nbsp;первый взгляд кажется, что языки несущественно отличаются по&nbsp;некоторому набору признаков. Например, код на&nbsp;Elixir выглядит немного более многословным, нежели на&nbsp;Ruby, названия модулей прописаны практически во&nbsp;всех вызовах функций. Модули, используемые внутри файла, явно в&nbsp;него подключаются. А&nbsp;состояние передаётся через функции в&nbsp;качестве аргумента. Расширить возможности языка можно с&nbsp;помощью макросов, однако в&nbsp;официальной документации Elixir <noindex><a href="http://elixir-lang.org/getting-started/meta/macros.html">постараются разубедить в&nbsp;необходимости их&nbsp;использования.</a></noindex></p>
+
+<p>Elixir можно рассматривать в&nbsp;качестве Ruby для виртуальной машины Erlang, и&nbsp;подобного приближения вполне достаточно для небольших проектов. Хотя Elixir и&nbsp;напоминает Ruby, между этими двумя языками имеются существенные различия.</p>
+<h2>Elixir&nbsp;&mdash; это Erlang в&nbsp;оболочке Ruby</h2>
+
+<p>Программы на&nbsp;языке Elixir компилируются в&nbsp;код для виртуальной машины Erlang (BEAM). Язык Erlang, разработанный в&nbsp;1986 году компанией Ericsson, с&nbsp;1998 года является продуктом с&nbsp;открытым исходным кодом и&nbsp;поддерживается подразделением OTP (Open Telecom Program) компании Ericsson.</p>
+<h3>Производительность</h3>
+
+<p>Используя один лишь Erlang, команде разработчиков приложения WhatsApp удалось добиться того, чтобы один сервер смог обслуживать два миллиона TCP-соединений. Откуда такая производительность?</p>
+
+<p>Виртуальная машина Erlang выглядит как один процесс операционной системы и&nbsp;по&nbsp;умолчанию запускает по&nbsp;одному потоку на&nbsp;каждом ядре. <strong>Программы на&nbsp;языке Elixir используют все ядра ЦП.</strong></p>
+
+<p>Процессы в&nbsp;Erlang не&nbsp;имеют никакой связи с&nbsp;потоками и&nbsp;процессами операционной системы. Они являются легковесными, их&nbsp;можно быстро создать и&nbsp;уничтожить (т.е. количество изменяется динамически), объём потребляемой памяти невелик, ресурсы расходуются экономно. Erlang-приложение запускает более одного миллиона своих процессов, которые могут существовать в&nbsp;единственном процессе ОС. Эти процессы не&nbsp;имеют общего состояния, они взаимодействуют между собой посредством асинхронного обмена сообщениями. Такой подход превращает Elixir в&nbsp;первую общедоступную реализацию модели акторов.</p>
+
+<p>Если процесс находится в&nbsp;ожидании сообщения (затерявшегося в&nbsp;блоке receive), он&nbsp;не&nbsp;помещается в&nbsp;очередь на&nbsp;исполнение до&nbsp;тех пор, пока сообщение не&nbsp;будет найдено. Именно поэтому на&nbsp;одном компьютере возможен ресурсоёмкий запуск миллионов по&nbsp;большей части бездействующих процессов.</p>
+
+<p>Эффективность работы сборщика мусора в&nbsp;Erlang повышается за&nbsp;счёт следующих допущений. Каждая переменная иммутабельна. Это означает, что с&nbsp;момента создания переменной её&nbsp;значение остаётся постоянным. Значения копируются между процессами. Таким образом, процесс практически всегда имеет изолированную область памяти, а&nbsp;сборщик мусора у&nbsp;каждого отдельного процесса свой, что достаточно оперативно. Узнать подробнее о&nbsp;процессах и&nbsp;принципах работы сборщика мусора в&nbsp;Erlang можно в&nbsp;4&nbsp;разделе статьи Programming the Parallel World.</p>
+
+<p>В&nbsp;двух словах, Erlang работает быстрее других платформ, потому что поддерживает иммутабельность переменных и&nbsp;использует модель изолированной памяти.</p>
+<h3>Отказоустойчивость</h3>
+
+<p>В&nbsp;основе архитектуры Erlang лежит модель системы без разделения ресурсов: каждая нода является независимой и&nbsp;самодостаточной. Программное обеспечение, написанное на&nbsp;Erlang, может быть построено так, чтобы оно было в&nbsp;состоянии поддерживать обновление без прерывания рабочих процессов и&nbsp;обеспечивать устойчивость к&nbsp;ошибкам.</p>
+
+<p>Пересказав услышанные на&nbsp;подкасте The Changelog слова Жозе Валима, можно отметить, что отказоустойчивость в&nbsp;Erlang&nbsp;&mdash; это способность поддерживать систему в&nbsp;рабочем состоянии; разрыв связи с&nbsp;одним пользователем&nbsp;&mdash; <strong>вполне нормально</strong>, со&nbsp;всеми пользователями&nbsp;&mdash; <strong>уже проблема</strong>.</p>
+<blockquote><em>В&nbsp;отличие от&nbsp;интернет-сервисов у&nbsp;телекоммуникационных компаний нет возможности позвонить каждому клиенту и&nbsp;оповестить его о&nbsp;перебоях связи между 6:00 и&nbsp;6:30&nbsp;утра. В&nbsp;такой системе всегда должна поддерживаться работоспособность.</em></blockquote>
+<h3>Чистые функции</h3>
+
+<p>Erlang&nbsp;&mdash; функциональный язык программирования. В&nbsp;функциональном программировании вычисление трактуется как определение значений функций при условии неизменности состояния и&nbsp;данных. Чистая функция демонстрирует функциональную прозрачность: вызовы функции можно заменить на&nbsp;возвращаемые ею&nbsp;значения без изменения семантики программы. Использовать чистые функции выгодно, поскольку они детерминированы, легче поддаются анализу и&nbsp;тестированию.</p>
+
+<p>Единичное присваивание и&nbsp;неизменяемая структура данных Erlang только способствует созданию чистых функций. Анализируя различные объёмные кодовые базы Erlang, исследователи отнесли к&nbsp;чистым в&nbsp;среднем от&nbsp;30&nbsp;до&nbsp;50% его функций. Есть и&nbsp;нежелательные последствия: код можно динамически загружать и&nbsp;выгружать, что приводит к&nbsp;изменению переменных среды операционной системы.</p>
+
+<p>В&nbsp;Ruby&nbsp;же можно обойтись без изолированного состояния. Значения можно изменять в&nbsp;любом месте программы (например, метод string.gsub!). Классическим примером нечистой функции может служить геттер: каждый раз, вызывая его с&nbsp;одними и&nbsp;теми&nbsp;же аргументами, в&nbsp;зависимости от&nbsp;внутреннего состояния объекта можно получить различные результаты.</p>
+<h3>Другие особенности Erlang, доступные в&nbsp;Elixir</h3>
+К ним относятся:
+<ul style="margin-top: 10px;">
+    <li>Распределенные вычисления</li>
+    <li>Мягкое реальное время (черта, определяющая качество телекоммуникационных услуг)</li>
+    <li>Высокая доступность</li>
+    <li>Горячая замена кода</li>
+</ul>
+
+<h2>Собственные преимущества Elixir</h2>
+<h3>Пайп-оператор</h3>
+
+<p>Предположим, необходимо превратить заголовки всех постов блога в&nbsp;постоянные ссылки. Для заголовка наподобие ExMachina Hits&nbsp;1.0&nbsp;&mdash; More Flexible, More Useful and Support for Ecto&nbsp;2.0 постоянная ссылка должна быть такой exmachina-hits-1-0-more-flexible-more-useful-and-support-for-ecto-2-0.</p>
+
+<p>Код на&nbsp;Ruby выглядит следующим образом:</p>
+
+<figure class="highlight"><pre><code class="language-elixir" data-lang="elixir"><span class="n">title</span><span class="o">.</span>
+  <span class="n">downcase</span><span class="o">.</span>
+  <span class="n">gsub</span><span class="p">(</span><span class="o">/</span><span class="p">\</span><span class="no">W</span><span class="o">/</span><span class="p">,</span> <span class="sd">"</span><span class="s2"> "</span><span class="p">)</span><span class="o">.</span> <span class="c1"># convert non-word chars (like -,!) into spaces</span>
+  <span class="n">split</span><span class="o">.</span>    <span class="c1"># drop extra whitespace</span>
+  <span class="n">join</span><span class="p">(</span><span class="sd">"</span><span class="s2">-"</span><span class="p">)</span> <span class="c1"># join words with dashes</span></code></pre></figure>
+
+<p>Вызов каждого из&nbsp;методов возвращает объект типа String или объект, реализующий Enumerable, следовательно, мы&nbsp;можем объединять эти методы в&nbsp;цепочку. Давайте дадим проделанным шагам какие-нибудь названия, чтобы не&nbsp;было необходимости комментировать каждую строчку. Но&nbsp;как сделать код похожим на&nbsp;такой?</p>
+
+<figure class="highlight"><pre><code class="language-elixir" data-lang="elixir"><span class="n">text</span><span class="o">.</span>
+  <span class="n">downcase</span><span class="o">.</span>
+  <span class="n">replace_non_words_with_spaces</span><span class="o">.</span>
+  <span class="n">drop_extra_whitespace</span><span class="o">.</span>
+  <span class="n">join_with_dashes</span></code></pre></figure>
+
+<p>Чтобы этого достичь, нужно &laquo;проманкипатчить&raquo; класс String и&nbsp;определить в&nbsp;нём методы replace_non_words_with_spaces и&nbsp;drop_extra_whitespace, а&nbsp;для класса Enumerable сделать то&nbsp;же самое с&nbsp;методом join_with_dashes.</p>
+
+<p>Теперь посмотрим, как всё это реализуется в&nbsp;языке Elixir. С&nbsp;точки зрения функционального подхода, код может выглядеть так:</p>
+
+<figure class="highlight"><pre><code class="language-elixir" data-lang="elixir"><span class="no">Enum</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+  <span class="no">String</span><span class="o">.</span><span class="n">split</span><span class="p">(</span>
+    <span class="no">String</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span>
+      <span class="no">String</span><span class="o">.</span><span class="n">downcase</span><span class="p">(</span><span class="n">title</span><span class="p">),</span> <span class="sr">~r/\W/</span><span class="p">,</span> <span class="sd">"</span><span class="s2"> "</span>
+    <span class="p">)</span>
+  <span class="p">),</span>
+  <span class="sd">"</span><span class="s2">-"</span>
+<span class="p">)</span></code></pre></figure>
+
+<p>Его можно сделать более читабельным, используя локальные переменные:</p>
+
+<figure class="highlight"><pre><code class="language-elixir" data-lang="elixir"><span class="n">downcased</span> <span class="o">=</span> <span class="no">String</span><span class="o">.</span><span class="n">downcase</span><span class="p">(</span><span class="n">title</span><span class="p">)</span>
+<span class="n">non_words_to_spaces</span> <span class="o">=</span> <span class="no">String</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">downcased</span><span class="p">,</span> <span class="sr">~r/\W/</span><span class="p">,</span> <span class="sd">"</span><span class="s2"> "</span><span class="p">)</span>
+<span class="n">whitespace_to_dashes</span> <span class="o">=</span> <span class="no">Enum</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="no">String</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">non_words_to_spaces</span><span class="p">),</span> <span class="sd">"</span><span class="s2">-"</span><span class="p">)</span></code></pre></figure>
+
+<p>Однако Elixir предлагает более идиоматический подход. Пайп-оператор может передать условие слева в&nbsp;качестве первого аргумента при вызове функции справа, что позволяет привести код к&nbsp;следующему виду:</p>
+
+<figure class="highlight"><pre><code class="language-elixir" data-lang="elixir"><span class="n">title</span>
+<span class="o">|&gt;</span> <span class="no">String</span><span class="o">.</span><span class="n">downcase</span>
+<span class="o">|&gt;</span> <span class="no">String</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="sr">~r/\W/</span><span class="p">,</span> <span class="sd">"</span><span class="s2"> "</span><span class="p">)</span>
+<span class="o">|&gt;</span> <span class="no">String</span><span class="o">.</span><span class="n">split</span>
+<span class="o">|&gt;</span> <span class="no">Enum</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="sd">"</span><span class="s2">-"</span><span class="p">)</span></code></pre></figure>
+
+<p>Каждый шаг можно обозначить с&nbsp;помощью &laquo;говорящего&raquo; названия функции:</p>
+
+<figure class="highlight"><pre><code class="language-elixir" data-lang="elixir"><span class="n">title</span>
+<span class="o">|&gt;</span> <span class="n">downcased</span>
+<span class="o">|&gt;</span> <span class="n">non_words_to_spaces</span>
+<span class="o">|&gt;</span> <span class="n">whitespace_to_dashes</span></code></pre></figure>
+
+<p>В&nbsp;Ruby существуют две реализации композиций функций, схожих с&nbsp;пайп-оператором. Фабио Акита разработал пакет chainable_methods (RubyGem), методы которого умеют привязывать значение к&nbsp;объекту так&nbsp;же, как это делает пайп-оператор. Чтобы получить окончательный результат, необходимо вызвать unwrap в&nbsp;качестве последнего метода. Майк Бёрнс представил пакет method_missing (RubyGem), позволяющий связывать функции посредством оператора *.</p>
+<h3>Оператор сопоставления =</h3>
+
+<p>Оператор = в&nbsp;Elixir называется оператором сопоставления. Он&nbsp;позволяет назначать и&nbsp;сравнивать значения. Рассмотрим такой код:</p>
+
+<figure class="highlight"><pre><code class="language-elixir" data-lang="elixir"><span class="n">iex</span><span class="o">&gt;</span> <span class="p">{</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="m">42</span><span class="p">}</span> <span class="o">=</span> <span class="p">{</span><span class="ss">:hello</span><span class="p">,</span> <span class="sd">"</span><span class="s2">world"</span><span class="p">,</span> <span class="m">42</span><span class="p">}</span>
+<span class="p">{</span><span class="ss">:hello</span><span class="p">,</span> <span class="sd">"</span><span class="s2">world"</span><span class="p">,</span> <span class="m">42</span><span class="p">}</span>
+<span class="n">iex</span><span class="o">&gt;</span> <span class="n">a</span>
+<span class="ss">:hello</span>
+<span class="n">iex</span><span class="o">&gt;</span> <span class="n">b</span>
+<span class="sd">"</span><span class="s2">world"</span>
+<span class="n">iex</span><span class="o">&gt;</span> <span class="ss">:hello</span> <span class="o">=</span> <span class="n">a</span>
+<span class="ss">:hello</span>
+<span class="n">iex</span><span class="o">&gt;</span> <span class="sd">"</span><span class="s2">world"</span> <span class="o">=</span> <span class="n">a</span>
+<span class="o">**</span> <span class="p">(</span><span class="no">MatchError</span><span class="p">)</span> <span class="n">no</span> <span class="n">match</span> <span class="n">of</span> <span class="n">right</span> <span class="n">hand</span> <span class="n">side</span> <span class="ss">value:</span> <span class="ss">:hello</span></code></pre></figure>
+
+<h3>Сопоставление с&nbsp;образцом и&nbsp;составные условия функций</h3>
+
+<p>Сопоставление с&nbsp;образцом позволяет сравнивать простые значения, структуры данных и&nbsp;даже функции. В&nbsp;объявлении функций могут присутствовать охранные и&nbsp;составные условия. Если тело функции содержит несколько условий, Elixir будет перебирать их&nbsp;все, пока не&nbsp;выполнится условие сопоставления.</p>
+
+<p>Рассмотрим пример. Пусть необходимо добавить имя активного класса к&nbsp;элементу li&nbsp;только в&nbsp;том случае, если указанный документ совпадет с&nbsp;тем, в&nbsp;котором в&nbsp;данный момент осуществляется перебор. Код будет следующим (@conn.assigns напоминает многомерный хэш).</p>
+
+<figure class="highlight"><pre><code class="language-erb" data-lang="erb"><span class="cp">&lt;%=</span> <span class="k">for</span> <span class="n">document</span> <span class="o">&lt;-</span> <span class="n">documents</span> <span class="k">do</span> <span class="cp">%&gt;</span>
+  <span class="nt">&lt;li</span> <span class="na">class=</span><span class="s">"</span><span class="cp">&lt;%=</span> <span class="n">active_class</span><span class="p">(</span><span class="vi">@conn</span><span class="p">.</span><span class="nf">assigns</span><span class="p">,</span> <span class="n">document</span><span class="p">.</span><span class="nf">id</span><span class="p">)</span> <span class="cp">%&gt;</span><span class="s">"</span><span class="nt">&gt;</span>
+    <span class="cp">&lt;%=</span> <span class="n">document</span><span class="p">.</span><span class="nf">title</span> <span class="cp">%&gt;</span>
+  <span class="nt">&lt;/li&gt;</span>
+<span class="cp">&lt;%</span> <span class="k">end</span> <span class="cp">%&gt;</span></code></pre></figure>
+
+<p>Типовая реализация класса active_class включает условие, проверяющее наличие аргумента в&nbsp;списке (в&nbsp;Ruby оно выглядит так: enumerable.include?(item)). На&nbsp;Elixir получаем следующее:</p>
+
+<figure class="highlight"><pre><code class="language-elixir" data-lang="elixir"><span class="k">def</span> <span class="n">active_class</span><span class="p">(%{</span><span class="ss">document:</span> <span class="p">%{</span><span class="ss">id:</span> <span class="n">id</span><span class="p">}},</span> <span class="n">id</span><span class="p">),</span> <span class="k">do</span><span class="p">:</span> <span class="sd">"</span><span class="s2">active"</span>
+<span class="k">def</span> <span class="n">active_class</span><span class="p">(</span><span class="n">_</span><span class="p">,</span> <span class="n">_</span><span class="p">),</span> <span class="k">do</span><span class="p">:</span> <span class="sd">"</span><span class="s2">"</span></code></pre></figure>
+
+<p>В&nbsp;приведенном листинге проводится сопоставление хэша и&nbsp;ключа document; далее, если он&nbsp;имеется в&nbsp;хэше, то&nbsp;проводится сопоставление по&nbsp;id. Условие в&nbsp;теле функции содержит тот&nbsp;же id&nbsp;в&nbsp;качестве второго аргумента, и, когда он&nbsp;совпадет с&nbsp;запрашиваемым, возвращается строка &laquo;active&raquo;. Второе условие выполняется для любого другого случая, возвращая пустую строку.</p>
+
+<p>Сопоставление с&nbsp;образцом позволяет избежать использования традиционных управляющих конструкций. Программы состоят из&nbsp;множества небольших функций, определённых с&nbsp;использованием охранных условий и&nbsp;сопоставления с&nbsp;образцом, которые обеспечивают надлежащее поведение, основанное на&nbsp;соответствии аргументов. В&nbsp;итоге код приобретает более декларативный окрас.</p>
+<h3>Макросы</h3>
+
+<p>Еще одна отличительная черта Elixir по&nbsp;сравнению с&nbsp;Erlang&nbsp;&mdash; это наличие средств метапрограммирования, но&nbsp;это уже отдельная достаточно обширная тема.</p>
+<h2>В&nbsp;каком случае Elixir подходит больше, чем Ruby?</h2>
+
+<p>Думаю, Elixir и&nbsp;Ruby взаимозаменяемы для написания несложных веб-приложений с&nbsp;низким трафиком и&nbsp;невысокими требованиями по&nbsp;части времени отклика.</p>
+
+<p>Некоторых разработчиков привлекает наличие в&nbsp;Elixir проверки на&nbsp;этапе компиляции. Будучи приверженцем техники TDD и&nbsp;средств обеспечения высокого качества кода, я&nbsp;не&nbsp;вижу существенной разницы между стоимостью поддержки небольшого или среднего проекта и&nbsp;выбором языка программирования для его разработки.</p>
+
+<p>Тем не&nbsp;менее для создания некоторых приложений выбор Elixir является технически наиболее выгодным.</p>
+<h3>Масштабируемость</h3>
+
+<p>Elixir справляется с&nbsp;этим лучше, чем Ruby. Фреймворк Phoenix в&nbsp;10&nbsp;раз производительнее того&nbsp;же Rails, а&nbsp;это означает, что задумываться о&nbsp;хостинге или кэшировании при разработке на&nbsp;Elixir, можно немного позднее.</p>
+
+<p>Процессы в&nbsp;Elixir определяются по&nbsp;ноде и&nbsp;идентификатору. Перекинуть процесс на&nbsp;другой хост&nbsp;&mdash; всё равно что создать новый на&nbsp;уже имеющемся. Так или иначе процессы и&nbsp;хосты в&nbsp;Elixir работают изолированно, тогда как добиться такого эффекта в&nbsp;Ruby&nbsp;&mdash; требует от&nbsp;разработчика определенных усилий.</p>
+
+<p>Деревья супервизоров и&nbsp;способность к&nbsp;восстановлению после отказа при уничтожении процесса&nbsp;&mdash; встроенные в&nbsp;Elixir функции, обеспечивающие высокую горизонтальную масштабируемость.</p>
+<h3>Системы с&nbsp;высоким уровнем доступности</h3>
+
+<p>Отказоустойчивость и&nbsp;горячая замена кода&nbsp;&mdash; то, что отлично реализовано в&nbsp;Elixir и&nbsp;что облегчает развёртывание на&nbsp;нём высокодоступных систем.</p>
+
+  </div>
+
+  <!-- uSocial -->
+  <div class="post__share_block share_block">
+    <script async src="https://usocial.pro/usocial/usocial.js?v=6.1.4" data-script="usocial" charset="utf-8"></script>
+    <div class="uSocial-Share" data-pid="2fd19544e551bce292425ee8adaa31be" data-type="share" data-options="round,style2,default,absolute,horizontal,size32,counter1,counter-before,upArrow-right,nomobile" data-social="telegram,fb,vk,gPlus,twi,bookmarks"></div>
+  </div>
+  <!-- /uSocial -->
+</article>
+
+
+        <footer class="footer">
+    &copy; 2020
+    / Россия
+
+    <span class="pull-right">Любые мысли и вопросы пишите на <a href="mailto:elixir@wunsh.ru">elixir@wunsh.ru</a>.</span>
+</footer>
+
+        <div id="subscribeModal" class="modal">
+    <div class="modal__content">
+        <a href="#close" title="Close" class="modal__close">x</a>
+
+        <h2 class="modal__title">Ламповая рассылка про&nbsp;Эликсир</h2>
+
+        <p>Один-два раза в&nbsp;неделю присылаем тёплые письма об&nbsp;Эликсире: переводы самых интересных статей до&nbsp;их&nbsp;появления в&nbsp;открытом доступе, анонсы событий и&nbsp;вкусные бонусы.</p>
+
+        <form action="//wunsh.us14.list-manage.com/subscribe/post?u=c81ca3d4693f62db7f7f67c71&amp;id=a192e2dfef" method="post" id="mc-embedded-subscribe-form" name="mc-embedded-subscribe-form" class="pure-form h-tc validate" target="_blank" novalidate>
+            <input type="email" value="" name="EMAIL" class="modal__input pure-input-rounded large" id="mce-EMAIL" placeholder="Твоя почта" required>
+            <div style="position: absolute; left: -5000px;" aria-hidden="true"><input type="text" name="b_c81ca3d4693f62db7f7f67c71_a192e2dfef" tabindex="-1" value=""></div>
+
+            <input type="submit" value="Присоединиться" name="subscribe" onClick="yaCounter39773490.reachGoal('SUBSCRIBED'); return true" id="mc-embedded-subscribe" class="pure-button button-success large">
+        </form>
+
+        <p>Обязательно подтверди почту, перейдя по&nbsp;ссылке в&nbsp;письме, иначе мы&nbsp;не&nbsp;сможем делиться с&nbsp;тобой полезностями.</p>
+
+        <p>Надоедать точно не&nbsp;будем :)</p>
+    </div>
+</div>
+
+        <script src="/assets/js/vendors/zepto.min.js"></script>
+
+<script>
+    if ($(".post--docs").length) {
+        $(".footer").addClass("footer--docs")
+    }
+
+    $(".modal--close_backdrop").click(function(){
+        window.location.hash = "";
+    });
+</script>
+
+        <!-- Yandex.Metrika counter -->
+<script type="text/javascript">
+    (function (d, w, c) {
+        (w[c] = w[c] || []).push(function() {
+            try {
+                w.yaCounter39773490 = new Ya.Metrika({
+                    id:39773490,
+                    clickmap:true,
+                    trackLinks:true,
+                    accurateTrackBounce:true,
+                    webvisor:true,
+                    ut:"noindex"
+                });
+            } catch(e) { }
+        });
+
+        var n = d.getElementsByTagName("script")[0],
+            s = d.createElement("script"),
+            f = function () { n.parentNode.insertBefore(s, n); };
+        s.type = "text/javascript";
+        s.async = true;
+        s.src = "https://mc.yandex.ru/metrika/watch.js";
+
+        if (w.opera == "[object Opera]") {
+            d.addEventListener("DOMContentLoaded", f, false);
+        } else { f(); }
+    })(document, window, "yandex_metrika_callbacks");
+</script>
+<noscript><div><img src="https://mc.yandex.ru/watch/39773490?ut=noindex" style="position:absolute; left:-9999px;" alt="" /></div></noscript>
+<!-- /Yandex.Metrika counter -->
+
+      </div>
+    </div>
+  </body>
+</html>

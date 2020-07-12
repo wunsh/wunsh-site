@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Директивы `alias`, `require` и `import` |> Сообщество Elixir и Phoenix Framework</title>
+    <meta name="description" content="Русскоязычное сообщество Elixir и Phoenix Framework
+">
+
+    <link rel="alternate" type="application/rss+xml" title="Сообщество Elixir и Phoenix Framework" href="/feed.xml" />
+    <link rel="canonical" href="https://wunsh.ru/docs/alias-require-and-import">
+
+    <style type="text/css">@import url("//fonts.googleapis.com/css?family=Source+Sans+Pro:400,700&subset=cyrillic");</style>
+    <link rel="stylesheet" href="/assets/css/vendors/pure.min.css">
+    <link rel="stylesheet" href="/assets/css/vendors/pure-grids-responsive.min.css">
+    <link rel="stylesheet" href="/assets/css/style.css?1594516983">
+
+    <link rel="shortcut icon" type="image/png" href="/assets/favicon.png" >
+</head>
+
+
+  <body>
+    <div class="wunsh pure-g">
+      
+
+
+
+
+<div class="menu pure-u-1 pure-u-md-1-4">
+  <div class="header">
+    <h2 class="header__title">
+      
+        <a href="https://wunsh.ru" class="header__title_link" title="На главную">Эликсир и&nbsp;Вунш</a>
+      
+    </h2>
+    <h3 class="header__tagline">Erlang + Ruby = &#10084;</h3>
+
+    <nav class="nav">
+      <ul class="nav_list">
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/elixir" class="nav_list__item_link pure-button">О языке</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/install/linux-asdf" class="nav_list__item_link pure-button">Установка</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/docs/" class="nav_list__item_link pure-button">Документация</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/guides" class="nav_list__item_link pure-button">Гайды</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/news" class="nav_list__item_link pure-button">Новости</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/articles" class="nav_list__item_link pure-button">Статьи</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/videos" class="nav_list__item_link pure-button">Видео</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/vacancies" class="nav_list__item_link pure-button">Вакансии</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/faq" class="nav_list__item_link pure-button">FAQ</a>
+            </li>
+          
+        
+      </ul>
+    </nav>
+
+    <a href="#subscribeModal" class="pure-button header__subscribe_link">Подписаться на рассылку</a>
+  </div>
+</div>
+
+
+      <div class="content pure-u-1 pure-u-md-3-4">
+        <article class="post post--docs" itemscope itemtype="http://schema.org/BlogPosting">
+    <header class="post__header">
+        <h1 class="post__title" itemprop="name headline">
+            <p>Директивы <code class="highlighter-rouge">alias</code>, <code class="highlighter-rouge">require</code> и <code class="highlighter-rouge">import</code></p>
+
+        </h1>
+    </header>
+
+    <div class="post__content" itemprop="articleBody">
+        <p>Для повторного использования частей приложения в Эликсире есть три директивы: <code class="highlighter-rouge">alias</code>, <code class="highlighter-rouge">require</code> и <code class="highlighter-rouge">import</code>, а также макрос <code class="highlighter-rouge">use</code> – описанные ниже:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># Псевдоним для модуля. Вместо `Foo.Bar` можно обращаться к модулю через `Bar`</span>
+<span class="n">alias</span> <span class="no">Foo</span><span class="o">.</span><span class="no">Bar</span><span class="p">,</span> <span class="ss">as:</span> <span class="no">Bar</span>
+
+<span class="c1"># Подключение модуля `Foo` для использования его макросов</span>
+<span class="kn">require</span> <span class="no">Foo</span>
+
+<span class="c1"># Импорт функций из модуля `Foo`, чтобы вызывать их без префикса `Foo`</span>
+<span class="kn">import</span> <span class="no">Foo</span>
+
+<span class="c1"># Вызов кода из модуля `Foo` в качестве точки расширения</span>
+<span class="kn">use</span> <span class="no">Foo</span>
+</code></pre></div></div>
+
+<p>Мы рассмотрим их подробно. Помните, что первые три называются директивами, потому что имеют <strong><em>лексическую область видимости</em></strong>, в то время как <code class="highlighter-rouge">use</code> – это <strong><em>точка расширения</em></strong>.</p>
+
+<h2 id="директива-alias">Директива <code class="highlighter-rouge">alias</code></h2>
+
+<p>Директива <code class="highlighter-rouge">alias</code> позволяет нам устанавливать псевдонимы для любых имён модулей.</p>
+
+<p>Представьте модуль, который использует особую форму списка из <code class="highlighter-rouge">Math.List</code>. Директива <code class="highlighter-rouge">alias</code> позволяет ссылаться на <code class="highlighter-rouge">Math.List</code> по имени <code class="highlighter-rouge">List</code> без указания модуля:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">defmodule</span> <span class="no">Stats</span> <span class="k">do</span>
+  <span class="n">alias</span> <span class="no">Math</span><span class="o">.</span><span class="no">List</span><span class="p">,</span> <span class="ss">as:</span> <span class="no">List</span>
+  <span class="c1"># In the remaining module definition List expands to Math.List.</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<p>Оригинальный <code class="highlighter-rouge">List</code> также доступен внутри <code class="highlighter-rouge">Stats</code> по полному имени <code class="highlighter-rouge">Elixir.List</code>.</p>
+
+<blockquote>
+  <p><strong>Обратите внимание.</strong> Все модули, определённые в Эликсире, определены в главном пространстве имён <code class="highlighter-rouge">Elixir</code>. Однако, для удобства, вы можете опустить <code class="highlighter-rouge">Elixir.</code> при обращении к ним.</p>
+</blockquote>
+
+<p>Псевдонимы часто используются для сокращений. Вызов директивы <code class="highlighter-rouge">alias</code> без опции <code class="highlighter-rouge">:as</code> автоматически устанавливает псевдоним для последней части имени модуля, например:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">alias</span> <span class="no">Math</span><span class="o">.</span><span class="no">List</span>
+</code></pre></div></div>
+
+<p>То же самое, что:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">alias</span> <span class="no">Math</span><span class="o">.</span><span class="no">List</span><span class="p">,</span> <span class="ss">as:</span> <span class="no">List</span>
+</code></pre></div></div>
+
+<p>Помните, что <code class="highlighter-rouge">alias</code> имеет лексическую область видимости, поэтому вы можете устанавливать псевдонимы внутри функций:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">defmodule</span> <span class="no">Math</span> <span class="k">do</span>
+  <span class="k">def</span> <span class="n">plus</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">)</span> <span class="k">do</span>
+    <span class="n">alias</span> <span class="no">Math</span><span class="o">.</span><span class="no">List</span>
+    <span class="c1"># ...</span>
+  <span class="k">end</span>
+
+  <span class="k">def</span> <span class="n">minus</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">)</span> <span class="k">do</span>
+    <span class="c1"># ...</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<p>В примере выше, с момента, когда мы вызвали директиву <code class="highlighter-rouge">alias</code> внутри функции <code class="highlighter-rouge">plus/2</code>, псевдоним будет работать внутри этой функции. При этом он не будет доступен внутри функции <code class="highlighter-rouge">minus/2</code>.</p>
+
+<h2 id="директива-require">Директива <code class="highlighter-rouge">require</code></h2>
+
+<p>Эликсир предоставляет макросы, как механизм для метапрограммирования (написания кода, который генерирует код). Макросы генерируют код во время компиляции.</p>
+
+<p>Публичные функции в модулях доступны глобально, но для использования макросов, вам нужно зарегистрировать модуль, в котором они определены.</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">iex</span><span class="o">&gt;</span> <span class="no">Integer</span><span class="o">.</span><span class="n">is_odd</span><span class="p">(</span><span class="m">3</span><span class="p">)</span>
+<span class="o">**</span> <span class="p">(</span><span class="no">UndefinedFunctionError</span><span class="p">)</span> <span class="n">function</span> <span class="no">Integer</span><span class="o">.</span><span class="n">is_odd</span><span class="o">/</span><span class="m">1</span> <span class="n">is</span> <span class="n">undefined</span> <span class="ow">or</span> <span class="n">private</span><span class="o">.</span> <span class="no">However</span> <span class="n">there</span> <span class="n">is</span> <span class="n">a</span> <span class="n">macro</span> <span class="n">with</span> <span class="n">the</span> <span class="n">same</span> <span class="n">name</span> <span class="ow">and</span> <span class="n">arity</span><span class="o">.</span> <span class="no">Be</span> <span class="n">sure</span> <span class="n">to</span> <span class="kn">require</span> <span class="no">Integer</span> <span class="k">if</span> <span class="n">you</span> <span class="n">intend</span> <span class="n">to</span> <span class="n">invoke</span> <span class="n">this</span> <span class="n">macro</span>
+
+<span class="n">iex</span><span class="o">&gt;</span> <span class="kn">require</span> <span class="no">Integer</span>
+<span class="no">Integer</span>
+
+<span class="n">iex</span><span class="o">&gt;</span> <span class="no">Integer</span><span class="o">.</span><span class="n">is_odd</span><span class="p">(</span><span class="m">3</span><span class="p">)</span>
+<span class="no">true</span>
+</code></pre></div></div>
+
+<p>В Эликсире функция <code class="highlighter-rouge">Integer.is_odd/1</code> объявлена как макрос, поэтому её можно использовать в качестве охранного условия. Это значит, что для её вызова нужно подключить с помощью <code class="highlighter-rouge">require</code> модуль <code class="highlighter-rouge">Integer</code>.</p>
+
+<p>Обратите внимание, что как и <code class="highlighter-rouge">alias</code>, директива <code class="highlighter-rouge">require</code> имеет лексическую область видимости. Мы поговорим подробнее о макросах в следующей главе.</p>
+
+<h2 id="директива-import">Директива <code class="highlighter-rouge">import</code></h2>
+
+<p>Директива <code class="highlighter-rouge">import</code> используется для облегчения доступа к функциям или макросам из другого модуля без использования полного имени. Например, если мы хотим использовать фукнцию <code class="highlighter-rouge">duplicate/2</code> из модуля <code class="highlighter-rouge">List</code> несколько раз, мы можем её импортировать:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">iex</span><span class="o">&gt;</span> <span class="kn">import</span> <span class="no">List</span><span class="p">,</span> <span class="ss">only:</span> <span class="p">[</span><span class="ss">duplicate:</span> <span class="m">2</span><span class="p">]</span>
+<span class="no">List</span>
+
+<span class="n">iex</span><span class="o">&gt;</span> <span class="n">duplicate</span> <span class="ss">:ok</span><span class="p">,</span> <span class="m">3</span>
+<span class="p">[</span><span class="ss">:ok</span><span class="p">,</span> <span class="ss">:ok</span><span class="p">,</span> <span class="ss">:ok</span><span class="p">]</span>
+</code></pre></div></div>
+
+<p>В данном случае, мы импортируем только функцию <code class="highlighter-rouge">duplicate</code> с арностью 2 из модуля <code class="highlighter-rouge">List</code>. Хотя опция <code class="highlighter-rouge">:only</code> необязательна, её использование рекомендовано во избежание импорта всех функций из модуля в текущее пространство имён. Опция <code class="highlighter-rouge">:except</code> может также быть передана для импорта всех функций, кроме указанных.</p>
+
+<p>Директива <code class="highlighter-rouge">import</code> также поддерживает ключевые слова <code class="highlighter-rouge">:macros</code> и <code class="highlighter-rouge">:functions</code> для передачи в опцию <code class="highlighter-rouge">:only</code>. Например, для импорта всех макросов можно написать:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">import</span> <span class="no">Integer</span><span class="p">,</span> <span class="ss">only:</span> <span class="ss">:macros</span>
+</code></pre></div></div>
+
+<p>Или для импорта всех функций:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">import</span> <span class="no">Integer</span><span class="p">,</span> <span class="ss">only:</span> <span class="ss">:functions</span>
+</code></pre></div></div>
+
+<p>Помните, что директива <code class="highlighter-rouge">import</code> также имеет лексическую область видимости. Это значит, что мы можем импортировать указанные макросы и функции внутри определения функций:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">defmodule</span> <span class="no">Math</span> <span class="k">do</span>
+  <span class="k">def</span> <span class="n">some_function</span> <span class="k">do</span>
+    <span class="kn">import</span> <span class="no">List</span><span class="p">,</span> <span class="ss">only:</span> <span class="p">[</span><span class="ss">duplicate:</span> <span class="m">2</span><span class="p">]</span>
+    <span class="n">duplicate</span><span class="p">(</span><span class="ss">:ok</span><span class="p">,</span> <span class="m">10</span><span class="p">)</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<p>В примере выше, импортированная <code class="highlighter-rouge">List.duplicate/2</code> видна только внутри функции <code class="highlighter-rouge">some_function</code>. Функция <code class="highlighter-rouge">duplicate/2</code> не будет доступна в других функциях этого модуля (или любого другого).</p>
+
+<p>Обратите внимание, что директива <code class="highlighter-rouge">import</code> модуля автоматически производит его <code class="highlighter-rouge">require</code>.</p>
+
+<h2 id="макрос-use">Макрос <code class="highlighter-rouge">use</code></h2>
+
+<p>Макрос <code class="highlighter-rouge">use</code> часто используется разработчиками для добавления внешней функциональности в текущую лексическую область видимости, зачастую, в модуль.</p>
+
+<p>Например, для написания тестов с использованием фреймворка ExUnit, разработчику нужен модуль <code class="highlighter-rouge">ExUnit.Case</code>:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">defmodule</span> <span class="no">AssertionTest</span> <span class="k">do</span>
+  <span class="kn">use</span> <span class="no">ExUnit</span><span class="o">.</span><span class="no">Case</span><span class="p">,</span> <span class="ss">async:</span> <span class="no">true</span>
+
+  <span class="n">test</span> <span class="sd">"</span><span class="s2">always pass"</span> <span class="k">do</span>
+    <span class="n">assert</span> <span class="no">true</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<p>По сути, макрос <code class="highlighter-rouge">use</code> выполняет директиву <code class="highlighter-rouge">require</code> и совершает обратный вызов <code class="highlighter-rouge">__using__/1</code> для него, позволяя модулю внедрить некоторый код в текущий контекст. В целом, следующий модуль:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">defmodule</span> <span class="no">Example</span> <span class="k">do</span>
+  <span class="kn">use</span> <span class="no">Feature</span><span class="p">,</span> <span class="ss">option:</span> <span class="ss">:value</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<p>компилируется в</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">defmodule</span> <span class="no">Example</span> <span class="k">do</span>
+  <span class="kn">require</span> <span class="no">Feature</span>
+  <span class="no">Feature</span><span class="o">.</span><span class="n">__using__</span><span class="p">(</span><span class="ss">option:</span> <span class="ss">:value</span><span class="p">)</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<h2 id="понимание-псевдонимов">Понимание псевдонимов</h2>
+
+<p>К этому моменту, вы, должно быть, задаётесь вопросом: чем являются псевдонимы в Эликсире и как они представлены?</p>
+
+<p>Псевдоним в Эликсире – идентификатор, начинающийся с большой буквы (например, <code class="highlighter-rouge">String</code>, <code class="highlighter-rouge">Keyword</code> и т. д.), который конвертируется в атом во время компиляции. Например, псевдоним <code class="highlighter-rouge">String</code> переводится по умолчанию в атом <code class="highlighter-rouge">:"Elixir.String"</code>:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">iex</span><span class="o">&gt;</span> <span class="n">is_atom</span><span class="p">(</span><span class="no">String</span><span class="p">)</span>
+<span class="no">true</span>
+
+<span class="n">iex</span><span class="o">&gt;</span> <span class="n">to_string</span><span class="p">(</span><span class="no">String</span><span class="p">)</span>
+<span class="sd">"</span><span class="s2">Elixir.String"</span>
+
+<span class="n">iex</span><span class="o">&gt;</span> <span class="ss">:"Elixir.String"</span> <span class="o">==</span> <span class="no">String</span>
+<span class="no">true</span>
+</code></pre></div></div>
+
+<p>Используя директиву <code class="highlighter-rouge">alias/2</code>, мы изменяем атом, в который разворачивается псевдоним.</p>
+
+<p>Псевдонимы разворачиваются в атомы, потому что модули виртуальной машины Эрланга (и, соответственно, Эликсира) всегда представлены как атомы. Например, вот механизм вызова модулей Эрланга:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">iex</span><span class="o">&gt;</span> <span class="ss">:lists</span><span class="o">.</span><span class="n">flatten</span><span class="p">([</span><span class="m">1</span><span class="p">,</span> <span class="p">[</span><span class="m">2</span><span class="p">],</span> <span class="m">3</span><span class="p">])</span>
+<span class="p">[</span><span class="m">1</span><span class="p">,</span> <span class="m">2</span><span class="p">,</span> <span class="m">3</span><span class="p">]</span>
+</code></pre></div></div>
+
+<h2 id="вложенность-модулей">Вложенность модулей</h2>
+
+<p>Теперь, когда мы поговорили о псевдонимах, мы можем поговорить о вложенности, и как она работает в Эликсире. Рассмотрим следующий пример:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">defmodule</span> <span class="no">Foo</span> <span class="k">do</span>
+  <span class="k">defmodule</span> <span class="no">Bar</span> <span class="k">do</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<p>Пример выше определит два модуля: <code class="highlighter-rouge">Foo</code> и <code class="highlighter-rouge">Foo.Bar</code>. Последний доступен как <code class="highlighter-rouge">Bar</code> внутри <code class="highlighter-rouge">Foo</code>, т. к. они находятся в одной лексической области видимости. Код выше ровно то же самое, что:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">defmodule</span> <span class="no">Elixir</span><span class="o">.</span><span class="no">Foo</span> <span class="k">do</span>
+  <span class="k">defmodule</span> <span class="no">Elixir</span><span class="o">.</span><span class="no">Foo</span><span class="o">.</span><span class="no">Bar</span> <span class="k">do</span>
+  <span class="k">end</span>
+  <span class="n">alias</span> <span class="no">Elixir</span><span class="o">.</span><span class="no">Foo</span><span class="o">.</span><span class="no">Bar</span><span class="p">,</span> <span class="ss">as:</span> <span class="no">Bar</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<p>Если позже модуль <code class="highlighter-rouge">Bar</code> будет перемещён наружу из определения модуля <code class="highlighter-rouge">Foo</code>, к нему придётся обращаться по полному имени <code class="highlighter-rouge">Foo.Bar</code> или создать псевдоним, используя директиву <code class="highlighter-rouge">alias</code>, о которой мы говорили выше.</p>
+
+<p><strong>Помните</strong>: в Эликсире вам не нужно определять модуль <code class="highlighter-rouge">Foo</code> перед тем как определить модуль <code class="highlighter-rouge">Foo.Bar</code>, потому что язык переводит все имена модулей в атомы. Вы можете определить произвольно-вложенные модули без определения модулей в цепочке (например, <code class="highlighter-rouge">Foo.Bar.Baz</code> без определения <code class="highlighter-rouge">Foo</code> или <code class="highlighter-rouge">Foo.Bar</code> в начале).</p>
+
+<p>Как мы увидим в более поздних главах, псевдонимы также играют ключевую роль в макросах, гарантируя их корректность.</p>
+
+<h2 id="множественные-aliasimportrequireuse">Множественные <code class="highlighter-rouge">alias</code>/<code class="highlighter-rouge">import</code>/<code class="highlighter-rouge">require</code>/<code class="highlighter-rouge">use</code></h2>
+
+<p>Начиная с Эликсира версии 1.2, можно сделать <code class="highlighter-rouge">alias</code>, <code class="highlighter-rouge">import</code> или <code class="highlighter-rouge">require</code> нескольких модулей одновременно. Это оказывается полезным, когда мы начинаем писать вложенные модули, что часто используется при написании приложений на Эликсире. Например, представьте, что у вас есть приложение, где все модули вложены в <code class="highlighter-rouge">MyApp</code>, вы можете сделать <code class="highlighter-rouge">alias</code> модулей <code class="highlighter-rouge">MyApp.Foo</code>, <code class="highlighter-rouge">MyApp.Bar</code> и <code class="highlighter-rouge">MyApp.Baz</code> одновременно:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">alias</span> <span class="no">MyApp</span><span class="o">.</span><span class="p">{</span><span class="no">Foo</span><span class="p">,</span> <span class="no">Bar</span><span class="p">,</span> <span class="no">Baz</span><span class="p">}</span>
+</code></pre></div></div>
+
+<p>На этом мы закончим знакомство с модулями Эликсира. Последняя глава посвящена атрибутам модулей.</p>
+
+    </div>
+</article>
+
+<nav class="docs_nav pure-g">
+    <div class="docs_nav__inner pure-u-1 pure-u-md-3-4">
+        <div class="pure-g">
+            <div class="docs_nav__column docs_nav__column--prev pure-u-1-3">
+                
+                    <a href="/docs/io-and-the-file-system.html" class="docs_nav__link pure-button">
+                        &larr;<span class="h-hidden_mobile"> Назад</span></a>
+                
+            </div>
+
+            <div class="docs_nav__column docs_nav__column--contents pure-u-1-3">
+                <a href="#docsContents" class="docs_nav__link docs_nav__link--contents pure-button">☰</a>
+            </div>
+
+            <div class="docs_nav__column docs_nav__column--next pure-u-1-3">
+                
+                    <a href="/docs/module-attributes.html" class="docs_nav__link pure-button">
+                        <span class="h-hidden_mobile">Вперёд </span>&rarr;
+                    </a>
+                
+            </div>
+        </div>
+    </div>
+</nav>
+
+<div id="docsContents" class="modal modal--docs_contents modal--close_backdrop">
+    <div class="modal__content">
+        <a href="#close" title="Закрыть" class="modal__close">x</a>
+
+        <h2 class="modal__title">Содержание</h2>
+
+        
+        <h3 id="руководство-для-начинающих">Руководство для начинающих</h3>
+<ul>
+  <li><a href="/docs">Введение</a></li>
+  <li><a href="/docs/basic-types.html">Базовые типы</a></li>
+  <li><a href="/docs/basic-operators.html">Базовые операторы</a></li>
+  <li><a href="/docs/pattern-matching.html">Сопоставление с образцом</a></li>
+  <li><a href="/docs/case-cond-and-if.html">Конструкции ветвления</a></li>
+  <li><a href="/docs/binaries-strings-and-char-lists.html">Двоичные данные, строки и списки символов</a></li>
+  <li><a href="/docs/keywords-and-maps.html">Ключевые списки и словари</a></li>
+  <li><a href="/docs/modules-and-functions.html">Модули и функции</a></li>
+  <li><a href="/docs/recursion.html">Рекурсия</a></li>
+  <li><a href="/docs/enumerables-and-streams.html">Перечисления и потоки</a></li>
+  <li><a href="/docs/processes.html">Процессы</a></li>
+  <li><a href="/docs/io-and-the-file-system.html">Ввод/вывод и файловая система</a></li>
+  <li><a href="/docs/alias-require-and-import.html">Директивы <code class="highlighter-rouge">alias</code>, <code class="highlighter-rouge">require</code> и <code class="highlighter-rouge">import</code></a></li>
+  <li><a href="/docs/module-attributes.html">Атрибуты модулей</a></li>
+  <li><a href="/docs/structs.html">Структуры</a></li>
+  <li><a href="/docs/protocols.html">Протоколы</a></li>
+  <li><a href="/docs/comprehensions.html">Списковые выражения</a></li>
+  <li><a href="/docs/sigils.html">Сигилы</a></li>
+  <li><a href="/docs/try-catch-and-rescue.html">Конструкция <code class="highlighter-rouge">try</code>, <code class="highlighter-rouge">catch</code> и <code class="highlighter-rouge">rescue</code></a></li>
+  <li><a href="/docs/typespecs-and-behaviours.html">Спецификации типов и поведения</a></li>
+  <li><a href="/docs/erlang-libraries.html">Библиотеки Эрланга</a></li>
+  <li><a href="/docs/where-to-go-next.html">Куда двигаться дальше</a></li>
+</ul>
+
+<h3 id="микс-и-otp">Микс и <code class="highlighter-rouge">OTP</code></h3>
+<ul>
+  <li><a href="/docs/mix-otp/introduction-to-mix.html">Введение в Микс</a></li>
+  <li><a href="/docs/mix-otp/agent.html">Агент</a></li>
+  <li><a href="/docs/mix-otp/genserver.html">GenServer</a></li>
+  <li><a href="/docs/mix-otp/supervisor-and-application.html">Супервизор и приложение</a></li>
+  <li><a href="/docs/mix-otp/dynamic-supervisor.html">Динамический супервизор</a></li>
+  <li><a href="/docs/mix-otp/ets.html">ETS</a></li>
+  <li><a href="/docs/mix-otp/dependencies-and-umbrella-apps.html">Зависимости и зонтичные проекты</a></li>
+  <li><a href="/docs/mix-otp/task-and-gen-tcp.html">Модули <code class="highlighter-rouge">Task</code> и <code class="highlighter-rouge">:gen_tcp</code></a></li>
+  <li><a href="/docs/mix-otp/docs-tests-and-with.html">Доктесты, паттерны и оператор <code class="highlighter-rouge">with</code></a></li>
+  <li><a href="/docs/mix-otp/distributed-tasks-and-configuration.html">Распределенные задачи и конфигурация</a></li>
+</ul>
+
+<h3 id="метапрограммирование">Метапрограммирование</h3>
+<ul>
+  <li><a href="/docs/meta/quote-and-unquote.html">Конструкции <code class="highlighter-rouge">quote</code> и <code class="highlighter-rouge">unquote</code></a></li>
+  <li><a href="/docs/meta/macros.html">Макросы</a></li>
+  <li><a href="/docs/meta/domain-specific-languages.html">Предметно-ориентированные языки</a></li>
+</ul>
+
+    </div>
+</div>
+
+
+
+        <footer class="footer">
+    &copy; 2020
+    / Россия
+
+    <span class="pull-right">Любые мысли и вопросы пишите на <a href="mailto:elixir@wunsh.ru">elixir@wunsh.ru</a>.</span>
+</footer>
+
+        <div id="subscribeModal" class="modal">
+    <div class="modal__content">
+        <a href="#close" title="Close" class="modal__close">x</a>
+
+        <h2 class="modal__title">Ламповая рассылка про&nbsp;Эликсир</h2>
+
+        <p>Один-два раза в&nbsp;неделю присылаем тёплые письма об&nbsp;Эликсире: переводы самых интересных статей до&nbsp;их&nbsp;появления в&nbsp;открытом доступе, анонсы событий и&nbsp;вкусные бонусы.</p>
+
+        <form action="//wunsh.us14.list-manage.com/subscribe/post?u=c81ca3d4693f62db7f7f67c71&amp;id=a192e2dfef" method="post" id="mc-embedded-subscribe-form" name="mc-embedded-subscribe-form" class="pure-form h-tc validate" target="_blank" novalidate>
+            <input type="email" value="" name="EMAIL" class="modal__input pure-input-rounded large" id="mce-EMAIL" placeholder="Твоя почта" required>
+            <div style="position: absolute; left: -5000px;" aria-hidden="true"><input type="text" name="b_c81ca3d4693f62db7f7f67c71_a192e2dfef" tabindex="-1" value=""></div>
+
+            <input type="submit" value="Присоединиться" name="subscribe" onClick="yaCounter39773490.reachGoal('SUBSCRIBED'); return true" id="mc-embedded-subscribe" class="pure-button button-success large">
+        </form>
+
+        <p>Обязательно подтверди почту, перейдя по&nbsp;ссылке в&nbsp;письме, иначе мы&nbsp;не&nbsp;сможем делиться с&nbsp;тобой полезностями.</p>
+
+        <p>Надоедать точно не&nbsp;будем :)</p>
+    </div>
+</div>
+
+        <script src="/assets/js/vendors/zepto.min.js"></script>
+
+<script>
+    if ($(".post--docs").length) {
+        $(".footer").addClass("footer--docs")
+    }
+
+    $(".modal--close_backdrop").click(function(){
+        window.location.hash = "";
+    });
+</script>
+
+        <!-- Yandex.Metrika counter -->
+<script type="text/javascript">
+    (function (d, w, c) {
+        (w[c] = w[c] || []).push(function() {
+            try {
+                w.yaCounter39773490 = new Ya.Metrika({
+                    id:39773490,
+                    clickmap:true,
+                    trackLinks:true,
+                    accurateTrackBounce:true,
+                    webvisor:true,
+                    ut:"noindex"
+                });
+            } catch(e) { }
+        });
+
+        var n = d.getElementsByTagName("script")[0],
+            s = d.createElement("script"),
+            f = function () { n.parentNode.insertBefore(s, n); };
+        s.type = "text/javascript";
+        s.async = true;
+        s.src = "https://mc.yandex.ru/metrika/watch.js";
+
+        if (w.opera == "[object Opera]") {
+            d.addEventListener("DOMContentLoaded", f, false);
+        } else { f(); }
+    })(document, window, "yandex_metrika_callbacks");
+</script>
+<noscript><div><img src="https://mc.yandex.ru/watch/39773490?ut=noindex" style="position:absolute; left:-9999px;" alt="" /></div></noscript>
+<!-- /Yandex.Metrika counter -->
+
+      </div>
+    </div>
+  </body>
+</html>

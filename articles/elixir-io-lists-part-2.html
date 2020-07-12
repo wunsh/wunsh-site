@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Списки ввода-вывода в&nbsp;Elixir. Часть&nbsp;2: применение в&nbsp;Phoenix |> Сообщество Elixir и Phoenix Framework</title>
+    <meta name="description" content="В этой статье рассказывается об использовании структуры под названием списки ввода-вывода в Phoenix Framework.">
+
+    <link rel="alternate" type="application/rss+xml" title="Сообщество Elixir и Phoenix Framework" href="/feed.xml" />
+    <link rel="canonical" href="https://wunsh.ru/articles/elixir-io-lists-part-2.html">
+
+    <style type="text/css">@import url("//fonts.googleapis.com/css?family=Source+Sans+Pro:400,700&subset=cyrillic");</style>
+    <link rel="stylesheet" href="/assets/css/vendors/pure.min.css">
+    <link rel="stylesheet" href="/assets/css/vendors/pure-grids-responsive.min.css">
+    <link rel="stylesheet" href="/assets/css/style.css?1594516983">
+
+    <link rel="shortcut icon" type="image/png" href="/assets/favicon.png" >
+</head>
+
+
+  <body>
+    <div class="wunsh pure-g">
+      
+
+
+
+
+<div class="menu pure-u-1 pure-u-md-1-4">
+  <div class="header">
+    <h2 class="header__title">
+      
+        <a href="https://wunsh.ru" class="header__title_link" title="На главную">Эликсир и&nbsp;Вунш</a>
+      
+    </h2>
+    <h3 class="header__tagline">Erlang + Ruby = &#10084;</h3>
+
+    <nav class="nav">
+      <ul class="nav_list">
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/elixir" class="nav_list__item_link pure-button">О языке</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/install/linux-asdf" class="nav_list__item_link pure-button">Установка</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/docs/" class="nav_list__item_link pure-button">Документация</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/guides" class="nav_list__item_link pure-button">Гайды</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/news" class="nav_list__item_link pure-button">Новости</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/articles" class="nav_list__item_link pure-button">Статьи</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/videos" class="nav_list__item_link pure-button">Видео</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/vacancies" class="nav_list__item_link pure-button">Вакансии</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/faq" class="nav_list__item_link pure-button">FAQ</a>
+            </li>
+          
+        
+      </ul>
+    </nav>
+
+    <a href="#subscribeModal" class="pure-button header__subscribe_link">Подписаться на рассылку</a>
+  </div>
+</div>
+
+
+      <div class="content pure-u-1 pure-u-md-3-4">
+        
+
+<article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+  <header class="post__header">
+    
+    <h1 class="post__title" itemprop="name headline">Списки ввода-вывода в&nbsp;Elixir. Часть&nbsp;2: применение в&nbsp;Phoenix</h1>
+
+    <div class="post__meta post_meta">
+      <ul class="meta_list">
+        <li class="meta_list__item">
+          
+          <span class="">
+            <small class="meta_list__item_name">Дата</small>
+            <time class="h-bold" datetime="2017-03-07T00:00:00+00:00" itemprop="datePublished">
+              
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+07 марта 2017
+
+            </time>
+          </span>
+          
+
+          
+        </li>
+        
+        <li class="meta_list__item">
+            <span class="tag_cloud tags_cloud--inline h-no_margin">
+              <small class="meta_list__item_name">Теги</small> 
+
+
+<ul class="tags_cloud__list">
+  
+    <a href="/tags/#advanced" class="tags_cloud__link tag tag--advanced">advanced</a>
+  
+</ul>
+
+            </span>
+        </li>
+        
+        <li class="meta_list__item">
+          <span itemprop="author" itemscope itemtype="http://schema.org/Person">
+            <small class="meta_list__item_name">
+              
+                Перевод
+              
+            </small>
+            <span itemprop="name" class="h-bold">Надежда Нестерова</span>
+          </span>
+        </li>
+
+        <li class="meta_list__item">
+          
+            <div >
+              <small>Оригинал</small>
+              <strong>
+                &laquo;<a href="https://www.bignerdranch.com/blog/elixir-and-io-lists-part-2-io-lists-in-phoenix/" style="text-transform: none; text-decoration: underline; color: #4b2e39;">Elixir and IO Lists, Part 2. IO Lists in Phoenix</a>&raquo;
+              </strong>
+              <small>&copy;</small>
+              <strong>Nathan Long</strong>
+            </div>
+          
+        </li>
+      </ul>
+    </div>
+  </header>
+
+  <div class="post__content" itemprop="articleBody">
+    <p>В&nbsp;<a href="/articles/elixir-io-lists-part-1.html">предыдущей части</a> мы&nbsp;рассмотрели, как использование списков ввода-вывода в&nbsp;Elixir упрощает работу над реализацией вывода данных и&nbsp;уменьшает расход памяти.</p>
+<p>Это отличное решение для создания файлов, но&nbsp;оно едва&nbsp;ли подойдет для веб-приложений. Любая веб-страница содержит динамические элементы: имя текущего пользователя, список недавних постов или изображение товаров в&nbsp;корзине.</p>
+<p>Но&nbsp;эти динамические фрагменты оборачиваются в&nbsp;разметку, которая всегда выглядит одинаково: например, каждый товар помещается&nbsp;в <code>&lt;div class=&quot;product&quot;&gt;</code>. А&nbsp;меню, шапка и&nbsp;подвал, скорее всего, содержат одни и&nbsp;те&nbsp;же большие куски HTML-кода.</p>
+<p>Предположим, имеется шаблон с&nbsp;именем <code>users/index.html.eex</code>, который выглядит так:</p>
+<p><img src="https://habrastorage.org/files/ff1/952/29c/ff195229c36642a19b0f485ce9cff8fd.png"/></p>
+<p><p>Эти строки понадобятся нам снова и&nbsp;снова, а&nbsp;выделенный текст вообще никогда не&nbsp;меняется:</p>
+<img src="https://habrastorage.org/files/089/9bd/6d8/0899bd6d87874be5abefb08fcba8d9e5.png"/></p>
+<p>Большинство веб-фреймворков осуществляют конкатенацию статической разметки и&nbsp;динамических данных в&nbsp;одну большую строку ответа. Реализовать такую конкатенацию не&nbsp;так то&nbsp;просто, да&nbsp;и&nbsp;сборщику мусора при этом придётся хорошенько поработать.</p>
+<p>Вместо всего этого Phoenix:</p>
+<ul>
+    <li>
+        <p>загружает все шаблоны из&nbsp;директории шаблонов на&nbsp;этапе компиляции;</p>
+    </li>
+    <li>
+        <p>находит среди них <code>users/index.html.eex</code>;</p>
+    </li>
+    <li>
+        <p>использует EEx для компиляции шаблона в&nbsp;функцию вместе с&nbsp;его макетом и&nbsp;фрагментами;</p>
+    </li>
+    <li>
+        <p>приказывает EEx сделать так, чтобы эта функция создавала и&nbsp;возвращала не&nbsp;строки, а&nbsp;списки ввода-вывода;</p>
+    </li>
+    <li>
+        <p>хранит функцию рендеринга шаблона в&nbsp;виде <code>UsersView.render(&quot;index.html&laquo;, assigns)</code>;</p>
+    </li>
+</ul>
+<p>Созданная функция будет выглядеть примерно так:</p>
+<figure class="highlight"><pre><code class="language-elixir" data-lang="elixir"><span class="k">defmodule</span> <span class="no">MyApp</span><span class="o">.</span><span class="no">SomeView</span> <span class="k">do</span>
+  <span class="k">defp</span><span class="p">(</span><span class="n">index</span><span class="o">.</span><span class="n">html</span><span class="p">(</span><span class="n">var!</span><span class="p">(</span><span class="n">assigns</span><span class="p">)))</span> <span class="k">do</span>
+    <span class="n">_</span> <span class="o">=</span> <span class="n">var!</span><span class="p">(</span><span class="n">assigns</span><span class="p">)</span>
+    <span class="p">{</span><span class="ss">:safe</span><span class="p">,</span> <span class="p">[(</span>
+      <span class="n">tmp1</span> <span class="o">=</span> <span class="p">[</span><span class="sd">"</span><span class="s2">"</span> <span class="o">|</span> <span class="sd">"</span><span class="s2">&lt;h1&gt;Listing Users&lt;/h1&gt;\n\n&lt;ul&gt;\n  "</span><span class="p">]</span>
+      <span class="p">[</span><span class="n">tmp1</span> <span class="o">|</span> <span class="k">case</span><span class="p">(</span><span class="n">for</span><span class="p">(</span><span class="n">user</span> <span class="o">&lt;-</span> <span class="no">Phoenix</span><span class="o">.</span><span class="no">HTML</span><span class="o">.</span><span class="no">Engine</span><span class="o">.</span><span class="n">fetch_assign</span><span class="p">(</span><span class="n">var!</span><span class="p">(</span><span class="n">assigns</span><span class="p">),</span> <span class="ss">:users</span><span class="p">))</span> <span class="k">do</span>
+        <span class="p">{</span><span class="ss">:safe</span><span class="p">,</span> <span class="p">[(</span>
+          <span class="n">tmp1</span> <span class="o">=</span> <span class="p">[(</span>
+            <span class="n">tmp1</span> <span class="o">=</span> <span class="p">[</span><span class="sd">"</span><span class="s2">"</span> <span class="o">|</span> <span class="sd">"</span><span class="s2">\n    &lt;li&gt; "</span><span class="p">]</span>
+            <span class="p">[</span><span class="n">tmp1</span> <span class="o">|</span> <span class="k">case</span><span class="p">(</span><span class="n">user</span><span class="o">.</span><span class="n">first_name</span><span class="p">())</span> <span class="k">do</span>
+              <span class="p">{</span><span class="ss">:safe</span><span class="p">,</span> <span class="n">data</span><span class="p">}</span> <span class="o">-&gt;</span>
+                <span class="n">data</span>
+              <span class="n">bin</span> <span class="ow">when</span> <span class="n">is_binary</span><span class="p">(</span><span class="n">bin</span><span class="p">)</span> <span class="o">-&gt;</span>
+                <span class="no">Plug</span><span class="o">.</span><span class="no">HTML</span><span class="o">.</span><span class="n">html_escape</span><span class="p">(</span><span class="n">bin</span><span class="p">)</span>
+              <span class="n">other</span> <span class="o">-&gt;</span>
+                <span class="no">Phoenix</span><span class="o">.</span><span class="no">HTML</span><span class="o">.</span><span class="no">Safe</span><span class="o">.</span><span class="n">to_iodata</span><span class="p">(</span><span class="n">other</span><span class="p">)</span>
+            <span class="k">end</span><span class="p">]</span>
+          <span class="p">)</span> <span class="o">|</span> <span class="sd">"</span><span class="s2"> ("</span><span class="p">]</span>
+          <span class="p">[</span><span class="n">tmp1</span> <span class="o">|</span> <span class="k">case</span><span class="p">(</span><span class="n">user</span><span class="o">.</span><span class="n">id</span><span class="p">())</span> <span class="k">do</span>
+            <span class="p">{</span><span class="ss">:safe</span><span class="p">,</span> <span class="n">data</span><span class="p">}</span> <span class="o">-&gt;</span>
+              <span class="n">data</span>
+            <span class="n">bin</span> <span class="ow">when</span> <span class="n">is_binary</span><span class="p">(</span><span class="n">bin</span><span class="p">)</span> <span class="o">-&gt;</span>
+              <span class="no">Plug</span><span class="o">.</span><span class="no">HTML</span><span class="o">.</span><span class="n">html_escape</span><span class="p">(</span><span class="n">bin</span><span class="p">)</span>
+            <span class="n">other</span> <span class="o">-&gt;</span>
+              <span class="no">Phoenix</span><span class="o">.</span><span class="no">HTML</span><span class="o">.</span><span class="no">Safe</span><span class="o">.</span><span class="n">to_iodata</span><span class="p">(</span><span class="n">other</span><span class="p">)</span>
+          <span class="k">end</span><span class="p">]</span>
+        <span class="p">)</span> <span class="o">|</span> <span class="sd">"</span><span class="s2">)&lt;/li&gt;\n  "</span><span class="p">]}</span>
+      <span class="k">end</span><span class="p">)</span> <span class="k">do</span>
+        <span class="p">{</span><span class="ss">:safe</span><span class="p">,</span> <span class="n">data</span><span class="p">}</span> <span class="o">-&gt;</span>
+          <span class="n">data</span>
+        <span class="n">bin</span> <span class="ow">when</span> <span class="n">is_binary</span><span class="p">(</span><span class="n">bin</span><span class="p">)</span> <span class="o">-&gt;</span>
+          <span class="no">Plug</span><span class="o">.</span><span class="no">HTML</span><span class="o">.</span><span class="n">html_escape</span><span class="p">(</span><span class="n">bin</span><span class="p">)</span>
+        <span class="n">other</span> <span class="o">-&gt;</span>
+          <span class="no">Phoenix</span><span class="o">.</span><span class="no">HTML</span><span class="o">.</span><span class="no">Safe</span><span class="o">.</span><span class="n">to_iodata</span><span class="p">(</span><span class="n">other</span><span class="p">)</span>
+      <span class="k">end</span><span class="p">]</span>
+    <span class="p">)</span> <span class="o">|</span> <span class="sd">"</span><span class="s2">\n&lt;/ul&gt;\n\nThat's all!\n"</span><span class="p">]}</span>
+  <span class="k">end</span>
+
+  <span class="k">def</span><span class="p">(</span><span class="n">render</span><span class="p">(</span><span class="sd">"</span><span class="s2">index.html"</span><span class="p">,</span> <span class="n">assigns</span><span class="p">))</span> <span class="k">do</span>
+    <span class="n">index</span><span class="o">.</span><span class="n">html</span><span class="p">(</span><span class="n">assigns</span><span class="p">)</span>
+  <span class="k">end</span>
+<span class="k">end</span></code></pre></figure>
+<p>Отметим, что в&nbsp;этой функции присутствуют строковые литералы вроде <code>&lt;h1&gt;Listing Users&lt;/h1&gt;\n\n&lt;ul&gt;\n</code> и <code>\n &lt;li&gt;</code>. Это одни и&nbsp;те&nbsp;же иммутабельные строки, которые хранятся в&nbsp;одних и&nbsp;тех&nbsp;же ячейках памяти и&nbsp;запрос за&nbsp;запросом появляются в&nbsp;возвращаемом списке ввода-вывода.</p>
+<p>После запуска функция возвратит такой список ввода-вывода:</p>
+<figure class="highlight"><pre><code class="language-elixir" data-lang="elixir"><span class="p">[[[</span><span class="sd">"</span><span class="s2">"</span> <span class="o">|</span> <span class="sd">"</span><span class="s2">&lt;h1&gt;Listing Users&lt;/h1&gt;\n\n&lt;ul&gt;\n  "</span><span class="p">],</span>
+    <span class="p">[[[[[</span><span class="sd">"</span><span class="s2">"</span> <span class="o">|</span> <span class="sd">"</span><span class="s2">\n    &lt;li&gt;"</span><span class="p">]</span> <span class="o">|</span> <span class="sd">"</span><span class="s2">Jane"</span><span class="p">]</span> <span class="o">|</span> <span class="sd">"</span><span class="s2"> ("</span><span class="p">]</span> <span class="o">|</span> <span class="sd">"</span><span class="s2">1"</span><span class="p">]</span> <span class="o">|</span> <span class="sd">"</span><span class="s2">)&lt;/li&gt;\n  "</span><span class="p">],</span>
+    <span class="p">[[[[[</span><span class="sd">"</span><span class="s2">"</span> <span class="o">|</span> <span class="sd">"</span><span class="s2">\n    &lt;li&gt;"</span><span class="p">]</span> <span class="o">|</span> <span class="sd">"</span><span class="s2">Joe"</span><span class="p">]</span> <span class="o">|</span> <span class="sd">"</span><span class="s2"> ("</span><span class="p">]</span> <span class="o">|</span> <span class="sd">"</span><span class="s2">2"</span><span class="p">]</span> <span class="o">|</span> <span class="sd">"</span><span class="s2">)&lt;/li&gt;\n  "</span><span class="p">]]</span> <span class="o">|</span>
+    <span class="sd">"</span><span class="s2">\n&lt;/ul&gt;\n\nThat's all!\n"</span><span class="p">]</span></code></pre></figure>
+<p>Странный список, не&nbsp;находите? Всё потому, что это &laquo;неправильный&raquo; список.</p>
+<p>Списки обычно составляются путём добавления новых элементов в&nbsp;конец:</p>
+<figure class="highlight"><pre><code class="language-elixir" data-lang="elixir"><span class="n">list</span> <span class="o">=</span> <span class="p">[]</span>           <span class="c1"># =&gt; []</span>
+<span class="n">list</span> <span class="o">=</span> <span class="p">[</span><span class="sd">"</span><span class="s2">C"</span> <span class="o">|</span> <span class="n">list</span><span class="p">]</span> <span class="c1"># =&gt; ["C"]</span>
+<span class="n">list</span> <span class="o">=</span> <span class="p">[</span><span class="sd">"</span><span class="s2">B"</span> <span class="o">|</span> <span class="n">list</span><span class="p">]</span> <span class="c1"># =&gt; ["B", "C"]</span>
+<span class="n">list</span> <span class="o">=</span> <span class="p">[</span><span class="sd">"</span><span class="s2">A"</span> <span class="o">|</span> <span class="n">list</span><span class="p">]</span> <span class="c1"># =&gt; ["A", "B", "C"]</span></code></pre></figure>
+<p>Каждый элемент этого списка сам по&nbsp;себе тоже представляет собой список, первый элемент которого&nbsp;&mdash; указатель на&nbsp;строку, а&nbsp;последний элемент&nbsp;&mdash; указатель на&nbsp;следующий список. Последний список пустой (в&nbsp;примере его нет). Как&nbsp;же много списков!</p>
+<p>Можно ещё сделать так:</p>
+<figure class="highlight"><pre><code class="language-elixir" data-lang="elixir"><span class="n">list</span> <span class="o">=</span> <span class="p">[</span><span class="sd">"</span><span class="s2">A"</span> <span class="o">|</span> <span class="sd">"</span><span class="s2">B"</span><span class="p">]</span>  <span class="c1"># =&gt; ["A" | "B"]</span></code></pre></figure>
+<p>Этот список &laquo;неправильный&raquo;, так как его первый элемент указывает на&nbsp;&laquo;A&raquo;, а&nbsp;последний указывает <strong>не&nbsp;на&nbsp;список</strong>, а&nbsp;на&nbsp;&laquo;B&raquo;.</p>
+<p>Многие функции, ожидающие передачи списков, будут прерваны при получении &laquo;неправильного&raquo; списка, поэтому обычно их&nbsp;лучше вообще не&nbsp;использовать. Но&nbsp;так как единственное, что мы&nbsp;сегодня будем делать с&nbsp;этими списками,&nbsp;&mdash; это оборачивать их&nbsp;в&nbsp;другие списки, а&nbsp;затем записывать их&nbsp;в&nbsp;сокет, &laquo;неправильные&raquo; списки позволят избежать выделения памяти под такое большое количество данных.</p>
+<p>Что&nbsp;ж, идём дальше.</p>
+<p>А&nbsp;дальше как раз происходит самое интересное: список ввода-вывода передаётся процессу веб-сервера, который выводит его пользователю, вызывая в&nbsp;сетевом сокете функцию writev. <strong>Ответ на&nbsp;запрос формируется в&nbsp;окончательном виде только в&nbsp;буфере сокета.</strong></p>
+<p>Напомню, что минимальное требование для отправки ответа&nbsp;&mdash; скопировать каждый байт ответа в&nbsp;сокет. Это всё, что делает Phoenix при реализации выбранного способа рендеринга представлений.</p>
+<h2>Кэширование</h2>
+<p>Описанный выше способ построения ответов обладает ещё одним преимуществом. Помните тот пример шаблона, который содержит строки, повторяющиеся в&nbsp;последующем коде снова и&nbsp;снова?</p>
+<p><img src="https://habrastorage.org/files/089/9bd/6d8/0899bd6d87874be5abefb08fcba8d9e5.png"/></p>
+<p>Мы&nbsp;уже видели, как функция, которую Phoenix компилирует для рендеринга этого шаблона, всё время использует одни и&nbsp;те&nbsp;же строки, просто добавляя в&nbsp;список ввода-вывода необходимые динамические компоненты. Фактически это не&nbsp;что иное, как кэширование представлений.</p>
+<p>Наверняка вы&nbsp;уже имели дело с&nbsp;веб-фреймворками, производящими рендеринг представлений при помощи конкатенации. Они пытаются компенсировать низкую скорость своей работы наличием различных способов кэширования представлений и&nbsp;фрагментов. Вместе с&nbsp;тем они вынудят вас заняться поиском решения одной из&nbsp;сложнейших проблем информатики&nbsp;&mdash; проблемы инвалидации кэша. Следует учитывать, что контент веб-страницы постоянно меняется.</p>
+<p>К&nbsp;примеру, пост блога может обновиться в&nbsp;базе данных. Проблему можно решить, поставив ограничение по&nbsp;времени (кэшировать нужный фрагмент поста в&nbsp;течение одного часа) или привязав кэш представления к&nbsp;состоянию базы данных. Например, HTML-код поста блога и&nbsp;комментариев к&nbsp;нему можно поместить в&nbsp;кэш, но&nbsp;тогда, если в&nbsp;пост или комментарии будут внесены изменения, изменится имя автора поста или имя автора комментария, представление необходимо будет рендерить снова. Такие&nbsp;же правила актуальны и&nbsp;для кэширования матрёшкой в&nbsp;Rails.</p>
+<p>Нужно также иметь в&nbsp;виду, что элементы страницы для каждого пользователя могут быть разными. Например, адрес электронной почты пользователя или список рекомендованных товаров. Эту проблему можно решить путём создания ключей кэша отдельно для каждого пользователя, как это показано в&nbsp;<noindex><a href="https://docs.djangoproject.com/en/1.10/topics/cache/#template-fragment-caching" rel="noreferrer nofollow">документации Django</a></noindex>, или путём кэширования некой общей версии и&nbsp;добавления персонализированного контента после загрузки страницы с&nbsp;помощью Javascript, как сделано в&nbsp;<noindex><a href="http://railscasts.com/episodes/169-dynamic-page-caching?autoplay=false" rel="noreferrer nofollow">этом</a></noindex> примере. Ну&nbsp;или попробовать вообще обойтись без кэширования.</p>
+<p>В&nbsp;любом случае только вам решать, какие части представления стоит кэшировать и&nbsp;при каких обстоятельствах кэш будет считаться валидным. Чем чаще обновляется контент и&nbsp;чем больше он&nbsp;содержит персонализированной информации, тем больше места он&nbsp;занимает в&nbsp;хранилище кэша.</p>
+<p>А&nbsp;я&nbsp;разве не&nbsp;говорил, что вам потребуется хранилище кэша? Вам самим придётся решить, где выделить место для кэша: в&nbsp;оперативной памяти, в&nbsp;файловой системе или во&nbsp;внешней базе данных, а&nbsp;потом разбираться со&nbsp;всеми последствиями своего решения.</p>
+<p>Не&nbsp;хочу показаться грубым, но&nbsp;все грамотные разработчики прикладывают немало усилий, чтобы кэширование представлений происходило легко и&nbsp;удобно, но&nbsp;даже при существующем множестве решений здесь всё ещё есть над чем поработать.</p>
+<p>Phoenix&nbsp;же, напротив, использует простую и&nbsp;универсальную модель кэширования представлений<strong>: кэшируются только статические элементы шаблона, а&nbsp;при изменении файла шаблона данные в&nbsp;кэше аннулируются. Вот и&nbsp;вся схема.</strong></p>
+<p>Так как динамические элементы представления (например, список заголовков постов блога в&nbsp;базе данных) не&nbsp;кэшируются, то&nbsp;нужно передать эти данные функциям представления во&nbsp;время рендеринга. Если запросы к&nbsp;базе данных&nbsp;&mdash; узкое место в&nbsp;производительности приложения, то&nbsp;можно просто кэшировать результаты. Воспользуйтесь, к&nbsp;примеру, <noindex><a href="https://www.postgresql.org/docs/current/static/rules-materializedviews.html" rel="noreferrer nofollow">материализованным представлением</a></noindex>, и&nbsp;специальный процесс будет периодически обновлять результаты. Но&nbsp;это уже никак не&nbsp;связано с&nbsp;шаблонами. Рендеринг представлений в&nbsp;Phoenix происходит так быстро, что задумываться о&nbsp;кэшировании полученных страниц просто нет времени.</p>
+<h2>Дисклеймер</h2>
+<p>Прежде чем перейти к&nbsp;выводам, я&nbsp;хотел&nbsp;бы немного поговорить о&nbsp;системных вызовах.</p>
+<p>В&nbsp;предыдущей части статьи было показано, как виртуальная машина BEAM объединяет короткие строки (длиной менее 64&nbsp;байт), помещая их&nbsp;в&nbsp;аргументы функции <code>writev</code>. Если провести трассировку Phoenix-приложения, то&nbsp;вряд можно увидеть, чтобы каждый тег <code>&lt;li&gt;</code> передавался в&nbsp;функцию <code>writev</code> в&nbsp;качестве отдельного аргумента. Но&nbsp;<code>writev</code> всё&nbsp;же используется в&nbsp;сокете.</p>
+<p>Вот мой пример трассировки Phoenix-приложения, в&nbsp;шаблонах которого присутствуют очень длинные строки:</p>
+<p><img src="https://www.bignerdranch.com/assets/img/blog/2016/10/phoenix_writev.png" alt="Writev"></p>
+<p>Две очень длинные строки, которые я&nbsp;выделил синим, повторяются в&nbsp;шаблоне несколько раз. При записи ответа в&nbsp;сокет, сервер Cowboy всё время ссылается в&nbsp;памяти на&nbsp;одни и&nbsp;те&nbsp;же строки. Строка, выделенная красным, состоит из&nbsp;открывающего HTML-тега и&nbsp;неких неизменяемых данных. На&nbsp;снимке экрана она встречается только один раз, хотя на&nbsp;самом деле в&nbsp;последующих запросах она считывалась снова и&nbsp;снова с&nbsp;одного из&nbsp;того&nbsp;же адреса памяти.</p>
+<p>Но&nbsp;независимо от&nbsp;того, как BEAM записывает ответы Phoenix в&nbsp;сокет, такой способ выигрывает по&nbsp;скорости и&nbsp;эффективности расхода ресурсов.</p>
+<p>Так что в&nbsp;следующий раз, когда Phoenix отрендерит страницу меньше чем за&nbsp;миллисекунду, подумайте о&nbsp;волшебном списке ввода-вывода, благодаря которому это становится возможным.</p>
+  </div>
+
+  <!-- uSocial -->
+  <div class="post__share_block share_block">
+    <script async src="https://usocial.pro/usocial/usocial.js?v=6.1.4" data-script="usocial" charset="utf-8"></script>
+    <div class="uSocial-Share" data-pid="2fd19544e551bce292425ee8adaa31be" data-type="share" data-options="round,style2,default,absolute,horizontal,size32,counter1,counter-before,upArrow-right,nomobile" data-social="telegram,fb,vk,gPlus,twi,bookmarks"></div>
+  </div>
+  <!-- /uSocial -->
+</article>
+
+
+        <footer class="footer">
+    &copy; 2020
+    / Россия
+
+    <span class="pull-right">Любые мысли и вопросы пишите на <a href="mailto:elixir@wunsh.ru">elixir@wunsh.ru</a>.</span>
+</footer>
+
+        <div id="subscribeModal" class="modal">
+    <div class="modal__content">
+        <a href="#close" title="Close" class="modal__close">x</a>
+
+        <h2 class="modal__title">Ламповая рассылка про&nbsp;Эликсир</h2>
+
+        <p>Один-два раза в&nbsp;неделю присылаем тёплые письма об&nbsp;Эликсире: переводы самых интересных статей до&nbsp;их&nbsp;появления в&nbsp;открытом доступе, анонсы событий и&nbsp;вкусные бонусы.</p>
+
+        <form action="//wunsh.us14.list-manage.com/subscribe/post?u=c81ca3d4693f62db7f7f67c71&amp;id=a192e2dfef" method="post" id="mc-embedded-subscribe-form" name="mc-embedded-subscribe-form" class="pure-form h-tc validate" target="_blank" novalidate>
+            <input type="email" value="" name="EMAIL" class="modal__input pure-input-rounded large" id="mce-EMAIL" placeholder="Твоя почта" required>
+            <div style="position: absolute; left: -5000px;" aria-hidden="true"><input type="text" name="b_c81ca3d4693f62db7f7f67c71_a192e2dfef" tabindex="-1" value=""></div>
+
+            <input type="submit" value="Присоединиться" name="subscribe" onClick="yaCounter39773490.reachGoal('SUBSCRIBED'); return true" id="mc-embedded-subscribe" class="pure-button button-success large">
+        </form>
+
+        <p>Обязательно подтверди почту, перейдя по&nbsp;ссылке в&nbsp;письме, иначе мы&nbsp;не&nbsp;сможем делиться с&nbsp;тобой полезностями.</p>
+
+        <p>Надоедать точно не&nbsp;будем :)</p>
+    </div>
+</div>
+
+        <script src="/assets/js/vendors/zepto.min.js"></script>
+
+<script>
+    if ($(".post--docs").length) {
+        $(".footer").addClass("footer--docs")
+    }
+
+    $(".modal--close_backdrop").click(function(){
+        window.location.hash = "";
+    });
+</script>
+
+        <!-- Yandex.Metrika counter -->
+<script type="text/javascript">
+    (function (d, w, c) {
+        (w[c] = w[c] || []).push(function() {
+            try {
+                w.yaCounter39773490 = new Ya.Metrika({
+                    id:39773490,
+                    clickmap:true,
+                    trackLinks:true,
+                    accurateTrackBounce:true,
+                    webvisor:true,
+                    ut:"noindex"
+                });
+            } catch(e) { }
+        });
+
+        var n = d.getElementsByTagName("script")[0],
+            s = d.createElement("script"),
+            f = function () { n.parentNode.insertBefore(s, n); };
+        s.type = "text/javascript";
+        s.async = true;
+        s.src = "https://mc.yandex.ru/metrika/watch.js";
+
+        if (w.opera == "[object Opera]") {
+            d.addEventListener("DOMContentLoaded", f, false);
+        } else { f(); }
+    })(document, window, "yandex_metrika_callbacks");
+</script>
+<noscript><div><img src="https://mc.yandex.ru/watch/39773490?ut=noindex" style="position:absolute; left:-9999px;" alt="" /></div></noscript>
+<!-- /Yandex.Metrika counter -->
+
+      </div>
+    </div>
+  </body>
+</html>

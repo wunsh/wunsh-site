@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Процессы в конкурентной модели Elixir |> Сообщество Elixir и Phoenix Framework</title>
+    <meta name="description" content="Конкурентная модель Elixir строится на понятии процеесов. В этой статье рассматривается что же такое процессы, их жизненный цикл и взаимодействие.">
+
+    <link rel="alternate" type="application/rss+xml" title="Сообщество Elixir и Phoenix Framework" href="/feed.xml" />
+    <link rel="canonical" href="https://wunsh.ru/articles/concurrent-elixir-processes.html">
+
+    <style type="text/css">@import url("//fonts.googleapis.com/css?family=Source+Sans+Pro:400,700&subset=cyrillic");</style>
+    <link rel="stylesheet" href="/assets/css/vendors/pure.min.css">
+    <link rel="stylesheet" href="/assets/css/vendors/pure-grids-responsive.min.css">
+    <link rel="stylesheet" href="/assets/css/style.css?1594516983">
+
+    <link rel="shortcut icon" type="image/png" href="/assets/favicon.png" >
+</head>
+
+
+  <body>
+    <div class="wunsh pure-g">
+      
+
+
+
+
+<div class="menu pure-u-1 pure-u-md-1-4">
+  <div class="header">
+    <h2 class="header__title">
+      
+        <a href="https://wunsh.ru" class="header__title_link" title="На главную">Эликсир и&nbsp;Вунш</a>
+      
+    </h2>
+    <h3 class="header__tagline">Erlang + Ruby = &#10084;</h3>
+
+    <nav class="nav">
+      <ul class="nav_list">
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/elixir" class="nav_list__item_link pure-button">О языке</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/install/linux-asdf" class="nav_list__item_link pure-button">Установка</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/docs/" class="nav_list__item_link pure-button">Документация</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/guides" class="nav_list__item_link pure-button">Гайды</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/news" class="nav_list__item_link pure-button">Новости</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/articles" class="nav_list__item_link pure-button">Статьи</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/videos" class="nav_list__item_link pure-button">Видео</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/vacancies" class="nav_list__item_link pure-button">Вакансии</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/faq" class="nav_list__item_link pure-button">FAQ</a>
+            </li>
+          
+        
+      </ul>
+    </nav>
+
+    <a href="#subscribeModal" class="pure-button header__subscribe_link">Подписаться на рассылку</a>
+  </div>
+</div>
+
+
+      <div class="content pure-u-1 pure-u-md-3-4">
+        
+
+<article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+  <header class="post__header">
+    
+    <h1 class="post__title" itemprop="name headline">Процессы в конкурентной модели Elixir</h1>
+
+    <div class="post__meta post_meta">
+      <ul class="meta_list">
+        <li class="meta_list__item">
+          
+          <span class="">
+            <small class="meta_list__item_name">Дата</small>
+            <time class="h-bold" datetime="2016-12-02T00:00:00+00:00" itemprop="datePublished">
+              
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+02 декабря 2016
+
+            </time>
+          </span>
+          
+
+          
+        </li>
+        
+        <li class="meta_list__item">
+            <span class="tag_cloud tags_cloud--inline h-no_margin">
+              <small class="meta_list__item_name">Теги</small> 
+
+
+<ul class="tags_cloud__list">
+  
+    <a href="/tags/#beginner" class="tags_cloud__link tag tag--beginner">beginner</a>
+  
+</ul>
+
+            </span>
+        </li>
+        
+        <li class="meta_list__item">
+          <span itemprop="author" itemscope itemtype="http://schema.org/Person">
+            <small class="meta_list__item_name">
+              
+                Перевод
+              
+            </small>
+            <span itemprop="name" class="h-bold">Надежда Нестерова</span>
+          </span>
+        </li>
+
+        <li class="meta_list__item">
+          
+            <div >
+              <small>Оригинал</small>
+              <strong>
+                &laquo;<a href="https://bassam.co/blog/2016/08/concurrent-elixir-processes/" style="text-transform: none; text-decoration: underline; color: #4b2e39;">Concurrent Elixir. Processes</a>&raquo;
+              </strong>
+              <small>&copy;</small>
+              <strong>Bassam Ismail</strong>
+            </div>
+          
+        </li>
+      </ul>
+    </div>
+  </header>
+
+  <div class="post__content" itemprop="articleBody">
+    <h2>Введение</h2>
+
+<p>Процессы&nbsp;&mdash; фундамент конкурентной модели Elixir. Вместо потоков операционной системы в&nbsp;Elixir реализованы высокопроизводительные легковесные &laquo;зелёные&raquo; потоки, а&nbsp;процессы взаимодействуют и&nbsp;синхронизируются друг с&nbsp;другом посредством <i>передачи сообщений</i>. Elixir- и&nbsp;Erlang-разработчикам не&nbsp;приходится беспокоиться о&nbsp;производительности при одновременном запуске нескольких тысяч процессов, поскольку они являются изолированными, а&nbsp;память освобождается после их&nbsp;отработки или уничтожения.</p>
+
+<h2>Создание процесса</h2>
+
+<p>Для создания нового процесса в&nbsp;Elixir используется функция <code>spawn</code>. В&nbsp;неё можно передать либо анонимную функцию, либо функцию с&nbsp;аргументами из&nbsp;модуля. Новый процесс создастся в&nbsp;текущем процессе виртуальной машины Beam, однако эти два процесса совершенно не&nbsp;связаны друг с&nbsp;другом и&nbsp;не&nbsp;имеют общих данных. Все необходимые переменные копируются в&nbsp;только что созданные процессы.</p>
+
+<h4>Использование анонимной функции</h4>
+
+<figure class="highlight"><pre><code class="language-elixir" data-lang="elixir"><span class="n">spawn</span> <span class="k">fn</span> <span class="o">-&gt;</span>
+<span class="no">IO</span><span class="o">.</span><span class="n">inspect</span> <span class="sd">"</span><span class="s2">Process body here."</span>
+<span class="k">end</span></code></pre></figure>
+
+<h4>Использование функции модуля</h4>
+
+<figure class="highlight"><pre><code class="language-elixir" data-lang="elixir"><span class="n">spawn</span> <span class="no">Module</span><span class="p">,</span> <span class="ss">:function</span><span class="p">,</span> <span class="p">[</span><span class="n">arg1</span><span class="p">,</span> <span class="n">arg2</span><span class="p">]</span></code></pre></figure>
+
+<h2>Обмен сообщениями</h2>
+
+<p>Elixir опирается на&nbsp;Erlang и&nbsp;его мощную виртуальную машину в&nbsp;целях обеспечения конкурентности, основанной на&nbsp;принципах модели акторов. Данные передаются от&nbsp;процесса к&nbsp;процессу с&nbsp;помощью сообщений, посылаемых идентификаторам.</p>
+
+<figure class="highlight"><pre><code class="language-elixir" data-lang="elixir"><span class="n">pid</span> <span class="o">=</span> <span class="n">spawn</span> <span class="no">Module</span><span class="p">,</span> <span class="ss">:function</span><span class="p">,</span> <span class="p">[</span><span class="n">arg1</span><span class="p">,</span> <span class="n">arg2</span><span class="p">]</span>
+<span class="n">pid2</span> <span class="o">=</span> <span class="n">spawn</span> <span class="k">fn</span> <span class="o">-&gt;</span> <span class="no">IO</span><span class="o">.</span><span class="n">inspect</span> <span class="sd">"</span><span class="s2">Current Process: </span><span class="si">#{</span><span class="n">self</span><span class="si">}</span><span class="s2">."</span> <span class="k">end</span></code></pre></figure>
+
+<h3>Идентификаторы процессов</h3>
+
+<p>При создании нового процесса в&nbsp;качестве возвращаемого параметра выступает идентификатор процесса <code>pid</code>. <code>pid</code> в&nbsp;Elixir&nbsp;&mdash; это тип данных, используемый для работы с&nbsp;процессами. С&nbsp;помощью идентификатора можно проверить статус процесса, послать ему сообщения, уничтожить его и&nbsp;многое другое. Функция <code>self</code> позволяет получить <code>pid</code> текущего процесса.</p>
+
+<figure class="highlight"><pre><code class="language-elixir" data-lang="elixir"><span class="n">pid</span> <span class="o">=</span> <span class="n">spawn</span> <span class="no">Account</span><span class="p">,</span> <span class="ss">:add</span><span class="p">,</span> <span class="p">[]</span>
+<span class="n">send</span> <span class="n">pid</span><span class="p">,</span> <span class="p">{</span><span class="ss">:deposit</span><span class="p">,</span> <span class="m">1_000_000</span><span class="p">}</span></code></pre></figure>
+
+<h3>Отправка сообщений</h3>
+
+<p>Послать сообщение процессу можно с&nbsp;помощью макроса <code>send</code>. В&nbsp;него потребуется передать идентификатор <code>pid</code> процесса-получателя и&nbsp;само сообщение. Сообщение может представлять собой любой тип данных, однако для Elixir-сообщества характерно использование атомов или тегированных кортежей, которые можно сопоставлять с&nbsp;образцом для проверки на&nbsp;ошибки.</p>
+
+<h3>Получение сообщений</h3>
+
+<p>Обработать все сообщения в&nbsp;почтовом ящике процесса поможет макрос <code>receive</code>. Можно обрабатывать все полученные сообщения таким способом или&nbsp;же проводить сопоставлением с&nbsp;образцом.</p>
+
+<h4>Получение обычным способом</h4>
+
+<figure class="highlight"><pre><code class="language-elixir" data-lang="elixir"><span class="k">receive</span> <span class="k">do</span>
+  <span class="n">message</span> <span class="o">-&gt;</span>
+    <span class="no">IO</span><span class="o">.</span><span class="n">inspect</span> <span class="sd">"</span><span class="s2">Generic method to handle all the messages: </span><span class="si">#{</span><span class="n">message</span><span class="si">}</span><span class="s2">."</span>
+  <span class="k">end</span>
+<span class="k">end</span></code></pre></figure>
+
+<h4>Сопоставление с&nbsp;образцом</h4>
+
+<figure class="highlight"><pre><code class="language-elixir" data-lang="elixir"><span class="k">receive</span> <span class="k">do</span>
+  <span class="p">{</span><span class="ss">:ok</span><span class="p">,</span> <span class="n">data</span><span class="p">}</span> <span class="o">-&gt;</span>
+    <span class="no">IO</span><span class="o">.</span><span class="n">puts</span> <span class="sd">"</span><span class="s2">Received data: </span><span class="si">#{</span><span class="n">data</span><span class="si">}</span><span class="s2">."</span>
+  <span class="p">{</span><span class="ss">:error</span><span class="p">,</span> <span class="n">reason</span><span class="p">}</span> <span class="o">-&gt;</span>
+    <span class="no">IO</span><span class="o">.</span><span class="n">puts</span> <span class="sd">"</span><span class="s2">Failed to get data: </span><span class="si">#{</span><span class="n">reason</span><span class="si">}</span><span class="s2">."</span>
+  <span class="k">end</span>
+<span class="k">end</span></code></pre></figure>
+
+<p><code>receive</code> продолжит работать в&nbsp;фоновом режиме, ожидая получения новых сообщений. Тем не&nbsp;менее в&nbsp;блоке after макроса recieve есть возможность указать необходимое время ожидания.</p>
+
+<figure class="highlight"><pre><code class="language-elixir" data-lang="elixir"><span class="k">receive</span> <span class="k">do</span>
+  <span class="o">...</span>
+<span class="k">after</span> <span class="m">500</span> <span class="o">-&gt;</span>
+  <span class="no">IO</span><span class="o">.</span><span class="n">puts</span> <span class="sd">"</span><span class="s2">Didn't get any messages."</span>
+<span class="k">end</span></code></pre></figure>
+
+<h3>Пример</h3>
+
+<p>Процессы выгодно использовать в&nbsp;тех случаях, когда последовательное выполнение заданий занимает слишком много времени. Например, реализация параллельного загрузчика файлов: просто передаём ему набор ссылок, и&nbsp;файлы загружаются параллельно. Это значительно сокращает время выполнения задачи по&nbsp;сравнению с&nbsp;линейным способом реализации.</p>
+
+<h4>Пример кода</h4>
+
+<figure class="highlight"><pre><code class="language-elixir" data-lang="elixir"><span class="k">defmodule</span> <span class="no">Downloader</span> <span class="k">do</span>
+  <span class="k">def</span> <span class="n">pget</span><span class="p">(</span><span class="n">url</span><span class="p">)</span> <span class="ow">when</span> <span class="n">is_list</span><span class="p">(</span><span class="n">url</span><span class="p">)</span> <span class="k">do</span>
+    <span class="n">url</span>
+    <span class="o">|&gt;</span> <span class="no">Enum</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="o">&amp;</span><span class="n">spawn_process</span><span class="p">(</span><span class="nv">&amp;1</span><span class="p">,</span> <span class="n">self</span><span class="p">))</span>
+    <span class="o">|&gt;</span> <span class="no">Enum</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="o">&amp;</span><span class="n">await</span><span class="o">/</span><span class="m">1</span><span class="p">)</span>
+  <span class="k">end</span>
+
+  <span class="k">defp</span> <span class="n">spawn_process</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">parent</span><span class="p">)</span> <span class="k">do</span>
+    <span class="n">spawn_link</span> <span class="k">fn</span> <span class="o">-&gt;</span>
+      <span class="k">case</span> <span class="no">HTTPoison</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">url</span><span class="p">)</span> <span class="k">do</span>
+        <span class="p">{</span><span class="ss">:ok</span><span class="p">,</span> <span class="p">%</span><span class="no">HTTPoison</span><span class="o">.</span><span class="no">Response</span><span class="p">{</span><span class="ss">body:</span> <span class="n">body</span><span class="p">,</span> <span class="ss">headers:</span> <span class="n">_headers</span><span class="p">,</span> <span class="ss">status_code:</span> <span class="m">200</span><span class="p">}}</span> <span class="o">-&gt;</span>
+          <span class="n">send</span> <span class="n">parent</span><span class="p">,</span> <span class="p">{</span><span class="ss">:ok</span><span class="p">,</span> <span class="n">body</span><span class="p">}</span>
+        <span class="p">{</span><span class="ss">:error</span><span class="p">,</span> <span class="p">%</span><span class="no">HTTPoison</span><span class="o">.</span><span class="no">Error</span><span class="p">{</span><span class="ss">reason:</span> <span class="n">reason</span><span class="p">}}</span> <span class="o">-&gt;</span>
+          <span class="n">send</span> <span class="n">parent</span><span class="p">,</span> <span class="p">{</span><span class="ss">:error</span><span class="p">,</span> <span class="sd">"</span><span class="s2">Failed: </span><span class="si">#{</span><span class="n">reason</span><span class="si">}</span><span class="s2">."</span><span class="p">}</span>
+        <span class="n">_</span> <span class="o">-&gt;</span>
+          <span class="n">send</span> <span class="n">parent</span><span class="p">,</span> <span class="p">{</span><span class="ss">:error</span><span class="p">,</span> <span class="sd">"</span><span class="s2">Failed."</span><span class="p">}</span>
+      <span class="k">end</span>
+    <span class="k">end</span>
+  <span class="k">end</span>
+
+  <span class="k">defp</span> <span class="n">await</span><span class="p">(</span><span class="n">pid</span><span class="p">)</span> <span class="k">do</span>
+    <span class="k">receive</span> <span class="k">do</span>
+      <span class="p">{</span><span class="ss">:ok</span><span class="p">,</span> <span class="n">body</span><span class="p">}</span> <span class="o">-&gt;</span>
+        <span class="no">File</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="sd">"</span><span class="s2">./</span><span class="si">#{</span><span class="ss">:rand</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span><span class="m">1_000_000</span><span class="p">)</span><span class="si">}</span><span class="s2">.html"</span><span class="p">,</span> <span class="n">body</span><span class="p">)</span>
+      <span class="p">{</span><span class="ss">:error</span><span class="p">,</span> <span class="n">reason</span><span class="p">}</span> <span class="o">-&gt;</span>
+        <span class="no">IO</span><span class="o">.</span><span class="n">puts</span> <span class="sd">"</span><span class="si">#{</span><span class="n">reason</span><span class="si">}</span><span class="s2">"</span>
+    <span class="k">end</span>
+  <span class="k">end</span>
+<span class="k">end</span></code></pre></figure>
+
+<h4>Описание</h4>
+
+<p>Модуль <code>Downloader</code> содержит функцию <code>pget</code>, в&nbsp;который помещаются ссылки. В&nbsp;<code>pget</code> имеется охранное условие <code>when is_list(url)</code>, проверяющее, что функция вызывается только если ему передать аргумент <code>list</code>.</p>
+
+<p>Ссылки нумеруются и&nbsp;передаются функции <code>spawn_process</code>, который запрашивает содержимое той или иной ссылки (<code>url</code>), используя библиотеку HTTPoison. Функции <code>spawn_process</code> также передаётся <code>pid</code> родительского процесса. В&nbsp;<code>spawn_process</code> проводится сопоставление полученного ответа с&nbsp;образцом, после чего с&nbsp;помощью макроса <code>send</code> в&nbsp;<code>pid</code> родительского процесса направляется сообщение в&nbsp;форме тегированного кортежа.</p>
+
+<p>По&nbsp;завершении <code>spawn_process</code> функция <code>await</code> обрабатывает все сообщения, полученные родительскими процессами от&nbsp;дочерних, созданных с&nbsp;помощью функции <code>spawn_process</code>. Если получен кортеж <code>:ok</code>, он&nbsp;сохраняется в&nbsp;файл, названный случайным именем, в&nbsp;противном случае в&nbsp;<code>stdout</code> регистрируется ошибка.</p>
+
+<p>Важно отметить, что новый процесс создаётся в&nbsp;течение нескольких микросекунд. Это может привести к&nbsp;задержке при работе с&nbsp;заданиями, которые завершаются сразу&nbsp;же после запуска. В&nbsp;таком случае использование одного процесса, возможно, будет более эффективным решением.</p>
+
+  </div>
+
+  <!-- uSocial -->
+  <div class="post__share_block share_block">
+    <script async src="https://usocial.pro/usocial/usocial.js?v=6.1.4" data-script="usocial" charset="utf-8"></script>
+    <div class="uSocial-Share" data-pid="2fd19544e551bce292425ee8adaa31be" data-type="share" data-options="round,style2,default,absolute,horizontal,size32,counter1,counter-before,upArrow-right,nomobile" data-social="telegram,fb,vk,gPlus,twi,bookmarks"></div>
+  </div>
+  <!-- /uSocial -->
+</article>
+
+
+        <footer class="footer">
+    &copy; 2020
+    / Россия
+
+    <span class="pull-right">Любые мысли и вопросы пишите на <a href="mailto:elixir@wunsh.ru">elixir@wunsh.ru</a>.</span>
+</footer>
+
+        <div id="subscribeModal" class="modal">
+    <div class="modal__content">
+        <a href="#close" title="Close" class="modal__close">x</a>
+
+        <h2 class="modal__title">Ламповая рассылка про&nbsp;Эликсир</h2>
+
+        <p>Один-два раза в&nbsp;неделю присылаем тёплые письма об&nbsp;Эликсире: переводы самых интересных статей до&nbsp;их&nbsp;появления в&nbsp;открытом доступе, анонсы событий и&nbsp;вкусные бонусы.</p>
+
+        <form action="//wunsh.us14.list-manage.com/subscribe/post?u=c81ca3d4693f62db7f7f67c71&amp;id=a192e2dfef" method="post" id="mc-embedded-subscribe-form" name="mc-embedded-subscribe-form" class="pure-form h-tc validate" target="_blank" novalidate>
+            <input type="email" value="" name="EMAIL" class="modal__input pure-input-rounded large" id="mce-EMAIL" placeholder="Твоя почта" required>
+            <div style="position: absolute; left: -5000px;" aria-hidden="true"><input type="text" name="b_c81ca3d4693f62db7f7f67c71_a192e2dfef" tabindex="-1" value=""></div>
+
+            <input type="submit" value="Присоединиться" name="subscribe" onClick="yaCounter39773490.reachGoal('SUBSCRIBED'); return true" id="mc-embedded-subscribe" class="pure-button button-success large">
+        </form>
+
+        <p>Обязательно подтверди почту, перейдя по&nbsp;ссылке в&nbsp;письме, иначе мы&nbsp;не&nbsp;сможем делиться с&nbsp;тобой полезностями.</p>
+
+        <p>Надоедать точно не&nbsp;будем :)</p>
+    </div>
+</div>
+
+        <script src="/assets/js/vendors/zepto.min.js"></script>
+
+<script>
+    if ($(".post--docs").length) {
+        $(".footer").addClass("footer--docs")
+    }
+
+    $(".modal--close_backdrop").click(function(){
+        window.location.hash = "";
+    });
+</script>
+
+        <!-- Yandex.Metrika counter -->
+<script type="text/javascript">
+    (function (d, w, c) {
+        (w[c] = w[c] || []).push(function() {
+            try {
+                w.yaCounter39773490 = new Ya.Metrika({
+                    id:39773490,
+                    clickmap:true,
+                    trackLinks:true,
+                    accurateTrackBounce:true,
+                    webvisor:true,
+                    ut:"noindex"
+                });
+            } catch(e) { }
+        });
+
+        var n = d.getElementsByTagName("script")[0],
+            s = d.createElement("script"),
+            f = function () { n.parentNode.insertBefore(s, n); };
+        s.type = "text/javascript";
+        s.async = true;
+        s.src = "https://mc.yandex.ru/metrika/watch.js";
+
+        if (w.opera == "[object Opera]") {
+            d.addEventListener("DOMContentLoaded", f, false);
+        } else { f(); }
+    })(document, window, "yandex_metrika_callbacks");
+</script>
+<noscript><div><img src="https://mc.yandex.ru/watch/39773490?ut=noindex" style="position:absolute; left:-9999px;" alt="" /></div></noscript>
+<!-- /Yandex.Metrika counter -->
+
+      </div>
+    </div>
+  </body>
+</html>

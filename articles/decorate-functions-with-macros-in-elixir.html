@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Декорируем функции с помощью макросов |> Сообщество Elixir и Phoenix Framework</title>
+    <meta name="description" content="Рассказываем об использовании макросов в Эликсире. С их помощью создаём декораторы в функциональном стиле.">
+
+    <link rel="alternate" type="application/rss+xml" title="Сообщество Elixir и Phoenix Framework" href="/feed.xml" />
+    <link rel="canonical" href="https://wunsh.ru/articles/decorate-functions-with-macros-in-elixir.html">
+
+    <style type="text/css">@import url("//fonts.googleapis.com/css?family=Source+Sans+Pro:400,700&subset=cyrillic");</style>
+    <link rel="stylesheet" href="/assets/css/vendors/pure.min.css">
+    <link rel="stylesheet" href="/assets/css/vendors/pure-grids-responsive.min.css">
+    <link rel="stylesheet" href="/assets/css/style.css?1594516983">
+
+    <link rel="shortcut icon" type="image/png" href="/assets/favicon.png" >
+</head>
+
+
+  <body>
+    <div class="wunsh pure-g">
+      
+
+
+
+
+<div class="menu pure-u-1 pure-u-md-1-4">
+  <div class="header">
+    <h2 class="header__title">
+      
+        <a href="https://wunsh.ru" class="header__title_link" title="На главную">Эликсир и&nbsp;Вунш</a>
+      
+    </h2>
+    <h3 class="header__tagline">Erlang + Ruby = &#10084;</h3>
+
+    <nav class="nav">
+      <ul class="nav_list">
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/elixir" class="nav_list__item_link pure-button">О языке</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/install/linux-asdf" class="nav_list__item_link pure-button">Установка</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/docs/" class="nav_list__item_link pure-button">Документация</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/guides" class="nav_list__item_link pure-button">Гайды</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/news" class="nav_list__item_link pure-button">Новости</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/articles" class="nav_list__item_link pure-button">Статьи</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/videos" class="nav_list__item_link pure-button">Видео</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/vacancies" class="nav_list__item_link pure-button">Вакансии</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/faq" class="nav_list__item_link pure-button">FAQ</a>
+            </li>
+          
+        
+      </ul>
+    </nav>
+
+    <a href="#subscribeModal" class="pure-button header__subscribe_link">Подписаться на рассылку</a>
+  </div>
+</div>
+
+
+      <div class="content pure-u-1 pure-u-md-3-4">
+        
+
+<article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+  <header class="post__header">
+    
+    <h1 class="post__title" itemprop="name headline">Декорируем функции с помощью макросов</h1>
+
+    <div class="post__meta post_meta">
+      <ul class="meta_list">
+        <li class="meta_list__item">
+          
+          <span class="">
+            <small class="meta_list__item_name">Дата</small>
+            <time class="h-bold" datetime="2017-09-01T00:00:00+00:00" itemprop="datePublished">
+              
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+01 сентября 2017
+
+            </time>
+          </span>
+          
+
+          
+        </li>
+        
+        <li class="meta_list__item">
+            <span class="tag_cloud tags_cloud--inline h-no_margin">
+              <small class="meta_list__item_name">Теги</small> 
+
+
+<ul class="tags_cloud__list">
+  
+    <a href="/tags/#howto" class="tags_cloud__link tag tag--howto">howto</a>
+  
+    <a href="/tags/#macros" class="tags_cloud__link tag tag--macros">macros</a>
+  
+</ul>
+
+            </span>
+        </li>
+        
+        <li class="meta_list__item">
+          <span itemprop="author" itemscope itemtype="http://schema.org/Person">
+            <small class="meta_list__item_name">
+              
+                Перевод
+              
+            </small>
+            <span itemprop="name" class="h-bold">Надежда Нестерова</span>
+          </span>
+        </li>
+
+        <li class="meta_list__item">
+          
+            <div >
+              <small>Оригинал</small>
+              <strong>
+                &laquo;<a href="https://carlo-colombo.github.io/2017/06/10/Track-functions-call-in-Elixir-applications-with-Google-Analytics/" style="text-transform: none; text-decoration: underline; color: #4b2e39;">Decorate functions using macros in Elixir</a>&raquo;
+              </strong>
+              <small>&copy;</small>
+              <strong>Carlo Colombo</strong>
+            </div>
+          
+        </li>
+      </ul>
+    </div>
+  </header>
+
+  <div class="post__content" itemprop="articleBody">
+    <p>Однажды передо мной стояла задача запустить в массы Telegram-бота для отслеживания времени прибытия автобусов в Дублине (@dublin_bus_bot). Перед этим я задумался, сколько людей будут им пользоваться (спойлер: почти нисколько), и я решил, что было бы неплохо отследить их количество с помощью Google Analytics.</p>
+
+<h2 id="орешении">О решении</h2>
+
+<p>Протокол передачи статистических данных Google Analytics позволяет отслеживать данные не только веб-сайтов, но и мобильных приложений, программных решений для интернета вещей и др. На данный момент для этого протокола не существует Elixir клиента, а когда он появится, то будет представлять собой ни что иное, как обёртку над API. Мой план заключался в том, чтобы посылать запросы на сервер Google Analytics с помощью <a href="https://github.com/edgurgel/httpoison">HTTPoison</a>, но хотелось бы избежать вызова функции отслеживания после каждой новой команды бота.</p>
+
+<p>Что мне нравится в Elixir, так это макросы, позволяющие генерировать код на этапе компиляции. Мне в голову пришла идея написать макрос, использование которого похоже на объявление функции. Этот макрос определял бы функцию с таким же телом и дополнительным вызовом функции отслеживания. Этот подход показался мне более естественным для функциональной модели Elixir в сравнении со стандартным синтаксисом декораторов в других языках (<code class="highlighter-rouge">@decorator</code> в Python и Javascript).</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">defmetered</span> <span class="n">sample_function</span><span class="p">(</span><span class="n">arg1</span><span class="p">,</span> <span class="n">arg2</span><span class="p">)</span> <span class="k">do</span>
+    <span class="no">IO</span><span class="o">.</span><span class="n">inspect</span><span class="p">([</span><span class="n">arg1</span><span class="p">,</span> <span class="n">arg2</span><span class="p">])</span>
+<span class="k">end</span>
+<span class="c1"># would generate something similar to</span>
+<span class="k">def</span> <span class="n">sample_function</span><span class="p">(</span><span class="n">arg1</span><span class="p">,</span> <span class="n">arg2</span><span class="p">)</span> <span class="k">do</span>
+    <span class="n">track</span><span class="p">(</span><span class="ss">:sample_function</span><span class="p">,</span> <span class="p">[</span><span class="ss">arg1:</span> <span class="n">arg1</span><span class="p">,</span> <span class="ss">arg2:</span> <span class="n">arg2</span><span class="p">])</span>
+    <span class="no">IO</span><span class="o">.</span><span class="n">inspect</span><span class="p">([</span><span class="n">arg1</span><span class="p">,</span> <span class="n">arg2</span><span class="p">])</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<h2 id="реализация">Реализация</h2>
+
+<p>Описанный выше подход был реализован в пакете <a href="https://hex.pm/packages/meter">meter</a> для использования в созданном мной Telegram-боте.</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">@doc</span> <span class="sd">"""
+Replace a function definition, automatically tracking every call to the function
+on google analytics. It also track exception with the function track_error.
+This macro intended use is with a set of uniform functions that can be concettualy
+mapped to pageviews (eg: messaging bot commands).
+Example:
+    defmetered function(arg1, arg2), do: IO.inspect({arg1,arg2})
+    function(1,2)
+    
+will call track with this parameters
+    
+    track(:function, [arg1: 1, arg2: 2])
+Additional parameters will be loaded from the configurationd
+"""</span>
+<span class="c1"># A macro definition can use pattern matching to destructure the arguments</span>
+<span class="k">defmacro</span> <span class="n">defmetered</span><span class="p">({</span><span class="n">function</span><span class="p">,</span><span class="n">_</span><span class="p">,</span><span class="n">args</span><span class="p">}</span> <span class="o">=</span> <span class="n">fundef</span><span class="p">,</span> <span class="p">[</span><span class="k">do</span><span class="p">:</span> <span class="n">body</span><span class="p">])</span> <span class="k">do</span>
+  <span class="c1"># arguments are defined in 3 elements tuples</span>
+  <span class="c1"># this extract the arguments names in a list</span>
+  <span class="n">names</span> <span class="o">=</span> <span class="no">Enum</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="n">args</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">elem</span><span class="p">(</span><span class="nv">&amp;1</span><span class="p">,</span> <span class="m">0</span><span class="p">))</span>
+  <span class="c1"># meter will contain the body of the function that will be defined by the macro</span>
+  <span class="n">metered</span> <span class="o">=</span> <span class="kn">quote</span> <span class="k">do</span>
+    <span class="c1"># quote and unquote allow to switch context,</span>
+    <span class="c1"># simplyfing a lot quoted code will run when the function is called</span>
+    <span class="c1"># unquoted code run at compile time (when the macro is called)</span>
+    <span class="n">values</span> <span class="o">=</span> <span class="kn">unquote</span><span class="p">(</span>
+      <span class="n">args</span>
+      <span class="o">|&gt;</span> <span class="no">Enum</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="k">fn</span> <span class="n">arg</span> <span class="o">-&gt;</span>  <span class="kn">quote</span> <span class="k">do</span>
+          <span class="c1"># allow to access a value at runtime knowing the name</span>
+          <span class="c1"># elixir macros are hygienic so it's necessary to mark it</span>
+          <span class="c1"># explicitly</span>
+          <span class="n">var!</span><span class="p">(</span><span class="kn">unquote</span><span class="p">(</span><span class="n">arg</span><span class="p">))</span>
+        <span class="k">end</span>
+      <span class="k">end</span><span class="p">)</span>
+    <span class="p">)</span>
+    <span class="c1"># Match argument names with their own values at call time</span>
+    <span class="n">map</span> <span class="o">=</span> <span class="no">Enum</span><span class="o">.</span><span class="n">zip</span><span class="p">(</span><span class="kn">unquote</span><span class="p">(</span><span class="n">names</span><span class="p">),</span> <span class="n">values</span><span class="p">)</span>
+    <span class="c1"># wrap the original function call with a try to track errors too</span>
+    <span class="k">try</span> <span class="k">do</span>
+      <span class="n">to_return</span> <span class="o">=</span> <span class="kn">unquote</span><span class="p">(</span><span class="n">body</span><span class="p">)</span>
+      <span class="n">track</span><span class="p">(</span><span class="kn">unquote</span><span class="p">(</span><span class="n">function</span><span class="p">),</span> <span class="n">map</span><span class="p">)</span>
+      <span class="n">to_return</span>
+    <span class="k">rescue</span>
+      <span class="n">e</span> <span class="o">-&gt;</span>
+        <span class="n">track_error</span><span class="p">(</span><span class="kn">unquote</span><span class="p">(</span><span class="n">function</span><span class="p">),</span> <span class="n">map</span><span class="p">,</span> <span class="n">e</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="n">e</span>
+    <span class="k">end</span>
+  <span class="k">end</span>
+  <span class="c1"># define a function with the same name and arguments and with the augmented body</span>
+  <span class="kn">quote</span> <span class="k">do</span>
+    <span class="k">def</span><span class="p">(</span><span class="kn">unquote</span><span class="p">(</span><span class="n">fundef</span><span class="p">),</span><span class="kn">unquote</span><span class="p">([</span><span class="k">do</span><span class="p">:</span> <span class="n">metered</span><span class="p">]))</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<h2 id="заключение">Заключение</h2>
+
+<p>Макросы Elixir — мощный инструмент для расширения функциональности приложений и создания DSL. Несмотря на то, что их изучение займёт какое-то время, это полностью оправданно, ведь они помогут вам навести порядок в своём коде.</p>
+
+  </div>
+
+  <!-- uSocial -->
+  <div class="post__share_block share_block">
+    <script async src="https://usocial.pro/usocial/usocial.js?v=6.1.4" data-script="usocial" charset="utf-8"></script>
+    <div class="uSocial-Share" data-pid="2fd19544e551bce292425ee8adaa31be" data-type="share" data-options="round,style2,default,absolute,horizontal,size32,counter1,counter-before,upArrow-right,nomobile" data-social="telegram,fb,vk,gPlus,twi,bookmarks"></div>
+  </div>
+  <!-- /uSocial -->
+</article>
+
+
+        <footer class="footer">
+    &copy; 2020
+    / Россия
+
+    <span class="pull-right">Любые мысли и вопросы пишите на <a href="mailto:elixir@wunsh.ru">elixir@wunsh.ru</a>.</span>
+</footer>
+
+        <div id="subscribeModal" class="modal">
+    <div class="modal__content">
+        <a href="#close" title="Close" class="modal__close">x</a>
+
+        <h2 class="modal__title">Ламповая рассылка про&nbsp;Эликсир</h2>
+
+        <p>Один-два раза в&nbsp;неделю присылаем тёплые письма об&nbsp;Эликсире: переводы самых интересных статей до&nbsp;их&nbsp;появления в&nbsp;открытом доступе, анонсы событий и&nbsp;вкусные бонусы.</p>
+
+        <form action="//wunsh.us14.list-manage.com/subscribe/post?u=c81ca3d4693f62db7f7f67c71&amp;id=a192e2dfef" method="post" id="mc-embedded-subscribe-form" name="mc-embedded-subscribe-form" class="pure-form h-tc validate" target="_blank" novalidate>
+            <input type="email" value="" name="EMAIL" class="modal__input pure-input-rounded large" id="mce-EMAIL" placeholder="Твоя почта" required>
+            <div style="position: absolute; left: -5000px;" aria-hidden="true"><input type="text" name="b_c81ca3d4693f62db7f7f67c71_a192e2dfef" tabindex="-1" value=""></div>
+
+            <input type="submit" value="Присоединиться" name="subscribe" onClick="yaCounter39773490.reachGoal('SUBSCRIBED'); return true" id="mc-embedded-subscribe" class="pure-button button-success large">
+        </form>
+
+        <p>Обязательно подтверди почту, перейдя по&nbsp;ссылке в&nbsp;письме, иначе мы&nbsp;не&nbsp;сможем делиться с&nbsp;тобой полезностями.</p>
+
+        <p>Надоедать точно не&nbsp;будем :)</p>
+    </div>
+</div>
+
+        <script src="/assets/js/vendors/zepto.min.js"></script>
+
+<script>
+    if ($(".post--docs").length) {
+        $(".footer").addClass("footer--docs")
+    }
+
+    $(".modal--close_backdrop").click(function(){
+        window.location.hash = "";
+    });
+</script>
+
+        <!-- Yandex.Metrika counter -->
+<script type="text/javascript">
+    (function (d, w, c) {
+        (w[c] = w[c] || []).push(function() {
+            try {
+                w.yaCounter39773490 = new Ya.Metrika({
+                    id:39773490,
+                    clickmap:true,
+                    trackLinks:true,
+                    accurateTrackBounce:true,
+                    webvisor:true,
+                    ut:"noindex"
+                });
+            } catch(e) { }
+        });
+
+        var n = d.getElementsByTagName("script")[0],
+            s = d.createElement("script"),
+            f = function () { n.parentNode.insertBefore(s, n); };
+        s.type = "text/javascript";
+        s.async = true;
+        s.src = "https://mc.yandex.ru/metrika/watch.js";
+
+        if (w.opera == "[object Opera]") {
+            d.addEventListener("DOMContentLoaded", f, false);
+        } else { f(); }
+    })(document, window, "yandex_metrika_callbacks");
+</script>
+<noscript><div><img src="https://mc.yandex.ru/watch/39773490?ut=noindex" style="position:absolute; left:-9999px;" alt="" /></div></noscript>
+<!-- /Yandex.Metrika counter -->
+
+      </div>
+    </div>
+  </body>
+</html>

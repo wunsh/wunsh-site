@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Оптимизация обработки данных с помощью GenStage/Flow |> Сообщество Elixir и Phoenix Framework</title>
+    <meta name="description" content="В этой статье рассказывается о том, как улучшить обработку данных, используя правильную настройку GenStage.">
+
+    <link rel="alternate" type="application/rss+xml" title="Сообщество Elixir и Phoenix Framework" href="/feed.xml" />
+    <link rel="canonical" href="https://wunsh.ru/articles/genstage-optimization.html">
+
+    <style type="text/css">@import url("//fonts.googleapis.com/css?family=Source+Sans+Pro:400,700&subset=cyrillic");</style>
+    <link rel="stylesheet" href="/assets/css/vendors/pure.min.css">
+    <link rel="stylesheet" href="/assets/css/vendors/pure-grids-responsive.min.css">
+    <link rel="stylesheet" href="/assets/css/style.css?1594516983">
+
+    <link rel="shortcut icon" type="image/png" href="/assets/favicon.png" >
+</head>
+
+
+  <body>
+    <div class="wunsh pure-g">
+      
+
+
+
+
+<div class="menu pure-u-1 pure-u-md-1-4">
+  <div class="header">
+    <h2 class="header__title">
+      
+        <a href="https://wunsh.ru" class="header__title_link" title="На главную">Эликсир и&nbsp;Вунш</a>
+      
+    </h2>
+    <h3 class="header__tagline">Erlang + Ruby = &#10084;</h3>
+
+    <nav class="nav">
+      <ul class="nav_list">
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/elixir" class="nav_list__item_link pure-button">О языке</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/install/linux-asdf" class="nav_list__item_link pure-button">Установка</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/docs/" class="nav_list__item_link pure-button">Документация</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/guides" class="nav_list__item_link pure-button">Гайды</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/news" class="nav_list__item_link pure-button">Новости</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/articles" class="nav_list__item_link pure-button">Статьи</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/videos" class="nav_list__item_link pure-button">Видео</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/vacancies" class="nav_list__item_link pure-button">Вакансии</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/faq" class="nav_list__item_link pure-button">FAQ</a>
+            </li>
+          
+        
+      </ul>
+    </nav>
+
+    <a href="#subscribeModal" class="pure-button header__subscribe_link">Подписаться на рассылку</a>
+  </div>
+</div>
+
+
+      <div class="content pure-u-1 pure-u-md-3-4">
+        
+
+<article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+  <header class="post__header">
+    
+    <h1 class="post__title" itemprop="name headline">Оптимизация обработки данных с помощью GenStage/Flow</h1>
+
+    <div class="post__meta post_meta">
+      <ul class="meta_list">
+        <li class="meta_list__item">
+          
+          <span class="">
+            <small class="meta_list__item_name">Дата</small>
+            <time class="h-bold" datetime="2016-12-31T00:00:00+00:00" itemprop="datePublished">
+              
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+31 декабря 2016
+
+            </time>
+          </span>
+          
+
+          
+        </li>
+        
+        <li class="meta_list__item">
+            <span class="tag_cloud tags_cloud--inline h-no_margin">
+              <small class="meta_list__item_name">Теги</small> 
+
+
+<ul class="tags_cloud__list">
+  
+    <a href="/tags/#genstage" class="tags_cloud__link tag tag--genstage">genstage</a>
+  
+    <a href="/tags/#advanced" class="tags_cloud__link tag tag--advanced">advanced</a>
+  
+</ul>
+
+            </span>
+        </li>
+        
+        <li class="meta_list__item">
+          <span itemprop="author" itemscope itemtype="http://schema.org/Person">
+            <small class="meta_list__item_name">
+              
+                Перевод
+              
+            </small>
+            <span itemprop="name" class="h-bold">Надежда Нестерова</span>
+          </span>
+        </li>
+
+        <li class="meta_list__item">
+          
+            <div >
+              <small>Оригинал</small>
+              <strong>
+                &laquo;<a href="http://teamon.eu/2016/tuning-elixir-genstage-flow-pipeline-processing/" style="text-transform: none; text-decoration: underline; color: #4b2e39;">Tuning Elixir GenStage/Flow Pipeline Processing</a>&raquo;
+              </strong>
+              <small>&copy;</small>
+              <strong>Tymon Tobolski</strong>
+            </div>
+          
+        </li>
+      </ul>
+    </div>
+  </header>
+
+  <div class="post__content" itemprop="articleBody">
+    <p>Существует множество задач, которые можно решить с помощью GenStage/Flow.</p>
+<p>Недавно мне довелось работать над одной из подобных задач: необходимо было осуществить выборку записей из базы данных PostgreSQL, загрузить связанные с этими записями файлы из Amazon S3, извлечь из файлов текст и провести его индексацию в ElasticSearch.</p>
+<p>Задание можно представить в виде конвейера, состоящего из четырёх этапов:</p>
+<ol>
+  <li>
+    <p>SELECT &ndash; выбор записи из базы данных</p>
+  </li>
+  <li>
+    <p>DOWNLOAD &ndash; загрузка pdf-файла</p>
+  </li>
+  <li>
+    <p>EXTRACT &ndash; извлечение текста из файла</p>
+  </li>
+  <li>
+    <p>INDEX &ndash; индексация текста</p>
+  </li>
+</ol>
+<img src="http://teamon.eu/images/flow/task.png" alt="GenStage/Flow problem">
+<p>Так как в данном случае речь идёт о сотнях тысяч записей, мне пришлось поразмыслить над тем, как сделать конвейер наиболее эффективным.</p>
+<p>В результате мне удалось уместить реализацию эффективного алгоритма параллельной обработки данных всего в несколько строк кода.</p>
+<h2><a name="understanding-the-problem"></a><strong>Постановка задачи</strong></h2>
+<p>Прежде чем предлагать какие-либо решения, необходимо как можно лучше разобраться в условии задачи.</p>
+<p>Каждый этап будущего конвейера включает определённый набор действий и особенностей реализации:</p>
+<ul>
+  <li>
+    <p>SELECT: Необходимо выполнить SQL-запрос, который возвратит 100 000 записей. Лучше всего использовать курсоры PostgreSQL, а новая функция <a href="https://hexdocs.pm/ecto/2.1.0-rc.5/Ecto.Repo.html#c:stream/2">Repo.stream</a> упростит этот процесс. Этап будет выполняться снова и снова, обеспечивая непрерывный поток записей.</p>
+  </li>
+  <li>
+    <p>DOWNLOAD: На данном этапе реализуется сетевой ввод-вывод данных, который достаточно легко распараллелить.</p>
+  </li>
+  <li>
+    <p>EXTRACT: Извлечение текста &ndash; задача CPU, которая тоже может выполняться параллельно на нескольких ядрах процессора.</p>
+  </li>
+  <li>
+    <p>INDEX: В ElasticSearch гораздо производительнее индексировать файлы не отдельно, а пакетами.</p>
+  </li>
+</ul>
+<p>Проведя такой простой анализ, можно нарисовать полную картину того, над чем придётся работать. Кроме того, решение этой задачи в полной мере иллюстрирует работу <a href="https://github.com/elixir-lang/gen_stage">GenStage</a>, а особенно&nbsp;<a href="https://hexdocs.pm/gen_stage/Experimental.Flow.html#content">Flow</a>.</p>
+<h2><a name="implementation"></a><strong>Реализация</strong></h2>
+<p>GenStage разделяет этапы конвейера на три типа:</p>
+<ul>
+  <li>
+    <p>Поставщик (Producer) &ndash; порождает события (этап SELECT)</p>
+  </li>
+  <li>
+    <p>Поставщик-потребитель (Producer-Consumer) &ndash; получает одни события и порождает другие (этапы DOWNLOAD и EXTRACT)</p>
+  </li>
+  <li>
+    <p>Потребитель (Consumer) &ndash; получает события, при этом не порождая новых (этап INDEX)</p>
+  </li>
+</ul>
+<figure class="highlight"><pre><code class="language-elixir" data-lang="elixir"><span class="nv">@spec</span> <span class="n">select</span> <span class="p">::</span> <span class="no">Stream</span>
+<span class="k">def</span> <span class="n">select</span><span class="p">,</span> <span class="k">do</span><span class="p">:</span> <span class="o">...</span>
+
+<span class="nv">@spec</span> <span class="n">download</span><span class="p">(</span><span class="n">record</span><span class="p">)</span> <span class="p">::</span> <span class="n">file</span>
+<span class="k">def</span> <span class="n">download</span><span class="p">(</span><span class="n">record</span><span class="p">),</span> <span class="k">do</span><span class="p">:</span> <span class="o">...</span>
+
+<span class="nv">@spec</span> <span class="n">extract</span><span class="p">(</span><span class="n">file</span><span class="p">)</span> <span class="p">::</span> <span class="n">text</span>
+<span class="k">def</span> <span class="n">extract</span><span class="p">(</span><span class="n">file</span><span class="p">),</span> <span class="k">do</span><span class="p">:</span> <span class="o">...</span>
+
+<span class="nv">@spec</span> <span class="n">index</span><span class="p">([</span><span class="n">text</span><span class="p">])</span> <span class="p">::</span> <span class="n">nothing</span>
+<span class="k">def</span> <span class="n">index</span><span class="p">(</span><span class="n">texts</span><span class="p">),</span> <span class="k">do</span><span class="p">:</span> <span class="o">...</span></code></pre></figure>
+<p>Каждый этап можно представить в виде простой функции:</p>
+<img src="http://teamon.eu/images/flow/stages.png" alt="Stages">
+<p>Весь конвейер выглядит следующим образом:</p>
+<ul>
+  <li>
+    <p>Один этап SELECT</p>
+  </li>
+  <li>
+    <p>Несколько этапов DOWNLOAD</p>
+  </li>
+  <li>
+    <p>Несколько этапов EXTRACT</p>
+  </li>
+  <li>
+    <p>Этап ACCUMULATE, объединяющий файлы для последующей индексации</p>
+  </li>
+  <li>
+    <p>Несколько этапов INDEX</p>
+  </li>
+</ul>
+<p>Воплотить всё это в жизнь можно с помощью следующих 12 строк кода:</p>
+
+<figure class="highlight"><pre><code class="language-elixir" data-lang="elixir"><span class="k">def</span> <span class="n">perform</span> <span class="k">do</span>
+  <span class="c1"># вызываем функцию select/0, чтобы получить поток данных</span>
+  <span class="n">select</span>
+  <span class="c1"># конвертируем его во Flow</span>
+  <span class="o">|&gt;</span> <span class="no">Flow</span><span class="o">.</span><span class="n">from_enumerable</span><span class="p">(</span><span class="ss">max_demand:</span> <span class="m">100</span><span class="p">)</span>
+  <span class="c1"># распределяем поток записей между 50 процессами</span>
+  <span class="o">|&gt;</span> <span class="no">Flow</span><span class="o">.</span><span class="n">partition</span><span class="p">(</span><span class="ss">max_demand:</span> <span class="m">100</span><span class="p">,</span> <span class="ss">stages:</span> <span class="m">50</span><span class="p">)</span>
+  <span class="c1"># в каждом процессе вызываем функцию download/1 для каждой полученной записи</span>
+  <span class="o">|&gt;</span> <span class="no">Flow</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="o">&amp;</span><span class="n">download</span><span class="o">/</span><span class="m">1</span><span class="p">)</span>
+  <span class="c1"># получаем поток файлов, который снова распределяем между 50 процессами</span>
+  <span class="o">|&gt;</span> <span class="no">Flow</span><span class="o">.</span><span class="n">partition</span><span class="p">(</span><span class="ss">max_demand:</span> <span class="m">100</span><span class="p">,</span> <span class="ss">stages:</span> <span class="m">50</span><span class="p">)</span>
+  <span class="c1"># в каждом процессе вызываем функцию extract/1 для каждого полученного файла</span>
+  <span class="o">|&gt;</span> <span class="no">Flow</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="o">&amp;</span><span class="n">extract</span><span class="o">/</span><span class="m">1</span><span class="p">)</span>
+  <span class="c1"># чтобы провести индексацию файлов пакетами,</span>
+  <span class="c1"># объединяем их в текстовые фрагменты по 100 строк с помощью функции Window.count/1</span>
+  <span class="o">|&gt;</span> <span class="no">Flow</span><span class="o">.</span><span class="n">partition</span><span class="p">(</span><span class="ss">window:</span> <span class="no">Flow</span><span class="o">.</span><span class="no">Window</span><span class="o">.</span><span class="n">count</span><span class="p">(</span><span class="m">100</span><span class="p">),</span> <span class="ss">stages:</span> <span class="m">1</span><span class="p">)</span>
+  <span class="c1"># передаём в функцию Flow.reduce/2 два аргумента:</span>
+  <span class="c1">#   - функция-аккумулятор, вызываемая в начале обработки каждого фрагмента</span>
+  <span class="c1">#   - функция свёртки, вызываемая для каждого элемента фрагмента</span>
+  <span class="c1"># Таким образом мы помещаем входящие элементы в список.</span>
+  <span class="o">|&gt;</span> <span class="no">Flow</span><span class="o">.</span><span class="n">reduce</span><span class="p">(</span><span class="k">fn</span> <span class="o">-&gt;</span> <span class="p">[]</span> <span class="k">end</span><span class="p">,</span> <span class="k">fn</span> <span class="n">item</span><span class="p">,</span> <span class="n">list</span> <span class="o">-&gt;</span> <span class="p">[</span><span class="n">item</span> <span class="o">|</span> <span class="n">list</span><span class="p">]</span> <span class="k">end</span><span class="p">)</span>
+  <span class="c1"># события потока всё ещё представляют собой отдельные текстовые строки, поэтому</span>
+  <span class="c1"># нужно сделать так, чтобы Flow превращал в события состояния функции свёртки</span>
+  <span class="o">|&gt;</span> <span class="no">Flow</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="ss">:state</span><span class="p">)</span>
+  <span class="c1"># наконец, воспользуемся той же функцией Flow.partition, чтобы запустить 10 процессов</span>
+  <span class="o">|&gt;</span> <span class="no">Flow</span><span class="o">.</span><span class="n">partition</span><span class="p">(</span><span class="ss">max_demand:</span> <span class="m">100</span><span class="p">,</span> <span class="ss">stages:</span> <span class="m">10</span><span class="p">)</span>
+  <span class="c1"># вызываем функцию index/1 для каждого списка из 100 строк</span>
+  <span class="o">|&gt;</span> <span class="no">Flow</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="o">&amp;</span><span class="n">index</span><span class="o">/</span><span class="m">1</span><span class="p">)</span>
+  <span class="c1"># в заключении, запустим поток, который будет блокироваться,</span>
+  <span class="c1"># пока конвейер не завершит свою работу.</span>
+  <span class="o">|&gt;</span> <span class="no">Flow</span><span class="o">.</span><span class="n">run</span>
+<span class="k">end</span></code></pre></figure>
+
+<p>И это всё?</p>
+<p>К сожалению, нет. Придётся ещё немного попотеть.</p>
+<h2><a name="tuning"></a><strong>Оптимизация</strong></h2>
+<p>В примере выше переменные max_demand&nbsp;и&nbsp;stages имели произвольные значения. Несмотря на то, что приведённый код работает безошибочно, его производительность далека от идеальной. Для наглядности приведу график, полученный после обработки 700 записей.</p>
+<img src="http://teamon.eu/images/flow/first.png" alt="Tuning GenStage">
+<p>Кривые на графике показывают количество обработанных на определённом этапе элементов в единицу времени. Можно видеть, что на этапе SELECT действия по выборке 700 записей из базы данных и помещению их в память осуществились мгновенно. Извлечение текста на этапах EXTRACT начало выполняться с задержкой в 3 секунды (когда уже было загружено почти 200 файлов). Индексация также началась очень поздно (в очереди уже находились 300 текстовых элементов).</p>
+<p>В конвейерах такого рода производительность отдельных ступеней не так важна, как производительность конвейера в целом. Обрабатывая большие объёмы данных, обычно стремятся к тому, чтобы вся система была стабильна по части использования ресурсов.</p>
+<p>Поэкспериментировав с различными значениями (и построив несколько графиков для разных случаев), я остановился на следующем:</p>
+<figure class="highlight"><pre><code class="language-elixir" data-lang="elixir"><span class="k">def</span> <span class="n">perform</span> <span class="k">do</span>
+  <span class="n">select</span>
+  <span class="o">|&gt;</span> <span class="no">Flow</span><span class="o">.</span><span class="n">from_enumerable</span><span class="p">(</span><span class="ss">max_demand:</span> <span class="m">100</span><span class="p">)</span>
+  <span class="o">|&gt;</span> <span class="no">Flow</span><span class="o">.</span><span class="n">partition</span><span class="p">(</span><span class="ss">max_demand:</span> <span class="m">5</span><span class="p">,</span> <span class="ss">stages:</span> <span class="m">10</span><span class="p">)</span> <span class="c1"># instead of 100 and 50</span>
+  <span class="o">|&gt;</span> <span class="no">Flow</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="o">&amp;</span><span class="n">download</span><span class="o">/</span><span class="m">1</span><span class="p">)</span>
+  <span class="o">|&gt;</span> <span class="no">Flow</span><span class="o">.</span><span class="n">partition</span><span class="p">(</span><span class="ss">max_demand:</span> <span class="m">5</span><span class="p">,</span> <span class="ss">stages:</span> <span class="m">4</span><span class="p">)</span> <span class="c1"># instead of 100 and 50</span>
+  <span class="o">|&gt;</span> <span class="no">Flow</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="o">&amp;</span><span class="n">extract</span><span class="o">/</span><span class="m">1</span><span class="p">)</span>
+  <span class="o">|&gt;</span> <span class="no">Flow</span><span class="o">.</span><span class="n">partition</span><span class="p">(</span><span class="ss">window:</span> <span class="no">Flow</span><span class="o">.</span><span class="no">Window</span><span class="o">.</span><span class="n">count</span><span class="p">(</span><span class="m">100</span><span class="p">),</span> <span class="ss">stages:</span> <span class="m">1</span><span class="p">)</span>
+  <span class="o">|&gt;</span> <span class="no">Flow</span><span class="o">.</span><span class="n">reduce</span><span class="p">(</span><span class="k">fn</span> <span class="o">-&gt;</span> <span class="p">[]</span> <span class="k">end</span><span class="p">,</span> <span class="k">fn</span> <span class="n">item</span><span class="p">,</span> <span class="n">list</span> <span class="o">-&gt;</span> <span class="p">[</span><span class="n">item</span> <span class="o">|</span> <span class="n">list</span><span class="p">]</span> <span class="k">end</span><span class="p">)</span>
+  <span class="o">|&gt;</span> <span class="no">Flow</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="ss">:state</span><span class="p">)</span>
+  <span class="o">|&gt;</span> <span class="no">Flow</span><span class="o">.</span><span class="n">partition</span><span class="p">(</span><span class="ss">max_demand:</span> <span class="m">20</span><span class="p">,</span> <span class="ss">stages:</span> <span class="m">2</span><span class="p">)</span> <span class="c1"># instead of 100 and 10</span>
+  <span class="o">|&gt;</span> <span class="no">Flow</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="o">&amp;</span><span class="n">index</span><span class="o">/</span><span class="m">1</span><span class="p">)</span>
+  <span class="o">|&gt;</span> <span class="no">Flow</span><span class="o">.</span><span class="n">run</span>
+<span class="k">end</span></code></pre></figure>
+<p>Результаты получились намного лучше:</p>
+<img src="http://teamon.eu/images/flow/last.png" alt="Optimized GenStage">
+<p>С такими подстроенными параметрами все этапы конвейера обрабатывают данные с минимальной буферизацией и низким потреблением памяти. Сам конвейер также отработал немного быстрее, но так как имеем дело с внешними сервисами, этот случай не подойдёт в качестве теста <em>скорости</em>.</p>
+<h2><a name="few-last-words"></a><strong>Заключение</strong></h2>
+<p>GenStage и его высокоуровневая "оболочка" Flow предоставляют необходимые средства для реализации эффективной параллельной обработки данных. Какой бы волшебной ни казалась эта возможность, забывать об оценке производительности не стоит. И всё же я уверен, что при достижении "правильного" показателя производительности система будет иметь большой потенциал по масштабируемости, обеспечивая низкий расход ресурсов при работе с большими объёмами данных.</p>
+  </div>
+
+  <!-- uSocial -->
+  <div class="post__share_block share_block">
+    <script async src="https://usocial.pro/usocial/usocial.js?v=6.1.4" data-script="usocial" charset="utf-8"></script>
+    <div class="uSocial-Share" data-pid="2fd19544e551bce292425ee8adaa31be" data-type="share" data-options="round,style2,default,absolute,horizontal,size32,counter1,counter-before,upArrow-right,nomobile" data-social="telegram,fb,vk,gPlus,twi,bookmarks"></div>
+  </div>
+  <!-- /uSocial -->
+</article>
+
+
+        <footer class="footer">
+    &copy; 2020
+    / Россия
+
+    <span class="pull-right">Любые мысли и вопросы пишите на <a href="mailto:elixir@wunsh.ru">elixir@wunsh.ru</a>.</span>
+</footer>
+
+        <div id="subscribeModal" class="modal">
+    <div class="modal__content">
+        <a href="#close" title="Close" class="modal__close">x</a>
+
+        <h2 class="modal__title">Ламповая рассылка про&nbsp;Эликсир</h2>
+
+        <p>Один-два раза в&nbsp;неделю присылаем тёплые письма об&nbsp;Эликсире: переводы самых интересных статей до&nbsp;их&nbsp;появления в&nbsp;открытом доступе, анонсы событий и&nbsp;вкусные бонусы.</p>
+
+        <form action="//wunsh.us14.list-manage.com/subscribe/post?u=c81ca3d4693f62db7f7f67c71&amp;id=a192e2dfef" method="post" id="mc-embedded-subscribe-form" name="mc-embedded-subscribe-form" class="pure-form h-tc validate" target="_blank" novalidate>
+            <input type="email" value="" name="EMAIL" class="modal__input pure-input-rounded large" id="mce-EMAIL" placeholder="Твоя почта" required>
+            <div style="position: absolute; left: -5000px;" aria-hidden="true"><input type="text" name="b_c81ca3d4693f62db7f7f67c71_a192e2dfef" tabindex="-1" value=""></div>
+
+            <input type="submit" value="Присоединиться" name="subscribe" onClick="yaCounter39773490.reachGoal('SUBSCRIBED'); return true" id="mc-embedded-subscribe" class="pure-button button-success large">
+        </form>
+
+        <p>Обязательно подтверди почту, перейдя по&nbsp;ссылке в&nbsp;письме, иначе мы&nbsp;не&nbsp;сможем делиться с&nbsp;тобой полезностями.</p>
+
+        <p>Надоедать точно не&nbsp;будем :)</p>
+    </div>
+</div>
+
+        <script src="/assets/js/vendors/zepto.min.js"></script>
+
+<script>
+    if ($(".post--docs").length) {
+        $(".footer").addClass("footer--docs")
+    }
+
+    $(".modal--close_backdrop").click(function(){
+        window.location.hash = "";
+    });
+</script>
+
+        <!-- Yandex.Metrika counter -->
+<script type="text/javascript">
+    (function (d, w, c) {
+        (w[c] = w[c] || []).push(function() {
+            try {
+                w.yaCounter39773490 = new Ya.Metrika({
+                    id:39773490,
+                    clickmap:true,
+                    trackLinks:true,
+                    accurateTrackBounce:true,
+                    webvisor:true,
+                    ut:"noindex"
+                });
+            } catch(e) { }
+        });
+
+        var n = d.getElementsByTagName("script")[0],
+            s = d.createElement("script"),
+            f = function () { n.parentNode.insertBefore(s, n); };
+        s.type = "text/javascript";
+        s.async = true;
+        s.src = "https://mc.yandex.ru/metrika/watch.js";
+
+        if (w.opera == "[object Opera]") {
+            d.addEventListener("DOMContentLoaded", f, false);
+        } else { f(); }
+    })(document, window, "yandex_metrika_callbacks");
+</script>
+<noscript><div><img src="https://mc.yandex.ru/watch/39773490?ut=noindex" style="position:absolute; left:-9999px;" alt="" /></div></noscript>
+<!-- /Yandex.Metrika counter -->
+
+      </div>
+    </div>
+  </body>
+</html>

@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Конструкция `try`, `catch` и `rescue` |> Сообщество Elixir и Phoenix Framework</title>
+    <meta name="description" content="Русскоязычное сообщество Elixir и Phoenix Framework
+">
+
+    <link rel="alternate" type="application/rss+xml" title="Сообщество Elixir и Phoenix Framework" href="/feed.xml" />
+    <link rel="canonical" href="https://wunsh.ru/docs/try-catch-and-rescue">
+
+    <style type="text/css">@import url("//fonts.googleapis.com/css?family=Source+Sans+Pro:400,700&subset=cyrillic");</style>
+    <link rel="stylesheet" href="/assets/css/vendors/pure.min.css">
+    <link rel="stylesheet" href="/assets/css/vendors/pure-grids-responsive.min.css">
+    <link rel="stylesheet" href="/assets/css/style.css?1594516983">
+
+    <link rel="shortcut icon" type="image/png" href="/assets/favicon.png" >
+</head>
+
+
+  <body>
+    <div class="wunsh pure-g">
+      
+
+
+
+
+<div class="menu pure-u-1 pure-u-md-1-4">
+  <div class="header">
+    <h2 class="header__title">
+      
+        <a href="https://wunsh.ru" class="header__title_link" title="На главную">Эликсир и&nbsp;Вунш</a>
+      
+    </h2>
+    <h3 class="header__tagline">Erlang + Ruby = &#10084;</h3>
+
+    <nav class="nav">
+      <ul class="nav_list">
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/elixir" class="nav_list__item_link pure-button">О языке</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/install/linux-asdf" class="nav_list__item_link pure-button">Установка</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/docs/" class="nav_list__item_link pure-button">Документация</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/guides" class="nav_list__item_link pure-button">Гайды</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/news" class="nav_list__item_link pure-button">Новости</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/articles" class="nav_list__item_link pure-button">Статьи</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/videos" class="nav_list__item_link pure-button">Видео</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/vacancies" class="nav_list__item_link pure-button">Вакансии</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/faq" class="nav_list__item_link pure-button">FAQ</a>
+            </li>
+          
+        
+      </ul>
+    </nav>
+
+    <a href="#subscribeModal" class="pure-button header__subscribe_link">Подписаться на рассылку</a>
+  </div>
+</div>
+
+
+      <div class="content pure-u-1 pure-u-md-3-4">
+        <article class="post post--docs" itemscope itemtype="http://schema.org/BlogPosting">
+    <header class="post__header">
+        <h1 class="post__title" itemprop="name headline">
+            <p>Конструкция <code class="highlighter-rouge">try</code>, <code class="highlighter-rouge">catch</code> и <code class="highlighter-rouge">rescue</code></p>
+
+        </h1>
+    </header>
+
+    <div class="post__content" itemprop="articleBody">
+        <p>В Эликсире есть три механизма работы с непредвиденным поведением: ошибки, выбрасывания и выход. В этой главе мы рассмотрим каждый из них и случаи, когда использовать те или иные механизмы.</p>
+
+<h2 id="ошибки">Ошибки</h2>
+
+<p>Ошибки (или <em>исключения</em>) используются, когда в коде происходят исключительные ситуации. Пример ошибки можно увидеть при попытке добавить число к атому:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">iex</span><span class="o">&gt;</span> <span class="ss">:foo</span> <span class="o">+</span> <span class="m">1</span>
+<span class="o">**</span> <span class="p">(</span><span class="no">ArithmeticError</span><span class="p">)</span> <span class="n">bad</span> <span class="n">argument</span> <span class="ow">in</span> <span class="n">arithmetic</span> <span class="n">expression</span>
+     <span class="ss">:erlang</span><span class="o">.+</span><span class="p">(</span><span class="ss">:foo</span><span class="p">,</span> <span class="m">1</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p>Ошибка времени запуска может быть вызвана с помощью <code class="highlighter-rouge">raise/1</code>:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">iex</span><span class="o">&gt;</span> <span class="k">raise</span> <span class="sd">"</span><span class="s2">oops"</span>
+<span class="o">**</span> <span class="p">(</span><span class="no">RuntimeError</span><span class="p">)</span> <span class="n">oops</span>
+</code></pre></div></div>
+
+<p>Другие ошибки можно вызвать, передав имя ошибки и список аргументов с ключами в <code class="highlighter-rouge">raise/2</code>:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">iex</span><span class="o">&gt;</span> <span class="k">raise</span> <span class="no">ArgumentError</span><span class="p">,</span> <span class="ss">message:</span> <span class="sd">"</span><span class="s2">invalid argument foo"</span>
+<span class="o">**</span> <span class="p">(</span><span class="no">ArgumentError</span><span class="p">)</span> <span class="n">invalid</span> <span class="n">argument</span> <span class="n">foo</span>
+</code></pre></div></div>
+
+<p>Вы также можете объявить собственные ошибки, создав модуль и использовав конструкцию <code class="highlighter-rouge">defexception</code> внутри него. Таким образом вы создадите ошибку с тем же именем, что и у модуля, в котором она объявлена. Наиболее распространенный случай – объявление исключений с полем <code class="highlighter-rouge">message</code>:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">iex</span><span class="o">&gt;</span> <span class="k">defmodule</span> <span class="no">MyError</span> <span class="k">do</span>
+<span class="n">iex</span><span class="o">&gt;</span>   <span class="k">defexception</span> <span class="ss">message:</span> <span class="sd">"</span><span class="s2">default message"</span>
+<span class="n">iex</span><span class="o">&gt;</span> <span class="k">end</span>
+
+<span class="n">iex</span><span class="o">&gt;</span> <span class="k">raise</span> <span class="no">MyError</span>
+<span class="o">**</span> <span class="p">(</span><span class="no">MyError</span><span class="p">)</span> <span class="n">default</span> <span class="n">message</span>
+
+<span class="n">iex</span><span class="o">&gt;</span> <span class="k">raise</span> <span class="no">MyError</span><span class="p">,</span> <span class="ss">message:</span> <span class="sd">"</span><span class="s2">custom message"</span>
+<span class="o">**</span> <span class="p">(</span><span class="no">MyError</span><span class="p">)</span> <span class="n">custom</span> <span class="n">message</span>
+</code></pre></div></div>
+
+<p>Ошибки могут быть обработаны с помощью конструкции <code class="highlighter-rouge">try/rescue</code>:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">iex</span><span class="o">&gt;</span> <span class="k">try</span> <span class="k">do</span>
+<span class="o">...&gt;</span>   <span class="k">raise</span> <span class="sd">"</span><span class="s2">oops"</span>
+<span class="o">...&gt;</span> <span class="k">rescue</span>
+<span class="o">...&gt;</span>   <span class="n">e</span> <span class="ow">in</span> <span class="no">RuntimeError</span> <span class="o">-&gt;</span> <span class="n">e</span>
+<span class="o">...&gt;</span> <span class="k">end</span>
+<span class="p">%</span><span class="no">RuntimeError</span><span class="p">{</span><span class="ss">message:</span> <span class="sd">"</span><span class="s2">oops"</span><span class="p">}</span>
+</code></pre></div></div>
+
+<p>В примере выше ошибка рантайма отлавливается и возвращается для вывода в сессии <code class="highlighter-rouge">iex</code>.</p>
+
+<p>Если у вас нет причины использовать саму ошибку, не обязательно её предоставлять:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">iex</span><span class="o">&gt;</span> <span class="k">try</span> <span class="k">do</span>
+<span class="o">...&gt;</span>   <span class="k">raise</span> <span class="sd">"</span><span class="s2">oops"</span>
+<span class="o">...&gt;</span> <span class="k">rescue</span>
+<span class="o">...&gt;</span>   <span class="no">RuntimeError</span> <span class="o">-&gt;</span> <span class="sd">"</span><span class="s2">Error!"</span>
+<span class="o">...&gt;</span> <span class="k">end</span>
+<span class="sd">"</span><span class="s2">Error!"</span>
+</code></pre></div></div>
+
+<p>На практике, однако, Эликсир-разработчики редко используют конструкцию <code class="highlighter-rouge">try/rescue</code>. Например, многие языки обязали бы вас отловить ошибку, когда файл не может быть открыт. Эликсир же предоставляет функцию <code class="highlighter-rouge">File.read/1</code>, которая возвращает кортеж с информацией о том, что файл открыт успешно:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">iex</span><span class="o">&gt;</span> <span class="no">File</span><span class="o">.</span><span class="n">read</span> <span class="sd">"</span><span class="s2">hello"</span>
+<span class="p">{</span><span class="ss">:error</span><span class="p">,</span> <span class="ss">:enoent</span><span class="p">}</span>
+
+<span class="n">iex</span><span class="o">&gt;</span> <span class="no">File</span><span class="o">.</span><span class="n">write</span> <span class="sd">"</span><span class="s2">hello"</span><span class="p">,</span> <span class="sd">"</span><span class="s2">world"</span>
+<span class="ss">:ok</span>
+
+<span class="n">iex</span><span class="o">&gt;</span> <span class="no">File</span><span class="o">.</span><span class="n">read</span> <span class="sd">"</span><span class="s2">hello"</span>
+<span class="p">{</span><span class="ss">:ok</span><span class="p">,</span> <span class="sd">"</span><span class="s2">world"</span><span class="p">}</span>
+</code></pre></div></div>
+
+<p>Здесь нет <code class="highlighter-rouge">try/rescue</code>. Если вы хотите обрабатывать различные исходы попытки открыть файл, можно использовать сопоставление с образцом в конструкции <code class="highlighter-rouge">case</code>:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">iex</span><span class="o">&gt;</span> <span class="k">case</span> <span class="no">File</span><span class="o">.</span><span class="n">read</span> <span class="sd">"</span><span class="s2">hello"</span> <span class="k">do</span>
+<span class="o">...&gt;</span>   <span class="p">{</span><span class="ss">:ok</span><span class="p">,</span> <span class="n">body</span><span class="p">}</span>      <span class="o">-&gt;</span> <span class="no">IO</span><span class="o">.</span><span class="n">puts</span> <span class="sd">"</span><span class="s2">Success: </span><span class="si">#{</span><span class="n">body</span><span class="si">}</span><span class="s2">"</span>
+<span class="o">...&gt;</span>   <span class="p">{</span><span class="ss">:error</span><span class="p">,</span> <span class="n">reason</span><span class="p">}</span> <span class="o">-&gt;</span> <span class="no">IO</span><span class="o">.</span><span class="n">puts</span> <span class="sd">"</span><span class="s2">Error: </span><span class="si">#{</span><span class="n">reason</span><span class="si">}</span><span class="s2">"</span>
+<span class="o">...&gt;</span> <span class="k">end</span>
+</code></pre></div></div>
+
+<p>В конце концов, ваше приложение должно само решать, является ли ошибка при открытии файла исключительной или нет. Поэтому Эликсир не создаёт исключений в <code class="highlighter-rouge">File.read/1</code> и многих других функциях. Напротив, разработчик сам волен выбирать лучший способ поведения.</p>
+
+<p>Для случаев, когда вы ожидаете, что файл существует (и отсутствие этого файла действительно <em>ошибка</em>), вы можете использовать <code class="highlighter-rouge">File.read!/1</code>:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">iex</span><span class="o">&gt;</span> <span class="no">File</span><span class="o">.</span><span class="n">read!</span> <span class="sd">"</span><span class="s2">unknown"</span>
+<span class="o">**</span> <span class="p">(</span><span class="no">File</span><span class="o">.</span><span class="no">Error</span><span class="p">)</span> <span class="n">could</span> <span class="ow">not</span> <span class="n">read</span> <span class="n">file</span> <span class="ss">unknown:</span> <span class="n">no</span> <span class="n">such</span> <span class="n">file</span> <span class="ow">or</span> <span class="n">directory</span>
+    <span class="p">(</span><span class="n">elixir</span><span class="p">)</span> <span class="n">lib</span><span class="o">/</span><span class="n">file</span><span class="o">.</span><span class="ss">ex:</span><span class="m">305</span><span class="p">:</span> <span class="no">File</span><span class="o">.</span><span class="n">read!</span><span class="o">/</span><span class="m">1</span>
+</code></pre></div></div>
+
+<p>Многие функции в стандартной библиотеке следуют схеме наличия двух вариантов функции, одна из которых вызывает исключения, вместо возврата кортежа. Договорённость состоит в том, чтобы была функция (<code class="highlighter-rouge">foo</code>), которая возвращает кортеж <code class="highlighter-rouge">{:ok, result}</code> или <code class="highlighter-rouge">{:error, reason}</code>, и другая функция (<code class="highlighter-rouge">foo!</code>, такое же имя с <code class="highlighter-rouge">!</code> в конце), которая принимает те же аргументы, что и <code class="highlighter-rouge">foo</code>, но вызывает исключения в случае ошибки. <code class="highlighter-rouge">foo!</code> должна возвращать результат (не обёрнутый кортежем), если всё прошло хорошо. <a href="https://hexdocs.pm/elixir/File.html">Модуль <code class="highlighter-rouge">File</code></a> – хороший пример следования этой договорённости.</p>
+
+<p>В Эликсире мы избегаем использования <code class="highlighter-rouge">try/rescue</code>, потому что <strong>не используем ошибки для контроля работы приложения</strong>. Мы понимаем ошибки буквально: они оставлены для неожиданных и исключительных ситуаций. В случае, если вам действительно нужно контролировать ход работы, следует использовать выбрасывания с помощью <em>throw</em>. О нём мы и поговорим.</p>
+
+<h2 id="выбрасывания">Выбрасывания</h2>
+
+<p>В Эликсире, некоторое значение может быть <attr title="THROWN">**выброшено**&lt;/abbr&gt; и далее <abbr title="CAUGHT">**отловлено**</abbr>. Конструкции `throw` и `catch` зарезервированы для ситуации, когда невозможно получить значение без использования `throw` и `catch`.</attr></p>
+
+<p>Такие ситуации на практике встречаются очень нечасто, исключая случаи работы с библиотеками, которые не предоставляют нормального API. Например, представьте, что модуль <code class="highlighter-rouge">Enum</code> не предоставляет API для поиска значений и что нам нужно найти первое кратное 13 число в списке чисел:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">iex</span><span class="o">&gt;</span> <span class="k">try</span> <span class="k">do</span>
+<span class="o">...&gt;</span>   <span class="no">Enum</span><span class="o">.</span><span class="n">each</span> <span class="o">-</span><span class="m">50</span><span class="o">..</span><span class="m">50</span><span class="p">,</span> <span class="k">fn</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">-&gt;</span>
+<span class="o">...&gt;</span>     <span class="k">if</span> <span class="n">rem</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="m">13</span><span class="p">)</span> <span class="o">==</span> <span class="m">0</span><span class="p">,</span> <span class="k">do</span><span class="p">:</span> <span class="k">throw</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+<span class="o">...&gt;</span>   <span class="k">end</span>
+<span class="o">...&gt;</span>   <span class="sd">"</span><span class="s2">Got nothing"</span>
+<span class="o">...&gt;</span> <span class="k">catch</span>
+<span class="o">...&gt;</span>   <span class="n">x</span> <span class="o">-&gt;</span> <span class="sd">"</span><span class="s2">Got </span><span class="si">#{</span><span class="n">x</span><span class="si">}</span><span class="s2">"</span>
+<span class="o">...&gt;</span> <span class="k">end</span>
+<span class="sd">"</span><span class="s2">Got -39"</span>
+</code></pre></div></div>
+
+<p>Но т. к. <code class="highlighter-rouge">Enum</code> <em>предоставляет</em> хороший API, на практике задача решается с использованием <code class="highlighter-rouge">Enum.find/2</code>:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">iex</span><span class="o">&gt;</span> <span class="no">Enum</span><span class="o">.</span><span class="n">find</span> <span class="o">-</span><span class="m">50</span><span class="o">..</span><span class="m">50</span><span class="p">,</span> <span class="o">&amp;</span><span class="p">(</span><span class="n">rem</span><span class="p">(</span><span class="nv">&amp;1</span><span class="p">,</span> <span class="m">13</span><span class="p">)</span> <span class="o">==</span> <span class="m">0</span><span class="p">)</span>
+<span class="o">-</span><span class="m">39</span>
+</code></pre></div></div>
+
+<h2 id="выход">Выход</h2>
+
+<p>Весь код на Эликсире работает внутри процессов, которые общаются между собой. Когда процесс умирает по «естественным причинам» (например, необработанное исключение), он отправляет сигнал <code class="highlighter-rouge">exit</code>. Процесс также может умереть при вызове сигнала <code class="highlighter-rouge">exit</code> вручную:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">iex</span><span class="o">&gt;</span> <span class="n">spawn_link</span> <span class="k">fn</span> <span class="o">-&gt;</span> <span class="k">exit</span><span class="p">(</span><span class="m">1</span><span class="p">)</span> <span class="k">end</span>
+<span class="c1">#PID&lt;0.56.0&gt;</span>
+<span class="o">**</span> <span class="p">(</span><span class="no">EXIT</span> <span class="n">from</span> <span class="c1">#PID&lt;0.56.0&gt;) 1</span>
+</code></pre></div></div>
+
+<p>В примере выше, связанный процесс умирает при отправке сигнала <code class="highlighter-rouge">exit</code> со значением 1. Оболочка Эликсира автоматически обрабатывает такие сообщения и выводит их в терминал.</p>
+
+<p>Сигнал <code class="highlighter-rouge">exit</code> также можно «отловить», используя <code class="highlighter-rouge">try/catch</code>:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">iex</span><span class="o">&gt;</span> <span class="k">try</span> <span class="k">do</span>
+<span class="o">...&gt;</span>   <span class="k">exit</span> <span class="sd">"</span><span class="s2">I am exiting"</span>
+<span class="o">...&gt;</span> <span class="k">catch</span>
+<span class="o">...&gt;</span>   <span class="ss">:exit</span><span class="p">,</span> <span class="n">_</span> <span class="o">-&gt;</span> <span class="sd">"</span><span class="s2">not really"</span>
+<span class="o">...&gt;</span> <span class="k">end</span>
+<span class="sd">"</span><span class="s2">not really"</span>
+</code></pre></div></div>
+
+<p>Использование <code class="highlighter-rouge">try/catch</code> само по себе не распространено, и использование его для отлова выходов ещё более редкое.</p>
+
+<p>Сигналы <code class="highlighter-rouge">exit</code> – важная часть отказоустойчивости, предоставляемой виртуальной машиной Эрланга. Процессы обычно работают в деревьях супервизоров, которые тоже являются процессами, которые слушают сигналы <code class="highlighter-rouge">exit</code> от наблюдаемых ими процессов. Как только приходит сигнал выхода, процесс перезапускается.</p>
+
+<p>Именно эта система супервизоров делает конструкции вроде <code class="highlighter-rouge">try/catch</code> и <code class="highlighter-rouge">try/rescue</code> настолько непопулярными в Эликсире. Вместо попытки решить ошибку, мы лучше побыстрее закончим с проблемным местом и дерево супервизора будет гарантировать работу нашего приложения, откатив его к известному начальному состоянию после ошибки.</p>
+
+<h2 id="ключевое-слово-after">Ключевое слово <code class="highlighter-rouge">after</code></h2>
+
+<p>Иногда необходимо убедиться, что ресурс очищен после некоторых действий, которые могли быть потенциальной причиной ошибки. Конструкция <code class="highlighter-rouge">try/after</code> позволяет это сделать. Например, мы можем открыть файл и использовать <code class="highlighter-rouge">after</code> для его закрытия, это будет сделано даже если что-то пойдёт не так:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">iex</span><span class="o">&gt;</span> <span class="p">{</span><span class="ss">:ok</span><span class="p">,</span> <span class="n">file</span><span class="p">}</span> <span class="o">=</span> <span class="no">File</span><span class="o">.</span><span class="n">open</span> <span class="sd">"</span><span class="s2">sample"</span><span class="p">,</span> <span class="p">[</span><span class="ss">:utf8</span><span class="p">,</span> <span class="ss">:write</span><span class="p">]</span>
+<span class="n">iex</span><span class="o">&gt;</span> <span class="k">try</span> <span class="k">do</span>
+<span class="o">...&gt;</span>   <span class="no">IO</span><span class="o">.</span><span class="n">write</span> <span class="n">file</span><span class="p">,</span> <span class="sd">"</span><span class="s2">olá"</span>
+<span class="o">...&gt;</span>   <span class="k">raise</span> <span class="sd">"</span><span class="s2">oops, something went wrong"</span>
+<span class="o">...&gt;</span> <span class="k">after</span>
+<span class="o">...&gt;</span>   <span class="no">File</span><span class="o">.</span><span class="n">close</span><span class="p">(</span><span class="n">file</span><span class="p">)</span>
+<span class="o">...&gt;</span> <span class="k">end</span>
+<span class="o">**</span> <span class="p">(</span><span class="no">RuntimeError</span><span class="p">)</span> <span class="n">oops</span><span class="p">,</span> <span class="n">something</span> <span class="n">went</span> <span class="n">wrong</span>
+</code></pre></div></div>
+
+<p>Секция <code class="highlighter-rouge">after</code> будет выполнена независимо от того, выполнился блок <code class="highlighter-rouge">try</code> без ошибок или нет. Однако, обратите внимание, если связанный процесс существует, этот процесс отправит <code class="highlighter-rouge">exit</code> и секция <code class="highlighter-rouge">after</code> не будет выполнена. <code class="highlighter-rouge">after</code> предоставляет лишь неполную гарантию. К счастью, файлы в Эликсире также связаны с текущим процессом и всегда будут закрыты, если текущий процесс завершился с ошибкой, независимо от секции <code class="highlighter-rouge">after</code>. Вы можете обнаружить, что так работают и другие ресурсы: таблицы ETS, сокеты, порты и др.</p>
+
+<p>Иногда вы можете захотеть обернуть всё тело функции в конструкцию <code class="highlighter-rouge">try</code>, часто чтобы убедиться, что некоторый код наверняка выполнится после. В этом случае, Эликсир позволяет опустить строку <code class="highlighter-rouge">try</code>:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">iex</span><span class="o">&gt;</span> <span class="k">defmodule</span> <span class="no">RunAfter</span> <span class="k">do</span>
+<span class="o">...&gt;</span>   <span class="k">def</span> <span class="n">without_even_trying</span> <span class="k">do</span>
+<span class="o">...&gt;</span>     <span class="k">raise</span> <span class="sd">"</span><span class="s2">oops"</span>
+<span class="o">...&gt;</span>   <span class="k">after</span>
+<span class="o">...&gt;</span>     <span class="no">IO</span><span class="o">.</span><span class="n">puts</span> <span class="sd">"</span><span class="s2">cleaning up!"</span>
+<span class="o">...&gt;</span>   <span class="k">end</span>
+<span class="o">...&gt;</span> <span class="k">end</span>
+
+<span class="n">iex</span><span class="o">&gt;</span> <span class="no">RunAfter</span><span class="o">.</span><span class="n">without_even_trying</span>
+<span class="n">cleaning</span> <span class="n">up!</span>
+<span class="o">**</span> <span class="p">(</span><span class="no">RuntimeError</span><span class="p">)</span> <span class="n">oops</span>
+</code></pre></div></div>
+
+<p>Эликсир автоматически обернёт тело функции в <code class="highlighter-rouge">try</code>, если обнаружит <code class="highlighter-rouge">after</code>, <code class="highlighter-rouge">rescue</code> или <code class="highlighter-rouge">catch</code>.</p>
+
+<h2 id="ключевое-слово-else">Ключевое слово <code class="highlighter-rouge">else</code></h2>
+
+<p>Если указан блок <code class="highlighter-rouge">else</code>, он будет выполнен после блока <code class="highlighter-rouge">try</code> в любом случае, были в процессе ошибки или нет.</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">iex</span><span class="o">&gt;</span> <span class="n">x</span> <span class="o">=</span> <span class="m">2</span>
+<span class="m">2</span>
+
+<span class="n">iex</span><span class="o">&gt;</span> <span class="k">try</span> <span class="k">do</span>
+<span class="o">...&gt;</span>   <span class="m">1</span> <span class="o">/</span> <span class="n">x</span>
+<span class="o">...&gt;</span> <span class="k">rescue</span>
+<span class="o">...&gt;</span>   <span class="no">ArithmeticError</span> <span class="o">-&gt;</span>
+<span class="o">...&gt;</span>     <span class="ss">:infinity</span>
+<span class="o">...&gt;</span> <span class="k">else</span>
+<span class="o">...&gt;</span>   <span class="n">y</span> <span class="ow">when</span> <span class="n">y</span> <span class="o">&lt;</span> <span class="m">1</span> <span class="ow">and</span> <span class="n">y</span> <span class="o">&gt;</span> <span class="o">-</span><span class="m">1</span> <span class="o">-&gt;</span>
+<span class="o">...&gt;</span>     <span class="ss">:small</span>
+<span class="o">...&gt;</span>   <span class="n">_</span> <span class="o">-&gt;</span>
+<span class="o">...&gt;</span>     <span class="ss">:large</span>
+<span class="o">...&gt;</span> <span class="k">end</span>
+<span class="ss">:small</span>
+</code></pre></div></div>
+
+<p>Исключения в блоке <code class="highlighter-rouge">else</code> не отлавливаются. Если ни один шаблон внутри <code class="highlighter-rouge">else</code> не подходит, будет выброшено исключение. Оно не будет отловлено текущим <code class="highlighter-rouge">try/catch/rescue/after</code> блоком.</p>
+
+<h2 id="область-видимости-переменных">Область видимости переменных</h2>
+
+<p>Важно понимать, что переменные, определенные внутри <code class="highlighter-rouge">try/catch/rescue/after</code> блока не влияют на внешний контекст. Это связано с тем, что блок <code class="highlighter-rouge">try</code> может завершиться с ошибкой и некоторые переменные могут никогда не достичь своего объявления. Другими словами, следующий код не корректен:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">iex</span><span class="o">&gt;</span> <span class="k">try</span> <span class="k">do</span>
+<span class="o">...&gt;</span>   <span class="k">raise</span> <span class="sd">"</span><span class="s2">fail"</span>
+<span class="o">...&gt;</span>   <span class="n">what_happened</span> <span class="o">=</span> <span class="ss">:did_not_raise</span>
+<span class="o">...&gt;</span> <span class="k">rescue</span>
+<span class="o">...&gt;</span>   <span class="n">_</span> <span class="o">-&gt;</span> <span class="n">what_happened</span> <span class="o">=</span> <span class="ss">:rescued</span>
+<span class="o">...&gt;</span> <span class="k">end</span>
+
+<span class="n">iex</span><span class="o">&gt;</span> <span class="n">what_happened</span>
+<span class="o">**</span> <span class="p">(</span><span class="no">RuntimeError</span><span class="p">)</span> <span class="n">undefined</span> <span class="ss">function:</span> <span class="n">what_happened</span><span class="o">/</span><span class="m">0</span>
+</code></pre></div></div>
+
+<p>Вместо этого, вы можете сохранить значение выражения из <code class="highlighter-rouge">try</code>:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">iex</span><span class="o">&gt;</span> <span class="n">what_happened</span> <span class="o">=</span>
+<span class="o">...&gt;</span>   <span class="k">try</span> <span class="k">do</span>
+<span class="o">...&gt;</span>     <span class="k">raise</span> <span class="sd">"</span><span class="s2">fail"</span>
+<span class="o">...&gt;</span>     <span class="ss">:did_not_raise</span>
+<span class="o">...&gt;</span>   <span class="k">rescue</span>
+<span class="o">...&gt;</span>     <span class="n">_</span> <span class="o">-&gt;</span> <span class="ss">:rescued</span>
+<span class="o">...&gt;</span>   <span class="k">end</span>
+
+<span class="n">iex</span><span class="o">&gt;</span> <span class="n">what_happened</span>
+<span class="ss">:rescued</span>
+</code></pre></div></div>
+
+<p>На этом заканчивается наше введение в <code class="highlighter-rouge">try</code>, <code class="highlighter-rouge">catch</code> и <code class="highlighter-rouge">rescue</code>. Вы можете обнаружить, что в Эликсире они используются реже, чем в других языках, хотя они могут быть полезны в некоторых ситуациях, когда библиотека или некоторая часть кода играет «не по правилам».</p>
+
+    </div>
+</article>
+
+<nav class="docs_nav pure-g">
+    <div class="docs_nav__inner pure-u-1 pure-u-md-3-4">
+        <div class="pure-g">
+            <div class="docs_nav__column docs_nav__column--prev pure-u-1-3">
+                
+                    <a href="/docs/sigils.html" class="docs_nav__link pure-button">
+                        &larr;<span class="h-hidden_mobile"> Назад</span></a>
+                
+            </div>
+
+            <div class="docs_nav__column docs_nav__column--contents pure-u-1-3">
+                <a href="#docsContents" class="docs_nav__link docs_nav__link--contents pure-button">☰</a>
+            </div>
+
+            <div class="docs_nav__column docs_nav__column--next pure-u-1-3">
+                
+                    <a href="/docs/typespecs-and-behaviours.html" class="docs_nav__link pure-button">
+                        <span class="h-hidden_mobile">Вперёд </span>&rarr;
+                    </a>
+                
+            </div>
+        </div>
+    </div>
+</nav>
+
+<div id="docsContents" class="modal modal--docs_contents modal--close_backdrop">
+    <div class="modal__content">
+        <a href="#close" title="Закрыть" class="modal__close">x</a>
+
+        <h2 class="modal__title">Содержание</h2>
+
+        
+        <h3 id="руководство-для-начинающих">Руководство для начинающих</h3>
+<ul>
+  <li><a href="/docs">Введение</a></li>
+  <li><a href="/docs/basic-types.html">Базовые типы</a></li>
+  <li><a href="/docs/basic-operators.html">Базовые операторы</a></li>
+  <li><a href="/docs/pattern-matching.html">Сопоставление с образцом</a></li>
+  <li><a href="/docs/case-cond-and-if.html">Конструкции ветвления</a></li>
+  <li><a href="/docs/binaries-strings-and-char-lists.html">Двоичные данные, строки и списки символов</a></li>
+  <li><a href="/docs/keywords-and-maps.html">Ключевые списки и словари</a></li>
+  <li><a href="/docs/modules-and-functions.html">Модули и функции</a></li>
+  <li><a href="/docs/recursion.html">Рекурсия</a></li>
+  <li><a href="/docs/enumerables-and-streams.html">Перечисления и потоки</a></li>
+  <li><a href="/docs/processes.html">Процессы</a></li>
+  <li><a href="/docs/io-and-the-file-system.html">Ввод/вывод и файловая система</a></li>
+  <li><a href="/docs/alias-require-and-import.html">Директивы <code class="highlighter-rouge">alias</code>, <code class="highlighter-rouge">require</code> и <code class="highlighter-rouge">import</code></a></li>
+  <li><a href="/docs/module-attributes.html">Атрибуты модулей</a></li>
+  <li><a href="/docs/structs.html">Структуры</a></li>
+  <li><a href="/docs/protocols.html">Протоколы</a></li>
+  <li><a href="/docs/comprehensions.html">Списковые выражения</a></li>
+  <li><a href="/docs/sigils.html">Сигилы</a></li>
+  <li><a href="/docs/try-catch-and-rescue.html">Конструкция <code class="highlighter-rouge">try</code>, <code class="highlighter-rouge">catch</code> и <code class="highlighter-rouge">rescue</code></a></li>
+  <li><a href="/docs/typespecs-and-behaviours.html">Спецификации типов и поведения</a></li>
+  <li><a href="/docs/erlang-libraries.html">Библиотеки Эрланга</a></li>
+  <li><a href="/docs/where-to-go-next.html">Куда двигаться дальше</a></li>
+</ul>
+
+<h3 id="микс-и-otp">Микс и <code class="highlighter-rouge">OTP</code></h3>
+<ul>
+  <li><a href="/docs/mix-otp/introduction-to-mix.html">Введение в Микс</a></li>
+  <li><a href="/docs/mix-otp/agent.html">Агент</a></li>
+  <li><a href="/docs/mix-otp/genserver.html">GenServer</a></li>
+  <li><a href="/docs/mix-otp/supervisor-and-application.html">Супервизор и приложение</a></li>
+  <li><a href="/docs/mix-otp/dynamic-supervisor.html">Динамический супервизор</a></li>
+  <li><a href="/docs/mix-otp/ets.html">ETS</a></li>
+  <li><a href="/docs/mix-otp/dependencies-and-umbrella-apps.html">Зависимости и зонтичные проекты</a></li>
+  <li><a href="/docs/mix-otp/task-and-gen-tcp.html">Модули <code class="highlighter-rouge">Task</code> и <code class="highlighter-rouge">:gen_tcp</code></a></li>
+  <li><a href="/docs/mix-otp/docs-tests-and-with.html">Доктесты, паттерны и оператор <code class="highlighter-rouge">with</code></a></li>
+  <li><a href="/docs/mix-otp/distributed-tasks-and-configuration.html">Распределенные задачи и конфигурация</a></li>
+</ul>
+
+<h3 id="метапрограммирование">Метапрограммирование</h3>
+<ul>
+  <li><a href="/docs/meta/quote-and-unquote.html">Конструкции <code class="highlighter-rouge">quote</code> и <code class="highlighter-rouge">unquote</code></a></li>
+  <li><a href="/docs/meta/macros.html">Макросы</a></li>
+  <li><a href="/docs/meta/domain-specific-languages.html">Предметно-ориентированные языки</a></li>
+</ul>
+
+    </div>
+</div>
+
+
+
+        <footer class="footer">
+    &copy; 2020
+    / Россия
+
+    <span class="pull-right">Любые мысли и вопросы пишите на <a href="mailto:elixir@wunsh.ru">elixir@wunsh.ru</a>.</span>
+</footer>
+
+        <div id="subscribeModal" class="modal">
+    <div class="modal__content">
+        <a href="#close" title="Close" class="modal__close">x</a>
+
+        <h2 class="modal__title">Ламповая рассылка про&nbsp;Эликсир</h2>
+
+        <p>Один-два раза в&nbsp;неделю присылаем тёплые письма об&nbsp;Эликсире: переводы самых интересных статей до&nbsp;их&nbsp;появления в&nbsp;открытом доступе, анонсы событий и&nbsp;вкусные бонусы.</p>
+
+        <form action="//wunsh.us14.list-manage.com/subscribe/post?u=c81ca3d4693f62db7f7f67c71&amp;id=a192e2dfef" method="post" id="mc-embedded-subscribe-form" name="mc-embedded-subscribe-form" class="pure-form h-tc validate" target="_blank" novalidate>
+            <input type="email" value="" name="EMAIL" class="modal__input pure-input-rounded large" id="mce-EMAIL" placeholder="Твоя почта" required>
+            <div style="position: absolute; left: -5000px;" aria-hidden="true"><input type="text" name="b_c81ca3d4693f62db7f7f67c71_a192e2dfef" tabindex="-1" value=""></div>
+
+            <input type="submit" value="Присоединиться" name="subscribe" onClick="yaCounter39773490.reachGoal('SUBSCRIBED'); return true" id="mc-embedded-subscribe" class="pure-button button-success large">
+        </form>
+
+        <p>Обязательно подтверди почту, перейдя по&nbsp;ссылке в&nbsp;письме, иначе мы&nbsp;не&nbsp;сможем делиться с&nbsp;тобой полезностями.</p>
+
+        <p>Надоедать точно не&nbsp;будем :)</p>
+    </div>
+</div>
+
+        <script src="/assets/js/vendors/zepto.min.js"></script>
+
+<script>
+    if ($(".post--docs").length) {
+        $(".footer").addClass("footer--docs")
+    }
+
+    $(".modal--close_backdrop").click(function(){
+        window.location.hash = "";
+    });
+</script>
+
+        <!-- Yandex.Metrika counter -->
+<script type="text/javascript">
+    (function (d, w, c) {
+        (w[c] = w[c] || []).push(function() {
+            try {
+                w.yaCounter39773490 = new Ya.Metrika({
+                    id:39773490,
+                    clickmap:true,
+                    trackLinks:true,
+                    accurateTrackBounce:true,
+                    webvisor:true,
+                    ut:"noindex"
+                });
+            } catch(e) { }
+        });
+
+        var n = d.getElementsByTagName("script")[0],
+            s = d.createElement("script"),
+            f = function () { n.parentNode.insertBefore(s, n); };
+        s.type = "text/javascript";
+        s.async = true;
+        s.src = "https://mc.yandex.ru/metrika/watch.js";
+
+        if (w.opera == "[object Opera]") {
+            d.addEventListener("DOMContentLoaded", f, false);
+        } else { f(); }
+    })(document, window, "yandex_metrika_callbacks");
+</script>
+<noscript><div><img src="https://mc.yandex.ru/watch/39773490?ut=noindex" style="position:absolute; left:-9999px;" alt="" /></div></noscript>
+<!-- /Yandex.Metrika counter -->
+
+      </div>
+    </div>
+  </body>
+</html>

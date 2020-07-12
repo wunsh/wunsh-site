@@ -1,0 +1,536 @@
+<!DOCTYPE html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Магические приёмы тестирования приложений на Эликсире. Часть 1 |> Сообщество Elixir и Phoenix Framework</title>
+    <meta name="description" content="В статье рассказывакется о проблемах тестирования в Эликсире и способах их решения.">
+
+    <link rel="alternate" type="application/rss+xml" title="Сообщество Elixir и Phoenix Framework" href="/feed.xml" />
+    <link rel="canonical" href="https://wunsh.ru/articles/magic-tricks-of-testing-in-elixir-1.html">
+
+    <style type="text/css">@import url("//fonts.googleapis.com/css?family=Source+Sans+Pro:400,700&subset=cyrillic");</style>
+    <link rel="stylesheet" href="/assets/css/vendors/pure.min.css">
+    <link rel="stylesheet" href="/assets/css/vendors/pure-grids-responsive.min.css">
+    <link rel="stylesheet" href="/assets/css/style.css?1594516983">
+
+    <link rel="shortcut icon" type="image/png" href="/assets/favicon.png" >
+</head>
+
+
+  <body>
+    <div class="wunsh pure-g">
+      
+
+
+
+
+<div class="menu pure-u-1 pure-u-md-1-4">
+  <div class="header">
+    <h2 class="header__title">
+      
+        <a href="https://wunsh.ru" class="header__title_link" title="На главную">Эликсир и&nbsp;Вунш</a>
+      
+    </h2>
+    <h3 class="header__tagline">Erlang + Ruby = &#10084;</h3>
+
+    <nav class="nav">
+      <ul class="nav_list">
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/elixir" class="nav_list__item_link pure-button">О языке</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/install/linux-asdf" class="nav_list__item_link pure-button">Установка</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/docs/" class="nav_list__item_link pure-button">Документация</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/guides" class="nav_list__item_link pure-button">Гайды</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/news" class="nav_list__item_link pure-button">Новости</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/articles" class="nav_list__item_link pure-button">Статьи</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/videos" class="nav_list__item_link pure-button">Видео</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/vacancies" class="nav_list__item_link pure-button">Вакансии</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/faq" class="nav_list__item_link pure-button">FAQ</a>
+            </li>
+          
+        
+      </ul>
+    </nav>
+
+    <a href="#subscribeModal" class="pure-button header__subscribe_link">Подписаться на рассылку</a>
+  </div>
+</div>
+
+
+      <div class="content pure-u-1 pure-u-md-3-4">
+        
+
+<article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+  <header class="post__header">
+    
+    <h1 class="post__title" itemprop="name headline"><strike>Магические</strike> приёмы тестирования приложений на Эликсире. Часть 1</h1>
+
+    <div class="post__meta post_meta">
+      <ul class="meta_list">
+        <li class="meta_list__item">
+          
+          <span class="">
+            <small class="meta_list__item_name">Дата</small>
+            <time class="h-bold" datetime="2018-06-04T00:00:00+00:00" itemprop="datePublished">
+              
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+04 июня 2018
+
+            </time>
+          </span>
+          
+
+          
+        </li>
+        
+        <li class="meta_list__item">
+            <span class="tag_cloud tags_cloud--inline h-no_margin">
+              <small class="meta_list__item_name">Теги</small> 
+
+
+<ul class="tags_cloud__list">
+  
+    <a href="/tags/#beginner" class="tags_cloud__link tag tag--beginner">beginner</a>
+  
+    <a href="/tags/#testing" class="tags_cloud__link tag tag--testing">testing</a>
+  
+</ul>
+
+            </span>
+        </li>
+        
+        <li class="meta_list__item">
+          <span itemprop="author" itemscope itemtype="http://schema.org/Person">
+            <small class="meta_list__item_name">
+              
+                Перевод
+              
+            </small>
+            <span itemprop="name" class="h-bold">Надежда Нестерова</span>
+          </span>
+        </li>
+
+        <li class="meta_list__item">
+          
+            <div >
+              <small>Оригинал</small>
+              <strong>
+                &laquo;<a href="https://medium.com/onfido-tech/the-not-so-magic-tricks-of-testing-in-elixir-1-2-89bfcf252321" style="text-transform: none; text-decoration: underline; color: #4b2e39;">The (not so) Magic Tricks of Testing in Elixir (1/2)</a>&raquo;
+              </strong>
+              <small>&copy;</small>
+              <strong>Daniel Caixinha</strong>
+            </div>
+          
+        </li>
+      </ul>
+    </div>
+  </header>
+
+  <div class="post__content" itemprop="articleBody">
+    <p>Одной из болевых точек, которую можно нащупать при переходе на Эликсир, может стать тестирование. Тестирование — неотъемлемая часть разработки любого приложения. Тесты служат не только отличной «живой» документацией, но и своеобразной подушкой безопасности при рефакторинге кода, следовательно, тестирование приложений должно быть осуществлено надлежащим образом. В данной статье сотрудники компании Onfido рассказывают о трудностях, с которыми повстречались на этом тернистом пути, и как с ними справились.</p>
+
+<p><em><strong>Предупреждение</strong>: Всё, о чём говорится в статье, относится только к <code class="highlighter-rouge">ExUnit</code>. Вполне возможно, многие из описанных далее проблем при использовании других тестовых фреймворков (например, <code class="highlighter-rouge">espec</code>) вас не коснутся. Никто не настаивает на выборе <code class="highlighter-rouge">ExUnit</code>, но крайне важно задуматься о проектных решениях, особенно если все используемые вами тестовые фреймворки совершенно различны.</em></p>
+
+<h2 id="damp-вместо-dry">DAMP вместо DRY!</h2>
+
+<p>Очень известная среди тестировщиков фраза, означающая, что читабельность тестов, обусловленная использованием в них описательных и выразительных фраз, важнее принципа «не повторяйся». На то есть две причины:</p>
+
+<ul>
+  <li><strong>Тесты —  отличный источник живой документации.</strong> Они прекрасно передают намерения своего создателя и делают более очевидным назначение того или иного модуля или функции. Для этого код тестов должен быть по максимуму читабельным;</li>
+  <li><strong>Тесты не тестируются.</strong> А значит, имеет смысл сводить к минимуму логическую часть и делать их как можно проще.</li>
+</ul>
+
+<p>Рассмотрим действие данного принципа на примере:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">describe</span> <span class="sd">"</span><span class="s2">when the address was already validated and the feature flag is enabled"</span> <span class="k">do</span>
+  <span class="n">setup</span> <span class="ss">:address_already_validated</span><span class="p">,</span> <span class="ss">:enabled_feature_flag</span>
+
+  <span class="n">test</span> <span class="sd">"</span><span class="s2">it runs the validation again"</span> <span class="k">do</span>
+    <span class="c1"># [...]</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+
+<span class="n">describe</span> <span class="sd">"</span><span class="s2">when the address was already validated and the feature flag is disabled"</span> <span class="k">do</span>
+  <span class="n">setup</span> <span class="ss">:address_already_validated</span><span class="p">,</span> <span class="ss">:disable_feature_flag</span>
+
+  <span class="n">test</span> <span class="sd">"</span><span class="s2">it does not run the validation again"</span> <span class="k">do</span>
+    <span class="c1"># [...]</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<p>Итак, здесь приведены два блока <code class="highlighter-rouge">describe</code> с похожими действиями после <code class="highlighter-rouge">setup</code>: и в том и в другом вызывается функция <code class="highlighter-rouge">address_already_validated</code>. Посмотрев на этот пример, у большинства разработчиков возникнет непреодолимое желание избавиться от повторяющегося кода и связать внешний контекст <code class="highlighter-rouge">describe</code> с блоком <code class="highlighter-rouge">setup</code> для функции <code class="highlighter-rouge">address_already_validated</code>.</p>
+
+<p>В простом примере такое решение может показаться достаточно безобидным, но чем крупнее приложение, тем больше будет заметна его непригодность. Главная цель: посмотрев на тест, без лишних движений понять, зачем он нужен и что он делает (если вы рубист, то можно с уверенностью сказать, что в первое время работы над новым проектом вы сталкивались с тем, что мозг просто разрывается на части после прочтения документации и попыток разобраться во всех, связанных с этим тестом контекстах).</p>
+
+<p>Описательность укрепляет свои позиции и в <code class="highlighter-rouge">ExUnit</code>, поскольку вложенные блоки <code class="highlighter-rouge">describe</code> создавать нельзя (Жозе Валим логически обосновал этот запрет <a href="https://elixirforum.com/t/how-to-describe-many-contexts-in-exunit-without-a-hierarchy/1551/3">здесь</a>). Такое проектное решение кажется непривлекательным, но в то же время оно является ярким примером того, что Эликсир направлен на обеспечение долгосрочной поддержки проекта, а следовательно, и высокой скорости разработки).</p>
+
+<h2 id="разработка-через-тестирование-детройт-против-лондона">Разработка через тестирование: Детройт против Лондона</h2>
+
+<p>Думаю, большинство сложностей, с которыми можно столкнуться, можно объяснить различием подходов к тестированию.</p>
+
+<p>Детройтская школа TDD, созданная в девяностые Кентом Беком и его командой, представляет классический подход, заключающийся в максимизации эффекта от регрессионного тестирования путём уменьшения использования «дублёров» (стабов и моков) в тестах. Но это неизбежно приводит к излишнему покрытию тестового кода (и всем связанным с этим проблемам). Кроме того, при выборе такого подхода страдает обратная связь при проектировании.</p>
+
+<p>Основой лондонской школы TDD является уделение первоочередного внимания тестируемому объекту и изоляция всех его зависимостей. Последователи данной школы склонны мыслить в терминах модульного тестирования, потому что работа ведётся над отдельными единицами кода. Обратная связь при таком TDD выше, но процесс должен быть дополнен интеграционными тестами, которые помогут убедиться, что все части работают как единое целое.</p>
+
+<p>Когда дело касается функциональных языков программирования, чаще всего можно встретить приверженцев детройтского метода, так как им присуща привычка писать код как можно чище (тем самым минимизируя побочные эффекты). Также для таких языков при проведении модульного тестирования характерен свободный запуск функций из других модулей.</p>
+
+<p>Поскольку автор является последователем лондонского метода, то ему привычно использовать моки даже если вызываемая функция или модуль не имеют побочных эффектов. Такая схема обеспечивает груду страданий, и мешает конкурентно запускать тесты при наличии моков. А теперь пришла пора перейти к стратегиям тестирования приложений на Эликсире.</p>
+
+<h2 id="магические-приёмы-тестирования">Магические приёмы тестирования</h2>
+
+<p>Сэнди Метц <a href="https://www.youtube.com/watch?v=URSWYvyc42M">в своём выступлении</a> 2013 года (рекомендуется посмотреть!) представила следующую опорную схему для создания тестов так, чтобы они не дублировали друг друга:</p>
+
+<p><img src="https://cdn-images-1.medium.com/max/1600/1*1ABg9Hp9_9hCUsNA2oBaVA.png" alt="" /></p>
+
+<p>Входящий запрос (<strong>Incoming Query</strong>) и команда (<strong>Command</strong>) не требуют постановки моков, но мы всё равно рассмотрим парочку примеров для каждого случая. С исходящей командой (<strong>Outgoing Command</strong>) дела обстоят сложнее, здесь точно понадобятся заглушки.</p>
+
+<p>Допустим, необходимо написать тесты для следующего модуля:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">defmodule</span> <span class="no">Demo</span><span class="o">.</span><span class="no">Validators</span><span class="o">.</span><span class="no">AddressValidator</span> <span class="k">do</span>
+  <span class="nv">@callback</span> <span class="n">validation_level</span><span class="p">()</span> <span class="p">::</span> <span class="no">String</span><span class="o">.</span><span class="n">t</span>
+  <span class="nv">@callback</span> <span class="n">set_validation_level</span><span class="p">(</span><span class="no">String</span><span class="o">.</span><span class="n">t</span><span class="p">)</span> <span class="p">::</span> <span class="ss">:ok</span>
+  <span class="nv">@callback</span> <span class="n">validate</span><span class="p">(</span><span class="no">String</span><span class="o">.</span><span class="n">t</span><span class="p">)</span> <span class="p">::</span> <span class="n">boolean</span>
+
+  <span class="k">def</span> <span class="n">validation_level</span><span class="p">()</span> <span class="k">do</span>
+    <span class="no">Application</span><span class="o">.</span><span class="n">get_env</span><span class="p">(</span><span class="ss">:demo</span><span class="p">,</span> <span class="ss">:validation_level</span><span class="p">)</span>
+  <span class="k">end</span>
+
+  <span class="k">def</span> <span class="n">set_validation_level</span><span class="p">(</span><span class="n">level</span><span class="p">)</span> <span class="k">do</span>
+    <span class="no">Application</span><span class="o">.</span><span class="n">put_env</span><span class="p">(</span><span class="ss">:demo</span><span class="p">,</span> <span class="ss">:validation_level</span><span class="p">,</span> <span class="n">level</span><span class="p">)</span>
+  <span class="k">end</span>
+
+  <span class="k">def</span> <span class="n">validate</span><span class="p">(</span><span class="n">address</span><span class="p">)</span> <span class="k">do</span>
+    <span class="n">emit_event</span><span class="p">(</span><span class="sd">"</span><span class="s2">address_validated"</span><span class="p">)</span>
+
+    <span class="n">address</span>
+    <span class="o">|&gt;</span> <span class="no">String</span><span class="o">.</span><span class="n">length</span><span class="p">()</span>
+    <span class="o">|&gt;</span> <span class="n">validate_length</span><span class="p">()</span>
+  <span class="k">end</span>
+
+  <span class="k">defp</span> <span class="n">validate_length</span><span class="p">(</span><span class="n">address_length</span><span class="p">)</span> <span class="ow">when</span> <span class="n">address_length</span> <span class="o">&lt;</span> <span class="m">32</span><span class="p">,</span> <span class="k">do</span><span class="p">:</span> <span class="no">true</span>
+  <span class="k">defp</span> <span class="n">validate_length</span><span class="p">(</span><span class="n">_address_length</span><span class="p">),</span> <span class="k">do</span><span class="p">:</span> <span class="no">false</span>
+
+  <span class="k">defp</span> <span class="n">emit_event</span><span class="p">(</span><span class="n">event_description</span><span class="p">),</span> <span class="k">do</span><span class="p">:</span> <span class="no">Demo</span><span class="o">.</span><span class="no">Events</span><span class="o">.</span><span class="no">EventEmitter</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="n">event_description</span><span class="p">)</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<p>Это модуль валидации адреса, который всего-навсего проверяет, чтобы в заданном адресе было не более 32 символов. Также предположим, что функция <code class="highlighter-rouge">validate</code> порождает событие (побочный эффект). Данный модуль также записывает в конфигурации и считывает оттуда параметр <code class="highlighter-rouge">:validation_level</code>, который представлен в данном примере только в качестве входящей команды и который означает степень проводимой валидации (проверка каждого символа или только длины адреса).</p>
+
+<h3 id="входящий-запрос">Входящий запрос</h3>
+
+<p>Как показано на схеме выше, в данном случае нужно проверить корректность результата тестируемой функции. Просто запускаем функцию и проводим проверку (с помощью <code class="highlighter-rouge">assert</code>) по заданным аргументам. Что может быть проще!</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">defmodule</span> <span class="no">Demo</span><span class="o">.</span><span class="no">Validators</span><span class="o">.</span><span class="no">AddressValidatorTest</span> <span class="k">do</span>
+  <span class="kn">use</span> <span class="no">ExUnit</span><span class="o">.</span><span class="no">Case</span><span class="p">,</span> <span class="ss">async:</span> <span class="no">true</span>
+  <span class="n">alias</span> <span class="no">Demo</span><span class="o">.</span><span class="no">Validators</span><span class="o">.</span><span class="no">AddressValidator</span><span class="p">,</span> <span class="ss">as:</span> <span class="no">Subject</span>
+
+  <span class="n">describe</span> <span class="sd">"</span><span class="s2">when the address is fewer than 32 chars"</span> <span class="k">do</span>
+    <span class="n">test</span> <span class="sd">"</span><span class="s2">it validates the address"</span> <span class="k">do</span>
+      <span class="n">assert</span> <span class="no">Subject</span><span class="o">.</span><span class="n">validate</span><span class="p">(</span><span class="sd">"</span><span class="s2">valid address"</span><span class="p">)</span> <span class="o">==</span> <span class="no">true</span>
+    <span class="k">end</span>
+  <span class="k">end</span>
+
+  <span class="n">describe</span> <span class="sd">"</span><span class="s2">when the address is longer than 32 chars"</span> <span class="k">do</span>
+    <span class="n">test</span> <span class="sd">"</span><span class="s2">it invalidates the address"</span> <span class="k">do</span>
+      <span class="n">assert</span> <span class="no">Subject</span><span class="o">.</span><span class="n">validate</span><span class="p">(</span><span class="sd">"</span><span class="s2">some very very very long address"</span><span class="p">)</span> <span class="o">==</span> <span class="no">false</span>
+    <span class="k">end</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<h3 id="входящая-команда">Входящая команда</h3>
+
+<p>В данном случае будем тестировать побочные эффекты от запуска команды, распространяющиеся на всё приложение.</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">defmodule</span> <span class="no">Demo</span><span class="o">.</span><span class="no">Validators</span><span class="o">.</span><span class="no">AddressValidatorTest</span> <span class="k">do</span>
+  <span class="kn">use</span> <span class="no">ExUnit</span><span class="o">.</span><span class="no">Case</span><span class="p">,</span> <span class="ss">async:</span> <span class="no">true</span>
+  <span class="n">alias</span> <span class="no">Demo</span><span class="o">.</span><span class="no">Validators</span><span class="o">.</span><span class="no">AddressValidator</span><span class="p">,</span> <span class="ss">as:</span> <span class="no">Subject</span>
+  
+  <span class="n">test</span> <span class="sd">"</span><span class="s2">it sets the validation level to the provided parameter"</span> <span class="k">do</span>
+    <span class="n">expected_result</span> <span class="o">=</span> <span class="sd">"</span><span class="s2">some_validation_level"</span>
+
+    <span class="no">Subject</span><span class="o">.</span><span class="n">set_validation_level</span><span class="p">(</span><span class="sd">"</span><span class="s2">some_validation_level"</span><span class="p">)</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="no">Subject</span><span class="o">.</span><span class="n">validation_level</span><span class="p">()</span>
+
+    <span class="n">assert</span> <span class="n">result</span> <span class="o">==</span> <span class="n">expected_result</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<p>В этот раз нас интересует функция <code class="highlighter-rouge">set_validation_level</code>. Запускаем функцию в тесте и определяем побочные эффекты от команды, запустив функцию <code class="highlighter-rouge">validation_level</code>. Именно это действие представляет наибольший интерес в тестах такого рода. Обратите внимание, что так как сообщение является входящим, не стоит ожидать, что <code class="highlighter-rouge">Application.config</code> получит <code class="highlighter-rouge">put_env</code> с верными аргументами, ведь тогда детали реализации просочатся в тест . Этот случай тоже достаточно прост! Остался последний.</p>
+
+<h3 id="исходящая-команда">Исходящая команда</h3>
+
+<p>Здесь необходимо убедиться, что команда вызывается с правильными аргументами. Однако прежде чем перейти к самому тесту, необходимо изменить кое-что в коде уже готового приложения, а именно добавить зависимость (в данном случае <code class="highlighter-rouge">Demo.Events.EventEmitter</code>). Для этого определим новый атрибут модуля:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">@event_emitter</span> <span class="no">Application</span><span class="o">.</span><span class="n">get_env</span><span class="p">(</span><span class="ss">:demo</span><span class="p">,</span> <span class="ss">:event_emitter</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p>А затем используем его в функции, порождающей события:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">defp</span> <span class="n">emit_event</span><span class="p">(</span><span class="n">event_description</span><span class="p">),</span> <span class="k">do</span><span class="p">:</span> <span class="nv">@event_emitter</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="n">event_description</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p>Теперь в тестовом окружении будет доступен модуль-заглушка (в <code class="highlighter-rouge">config/mix.exs</code> определяем <code class="highlighter-rouge">:event_emitter</code> как <code class="highlighter-rouge">Demo.Events.EventEmitterMock</code>). Сам модуль выглядит следующим образом:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">defmodule</span> <span class="no">Demo</span><span class="o">.</span><span class="no">Events</span><span class="o">.</span><span class="no">EventEmitterMock</span> <span class="k">do</span>
+  <span class="nv">@callback</span> <span class="n">emit</span><span class="p">(</span><span class="no">String</span><span class="o">.</span><span class="n">t</span><span class="p">)</span> <span class="p">::</span> <span class="ss">:ok</span>
+
+  <span class="k">def</span> <span class="n">emit</span><span class="p">(</span><span class="sd">"</span><span class="s2">address_validated"</span><span class="p">)</span> <span class="k">do</span>
+    <span class="n">send</span><span class="p">(</span><span class="n">self</span><span class="p">(),</span> <span class="ss">:address_validated_event_emitted</span><span class="p">)</span>
+    <span class="ss">:ok</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<p>Далее используем обмен сообщениями между процессами, чтобы убедиться, что побочный эффект появился. Процесс посылает сообщение самому себе (первый аргумент, переданный в <code class="highlighter-rouge">send</code>), что поможет нам в будущем проверить его в тесте. Также проводим сопоставление с образцом по аргументу функции, которое проследит за тем, чтобы исходящая команда была вызвана с правильными аргументами.</p>
+
+<p>Преимущество создания моков с явными контрактами — легкость в понимании теста и работе с контекстом. Недостаток же состоит в том, что логика тестов рассредоточена по разным файлам, что затрудняет её восприятие.</p>
+
+<p>Код теста выглядит довольно просто:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">defmodule</span> <span class="no">Demo</span><span class="o">.</span><span class="no">Validators</span><span class="o">.</span><span class="no">AddressValidatorTest</span> <span class="k">do</span>
+  <span class="kn">use</span> <span class="no">ExUnit</span><span class="o">.</span><span class="no">Case</span><span class="p">,</span> <span class="ss">async:</span> <span class="no">true</span>
+  <span class="n">alias</span> <span class="no">Demo</span><span class="o">.</span><span class="no">Validators</span><span class="o">.</span><span class="no">AddressValidator</span><span class="p">,</span> <span class="ss">as:</span> <span class="no">Subject</span>
+  
+  <span class="n">test</span> <span class="sd">"</span><span class="s2">it emits the :address_validated event"</span> <span class="k">do</span>
+    <span class="no">Subject</span><span class="o">.</span><span class="n">validate</span><span class="p">(</span><span class="sd">"</span><span class="s2">test address"</span><span class="p">)</span>
+
+    <span class="n">assert_receive</span> <span class="ss">:address_validated_event_emitted</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<p>Как уже говорилось ранее, чтобы убедиться, что команда была вызвана, посмотрим на сообщения. Поэтому в тесте нужно просто проверить почтовый ящик текущего процесса и методом assert удостовериться, что получено нужное нам сообщение.</p>
+
+<p>Стоит отметить, что эффективность данного подхода сводится к нулю, если тестируемый код порождает новый процесс, что достаточно частая история в Эликсире. К примеру, модуль <code class="highlighter-rouge">Demo.Events.EventEmitter</code> мог бы находиться за пределами пула воркеров (<a href="https://github.com/devinus/poolboy"><code class="highlighter-rouge">poolboy</code></a>), и тогда отправка сообщений к <code class="highlighter-rouge">self()</code> не сработала бы.</p>
+
+<h2 id="отмодуля-заглушки-кgenserver">От модуля-заглушки к GenServer</h2>
+
+<p>Лучшее решение текущей проблемы — превратить модуль-заглушку в GenServer. Новый модуль будет таким:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">defmodule</span> <span class="no">Demo</span><span class="o">.</span><span class="no">Events</span><span class="o">.</span><span class="no">EventEmitterMock</span> <span class="k">do</span>
+  <span class="kn">use</span> <span class="no">GenServer</span>
+
+  <span class="k">def</span> <span class="n">start_link</span><span class="p">([])</span> <span class="k">do</span>
+    <span class="no">GenServer</span><span class="o">.</span><span class="n">start_link</span><span class="p">(</span><span class="bp">__MODULE__</span><span class="p">,</span> <span class="p">[],</span> <span class="p">[])</span>
+  <span class="k">end</span>
+
+  <span class="k">def</span> <span class="n">init</span><span class="p">(</span><span class="n">state</span><span class="p">)</span> <span class="k">do</span>
+    <span class="p">{</span><span class="ss">:ok</span><span class="p">,</span> <span class="n">state</span><span class="p">}</span>
+  <span class="k">end</span>
+
+  <span class="k">def</span> <span class="n">handle_call</span><span class="p">({</span><span class="ss">:subscribe</span><span class="p">,</span> <span class="n">pid</span><span class="p">},</span> <span class="n">_from</span><span class="p">,</span> <span class="n">listeners</span><span class="p">)</span> <span class="k">do</span>
+    <span class="p">{</span><span class="ss">:reply</span><span class="p">,</span> <span class="ss">:ok</span><span class="p">,</span> <span class="p">[</span><span class="n">pid</span> <span class="o">|</span> <span class="n">listeners</span><span class="p">]}</span>
+  <span class="k">end</span>
+
+  <span class="k">def</span> <span class="n">handle_call</span><span class="p">({</span><span class="ss">:emit_event</span><span class="p">,</span> <span class="sd">"</span><span class="s2">address_validated"</span><span class="p">},</span> <span class="n">_from</span><span class="p">,</span> <span class="n">listeners</span><span class="p">)</span> <span class="k">do</span>
+    <span class="n">send_to_listeners</span><span class="p">(</span><span class="n">listeners</span><span class="p">,</span> <span class="ss">:address_validated_event_emitted</span><span class="p">)</span>
+    <span class="p">{</span><span class="ss">:reply</span><span class="p">,</span> <span class="ss">:ok</span><span class="p">,</span> <span class="n">listeners</span><span class="p">}</span>
+  <span class="k">end</span>
+
+  <span class="k">defp</span> <span class="n">send_to_listeners</span><span class="p">(</span><span class="n">listeners</span><span class="p">,</span> <span class="n">message</span><span class="p">)</span> <span class="k">do</span>
+    <span class="n">for</span> <span class="n">listener</span> <span class="o">&lt;-</span> <span class="n">listeners</span> <span class="k">do</span>
+      <span class="n">send</span><span class="p">(</span><span class="n">listener</span><span class="p">,</span> <span class="n">message</span><span class="p">)</span>
+    <span class="k">end</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<p><em><strong>Примечание:</strong> данный GenServer не содержит реализаций обёрток для <code class="highlighter-rouge">handle_call</code>, потому что в этом примере GenServer вызывается напрямую (9 строчка в приведённом ниже коде).</em></p>
+
+<p>Модуль-заглушка отслеживает процессы, которые «подписаны» на его события. Получая <code class="highlighter-rouge">:emit_eventcall</code>, он передаёт сообщение всем подписанным на него слушателям. Это означает, что процесс теста должен быть подписан на GenServer. Собственно, вот что нужно изменить в коде теста …</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">setup</span> <span class="ss">:subscribe</span>
+<span class="n">test</span> <span class="sd">"</span><span class="s2">it emits the :address_validated event"</span> <span class="k">do</span>
+  <span class="no">Subject</span><span class="o">.</span><span class="n">validate</span><span class="p">(</span><span class="sd">"</span><span class="s2">test address"</span><span class="p">)</span>
+
+  <span class="n">assert_receive</span> <span class="ss">:address_validated_event_emitted</span>
+<span class="k">end</span>
+
+<span class="k">defp</span> <span class="n">subscribe</span><span class="p">(</span><span class="n">context</span><span class="p">)</span> <span class="k">do</span>
+  <span class="ss">:poolboy</span><span class="o">.</span><span class="n">transaction</span><span class="p">(</span><span class="ss">:demo_pool</span><span class="p">,</span> <span class="o">&amp;</span><span class="no">GenServer</span><span class="o">.</span><span class="n">call</span><span class="p">(</span><span class="nv">&amp;1</span><span class="p">,</span> <span class="p">{</span><span class="ss">:subscribe</span><span class="p">,</span> <span class="n">self</span><span class="p">()}),</span> <span class="m">5000</span><span class="p">)</span>
+  <span class="n">context</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<p>… всего лишь определить <code class="highlighter-rouge">setup</code> до запуска теста. Если бы мы использовали библиотеку <code class="highlighter-rouge">poolboy</code>, то именно так нужно было бы «подписаться» на модуль-заглушку (при условии если <code class="highlighter-rouge">:demo_pool</code> определён в <code class="highlighter-rouge">config/test.exs</code> должным образом).</p>
+
+<h2 id="заключение">Заключение</h2>
+
+<p>В данной статье были освещены особенности подхода к тестированию приложений, написанных на Эликсире, отдельное внимание было уделено тестированию приложений с заглушками.</p>
+
+<p>Во второй части статьи будут рассмотрены следующие недостатки представленных методов и пути их решения:</p>
+
+<ul>
+  <li>
+    <p>Рассредоточенность логики тестов по разным файлам, затрудняющая её понимание;</p>
+  </li>
+  <li>
+    <p>Интуитивное создание заглушек (не основанное на поведениях).</p>
+  </li>
+</ul>
+
+  </div>
+
+  <!-- uSocial -->
+  <div class="post__share_block share_block">
+    <script async src="https://usocial.pro/usocial/usocial.js?v=6.1.4" data-script="usocial" charset="utf-8"></script>
+    <div class="uSocial-Share" data-pid="2fd19544e551bce292425ee8adaa31be" data-type="share" data-options="round,style2,default,absolute,horizontal,size32,counter1,counter-before,upArrow-right,nomobile" data-social="telegram,fb,vk,gPlus,twi,bookmarks"></div>
+  </div>
+  <!-- /uSocial -->
+</article>
+
+
+        <footer class="footer">
+    &copy; 2020
+    / Россия
+
+    <span class="pull-right">Любые мысли и вопросы пишите на <a href="mailto:elixir@wunsh.ru">elixir@wunsh.ru</a>.</span>
+</footer>
+
+        <div id="subscribeModal" class="modal">
+    <div class="modal__content">
+        <a href="#close" title="Close" class="modal__close">x</a>
+
+        <h2 class="modal__title">Ламповая рассылка про&nbsp;Эликсир</h2>
+
+        <p>Один-два раза в&nbsp;неделю присылаем тёплые письма об&nbsp;Эликсире: переводы самых интересных статей до&nbsp;их&nbsp;появления в&nbsp;открытом доступе, анонсы событий и&nbsp;вкусные бонусы.</p>
+
+        <form action="//wunsh.us14.list-manage.com/subscribe/post?u=c81ca3d4693f62db7f7f67c71&amp;id=a192e2dfef" method="post" id="mc-embedded-subscribe-form" name="mc-embedded-subscribe-form" class="pure-form h-tc validate" target="_blank" novalidate>
+            <input type="email" value="" name="EMAIL" class="modal__input pure-input-rounded large" id="mce-EMAIL" placeholder="Твоя почта" required>
+            <div style="position: absolute; left: -5000px;" aria-hidden="true"><input type="text" name="b_c81ca3d4693f62db7f7f67c71_a192e2dfef" tabindex="-1" value=""></div>
+
+            <input type="submit" value="Присоединиться" name="subscribe" onClick="yaCounter39773490.reachGoal('SUBSCRIBED'); return true" id="mc-embedded-subscribe" class="pure-button button-success large">
+        </form>
+
+        <p>Обязательно подтверди почту, перейдя по&nbsp;ссылке в&nbsp;письме, иначе мы&nbsp;не&nbsp;сможем делиться с&nbsp;тобой полезностями.</p>
+
+        <p>Надоедать точно не&nbsp;будем :)</p>
+    </div>
+</div>
+
+        <script src="/assets/js/vendors/zepto.min.js"></script>
+
+<script>
+    if ($(".post--docs").length) {
+        $(".footer").addClass("footer--docs")
+    }
+
+    $(".modal--close_backdrop").click(function(){
+        window.location.hash = "";
+    });
+</script>
+
+        <!-- Yandex.Metrika counter -->
+<script type="text/javascript">
+    (function (d, w, c) {
+        (w[c] = w[c] || []).push(function() {
+            try {
+                w.yaCounter39773490 = new Ya.Metrika({
+                    id:39773490,
+                    clickmap:true,
+                    trackLinks:true,
+                    accurateTrackBounce:true,
+                    webvisor:true,
+                    ut:"noindex"
+                });
+            } catch(e) { }
+        });
+
+        var n = d.getElementsByTagName("script")[0],
+            s = d.createElement("script"),
+            f = function () { n.parentNode.insertBefore(s, n); };
+        s.type = "text/javascript";
+        s.async = true;
+        s.src = "https://mc.yandex.ru/metrika/watch.js";
+
+        if (w.opera == "[object Opera]") {
+            d.addEventListener("DOMContentLoaded", f, false);
+        } else { f(); }
+    })(document, window, "yandex_metrika_callbacks");
+</script>
+<noscript><div><img src="https://mc.yandex.ru/watch/39773490?ut=noindex" style="position:absolute; left:-9999px;" alt="" /></div></noscript>
+<!-- /Yandex.Metrika counter -->
+
+      </div>
+    </div>
+  </body>
+</html>

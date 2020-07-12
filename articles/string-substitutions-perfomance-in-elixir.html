@@ -1,0 +1,543 @@
+<!DOCTYPE html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Способы замены строк в Elixir и их производительность |> Сообщество Elixir и Phoenix Framework</title>
+    <meta name="description" content="Статья про производительность замены символов в строках на Elixir.">
+
+    <link rel="alternate" type="application/rss+xml" title="Сообщество Elixir и Phoenix Framework" href="/feed.xml" />
+    <link rel="canonical" href="https://wunsh.ru/articles/string-substitutions-perfomance-in-elixir.html">
+
+    <style type="text/css">@import url("//fonts.googleapis.com/css?family=Source+Sans+Pro:400,700&subset=cyrillic");</style>
+    <link rel="stylesheet" href="/assets/css/vendors/pure.min.css">
+    <link rel="stylesheet" href="/assets/css/vendors/pure-grids-responsive.min.css">
+    <link rel="stylesheet" href="/assets/css/style.css?1594516983">
+
+    <link rel="shortcut icon" type="image/png" href="/assets/favicon.png" >
+</head>
+
+
+  <body>
+    <div class="wunsh pure-g">
+      
+
+
+
+
+<div class="menu pure-u-1 pure-u-md-1-4">
+  <div class="header">
+    <h2 class="header__title">
+      
+        <a href="https://wunsh.ru" class="header__title_link" title="На главную">Эликсир и&nbsp;Вунш</a>
+      
+    </h2>
+    <h3 class="header__tagline">Erlang + Ruby = &#10084;</h3>
+
+    <nav class="nav">
+      <ul class="nav_list">
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/elixir" class="nav_list__item_link pure-button">О языке</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/install/linux-asdf" class="nav_list__item_link pure-button">Установка</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/docs/" class="nav_list__item_link pure-button">Документация</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/guides" class="nav_list__item_link pure-button">Гайды</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/news" class="nav_list__item_link pure-button">Новости</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/articles" class="nav_list__item_link pure-button">Статьи</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/videos" class="nav_list__item_link pure-button">Видео</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/vacancies" class="nav_list__item_link pure-button">Вакансии</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/faq" class="nav_list__item_link pure-button">FAQ</a>
+            </li>
+          
+        
+      </ul>
+    </nav>
+
+    <a href="#subscribeModal" class="pure-button header__subscribe_link">Подписаться на рассылку</a>
+  </div>
+</div>
+
+
+      <div class="content pure-u-1 pure-u-md-3-4">
+        
+
+<article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+  <header class="post__header">
+    
+    <h1 class="post__title" itemprop="name headline">Способы замены строк в Elixir и их производительность</h1>
+
+    <div class="post__meta post_meta">
+      <ul class="meta_list">
+        <li class="meta_list__item">
+          
+          <span class="">
+            <small class="meta_list__item_name">Дата</small>
+            <time class="h-bold" datetime="2017-07-21T00:00:00+00:00" itemprop="datePublished">
+              
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+21 июля 2017
+
+            </time>
+          </span>
+          
+
+          
+        </li>
+        
+        <li class="meta_list__item">
+            <span class="tag_cloud tags_cloud--inline h-no_margin">
+              <small class="meta_list__item_name">Теги</small> 
+
+
+<ul class="tags_cloud__list">
+  
+    <a href="/tags/#advanced" class="tags_cloud__link tag tag--advanced">advanced</a>
+  
+    <a href="/tags/#overview" class="tags_cloud__link tag tag--overview">overview</a>
+  
+</ul>
+
+            </span>
+        </li>
+        
+        <li class="meta_list__item">
+          <span itemprop="author" itemscope itemtype="http://schema.org/Person">
+            <small class="meta_list__item_name">
+              
+                Перевод
+              
+            </small>
+            <span itemprop="name" class="h-bold">Надежда Нестерова</span>
+          </span>
+        </li>
+
+        <li class="meta_list__item">
+          
+            <div >
+              <small>Оригинал</small>
+              <strong>
+                &laquo;<a href="http://minhajuddin.com/2017/06/19/performance-variations-of-string-substitution-in-elixir/" style="text-transform: none; text-decoration: underline; color: #4b2e39;">Performance Variations of String Substitution in Elixir</a>&raquo;
+              </strong>
+              <small>&copy;</small>
+              <strong>Khaja Minhajuddin</strong>
+            </div>
+          
+        </li>
+      </ul>
+    </div>
+  </header>
+
+  <div class="post__content" itemprop="articleBody">
+    <p>Однажды мне пришлось повозиться со строками в приложении, для производительности которого важны были доли секунды. Я решил протестировать несколько решений и сравнить их скоростные характеристики. Результаты получились <em>достаточно предсказуемые</em>.</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">path</span> <span class="o">=</span> <span class="sd">"</span><span class="s2">/haha/index.html"</span>
+<span class="n">subdomain_rx</span> <span class="o">=</span> <span class="sr">~r(^\/[^\/]+)</span>
+
+<span class="no">Benchee</span><span class="o">.</span><span class="n">run</span><span class="p">(%{</span>
+  <span class="sd">"</span><span class="s2">pattern_match_bytes"</span> <span class="o">=&gt;</span> <span class="k">fn</span> <span class="o">-&gt;</span>
+    <span class="n">len</span> <span class="o">=</span> <span class="n">byte_size</span><span class="p">(</span><span class="sd">"</span><span class="s2">/haha"</span><span class="p">)</span>
+    <span class="o">&lt;&lt;</span><span class="n">_</span><span class="p">::</span><span class="n">bytes</span><span class="o">-</span><span class="n">size</span><span class="p">(</span><span class="n">len</span><span class="p">),</span> <span class="n">rest</span> <span class="p">::</span> <span class="n">binary</span> <span class="o">&gt;&gt;</span> <span class="o">=</span> <span class="n">path</span>
+    <span class="n">rest</span>
+  <span class="k">end</span><span class="p">,</span>
+  <span class="sd">"</span><span class="s2">pattern_match"</span> <span class="o">=&gt;</span> <span class="k">fn</span> <span class="o">-&gt;</span> <span class="sd">"</span><span class="s2">/haha"</span> <span class="o">&lt;&gt;</span> <span class="n">rest</span> <span class="o">=</span> <span class="n">path</span><span class="p">;</span> <span class="n">rest</span> <span class="k">end</span><span class="p">,</span>
+  <span class="sd">"</span><span class="s2">slice"</span> <span class="o">=&gt;</span> <span class="k">fn</span> <span class="o">-&gt;</span> <span class="no">String</span><span class="o">.</span><span class="n">slice</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="no">String</span><span class="o">.</span><span class="n">length</span><span class="p">(</span><span class="sd">"</span><span class="s2">/haha"</span><span class="p">)</span><span class="o">..-</span><span class="m">1</span><span class="p">)</span> <span class="k">end</span><span class="p">,</span>
+  <span class="sd">"</span><span class="s2">replace_prefix"</span> <span class="o">=&gt;</span> <span class="k">fn</span> <span class="o">-&gt;</span> <span class="no">String</span><span class="o">.</span><span class="n">replace_prefix</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="sd">"</span><span class="s2">/haha"</span><span class="p">,</span> <span class="sd">"</span><span class="s2">"</span><span class="p">)</span> <span class="k">end</span><span class="p">,</span>
+  <span class="sd">"</span><span class="s2">split"</span> <span class="o">=&gt;</span> <span class="k">fn</span> <span class="o">-&gt;</span> <span class="no">String</span><span class="o">.</span><span class="n">splitter</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="sd">"</span><span class="s2">/"</span><span class="p">)</span> <span class="o">|&gt;</span> <span class="no">Enum</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="m">1</span><span class="p">)</span> <span class="o">|&gt;</span> <span class="no">Enum</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="sd">"</span><span class="s2">/"</span><span class="p">)</span> <span class="k">end</span><span class="p">,</span>
+  <span class="sd">"</span><span class="s2">regex"</span> <span class="o">=&gt;</span> <span class="k">fn</span> <span class="o">-&gt;</span> <span class="no">String</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">subdomain_rx</span><span class="p">,</span> <span class="sd">"</span><span class="s2">"</span><span class="p">)</span> <span class="k">end</span><span class="p">,</span>
+<span class="p">})</span>
+</code></pre></div></div>
+
+<p>Результаты бенчмарка:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">bench</span> <span class="p">[</span><span class="n">master</span><span class="p">]</span> <span class="err">$</span> <span class="n">mix</span> <span class="n">run</span> <span class="n">lib</span><span class="o">/</span><span class="n">bench</span><span class="o">.</span><span class="n">exs</span>
+<span class="no">Operating</span> <span class="ss">System:</span> <span class="no">Linux</span>
+<span class="no">CPU</span> <span class="ss">Information:</span> <span class="no">Intel</span><span class="p">(</span><span class="no">R</span><span class="p">)</span> <span class="no">Core</span><span class="p">(</span><span class="no">TM</span><span class="p">)</span> <span class="n">i7</span><span class="o">-</span><span class="err">4700</span><span class="no">MQ</span> <span class="no">CPU</span> <span class="err">@</span> <span class="m">2.</span><span class="err">40</span><span class="no">GHz</span>
+<span class="no">Number</span> <span class="n">of</span> <span class="no">Available</span> <span class="ss">Cores:</span> <span class="m">8</span>
+<span class="no">Available</span> <span class="ss">memory:</span> <span class="m">12.019316</span> <span class="no">GB</span>
+<span class="no">Elixir</span> <span class="m">1.4</span><span class="o">.</span><span class="m">4</span>
+<span class="no">Erlang</span> <span class="m">20.0</span><span class="o">-</span><span class="n">rc2</span>
+<span class="no">Benchmark</span> <span class="n">suite</span> <span class="n">executing</span> <span class="n">with</span> <span class="n">the</span> <span class="n">following</span> <span class="ss">configuration:</span>
+<span class="ss">warmup:</span> <span class="m">2.00</span> <span class="n">s</span>
+<span class="ss">time:</span> <span class="m">5.00</span> <span class="n">s</span>
+<span class="ss">parallel:</span> <span class="m">1</span>
+<span class="ss">inputs:</span> <span class="n">none</span> <span class="n">specified</span>
+<span class="no">Estimated</span> <span class="n">total</span> <span class="n">run</span> <span class="ss">time:</span> <span class="m">42.00</span> <span class="n">s</span>
+
+<span class="no">Benchmarking</span> <span class="n">pattern_match</span><span class="o">...</span>
+<span class="ss">Warning:</span> <span class="no">The</span> <span class="n">function</span> <span class="n">you</span> <span class="n">are</span> <span class="n">trying</span> <span class="n">to</span> <span class="n">benchmark</span> <span class="n">is</span> <span class="kn">super</span> <span class="n">fast</span><span class="p">,</span> <span class="n">making</span> <span class="n">measures</span> <span class="n">more</span> <span class="n">unreliable!</span> <span class="ss">See:</span> <span class="ss">https:</span><span class="o">//</span><span class="n">github</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="no">PragTob</span><span class="o">/</span><span class="n">benchee</span><span class="o">/</span><span class="n">wiki</span><span class="o">/</span><span class="no">Benchee</span><span class="o">-</span><span class="no">Warnings</span><span class="c1">#fast-execution-warning</span>
+<span class="no">You</span> <span class="n">may</span> <span class="n">disable</span> <span class="n">this</span> <span class="n">warning</span> <span class="n">by</span> <span class="n">passing</span> <span class="ss">print:</span> <span class="p">[</span><span class="ss">fast_warning:</span> <span class="no">false</span><span class="p">]</span> <span class="n">as</span> <span class="n">configuration</span> <span class="n">options</span><span class="o">.</span>
+
+<span class="no">Benchmarking</span> <span class="n">pattern_match_bytes</span><span class="o">...</span>
+<span class="ss">Warning:</span> <span class="no">The</span> <span class="n">function</span> <span class="n">you</span> <span class="n">are</span> <span class="n">trying</span> <span class="n">to</span> <span class="n">benchmark</span> <span class="n">is</span> <span class="kn">super</span> <span class="n">fast</span><span class="p">,</span> <span class="n">making</span> <span class="n">measures</span> <span class="n">more</span> <span class="n">unreliable!</span> <span class="ss">See:</span> <span class="ss">https:</span><span class="o">//</span><span class="n">github</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="no">PragTob</span><span class="o">/</span><span class="n">benchee</span><span class="o">/</span><span class="n">wiki</span><span class="o">/</span><span class="no">Benchee</span><span class="o">-</span><span class="no">Warnings</span><span class="c1">#fast-execution-warning</span>
+<span class="no">You</span> <span class="n">may</span> <span class="n">disable</span> <span class="n">this</span> <span class="n">warning</span> <span class="n">by</span> <span class="n">passing</span> <span class="ss">print:</span> <span class="p">[</span><span class="ss">fast_warning:</span> <span class="no">false</span><span class="p">]</span> <span class="n">as</span> <span class="n">configuration</span> <span class="n">options</span><span class="o">.</span>
+
+<span class="no">Benchmarking</span> <span class="n">regex</span><span class="o">...</span>
+
+<span class="no">Benchmarking</span> <span class="n">replace_prefix</span><span class="o">...</span>
+<span class="ss">Warning:</span> <span class="no">The</span> <span class="n">function</span> <span class="n">you</span> <span class="n">are</span> <span class="n">trying</span> <span class="n">to</span> <span class="n">benchmark</span> <span class="n">is</span> <span class="kn">super</span> <span class="n">fast</span><span class="p">,</span> <span class="n">making</span> <span class="n">measures</span> <span class="n">more</span> <span class="n">unreliable!</span> <span class="ss">See:</span> <span class="ss">https:</span><span class="o">//</span><span class="n">github</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="no">PragTob</span><span class="o">/</span><span class="n">benchee</span><span class="o">/</span><span class="n">wiki</span><span class="o">/</span><span class="no">Benchee</span><span class="o">-</span><span class="no">Warnings</span><span class="c1">#fast-execution-warning</span>
+<span class="no">You</span> <span class="n">may</span> <span class="n">disable</span> <span class="n">this</span> <span class="n">warning</span> <span class="n">by</span> <span class="n">passing</span> <span class="ss">print:</span> <span class="p">[</span><span class="ss">fast_warning:</span> <span class="no">false</span><span class="p">]</span> <span class="n">as</span> <span class="n">configuration</span> <span class="n">options</span><span class="o">.</span>
+
+<span class="no">Benchmarking</span> <span class="n">slice</span><span class="o">...</span>
+
+<span class="no">Benchmarking</span> <span class="n">split</span><span class="o">...</span>
+
+<span class="no">Name</span>                          <span class="n">ips</span>        <span class="n">average</span>  <span class="n">deviation</span>         <span class="n">median</span>
+<span class="n">pattern_match_bytes</span>       <span class="m">24.05</span> <span class="no">M</span>      <span class="m">0.0416</span> <span class="err">μ</span><span class="n">s</span>  <span class="err">±</span><span class="m">1797.73</span><span class="p">%</span>      <span class="m">0.0300</span> <span class="err">μ</span><span class="n">s</span>
+<span class="n">pattern_match</span>             <span class="m">22.37</span> <span class="no">M</span>      <span class="m">0.0447</span> <span class="err">μ</span><span class="n">s</span>  <span class="err">±</span><span class="m">1546.59</span><span class="p">%</span>      <span class="m">0.0400</span> <span class="err">μ</span><span class="n">s</span>
+<span class="n">replace_prefix</span>             <span class="m">3.11</span> <span class="no">M</span>        <span class="m">0.32</span> <span class="err">μ</span><span class="n">s</span>   <span class="err">±</span><span class="m">204.05</span><span class="p">%</span>        <span class="m">0.22</span> <span class="err">μ</span><span class="n">s</span>
+<span class="n">slice</span>                      <span class="m">1.25</span> <span class="no">M</span>        <span class="m">0.80</span> <span class="err">μ</span><span class="n">s</span>  <span class="err">±</span><span class="m">6484.21</span><span class="p">%</span>        <span class="m">1.00</span> <span class="err">μ</span><span class="n">s</span>
+<span class="n">split</span>                      <span class="m">0.75</span> <span class="no">M</span>        <span class="m">1.34</span> <span class="err">μ</span><span class="n">s</span>  <span class="err">±</span><span class="m">3267.35</span><span class="p">%</span>        <span class="m">1.00</span> <span class="err">μ</span><span class="n">s</span>
+<span class="n">regex</span>                      <span class="m">0.42</span> <span class="no">M</span>        <span class="m">2.37</span> <span class="err">μ</span><span class="n">s</span>  <span class="err">±</span><span class="m">1512.77</span><span class="p">%</span>        <span class="m">2.00</span> <span class="err">μ</span><span class="n">s</span>
+
+<span class="ss">Comparison:</span>
+<span class="n">pattern_match_bytes</span>       <span class="m">24.05</span> <span class="no">M</span>
+<span class="n">pattern_match</span>             <span class="m">22.37</span> <span class="no">M</span> <span class="o">-</span> <span class="m">1.</span><span class="err">08</span><span class="n">x</span> <span class="n">slower</span>
+<span class="n">replace_prefix</span>             <span class="m">3.11</span> <span class="no">M</span> <span class="o">-</span> <span class="m">7.</span><span class="err">73</span><span class="n">x</span> <span class="n">slower</span>
+<span class="n">slice</span>                      <span class="m">1.25</span> <span class="no">M</span> <span class="o">-</span> <span class="m">19.</span><span class="err">30</span><span class="n">x</span> <span class="n">slower</span>
+<span class="n">split</span>                      <span class="m">0.75</span> <span class="no">M</span> <span class="o">-</span> <span class="m">32.</span><span class="err">18</span><span class="n">x</span> <span class="n">slower</span>
+<span class="n">regex</span>                      <span class="m">0.42</span> <span class="no">M</span> <span class="o">-</span> <span class="m">57.</span><span class="err">00</span><span class="n">x</span> <span class="n">slower</span>
+</code></pre></div></div>
+
+<p>Так что когда вы в следующий раз захотите удалить символы в начале строки, используйте сопоставление с образцом :)</p>
+
+<h2 id="продолжаем">Продолжаем</h2>
+
+<p>Прочитав комментарии, я провёл небольшой тест кода для замены конца строки:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">path</span> <span class="o">=</span> <span class="sd">"</span><span class="s2">/haha/index.html"</span>
+<span class="n">ext_rx</span> <span class="o">=</span> <span class="sr">~r/\.[^\.]+$/</span>
+
+<span class="no">Benchee</span><span class="o">.</span><span class="n">run</span><span class="p">(%{</span>
+  <span class="sd">"</span><span class="s2">reverse_pattern_match_bytes"</span> <span class="o">=&gt;</span> <span class="k">fn</span> <span class="o">-&gt;</span>
+    <span class="n">len</span> <span class="o">=</span> <span class="n">byte_size</span><span class="p">(</span><span class="sd">"</span><span class="s2">.html"</span><span class="p">)</span>
+    <span class="o">&lt;&lt;</span><span class="n">_</span><span class="p">::</span><span class="n">bytes</span><span class="o">-</span><span class="n">size</span><span class="p">(</span><span class="n">len</span><span class="p">),</span> <span class="n">rest</span> <span class="p">::</span> <span class="n">binary</span> <span class="o">&gt;&gt;</span> <span class="o">=</span> <span class="no">String</span><span class="o">.</span><span class="n">reverse</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+    <span class="n">rest</span> <span class="o">|&gt;</span> <span class="no">String</span><span class="o">.</span><span class="n">reverse</span>
+  <span class="k">end</span><span class="p">,</span>
+  <span class="sd">"</span><span class="s2">reverse_pattern_match"</span> <span class="o">=&gt;</span> <span class="k">fn</span> <span class="o">-&gt;</span> <span class="sd">"</span><span class="s2">lmth."</span> <span class="o">&lt;&gt;</span> <span class="n">rest</span> <span class="o">=</span> <span class="no">String</span><span class="o">.</span><span class="n">reverse</span><span class="p">(</span><span class="n">path</span><span class="p">);</span> <span class="no">String</span><span class="o">.</span><span class="n">reverse</span><span class="p">(</span><span class="n">rest</span><span class="p">)</span> <span class="k">end</span><span class="p">,</span>
+  <span class="sd">"</span><span class="s2">slice"</span> <span class="o">=&gt;</span> <span class="k">fn</span> <span class="o">-&gt;</span> <span class="no">String</span><span class="o">.</span><span class="n">slice</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="m">0</span><span class="o">..</span><span class="p">(</span><span class="no">String</span><span class="o">.</span><span class="n">length</span><span class="p">(</span><span class="sd">"</span><span class="s2">.html"</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="o">-</span><span class="m">1</span><span class="p">)))</span> <span class="k">end</span><span class="p">,</span>
+  <span class="sd">"</span><span class="s2">replace_suffix"</span> <span class="o">=&gt;</span> <span class="k">fn</span> <span class="o">-&gt;</span> <span class="no">String</span><span class="o">.</span><span class="n">replace_suffix</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="sd">"</span><span class="s2">.html"</span><span class="p">,</span> <span class="sd">"</span><span class="s2">"</span><span class="p">)</span> <span class="k">end</span><span class="p">,</span>
+  <span class="sd">"</span><span class="s2">split"</span> <span class="o">=&gt;</span> <span class="k">fn</span> <span class="o">-&gt;</span> <span class="no">String</span><span class="o">.</span><span class="n">splitter</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="sd">"</span><span class="s2">."</span><span class="p">)</span> <span class="o">|&gt;</span> <span class="no">Enum</span><span class="o">.</span><span class="n">slice</span><span class="p">(</span><span class="m">0</span><span class="o">..-</span><span class="m">2</span><span class="p">)</span> <span class="o">|&gt;</span> <span class="no">Enum</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="sd">"</span><span class="s2">."</span><span class="p">)</span> <span class="k">end</span><span class="p">,</span>
+  <span class="sd">"</span><span class="s2">regex"</span> <span class="o">=&gt;</span> <span class="k">fn</span> <span class="o">-&gt;</span> <span class="no">String</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">ext_rx</span><span class="p">,</span> <span class="sd">"</span><span class="s2">"</span><span class="p">)</span> <span class="k">end</span><span class="p">,</span>
+<span class="p">})</span>
+</code></pre></div></div>
+
+<p>И получил интересный результат.</p>
+
+<p>Это подтолкнуло меня посмотреть на <a href="https://github.com/elixir-lang/elixir/blob/master/lib/elixir/lib/string.ex#L752">исходный код</a> функций <code class="highlighter-rouge">replace_prefix</code> и <code class="highlighter-rouge">replace_suffix</code> в Elixir:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">def</span> <span class="n">replace_prefix</span><span class="p">(</span><span class="n">string</span><span class="p">,</span> <span class="n">match</span><span class="p">,</span> <span class="n">replacement</span><span class="p">)</span>
+    <span class="ow">when</span> <span class="n">is_binary</span><span class="p">(</span><span class="n">string</span><span class="p">)</span> <span class="ow">and</span> <span class="n">is_binary</span><span class="p">(</span><span class="n">match</span><span class="p">)</span> <span class="ow">and</span> <span class="n">is_binary</span><span class="p">(</span><span class="n">replacement</span><span class="p">)</span> <span class="k">do</span>
+  <span class="n">prefix_size</span> <span class="o">=</span> <span class="n">byte_size</span><span class="p">(</span><span class="n">match</span><span class="p">)</span>
+  <span class="n">suffix_size</span> <span class="o">=</span> <span class="n">byte_size</span><span class="p">(</span><span class="n">string</span><span class="p">)</span> <span class="o">-</span> <span class="n">prefix_size</span>
+  
+  <span class="k">case</span> <span class="n">string</span> <span class="k">do</span>
+    <span class="o">&lt;&lt;</span><span class="n">prefix</span><span class="p">::</span><span class="n">size</span><span class="p">(</span><span class="n">prefix_size</span><span class="p">)</span><span class="o">-</span><span class="n">binary</span><span class="p">,</span> <span class="n">suffix</span><span class="p">::</span><span class="n">size</span><span class="p">(</span><span class="n">suffix_size</span><span class="p">)</span><span class="o">-</span><span class="n">binary</span><span class="o">&gt;&gt;</span> <span class="ow">when</span> <span class="n">prefix</span> <span class="o">==</span> <span class="n">match</span> <span class="o">-&gt;</span>
+      <span class="n">replacement</span> <span class="o">&lt;&gt;</span> <span class="n">suffix</span>
+    <span class="n">_</span> <span class="o">-&gt;</span>
+      <span class="n">string</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+
+<span class="k">def</span> <span class="n">replace_suffix</span><span class="p">(</span><span class="n">string</span><span class="p">,</span> <span class="n">match</span><span class="p">,</span> <span class="n">replacement</span><span class="p">)</span>
+    <span class="ow">when</span> <span class="n">is_binary</span><span class="p">(</span><span class="n">string</span><span class="p">)</span> <span class="ow">and</span> <span class="n">is_binary</span><span class="p">(</span><span class="n">match</span><span class="p">)</span> <span class="ow">and</span> <span class="n">is_binary</span><span class="p">(</span><span class="n">replacement</span><span class="p">)</span> <span class="k">do</span>
+  <span class="n">suffix_size</span> <span class="o">=</span> <span class="n">byte_size</span><span class="p">(</span><span class="n">match</span><span class="p">)</span>
+  <span class="n">prefix_size</span> <span class="o">=</span> <span class="n">byte_size</span><span class="p">(</span><span class="n">string</span><span class="p">)</span> <span class="o">-</span> <span class="n">suffix_size</span>
+  
+  <span class="k">case</span> <span class="n">string</span> <span class="k">do</span>
+    <span class="o">&lt;&lt;</span><span class="n">prefix</span><span class="p">::</span><span class="n">size</span><span class="p">(</span><span class="n">prefix_size</span><span class="p">)</span><span class="o">-</span><span class="n">binary</span><span class="p">,</span> <span class="n">suffix</span><span class="p">::</span><span class="n">size</span><span class="p">(</span><span class="n">suffix_size</span><span class="p">)</span><span class="o">-</span><span class="n">binary</span><span class="o">&gt;&gt;</span> <span class="ow">when</span> <span class="n">suffix</span> <span class="o">==</span> <span class="n">match</span> <span class="o">-&gt;</span>
+      <span class="n">prefix</span> <span class="o">&lt;&gt;</span> <span class="n">replacement</span>
+    <span class="n">_</span> <span class="o">-&gt;</span>
+      <span class="n">string</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<p>Я слегка подкорректировал код бенчмарка, сделав так, чтобы каждая замена проделывалась по 1000 раз и предупреждающее сообщение задерживалось.</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">defmodule</span> <span class="no">Bench</span> <span class="k">do</span>
+  <span class="k">def</span> <span class="n">run</span><span class="p">(</span><span class="n">fun</span><span class="p">),</span> <span class="k">do</span><span class="p">:</span> <span class="n">fun</span><span class="o">.</span><span class="p">()</span>
+  <span class="k">def</span> <span class="n">no_run</span><span class="p">(</span><span class="n">_fun</span><span class="p">),</span> <span class="k">do</span><span class="p">:</span> <span class="ss">:ok</span>
+  <span class="k">def</span> <span class="n">times</span><span class="p">(</span><span class="n">n</span> <span class="p">\\</span> <span class="m">1000</span><span class="p">,</span> <span class="n">fun</span><span class="p">),</span> <span class="k">do</span><span class="p">:</span> <span class="k">fn</span> <span class="o">-&gt;</span> <span class="no">Enum</span><span class="o">.</span><span class="n">each</span><span class="p">(</span><span class="m">1</span><span class="o">..</span><span class="n">n</span><span class="p">,</span> <span class="k">fn</span> <span class="n">_</span> <span class="o">-&gt;</span> <span class="n">fun</span><span class="o">.</span><span class="p">()</span> <span class="k">end</span><span class="p">)</span> <span class="k">end</span>
+<span class="k">end</span>
+
+<span class="c1"># match beginning of string</span>
+<span class="no">Bench</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="k">fn</span> <span class="o">-&gt;</span>
+  <span class="n">path</span> <span class="o">=</span> <span class="sd">"</span><span class="s2">/haha/index.html"</span>
+  <span class="n">subdomain_rx</span> <span class="o">=</span> <span class="sr">~r(^\/[^\/]+)</span>
+  
+  <span class="no">Benchee</span><span class="o">.</span><span class="n">run</span><span class="p">(%{</span>
+    <span class="sd">"</span><span class="s2">pattern_match_bytes"</span> <span class="o">=&gt;</span> <span class="no">Bench</span><span class="o">.</span><span class="n">times</span><span class="p">(</span><span class="k">fn</span> <span class="o">-&gt;</span>
+      <span class="n">len</span> <span class="o">=</span> <span class="n">byte_size</span><span class="p">(</span><span class="sd">"</span><span class="s2">/haha"</span><span class="p">)</span>
+      <span class="o">&lt;&lt;</span><span class="n">_</span><span class="p">::</span><span class="n">bytes</span><span class="o">-</span><span class="n">size</span><span class="p">(</span><span class="n">len</span><span class="p">),</span> <span class="n">rest</span> <span class="p">::</span> <span class="n">binary</span> <span class="o">&gt;&gt;</span> <span class="o">=</span> <span class="n">path</span>
+      <span class="n">rest</span>
+    <span class="k">end</span><span class="p">),</span>
+    <span class="sd">"</span><span class="s2">pattern_match"</span> <span class="o">=&gt;</span> <span class="no">Bench</span><span class="o">.</span><span class="n">times</span><span class="p">(</span><span class="k">fn</span> <span class="o">-&gt;</span> <span class="sd">"</span><span class="s2">/haha"</span> <span class="o">&lt;&gt;</span> <span class="n">rest</span> <span class="o">=</span> <span class="n">path</span><span class="p">;</span> <span class="n">rest</span> <span class="k">end</span><span class="p">),</span>
+    <span class="sd">"</span><span class="s2">slice"</span> <span class="o">=&gt;</span> <span class="no">Bench</span><span class="o">.</span><span class="n">times</span><span class="p">(</span><span class="k">fn</span> <span class="o">-&gt;</span> <span class="no">String</span><span class="o">.</span><span class="n">slice</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="no">String</span><span class="o">.</span><span class="n">length</span><span class="p">(</span><span class="sd">"</span><span class="s2">/haha"</span><span class="p">)</span><span class="o">..-</span><span class="m">1</span><span class="p">)</span> <span class="k">end</span><span class="p">),</span>
+    <span class="sd">"</span><span class="s2">replace_prefix"</span> <span class="o">=&gt;</span> <span class="no">Bench</span><span class="o">.</span><span class="n">times</span><span class="p">(</span><span class="k">fn</span> <span class="o">-&gt;</span> <span class="no">String</span><span class="o">.</span><span class="n">replace_prefix</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="sd">"</span><span class="s2">/haha"</span><span class="p">,</span> <span class="sd">"</span><span class="s2">"</span><span class="p">)</span> <span class="k">end</span><span class="p">),</span>
+    <span class="sd">"</span><span class="s2">split"</span> <span class="o">=&gt;</span> <span class="no">Bench</span><span class="o">.</span><span class="n">times</span><span class="p">(</span><span class="k">fn</span> <span class="o">-&gt;</span> <span class="no">String</span><span class="o">.</span><span class="n">splitter</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="sd">"</span><span class="s2">/"</span><span class="p">)</span> <span class="o">|&gt;</span> <span class="no">Enum</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="m">1</span><span class="p">)</span> <span class="o">|&gt;</span> <span class="no">Enum</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="sd">"</span><span class="s2">/"</span><span class="p">)</span> <span class="k">end</span><span class="p">),</span>
+    <span class="sd">"</span><span class="s2">regex"</span> <span class="o">=&gt;</span> <span class="no">Bench</span><span class="o">.</span><span class="n">times</span><span class="p">(</span><span class="k">fn</span> <span class="o">-&gt;</span> <span class="no">String</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">subdomain_rx</span><span class="p">,</span> <span class="sd">"</span><span class="s2">"</span><span class="p">)</span> <span class="k">end</span><span class="p">),</span>
+  <span class="p">})</span>
+<span class="k">end</span><span class="p">)</span>
+
+<span class="c1"># match end of string string</span>
+<span class="no">Bench</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="k">fn</span> <span class="o">-&gt;</span>
+  <span class="n">path</span> <span class="o">=</span> <span class="sd">"</span><span class="s2">/haha/index.html"</span>
+  <span class="n">ext_rx</span> <span class="o">=</span> <span class="sr">~r/\.[^\.]+$/</span>
+  
+  <span class="no">Benchee</span><span class="o">.</span><span class="n">run</span><span class="p">(%{</span>
+    <span class="sd">"</span><span class="s2">reverse_pattern_match_bytes"</span> <span class="o">=&gt;</span> <span class="no">Bench</span><span class="o">.</span><span class="n">times</span><span class="p">(</span><span class="k">fn</span> <span class="o">-&gt;</span>
+      <span class="n">len</span> <span class="o">=</span> <span class="n">byte_size</span><span class="p">(</span><span class="sd">"</span><span class="s2">.html"</span><span class="p">)</span>
+      <span class="o">&lt;&lt;</span><span class="n">_</span><span class="p">::</span><span class="n">bytes</span><span class="o">-</span><span class="n">size</span><span class="p">(</span><span class="n">len</span><span class="p">),</span> <span class="n">rest</span> <span class="p">::</span> <span class="n">binary</span> <span class="o">&gt;&gt;</span> <span class="o">=</span> <span class="no">String</span><span class="o">.</span><span class="n">reverse</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+      <span class="n">rest</span> <span class="o">|&gt;</span> <span class="no">String</span><span class="o">.</span><span class="n">reverse</span>
+    <span class="k">end</span><span class="p">),</span>
+    <span class="sd">"</span><span class="s2">reverse_pattern_match"</span> <span class="o">=&gt;</span> <span class="no">Bench</span><span class="o">.</span><span class="n">times</span><span class="p">(</span><span class="k">fn</span> <span class="o">-&gt;</span> <span class="sd">"</span><span class="s2">lmth."</span> <span class="o">&lt;&gt;</span> <span class="n">rest</span> <span class="o">=</span> <span class="no">String</span><span class="o">.</span><span class="n">reverse</span><span class="p">(</span><span class="n">path</span><span class="p">);</span> <span class="no">String</span><span class="o">.</span><span class="n">reverse</span><span class="p">(</span><span class="n">rest</span><span class="p">)</span> <span class="k">end</span><span class="p">),</span>
+    <span class="sd">"</span><span class="s2">slice"</span> <span class="o">=&gt;</span> <span class="no">Bench</span><span class="o">.</span><span class="n">times</span><span class="p">(</span><span class="k">fn</span> <span class="o">-&gt;</span> <span class="no">String</span><span class="o">.</span><span class="n">slice</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="m">0</span><span class="o">..</span><span class="p">(</span><span class="no">String</span><span class="o">.</span><span class="n">length</span><span class="p">(</span><span class="sd">"</span><span class="s2">.html"</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="o">-</span><span class="m">1</span><span class="p">)))</span> <span class="k">end</span><span class="p">),</span>
+    <span class="sd">"</span><span class="s2">replace_suffix"</span> <span class="o">=&gt;</span> <span class="no">Bench</span><span class="o">.</span><span class="n">times</span><span class="p">(</span><span class="k">fn</span> <span class="o">-&gt;</span> <span class="no">String</span><span class="o">.</span><span class="n">replace_suffix</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="sd">"</span><span class="s2">.html"</span><span class="p">,</span> <span class="sd">"</span><span class="s2">"</span><span class="p">)</span> <span class="k">end</span><span class="p">),</span>
+    <span class="sd">"</span><span class="s2">split"</span> <span class="o">=&gt;</span> <span class="no">Bench</span><span class="o">.</span><span class="n">times</span><span class="p">(</span><span class="k">fn</span> <span class="o">-&gt;</span> <span class="no">String</span><span class="o">.</span><span class="n">splitter</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="sd">"</span><span class="s2">."</span><span class="p">)</span> <span class="o">|&gt;</span> <span class="no">Enum</span><span class="o">.</span><span class="n">slice</span><span class="p">(</span><span class="m">0</span><span class="o">..-</span><span class="m">2</span><span class="p">)</span> <span class="o">|&gt;</span> <span class="no">Enum</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="sd">"</span><span class="s2">."</span><span class="p">)</span> <span class="k">end</span><span class="p">),</span>
+    <span class="sd">"</span><span class="s2">regex"</span> <span class="o">=&gt;</span> <span class="no">Bench</span><span class="o">.</span><span class="n">times</span><span class="p">(</span><span class="k">fn</span> <span class="o">-&gt;</span> <span class="no">String</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">ext_rx</span><span class="p">,</span> <span class="sd">"</span><span class="s2">"</span><span class="p">)</span> <span class="k">end</span><span class="p">),</span>
+  <span class="p">})</span>
+<span class="k">end</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p>Результаты бенчмарка:</p>
+
+<div class="language-shell highlighter-rouge"><div class="highlight"><pre class="highlight"><code>elixir_benchmarks <span class="o">[</span>master <span class="k">*</span><span class="o">]</span> <span class="nv">$ </span>mix run lib/bench.exs
+
+  Operating System: Linux
+  CPU Information: Intel<span class="o">(</span>R<span class="o">)</span> Core<span class="o">(</span>TM<span class="o">)</span> i7-4700MQ CPU @ 2.40GHz
+  Number of Available Cores: 8
+  Available memory: 12.019316 GB
+  Elixir 1.4.4
+  Erlang 20.0-rc2
+  Benchmark suite executing with the following configuration:
+  warmup: 2.00 s
+  <span class="nb">time</span>: 5.00 s
+  parallel: 1
+  inputs: none specified
+  Estimated total run <span class="nb">time</span>: 42.00 s
+  
+  Benchmarking pattern_match...
+  Benchmarking pattern_match_bytes...
+  Benchmarking regex...
+  Benchmarking replace_prefix...
+  Benchmarking slice...
+  Benchmarking split...
+  
+  Name                          ips        average  deviation         median
+  pattern_match_bytes       15.17 K      0.0659 ms    ±18.05%      0.0610 ms
+  pattern_match             14.60 K      0.0685 ms    ±17.41%      0.0640 ms
+  replace_prefix             2.52 K        0.40 ms    ±21.46%        0.38 ms
+  slice                      0.83 K        1.20 ms    ±21.95%        1.11 ms
+  <span class="nb">split                      </span>0.58 K        1.72 ms    ±16.76%        1.63 ms
+  regex                      0.45 K        2.24 ms     ±7.42%        2.22 ms
+  
+  Comparison:
+  pattern_match_bytes       15.17 K
+  pattern_match             14.60 K - 1.04x slower
+  replace_prefix             2.52 K - 6.01x slower
+  slice                      0.83 K - 18.24x slower
+  <span class="nb">split                      </span>0.58 K - 26.10x slower
+  regex                      0.45 K - 33.98x slower
+  Operating System: Linux
+  CPU Information: Intel<span class="o">(</span>R<span class="o">)</span> Core<span class="o">(</span>TM<span class="o">)</span> i7-4700MQ CPU @ 2.40GHz
+  Number of Available Cores: 8
+  Available memory: 12.019316 GB
+  Elixir 1.4.4
+  Erlang 20.0-rc2
+  Benchmark suite executing with the following configuration:
+  warmup: 2.00 s
+  <span class="nb">time</span>: 5.00 s
+  parallel: 1
+  inputs: none specified
+  Estimated total run <span class="nb">time</span>: 42.00 s
+  
+  Benchmarking regex...
+  Benchmarking replace_suffix...
+  Benchmarking reverse_pattern_match...
+  Benchmarking reverse_pattern_match_bytes...
+  Benchmarking slice...
+  Benchmarking split...
+  
+  Name                                  ips        average  deviation         median
+  replace_suffix                    2633.75        0.38 ms    ±21.15%        0.36 ms
+  <span class="nb">split                              </span>618.06        1.62 ms    ±13.56%        1.57 ms
+  regex                              389.25        2.57 ms     ±6.54%        2.54 ms
+  slice                              324.19        3.08 ms    ±19.06%        2.88 ms
+  reverse_pattern_match_bytes        275.45        3.63 ms    ±12.08%        3.48 ms
+  reverse_pattern_match              272.06        3.68 ms    ±11.99%        3.54 ms
+  
+  Comparison:
+  replace_suffix                    2633.75
+  <span class="nb">split                              </span>618.06 - 4.26x slower
+  regex                              389.25 - 6.77x slower
+  slice                              324.19 - 8.12x slower
+  reverse_pattern_match_bytes        275.45 - 9.56x slower
+  reverse_pattern_match              272.06 - 9.68x slower
+  elixir_benchmarks <span class="o">[</span>master <span class="k">*</span><span class="o">]</span> <span class="err">$</span>
+</code></pre></div></div>
+
+<p>Очевидно, для удаления символов с конца <code class="highlighter-rouge">replace_suffix</code> подойдёт как нельзя лучше, тогда как с началом строки быстрее всего работает <code class="highlighter-rouge">pattern_match_bytes</code>. Но на самом деле всё не совсем так. Потому что в моём случае, я точно знаю, что у строки есть префикс. Второе место занимает <code class="highlighter-rouge">Pattern_match</code>, который оказался в 6 раз быстрее текущей реализации <code class="highlighter-rouge">String.replace_prefix</code>.</p>
+
+<p>Быть может, это потому, что я использую OTP 20? Что ж, попробуем запустить всё это в других версиях OTP и сравнить результаты. А если они окажутся одинаковыми, придёт время изменить стандартную реализацию.</p>
+
+  </div>
+
+  <!-- uSocial -->
+  <div class="post__share_block share_block">
+    <script async src="https://usocial.pro/usocial/usocial.js?v=6.1.4" data-script="usocial" charset="utf-8"></script>
+    <div class="uSocial-Share" data-pid="2fd19544e551bce292425ee8adaa31be" data-type="share" data-options="round,style2,default,absolute,horizontal,size32,counter1,counter-before,upArrow-right,nomobile" data-social="telegram,fb,vk,gPlus,twi,bookmarks"></div>
+  </div>
+  <!-- /uSocial -->
+</article>
+
+
+        <footer class="footer">
+    &copy; 2020
+    / Россия
+
+    <span class="pull-right">Любые мысли и вопросы пишите на <a href="mailto:elixir@wunsh.ru">elixir@wunsh.ru</a>.</span>
+</footer>
+
+        <div id="subscribeModal" class="modal">
+    <div class="modal__content">
+        <a href="#close" title="Close" class="modal__close">x</a>
+
+        <h2 class="modal__title">Ламповая рассылка про&nbsp;Эликсир</h2>
+
+        <p>Один-два раза в&nbsp;неделю присылаем тёплые письма об&nbsp;Эликсире: переводы самых интересных статей до&nbsp;их&nbsp;появления в&nbsp;открытом доступе, анонсы событий и&nbsp;вкусные бонусы.</p>
+
+        <form action="//wunsh.us14.list-manage.com/subscribe/post?u=c81ca3d4693f62db7f7f67c71&amp;id=a192e2dfef" method="post" id="mc-embedded-subscribe-form" name="mc-embedded-subscribe-form" class="pure-form h-tc validate" target="_blank" novalidate>
+            <input type="email" value="" name="EMAIL" class="modal__input pure-input-rounded large" id="mce-EMAIL" placeholder="Твоя почта" required>
+            <div style="position: absolute; left: -5000px;" aria-hidden="true"><input type="text" name="b_c81ca3d4693f62db7f7f67c71_a192e2dfef" tabindex="-1" value=""></div>
+
+            <input type="submit" value="Присоединиться" name="subscribe" onClick="yaCounter39773490.reachGoal('SUBSCRIBED'); return true" id="mc-embedded-subscribe" class="pure-button button-success large">
+        </form>
+
+        <p>Обязательно подтверди почту, перейдя по&nbsp;ссылке в&nbsp;письме, иначе мы&nbsp;не&nbsp;сможем делиться с&nbsp;тобой полезностями.</p>
+
+        <p>Надоедать точно не&nbsp;будем :)</p>
+    </div>
+</div>
+
+        <script src="/assets/js/vendors/zepto.min.js"></script>
+
+<script>
+    if ($(".post--docs").length) {
+        $(".footer").addClass("footer--docs")
+    }
+
+    $(".modal--close_backdrop").click(function(){
+        window.location.hash = "";
+    });
+</script>
+
+        <!-- Yandex.Metrika counter -->
+<script type="text/javascript">
+    (function (d, w, c) {
+        (w[c] = w[c] || []).push(function() {
+            try {
+                w.yaCounter39773490 = new Ya.Metrika({
+                    id:39773490,
+                    clickmap:true,
+                    trackLinks:true,
+                    accurateTrackBounce:true,
+                    webvisor:true,
+                    ut:"noindex"
+                });
+            } catch(e) { }
+        });
+
+        var n = d.getElementsByTagName("script")[0],
+            s = d.createElement("script"),
+            f = function () { n.parentNode.insertBefore(s, n); };
+        s.type = "text/javascript";
+        s.async = true;
+        s.src = "https://mc.yandex.ru/metrika/watch.js";
+
+        if (w.opera == "[object Opera]") {
+            d.addEventListener("DOMContentLoaded", f, false);
+        } else { f(); }
+    })(document, window, "yandex_metrika_callbacks");
+</script>
+<noscript><div><img src="https://mc.yandex.ru/watch/39773490?ut=noindex" style="position:absolute; left:-9999px;" alt="" /></div></noscript>
+<!-- /Yandex.Metrika counter -->
+
+      </div>
+    </div>
+  </body>
+</html>

@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Транзакции в Elixir при помощи Ecto.Multi |> Сообщество Elixir и Phoenix Framework</title>
+    <meta name="description" content="Рассказываем о новой возможности Ecto 2 – транзакционных операциях через модуль Ecto.Multi.">
+
+    <link rel="alternate" type="application/rss+xml" title="Сообщество Elixir и Phoenix Framework" href="/feed.xml" />
+    <link rel="canonical" href="https://wunsh.ru/articles/elixir-ecto-multi.html">
+
+    <style type="text/css">@import url("//fonts.googleapis.com/css?family=Source+Sans+Pro:400,700&subset=cyrillic");</style>
+    <link rel="stylesheet" href="/assets/css/vendors/pure.min.css">
+    <link rel="stylesheet" href="/assets/css/vendors/pure-grids-responsive.min.css">
+    <link rel="stylesheet" href="/assets/css/style.css?1594516983">
+
+    <link rel="shortcut icon" type="image/png" href="/assets/favicon.png" >
+</head>
+
+
+  <body>
+    <div class="wunsh pure-g">
+      
+
+
+
+
+<div class="menu pure-u-1 pure-u-md-1-4">
+  <div class="header">
+    <h2 class="header__title">
+      
+        <a href="https://wunsh.ru" class="header__title_link" title="На главную">Эликсир и&nbsp;Вунш</a>
+      
+    </h2>
+    <h3 class="header__tagline">Erlang + Ruby = &#10084;</h3>
+
+    <nav class="nav">
+      <ul class="nav_list">
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/elixir" class="nav_list__item_link pure-button">О языке</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/install/linux-asdf" class="nav_list__item_link pure-button">Установка</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/docs/" class="nav_list__item_link pure-button">Документация</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/guides" class="nav_list__item_link pure-button">Гайды</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/news" class="nav_list__item_link pure-button">Новости</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/articles" class="nav_list__item_link pure-button">Статьи</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/videos" class="nav_list__item_link pure-button">Видео</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/vacancies" class="nav_list__item_link pure-button">Вакансии</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/faq" class="nav_list__item_link pure-button">FAQ</a>
+            </li>
+          
+        
+      </ul>
+    </nav>
+
+    <a href="#subscribeModal" class="pure-button header__subscribe_link">Подписаться на рассылку</a>
+  </div>
+</div>
+
+
+      <div class="content pure-u-1 pure-u-md-3-4">
+        
+
+<article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+  <header class="post__header">
+    
+    <h1 class="post__title" itemprop="name headline">Транзакции в Elixir при помощи Ecto.Multi</h1>
+
+    <div class="post__meta post_meta">
+      <ul class="meta_list">
+        <li class="meta_list__item">
+          
+          <span class="">
+            <small class="meta_list__item_name">Дата</small>
+            <time class="h-bold" datetime="2017-01-25T00:00:00+00:00" itemprop="datePublished">
+              
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+25 января 2017
+
+            </time>
+          </span>
+          
+
+          
+        </li>
+        
+        <li class="meta_list__item">
+            <span class="tag_cloud tags_cloud--inline h-no_margin">
+              <small class="meta_list__item_name">Теги</small> 
+
+
+<ul class="tags_cloud__list">
+  
+    <a href="/tags/#ecto" class="tags_cloud__link tag tag--ecto">ecto</a>
+  
+</ul>
+
+            </span>
+        </li>
+        
+        <li class="meta_list__item">
+          <span itemprop="author" itemscope itemtype="http://schema.org/Person">
+            <small class="meta_list__item_name">
+              
+                Перевод
+              
+            </small>
+            <span itemprop="name" class="h-bold">Надежда Нестерова</span>
+          </span>
+        </li>
+
+        <li class="meta_list__item">
+          
+            <div >
+              <small>Оригинал</small>
+              <strong>
+                &laquo;<a href="http://geoffreylessel.com/2017/using-ecto-multi-to-group-database-operations/" style="text-transform: none; text-decoration: underline; color: #4b2e39;">Using Ecto.Multi to Group Database Operations</a>&raquo;
+              </strong>
+              <small>&copy;</small>
+              <strong>Geoffrey Lessel</strong>
+            </div>
+          
+        </li>
+      </ul>
+    </div>
+  </header>
+
+  <div class="post__content" itemprop="articleBody">
+    <p>Приходилось&nbsp;ли вам составлять цепочку запросов к&nbsp;базе данных, в&nbsp;которой каждый новый запрос зависел от&nbsp;успеха выполнения предыдущего? Вообще говоря, каждый раз программно проверять результат выполнения запроса&nbsp;&mdash; не&nbsp;самое приятное дело: это обеспечит наличие большого количества вложенных операторов и&nbsp;значительно усложнит код. Кроме того, если одна из&nbsp;последних операций завершится неудачей, все предыдущие операции придётся откатить.</p>
+<p>Одна из&nbsp;приятнейших особенностей Ecto&nbsp;2.0&nbsp;&mdash; модуль <code>Ecto.Multi</code>. Он&nbsp;разработан специально для того, чтобы предоставить разработчикам возможность объединения многочисленных запросов к&nbsp;базе данных в&nbsp;одну транзакцию, которая либо выполнялась&nbsp;бы целиком, либо вовсе не&nbsp;выполнялась. Можно сказать, этот модуль&nbsp;&mdash; своего рода реализация принципа &laquo;всё или ничего&raquo;. <code>Ecto.Multi</code> поможет решить обозначенную выше проблему, избавив от&nbsp;необходимости использования многоуровневых вложений и&nbsp;обеспечив очень удобный API. Давайте скорее опробуем его в&nbsp;деле!</p>
+<h2>Описание задачи</h2>
+<p>Пусть имеется приложение, отслеживающее процесс эксплуатации двери, за&nbsp;которой, возможно, скрывается многомиллионное серверное оборудование или обычная, ничем не&nbsp;примечательная комната. У&nbsp;каждого человека, имеющего доступ к&nbsp;помещению за&nbsp;этой дверью, есть что-то вроде ключа, который содержит информацию о&nbsp;личности человека, позволяет ему открыть дверь и&nbsp;пройти внутрь.</p>
+<p>Хотелось&nbsp;бы отметить, что в&nbsp;данном приложении не&nbsp;самым лучшим способом реализовано взаимодействие с&nbsp;базой данных, так как оно прежде всего предназначено для демонстрации работы модуля <code>Ecto.Multi</code>, а&nbsp;<em>не</em>&nbsp;для иллюстрации чистого и&nbsp;хорошо структурированного кода.</p>
+<p>Что&nbsp;ж, теперь перейдём к&nbsp;делу.</p>
+<h3>Что мы&nbsp;будем отслеживать?</h3>
+<p>Приложение и&nbsp;база данных оперируют следующими абстракциями:</p>
+<ol>
+    <li>
+        <p>Дверь (Doors)</p>
+    </li>
+    <li>
+        <p>Человек (People)</p>
+    </li>
+    <li>
+        <p>Количество проходов человека в&nbsp;помещение (Entries)</p>
+    </li>
+    <li>
+        <p>Запись в&nbsp;журнале о&nbsp;количестве проходов (Logs)</p>
+    </li>
+</ol>
+<p>В&nbsp;нашем случае в&nbsp;простеньком демо-приложении реализуется определённая последовательность действий: всякий раз, когда человек (Person) пытается открыть дверь (Door), отмечается проход (Entry), обновляется кэшированное прежде значение количества проходов для этого человека и&nbsp;делается запись этого значения в&nbsp;журнал (Log). Если на&nbsp;каком-то из&nbsp;этих этапов возникнет ошибка, то&nbsp;система вернётся к&nbsp;прежнему состоянию. Например, если не&nbsp;удалось сделать запись в&nbsp;журнал, то&nbsp;проход не&nbsp;отметится, а&nbsp;общее число проходов не&nbsp;обновится.</p>
+<h2>Как это делалось раньше</h2>
+<p>Один из&nbsp;способов реализации транзакций до&nbsp;появления <code>Ecto.Multi</code> упрощённо выглядел так:</p>
+<figure class="highlight"><pre><code class="language-elixir" data-lang="elixir"><span class="k">defmodule</span> <span class="no">Guard</span> <span class="k">do</span>
+  <span class="k">def</span> <span class="n">enter_door</span><span class="p">(</span><span class="n">person</span><span class="p">,</span> <span class="n">door</span><span class="p">)</span> <span class="k">do</span>
+    <span class="k">case</span> <span class="no">Repo</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="no">Entry</span><span class="o">.</span><span class="n">changeset</span><span class="p">(%</span><span class="no">Entry</span><span class="p">{},</span> <span class="p">%{</span><span class="ss">door_id:</span> <span class="n">door</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="ss">person_id:</span> <span class="n">person</span><span class="o">.</span><span class="n">id</span><span class="p">})</span> <span class="k">do</span>
+      <span class="p">{</span><span class="ss">:ok</span><span class="p">,</span> <span class="n">entry</span><span class="p">}</span> <span class="o">-&gt;</span>
+        <span class="k">case</span> <span class="no">Repo</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="no">Person</span><span class="o">.</span><span class="n">increase_entry_count_changeset</span><span class="p">(</span><span class="n">person</span><span class="p">))</span> <span class="k">do</span>
+          <span class="p">{</span><span class="ss">:ok</span><span class="p">,</span> <span class="n">person</span><span class="p">}</span> <span class="o">-&gt;</span>
+            <span class="k">case</span> <span class="no">Repo</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="no">Log</span><span class="o">.</span><span class="n">changeset</span><span class="p">(%</span><span class="no">Log</span><span class="p">{},</span> <span class="p">%{</span><span class="ss">text:</span> <span class="sd">"</span><span class="s2">entry"</span><span class="p">}))</span> <span class="k">do</span>
+              <span class="p">{</span><span class="ss">:ok</span><span class="p">,</span> <span class="n">log</span><span class="p">}</span> <span class="o">-&gt;</span>
+                <span class="sd">"</span><span class="s2">Success on all three!"</span>
+              <span class="p">{</span><span class="ss">:error</span><span class="p">,</span> <span class="n">_changeset</span><span class="p">}</span> <span class="o">-&gt;</span>
+                <span class="c1"># rollback Person and Entry database operations</span>
+                <span class="sd">"</span><span class="s2">Failed to save Log"</span>
+            <span class="k">end</span>
+          <span class="p">{</span><span class="ss">:error</span><span class="p">,</span> <span class="n">_changeset</span><span class="p">}</span> <span class="o">-&gt;</span>
+            <span class="c1"># rollback Entry database operation</span>
+            <span class="sd">"</span><span class="s2">Failed to save Person"</span>
+        <span class="k">end</span>
+      <span class="p">{</span><span class="ss">:error</span><span class="p">,</span> <span class="n">_changeset</span><span class="p">}</span> <span class="o">-&gt;</span>
+        <span class="sd">"</span><span class="s2">Failed to save Entry"</span>
+    <span class="k">end</span>
+  <span class="k">end</span>
+<span class="k">end</span></code></pre></figure>
+<p>Писали&nbsp;ли вы&nbsp;когда-нибудь что-то подобное? Быть может, в&nbsp;контроллере в&nbsp;Phoenix? Лично я&nbsp;&mdash; да. Признаюсь даже, что такая схема со&nbsp;множеством вложений реализована в&nbsp;одном из&nbsp;разработанных мной действующих приложений.</p>
+<h2>Как это делает Ecto.Multi</h2>
+<p>Попробуем спасти положение с&nbsp;помощью <code>Ecto.Multi</code>. Для начала, посмотрим на&nbsp;код, после чего обсудим его подробнее.</p>
+<figure class="highlight"><pre><code class="language-elixir" data-lang="elixir"><span class="k">defmodule</span> <span class="no">Guard</span> <span class="k">do</span>
+  <span class="k">def</span> <span class="n">enter_door</span><span class="p">(</span><span class="n">person</span><span class="p">,</span> <span class="n">door</span><span class="p">)</span> <span class="k">do</span>
+    <span class="k">case</span> <span class="n">entry_transaction</span><span class="p">(</span><span class="n">person</span><span class="p">,</span> <span class="n">door</span><span class="p">)</span> <span class="k">do</span>
+      <span class="p">{</span><span class="ss">:ok</span><span class="p">,</span> <span class="p">%{</span><span class="ss">entry:</span> <span class="n">entry</span><span class="p">,</span> <span class="ss">log:</span> <span class="n">log</span><span class="p">,</span> <span class="ss">person:</span> <span class="n">person</span><span class="p">}}</span> <span class="o">-&gt;</span>
+        <span class="no">Logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sd">"</span><span class="s2">Success on all three!"</span><span class="p">)</span>
+      <span class="p">{</span><span class="ss">:error</span><span class="p">,</span> <span class="ss">:log</span><span class="p">,</span> <span class="n">_failed_value</span><span class="p">,</span> <span class="n">_changes_successful</span><span class="p">}</span> <span class="o">-&gt;</span>
+        <span class="no">Logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sd">"</span><span class="s2">Failed to save Log"</span><span class="p">)</span>
+      <span class="p">{</span><span class="ss">:error</span><span class="p">,</span> <span class="ss">:person</span><span class="p">,</span> <span class="n">_failed_value</span><span class="p">,</span> <span class="n">_changes_successful</span><span class="p">}</span> <span class="o">-&gt;</span>
+        <span class="no">Logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sd">"</span><span class="s2">Failed to save Person"</span><span class="p">)</span>
+      <span class="p">{</span><span class="ss">:error</span><span class="p">,</span> <span class="ss">:entry</span><span class="p">,</span> <span class="n">_failed_value</span><span class="p">,</span> <span class="n">_changes_successful</span><span class="p">}</span> <span class="o">-&gt;</span>
+        <span class="no">Logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sd">"</span><span class="s2">Failed to save Entry"</span><span class="p">)</span>
+    <span class="k">end</span>
+  <span class="k">end</span>
+
+  <span class="k">def</span> <span class="n">entry_transaction</span><span class="p">(</span><span class="n">person</span><span class="p">,</span> <span class="n">door</span><span class="p">)</span> <span class="k">do</span>
+    <span class="no">Multi</span><span class="o">.</span><span class="n">new</span>
+    <span class="o">|&gt;</span> <span class="no">Multi</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="ss">:entry</span><span class="p">,</span> <span class="no">Entry</span><span class="o">.</span><span class="n">changeset</span><span class="p">(%</span><span class="no">Entry</span><span class="p">{},</span> <span class="p">%{</span><span class="ss">door_id:</span> <span class="n">door</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="ss">person_id:</span> <span class="n">person</span><span class="o">.</span><span class="n">id</span><span class="p">}})</span>
+    <span class="o">|&gt;</span> <span class="no">Multi</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="ss">:person</span><span class="p">,</span> <span class="no">Person</span><span class="o">.</span><span class="n">increase_entry_count_changeset</span><span class="p">(</span><span class="n">person</span><span class="p">))</span>
+    <span class="o">|&gt;</span> <span class="no">Multi</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="ss">:log</span><span class="p">,</span> <span class="no">Log</span><span class="o">.</span><span class="n">changeset</span><span class="p">(%</span><span class="no">Log</span><span class="p">{},</span> <span class="p">%{</span><span class="n">text</span><span class="p">,</span> <span class="sd">"</span><span class="s2">entry"</span><span class="p">}))</span>
+    <span class="o">|&gt;</span> <span class="no">Repo</span><span class="o">.</span><span class="n">transaction</span><span class="p">()</span>
+  <span class="k">end</span>
+<span class="k">end</span></code></pre></figure>
+<p>Прежде всего разберёмся с&nbsp;функцией entry_transaction. Модуль <code>Ecto.Multi</code> содержит функции, аналогичные функциям модуля <code>Ecto.Repo</code>: <code>insert</code>, <code>delete</code>, <code>update</code> и&nbsp;многие другие. Однако в&nbsp;качестве второго аргумента этих функций выступает определённый в&nbsp;<noindex><a href="https://hexdocs.pm/ecto/2.1.2/Ecto.Multi.html" rel="nofollow noreferrer">документации</a></noindex> аргумент <code>name</code>. Он&nbsp;позволяет присвоить имя некоторому набору действий, чтобы потом с&nbsp;ним можно было провести сопоставление с&nbsp;образцом. В&nbsp;приведённом выше примере они названы в&nbsp;соответствии с&nbsp;той записью в&nbsp;базе даных, к&nbsp;которой относятся. Важно, чтобы в&nbsp;пределах транзакции эти имена были уникальными. Поговорим об&nbsp;этом подробнее, когда будем рассматривать функцию <code>enter_door</code>.</p>
+<p>На&nbsp;каждом этапе транзакции дальнейшим операциям передаётся результат <code>Multi.new</code>, а&nbsp;затем Repo уже осуществляет запросы к&nbsp;базе данных.</p>
+<p>Если на&nbsp;любом из&nbsp;этапов в&nbsp;наборе изменений возникла ошибка или по&nbsp;какой-либо причине не&nbsp;выполнился запрос к&nbsp;базе данных, изменения в&nbsp;базу данных внесены не&nbsp;будут. Запрос, в&nbsp;ходе выполнения которого произошла ошибка, возвратится в&nbsp;кортеже вида <code>{:error, name_of_call, failed_value, changes_that_succeeded}</code>. Переменная <code>failed_value</code> содержит ошибки набора изменений (если он&nbsp;используется) или другие ошибочные значения, возвращаемые запросом, а&nbsp;<code>changes_that_succeeded</code> содержит результаты всех предыдущих успешных операций. Тем не&nbsp;менее, согласно документации <strong><em>&laquo;необходимо произвести откат всех успешных операций&raquo;</em></strong>, если не&nbsp;удалось выполнить всю транзакцию целиком.</p>
+<p>Теперь перейдём к&nbsp;функции <code>enter_door</code>. Итак, если во&nbsp;время выполнения транзакции произойдёт ошибка, возвратится кортеж вида <code>{:error, ...}</code>. Если&nbsp;же всё пройдёт успешно, возвратится кортеж <code>{:ok, map}</code>. По&nbsp;заданному нами имени (<code>name</code>) операции в&nbsp;map можно получить доступ к&nbsp;значениям каждой из&nbsp;составляющих транзакцию операций. В&nbsp;текущем примере ключ <code>:entry</code> в&nbsp;<code>map</code> соотносится с&nbsp;результатом операции:</p>
+<figure class="highlight"><pre><code class="language-elixir" data-lang="elixir"><span class="no">Multi</span><span class="o">.</span><span class="n">new</span>
+<span class="o">|&gt;</span> <span class="no">Multi</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="ss">:entry</span><span class="p">,</span> <span class="no">Entry</span><span class="o">.</span><span class="n">changeset</span><span class="p">(%</span><span class="no">Entry</span><span class="p">{},</span> <span class="p">%{</span><span class="o">...</span><span class="p">}))</span>
+<span class="c1">#               ^^^^^^ where we named our operation</span>
+<span class="o">...</span></code></pre></figure>
+<p>В&nbsp;связи с&nbsp;этим можно сделать вывод, что запросы ведут себя как одна целостная единица: неудачен один запрос, неудачны и&nbsp;все остальные.</p>
+<h2>Использование Ecto.Multi.run для выполнения произвольного кода</h2>
+<p>Ещё одно занимательное действие с&nbsp;<code>Ecto.Multi</code>&nbsp;&mdash; использование функции <code>run/3</code> для исполнения произвольного кода, содержащего в&nbsp;себе результаты предыдущих успешных операций. Рассмотрим пример.</p>
+<p>Допустим, установим такое ограничение, что человек не&nbsp;может пройти в&nbsp;помещение более 10&nbsp;раз. Обычно (и, возможно, так правильно) это делается внутри набора изменений для Person, но&nbsp;сейчас попробуем воспользоваться функцией <code>run/3</code>, чтобы проверить, сколько раз человек уже открывал эту дверь:</p>
+<p>Функция <code>Ecto.Multi.run</code> на&nbsp;входе ожидает кортеж, содержащий либо <code>{:ok, message}</code>, чтобы продолжить выполнение транзакции, либо <code>{:error, message}</code>, чтобы откатить все изменения.</p>
+<p>Можно видеть, что проводится сопоставление с&nbsp;образцом по&nbsp;Person, которое содержит <em>результат</em> успешного выполнения предыдущей операции update. Если человек уже прошёл в&nbsp;помещение 10&nbsp;раз, то&nbsp;после успешного выполнения операции это значение обновится на&nbsp;11, и&nbsp;возникнет ошибка. Сообщение об&nbsp;ошибке передастся в&nbsp;блок сопоставления с&nbsp;образцом оператора case.</p>
+<h2>Мощный функционал с&nbsp;простым API</h2>
+<p>Должен признаться, <code>Ecto.Multi</code> и&nbsp;его возможности впечатляют. Он&nbsp;позволяет забыть об&nbsp;откате успешно выполненных операций, если зависимая операция по&nbsp;какой-то причине завершится неудачей. Кроме того, сопоставление содержащих ошибки транзакций с&nbsp;образцом&nbsp;&mdash; отличная возможность, позволяющая принимать дальнейшие меры в&nbsp;зависимости от&nbsp;того, какая из&nbsp;операций завершилась неудачей.</p>
+<p>Советую вам активно использовать этот модуль в&nbsp;будущих разработках, а&nbsp;также совершенствовать с&nbsp;его помощью предыдущие.</p>
+
+  </div>
+
+  <!-- uSocial -->
+  <div class="post__share_block share_block">
+    <script async src="https://usocial.pro/usocial/usocial.js?v=6.1.4" data-script="usocial" charset="utf-8"></script>
+    <div class="uSocial-Share" data-pid="2fd19544e551bce292425ee8adaa31be" data-type="share" data-options="round,style2,default,absolute,horizontal,size32,counter1,counter-before,upArrow-right,nomobile" data-social="telegram,fb,vk,gPlus,twi,bookmarks"></div>
+  </div>
+  <!-- /uSocial -->
+</article>
+
+
+        <footer class="footer">
+    &copy; 2020
+    / Россия
+
+    <span class="pull-right">Любые мысли и вопросы пишите на <a href="mailto:elixir@wunsh.ru">elixir@wunsh.ru</a>.</span>
+</footer>
+
+        <div id="subscribeModal" class="modal">
+    <div class="modal__content">
+        <a href="#close" title="Close" class="modal__close">x</a>
+
+        <h2 class="modal__title">Ламповая рассылка про&nbsp;Эликсир</h2>
+
+        <p>Один-два раза в&nbsp;неделю присылаем тёплые письма об&nbsp;Эликсире: переводы самых интересных статей до&nbsp;их&nbsp;появления в&nbsp;открытом доступе, анонсы событий и&nbsp;вкусные бонусы.</p>
+
+        <form action="//wunsh.us14.list-manage.com/subscribe/post?u=c81ca3d4693f62db7f7f67c71&amp;id=a192e2dfef" method="post" id="mc-embedded-subscribe-form" name="mc-embedded-subscribe-form" class="pure-form h-tc validate" target="_blank" novalidate>
+            <input type="email" value="" name="EMAIL" class="modal__input pure-input-rounded large" id="mce-EMAIL" placeholder="Твоя почта" required>
+            <div style="position: absolute; left: -5000px;" aria-hidden="true"><input type="text" name="b_c81ca3d4693f62db7f7f67c71_a192e2dfef" tabindex="-1" value=""></div>
+
+            <input type="submit" value="Присоединиться" name="subscribe" onClick="yaCounter39773490.reachGoal('SUBSCRIBED'); return true" id="mc-embedded-subscribe" class="pure-button button-success large">
+        </form>
+
+        <p>Обязательно подтверди почту, перейдя по&nbsp;ссылке в&nbsp;письме, иначе мы&nbsp;не&nbsp;сможем делиться с&nbsp;тобой полезностями.</p>
+
+        <p>Надоедать точно не&nbsp;будем :)</p>
+    </div>
+</div>
+
+        <script src="/assets/js/vendors/zepto.min.js"></script>
+
+<script>
+    if ($(".post--docs").length) {
+        $(".footer").addClass("footer--docs")
+    }
+
+    $(".modal--close_backdrop").click(function(){
+        window.location.hash = "";
+    });
+</script>
+
+        <!-- Yandex.Metrika counter -->
+<script type="text/javascript">
+    (function (d, w, c) {
+        (w[c] = w[c] || []).push(function() {
+            try {
+                w.yaCounter39773490 = new Ya.Metrika({
+                    id:39773490,
+                    clickmap:true,
+                    trackLinks:true,
+                    accurateTrackBounce:true,
+                    webvisor:true,
+                    ut:"noindex"
+                });
+            } catch(e) { }
+        });
+
+        var n = d.getElementsByTagName("script")[0],
+            s = d.createElement("script"),
+            f = function () { n.parentNode.insertBefore(s, n); };
+        s.type = "text/javascript";
+        s.async = true;
+        s.src = "https://mc.yandex.ru/metrika/watch.js";
+
+        if (w.opera == "[object Opera]") {
+            d.addEventListener("DOMContentLoaded", f, false);
+        } else { f(); }
+    })(document, window, "yandex_metrika_callbacks");
+</script>
+<noscript><div><img src="https://mc.yandex.ru/watch/39773490?ut=noindex" style="position:absolute; left:-9999px;" alt="" /></div></noscript>
+<!-- /Yandex.Metrika counter -->
+
+      </div>
+    </div>
+  </body>
+</html>

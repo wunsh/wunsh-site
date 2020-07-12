@@ -1,0 +1,568 @@
+<!DOCTYPE html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Зависимости и зонтичные проекты |> Сообщество Elixir и Phoenix Framework</title>
+    <meta name="description" content="Русскоязычное сообщество Elixir и Phoenix Framework
+">
+
+    <link rel="alternate" type="application/rss+xml" title="Сообщество Elixir и Phoenix Framework" href="/feed.xml" />
+    <link rel="canonical" href="https://wunsh.ru/docs/mix-otp/dependencies-and-umbrella-apps">
+
+    <style type="text/css">@import url("//fonts.googleapis.com/css?family=Source+Sans+Pro:400,700&subset=cyrillic");</style>
+    <link rel="stylesheet" href="/assets/css/vendors/pure.min.css">
+    <link rel="stylesheet" href="/assets/css/vendors/pure-grids-responsive.min.css">
+    <link rel="stylesheet" href="/assets/css/style.css?1594516983">
+
+    <link rel="shortcut icon" type="image/png" href="/assets/favicon.png" >
+</head>
+
+
+  <body>
+    <div class="wunsh pure-g">
+      
+
+
+
+
+<div class="menu pure-u-1 pure-u-md-1-4">
+  <div class="header">
+    <h2 class="header__title">
+      
+        <a href="https://wunsh.ru" class="header__title_link" title="На главную">Эликсир и&nbsp;Вунш</a>
+      
+    </h2>
+    <h3 class="header__tagline">Erlang + Ruby = &#10084;</h3>
+
+    <nav class="nav">
+      <ul class="nav_list">
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/elixir" class="nav_list__item_link pure-button">О языке</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/install/linux-asdf" class="nav_list__item_link pure-button">Установка</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/docs/" class="nav_list__item_link pure-button">Документация</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/guides" class="nav_list__item_link pure-button">Гайды</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/news" class="nav_list__item_link pure-button">Новости</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/articles" class="nav_list__item_link pure-button">Статьи</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/videos" class="nav_list__item_link pure-button">Видео</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/vacancies" class="nav_list__item_link pure-button">Вакансии</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/faq" class="nav_list__item_link pure-button">FAQ</a>
+            </li>
+          
+        
+      </ul>
+    </nav>
+
+    <a href="#subscribeModal" class="pure-button header__subscribe_link">Подписаться на рассылку</a>
+  </div>
+</div>
+
+
+      <div class="content pure-u-1 pure-u-md-3-4">
+        <article class="post post--docs" itemscope itemtype="http://schema.org/BlogPosting">
+    <header class="post__header">
+        <h1 class="post__title" itemprop="name headline">
+            <p>Зависимости и зонтичные проекты</p>
+
+        </h1>
+    </header>
+
+    <div class="post__content" itemprop="articleBody">
+        <p>В этой главе мы обсудим, как управлять зависимостями с помощью Микса.</p>
+
+<p>Наше приложение <code class="highlighter-rouge">kv</code> закончено, и значит пришло время сделать сервер, который будет обрабатывать запросы, которые мы объявили в первой главе:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>CREATE shopping
+OK
+
+PUT shopping milk 1
+OK
+
+PUT shopping eggs 3
+OK
+
+GET shopping milk
+1
+OK
+
+DELETE shopping eggs
+OK
+</code></pre></div></div>
+
+<p>Однако, вместо добавления ещё большего количества кода в приложение <code class="highlighter-rouge">kv</code>, мы сделаем TCP-сервер отдельным приложением, которое будет клиентом приложения <code class="highlighter-rouge">kv</code>. Т. к. весь рантайм и экосистема Эликсира основана на приложениях, есть смысл разделять наши проекты в приложения меньшего размера, которые работают вместе, вместо создания одного большого монолитного приложения.</p>
+
+<p>Перед тем, как создать наше новое приложение, мы должны обсудить, как Микс разрешает зависимости. На практике существует два типа зависимостей, с которыми мы обычно работаем: внутренние и внешние зависимости. Микс поддерживает механизмы для работы с обоими.</p>
+
+<h2 id="внешние-зависимости">Внешние зависимости</h2>
+
+<p>Внешними называют зависимости, которые не относятся к вашей бизнес-логике. Например, если вам нужен HTTP API для распределённого приложения <code class="highlighter-rouge">KV</code>, вы можете использовать <a href="https://github.com/elixir-lang/plug">проект <code class="highlighter-rouge">Plug</code></a> как внешнюю зависимость.</p>
+
+<p>Установка внешних зависимостей предельна проста. Как правило, мы используем <a href="https://hex.pm">пакетный менеджер Хекс</a>, перечисляя зависимости в функции <code class="highlighter-rouge">deps</code> в файле <code class="highlighter-rouge">mix.exs</code>:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">def</span> <span class="n">deps</span> <span class="k">do</span>
+  <span class="p">[{</span><span class="ss">:plug</span><span class="p">,</span> <span class="sd">"</span><span class="s2">~&gt; 1.0"</span><span class="p">}]</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<p>Эта зависимость ссылается на последнюю версию <code class="highlighter-rouge">Plug</code> в серии версий 1.x.x, которая известна Хексу. Для указания последней версии используется стрелка <code class="highlighter-rouge">~&gt;</code> перед номером минимальной версии. Больше информации о версиях можно получить в <a href="https://hexdocs.pm/elixir/Version.html">документации к модулю <code class="highlighter-rouge">Version</code></a>.</p>
+
+<p>Обычно стабильные релизы загружены в Хекс. Если вы хотите добавить внешнюю зависимость, которая ещё находится в разработке, Микс позволяет указать Гит-зависимость:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">def</span> <span class="n">deps</span> <span class="k">do</span>
+  <span class="p">[{</span><span class="ss">:plug</span><span class="p">,</span> <span class="ss">git:</span> <span class="sd">"</span><span class="s2">git://github.com/elixir-lang/plug.git"</span><span class="p">}]</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<p>Вы можете заметить, что при добавлении зависимости в ваш проект, Микс генерирует файл <code class="highlighter-rouge">mix.lock</code>, который гарантирует <em>повторяемость сборок</em>. Файл блокировки должен быть включен в вашу систему контроля версий, чтобы гарантировать для всех пользователей проекта использование тех же версий зависимостей, что и у вас.</p>
+
+<p>Микс предоставляет много функций для работы с зависимостями, которые можно увидеть, вызвав команду <code class="highlighter-rouge">mix help</code>:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span>mix <span class="nb">help
+</span>mix deps              <span class="c"># Lists dependencies and their status</span>
+mix deps.clean        <span class="c"># Deletes the given dependencies' files</span>
+mix deps.compile      <span class="c"># Compiles dependencies</span>
+mix deps.get          <span class="c"># Gets all out of date dependencies</span>
+mix deps.tree         <span class="c"># Prints the dependency tree</span>
+mix deps.unlock       <span class="c"># Unlocks the given dependencies</span>
+mix deps.update       <span class="c"># Updates the given dependencies</span>
+</code></pre></div></div>
+
+<p>Чаще всего используются функции <code class="highlighter-rouge">mix deps.get</code> и <code class="highlighter-rouge">mix deps.update</code>. Однажды загруженные зависимости будут автоматически скомпилированы. Вы можете узнать больше про <code class="highlighter-rouge">deps</code>, если вызовете команду <code class="highlighter-rouge">mix help deps</code>, а также из <a href="https://hexdocs.pm/mix/Mix.Tasks.Deps.html">документации к модулю <code class="highlighter-rouge">Mix.Tasks.Deps</code></a>.</p>
+
+<h2 id="внутренние-зависимости">Внутренние зависимости</h2>
+
+<p>Специфичные для вашего проекта зависимости называют внутренними. Они обычно не имеют смысла вне вашего проекта/компании/организации. Как правило, вы хотите сохранить их приватными, ввиду технических, экономических или бизнес причин.</p>
+
+<p>Если у вас есть внутренняя зависимость, Микс поддерживает два метода работы с ними: Гит-репозитории и зонтичные проекты.</p>
+
+<p>Например, если вы храните проект <code class="highlighter-rouge">kv</code> в Гит-репозитории, вам нужно указать его в списке зависимостей, чтобы начать его использовать:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">def</span> <span class="n">deps</span> <span class="k">do</span>
+  <span class="p">[{</span><span class="ss">:kv</span><span class="p">,</span> <span class="ss">git:</span> <span class="sd">"</span><span class="s2">https://github.com/YOUR_ACCOUNT/kv.git"</span><span class="p">}]</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<p>Если же репозиторий приватный, вам понадобится приватный URL <code class="highlighter-rouge">git@github.com:YOUR_ACCOUNT/kv.git</code>. В этом случае Микс сможет получать доступ к репозиторию, пока у вас есть права доступа.</p>
+
+<p>Использование Гита для внутренних зависимостей в Эликсире не лучший вариант. Помните, что экосистема Эликсира следует концепции приложении. Поэтому мы надеемся, что вы часто будете разделять свой код на приложения, которые могут быть логически организованны, даже в рамках одного проекта.</p>
+
+<p>Однако, если каждое приложение будет иметь свой репозиторий, ваш проект станет очень сложным в поддержке, вы будете тратить много времени на управление этими репозиториями вместо написания кода.</p>
+
+<p>По этой причине Микс поддерживает «зонтичные проекты». Зонтичные проекты используются для разработки приложений, которые работают вместе и имеют четкие границы внутри одного репозитория. Именно этот стиль мы изучим в следующих разделах.</p>
+
+<p>Давайте создадим новый Микс-проект. Назовём его оригинально – <code class="highlighter-rouge">kv_umbrella</code>, и этот проект будет включать в себя уже созданное приложение <code class="highlighter-rouge">kv</code> и новое, <code class="highlighter-rouge">kv_server</code>. Структура директорий должна выглядеть следующим образом:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>+ kv_umbrella
+  + apps
+    + kv
+    + kv_server
+</code></pre></div></div>
+
+<p>Интересно, что для этого подхода в Миксе есть много удобных возможностей, например, возможность компилировать и тестировать все приложения внутри <code class="highlighter-rouge">apps</code> одной командой. Однако, хотя они и перечислены вместе внутри <code class="highlighter-rouge">apps</code>, это всё ещё отдельные, изолированные друг от друга приложения, поэтому мы можем собирать, тестировать и деплоить каждое приложение отдельно, если это необходимо.</p>
+
+<p>Что ж, начнём!</p>
+
+<h2 id="зонтичные-проекты">Зонтичные проекты</h2>
+
+<p>Давайте начнём новый проект, запустив команду <code class="highlighter-rouge">mix new</code>. Назовём этот проект <code class="highlighter-rouge">kv_umbrella</code>, а также добавим опцию <code class="highlighter-rouge">--umbrella</code> при создании. Не создавайте этот новый проект внутри существующего проекта <code class="highlighter-rouge">kv</code>!</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span>mix new kv_umbrella <span class="nt">--umbrella</span>
+<span class="k">*</span> creating .gitignore
+<span class="k">*</span> creating README.md
+<span class="k">*</span> creating mix.exs
+<span class="k">*</span> creating apps
+<span class="k">*</span> creating config
+<span class="k">*</span> creating config/config.exs
+</code></pre></div></div>
+
+<p>Исходя из выведенной информации, мы можем увидеть, что сгенерировано намного меньше файлов. Сгенерированный <code class="highlighter-rouge">mix.exs</code> также отличается от стандартного. Давайте взглянем на него:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">defmodule</span> <span class="no">KvUmbrella</span><span class="o">.</span><span class="no">Mixfile</span> <span class="k">do</span>
+  <span class="kn">use</span> <span class="no">Mix</span><span class="o">.</span><span class="no">Project</span>
+
+  <span class="k">def</span> <span class="n">project</span> <span class="k">do</span>
+    <span class="p">[</span>
+      <span class="ss">apps_path:</span> <span class="sd">"</span><span class="s2">apps"</span><span class="p">,</span>
+      <span class="ss">start_permanent:</span> <span class="no">Mix</span><span class="o">.</span><span class="n">env</span> <span class="o">==</span> <span class="ss">:prod</span><span class="p">,</span>
+      <span class="ss">deps:</span> <span class="n">deps</span>
+    <span class="p">]</span>
+  <span class="k">end</span>
+
+  <span class="k">defp</span> <span class="n">deps</span> <span class="k">do</span>
+    <span class="p">[]</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<p>Отличие от предыдущего проекта в его определении, а именно в строке <code class="highlighter-rouge">apps_path: "apps"</code>. Это значит, что проект будет вести себя, как зонтичный. Такие проекты не содержат ни исходников, ни тестов, но они могут иметь свои зависимости. Каждое дочернее приложение должно быть определено внутри директории <code class="highlighter-rouge">apps</code>.</p>
+
+<p>Давайте перейдём в директорию <code class="highlighter-rouge">apps</code> и начнём работать над приложением <code class="highlighter-rouge">kv_server</code>. В этот раз передадим флаг <code class="highlighter-rouge">--sup</code>, который укажет Миксу сгенерировать дерево супервизора автоматически, вместо того, чтобы создавать его руками, как мы делали в предыдущих главах:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span><span class="nb">cd </span>kv_umbrella/apps
+<span class="nv">$ </span>mix new kv_server <span class="nt">--module</span> KVServer <span class="nt">--sup</span>
+</code></pre></div></div>
+
+<p>Сгенерированные файлы идентичны сгенерированным для <code class="highlighter-rouge">kv</code>, но с некоторыми отличиями. Откройте <code class="highlighter-rouge">mix.exs</code>:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">defmodule</span> <span class="no">KVServer</span><span class="o">.</span><span class="no">Mixfile</span> <span class="k">do</span>
+  <span class="kn">use</span> <span class="no">Mix</span><span class="o">.</span><span class="no">Project</span>
+
+  <span class="k">def</span> <span class="n">project</span> <span class="k">do</span>
+    <span class="p">[</span>
+      <span class="ss">app:</span> <span class="ss">:kv_server</span><span class="p">,</span>
+      <span class="ss">version:</span> <span class="sd">"</span><span class="s2">0.1.0"</span><span class="p">,</span>
+      <span class="ss">build_path:</span> <span class="sd">"</span><span class="s2">../../_build"</span><span class="p">,</span>
+      <span class="ss">config_path:</span> <span class="sd">"</span><span class="s2">../../config/config.exs"</span><span class="p">,</span>
+      <span class="ss">deps_path:</span> <span class="sd">"</span><span class="s2">../../deps"</span><span class="p">,</span>
+      <span class="ss">lockfile:</span> <span class="sd">"</span><span class="s2">../../mix.lock"</span><span class="p">,</span>
+      <span class="ss">elixir:</span> <span class="sd">"</span><span class="s2">~&gt; 1.6-dev"</span><span class="p">,</span>
+      <span class="ss">start_permanent:</span> <span class="no">Mix</span><span class="o">.</span><span class="n">env</span> <span class="o">==</span> <span class="ss">:prod</span><span class="p">,</span>
+      <span class="ss">deps:</span> <span class="n">deps</span><span class="p">()</span>
+    <span class="p">]</span>
+  <span class="k">end</span>
+
+  <span class="c1"># Выполните команду "mix help compile.app", чтобы узнать о приложении больше.</span>
+  <span class="k">def</span> <span class="n">application</span> <span class="k">do</span>
+    <span class="p">[</span>
+      <span class="ss">extra_applications:</span> <span class="p">[</span><span class="ss">:logger</span><span class="p">],</span>
+      <span class="ss">mod:</span> <span class="p">{</span><span class="no">KVServer</span><span class="o">.</span><span class="no">Application</span><span class="p">,</span> <span class="p">[]}</span>
+    <span class="p">]</span>
+  <span class="k">end</span>
+
+  <span class="c1"># Выполните команду "mix help deps", чтобы узнать о зависимостях.</span>
+  <span class="k">defp</span> <span class="n">deps</span> <span class="k">do</span>
+    <span class="p">[</span>
+      <span class="c1"># {:dep_from_hexpm, "~&gt; 0.3.0"},</span>
+      <span class="c1"># {:dep_from_git, git: "https://github.com/elixir-lang/my_dep.git", tag: "0.1.0"},</span>
+      <span class="c1"># {:sibling_app_in_umbrella, in_umbrella: true},</span>
+    <span class="p">]</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<p>Первое, что можно заметить, Микс автоматически определил структуру зонтичного проекта, т. к. мы сгенерировали этот проект внутри <code class="highlighter-rouge">kv_umbrella/apps</code>, и добавил следующие строки:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="ss">build_path:</span> <span class="sd">"</span><span class="s2">../../_build"</span><span class="p">,</span>
+<span class="ss">config_path:</span> <span class="sd">"</span><span class="s2">../../config/config.exs"</span><span class="p">,</span>
+<span class="ss">deps_path:</span> <span class="sd">"</span><span class="s2">../../deps"</span><span class="p">,</span>
+<span class="ss">lockfile:</span> <span class="sd">"</span><span class="s2">../../mix.lock"</span><span class="p">,</span>
+</code></pre></div></div>
+
+<p>Эти опции означают, что все зависимости будут взяты из директории <code class="highlighter-rouge">kv_umbrella/deps</code>, будут находиться в одной сборке, иметь общую конфигурацию и <code class="highlighter-rouge">lock</code>-файлы. При этом зависимости будут загружены и скомпилированы один раз для всего зонтичного проекта, а не для каждого приложения отдельно.</p>
+
+<p>Второе изменение в функции <code class="highlighter-rouge">application</code> внутри файла <code class="highlighter-rouge">mix.exs</code>:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">def</span> <span class="n">application</span> <span class="k">do</span>
+  <span class="p">[</span>
+    <span class="ss">extra_applications:</span> <span class="p">[</span><span class="ss">:logger</span><span class="p">],</span>
+    <span class="ss">mod:</span> <span class="p">{</span><span class="no">KVServer</span><span class="o">.</span><span class="no">Application</span><span class="p">,</span> <span class="p">[]}</span>
+  <span class="p">]</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<p>Т. к. мы передали флаг <code class="highlighter-rouge">--sup</code>, Микс автоматически добавил <code class="highlighter-rouge">mod: {KVServer.Application, []}</code>, определяющий, что <code class="highlighter-rouge">KVServer.Application</code> – модуль колбэка приложения. Он запустит дерево супервизора нашего приложения.</p>
+
+<p>А теперь откроем файл <code class="highlighter-rouge">lib/kv_server/application.ex</code>:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">defmodule</span> <span class="no">KVServer</span><span class="o">.</span><span class="no">Application</span> <span class="k">do</span>
+  <span class="c1"># Больше информации об OTP-приложениях</span>
+  <span class="c1"># по ссылке https://hexdocs.pm/elixir/Application.html</span>
+  <span class="nv">@moduledoc</span> <span class="no">false</span>
+
+  <span class="kn">use</span> <span class="no">Application</span>
+
+  <span class="k">def</span> <span class="n">start</span><span class="p">(</span><span class="n">_type</span><span class="p">,</span> <span class="n">_args</span><span class="p">)</span> <span class="k">do</span>
+    <span class="c1"># Список всех дочерних процессов супервайзера</span>
+    <span class="n">children</span> <span class="o">=</span> <span class="p">[</span>
+      <span class="c1"># Запускаем воркер вызовом функции `KVServer.Worker.start_link(arg)`</span>
+      <span class="c1"># `{KVServer.Worker, arg}`</span>
+    <span class="p">]</span>
+
+    <span class="c1"># Другие стратегии и поддерживаемые опции</span>
+    <span class="c1"># смотрите по ссылке https://hexdocs.pm/elixir/Supervisor.html</span>
+    <span class="n">opts</span> <span class="o">=</span> <span class="p">[</span><span class="ss">strategy:</span> <span class="ss">:one_for_one</span><span class="p">,</span> <span class="ss">name:</span> <span class="no">KVServer</span><span class="o">.</span><span class="no">Supervisor</span><span class="p">]</span>
+    <span class="no">Supervisor</span><span class="o">.</span><span class="n">start_link</span><span class="p">(</span><span class="n">children</span><span class="p">,</span> <span class="n">opts</span><span class="p">)</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<p>Обратите внимание, что тут определен колбэк приложения <code class="highlighter-rouge">start/2</code>, и вместо определения супервизора с именем <code class="highlighter-rouge">KVServer.Supervisor</code>, который использует модуль <code class="highlighter-rouge">Supervisor</code>, супервизор удобно определён в списке атрибутов! Вы можете прочитать больше о таких супервизорах в <a href="https://hexdocs.pm/elixir/Supervisor.html">документации модуля <code class="highlighter-rouge">Supervisor</code></a>.</p>
+
+<p>Мы уже можем попробовать наше первое приложение внутри проекта. Можно запустить тесты в директории <code class="highlighter-rouge">apps/kv_server</code>, но это будет не так круто, как перейти в корневую директорию зонтичного проекта и запустить <code class="highlighter-rouge">mix test</code>:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span>mix <span class="nb">test</span>
+</code></pre></div></div>
+
+<p>И это сработает!</p>
+
+<p>Т. к. мы хотим, чтобы приложение <code class="highlighter-rouge">kv_server</code> периодически использовал функциональность из приложения <code class="highlighter-rouge">kv</code>, нужно добавить его в зависимости нашего приложения.</p>
+
+<h2 id="зависимости-внутри-зонтичного-проекта">Зависимости внутри зонтичного проекта</h2>
+
+<p>Микс предоставляет лёгкий механизм для указания зависимостей одного приложения-потомка от другого. Откройте файл <code class="highlighter-rouge">apps/kv_server/mix.exs</code> и измените функцию <code class="highlighter-rouge">deps/0</code> на следующую:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">defp</span> <span class="n">deps</span> <span class="k">do</span>
+  <span class="p">[{</span><span class="ss">:kv</span><span class="p">,</span> <span class="ss">in_umbrella:</span> <span class="no">true</span><span class="p">}]</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<p>Строка выше делает <code class="highlighter-rouge">:kv</code> доступным как зависимость внутри приложения <code class="highlighter-rouge">:kv_server</code>, и автоматически запускает приложение <code class="highlighter-rouge">:kv</code> перед запуском сервера.</p>
+
+<p>Наконец, скопируйте приложение <code class="highlighter-rouge">kv</code>, которое мы недавно создали, в директорию <code class="highlighter-rouge">apps</code> нашего нового зонтичного проекта. Конечная структура директорий должна соответствовать структуре, которую мы упоминали ранее:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>+ kv_umbrella
+  + apps
+    + kv
+    + kv_server
+</code></pre></div></div>
+
+<p>А теперь нам нужно изменить файл <code class="highlighter-rouge">apps/kv/mix.exs</code>, чтобы он содержал строки, специфичные для зонтичного приложения, которые мы видели в файле <code class="highlighter-rouge">apps/kv_server/mix.exs</code>. Откройте файл <code class="highlighter-rouge">apps/kv/mix.exs</code> и добавьте в функцию <code class="highlighter-rouge">project</code> следующее:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="ss">build_path:</span> <span class="sd">"</span><span class="s2">../../_build"</span><span class="p">,</span>
+<span class="ss">config_path:</span> <span class="sd">"</span><span class="s2">../../config/config.exs"</span><span class="p">,</span>
+<span class="ss">deps_path:</span> <span class="sd">"</span><span class="s2">../../deps"</span><span class="p">,</span>
+<span class="ss">lockfile:</span> <span class="sd">"</span><span class="s2">../../mix.lock"</span><span class="p">,</span>
+</code></pre></div></div>
+
+<p>Теперь вы можете запускать тесты для обоих проектов из корневой директории проекта командой <code class="highlighter-rouge">mix test</code>. Супер!</p>
+
+<p>Помните, что зонтичные проекты помогают удобно организовать ваши приложения и управлять ими. Приложения внутри директории <code class="highlighter-rouge">apps</code> остаются отделёнными друг от друга. Зависимости между ними должны быть явно указаны. Это позволяет разрабатывать их вместе, но компилировать, тестировать и деплоить независимо, если это необходимо.</p>
+
+<h2 id="заключение">Заключение</h2>
+
+<p>В этой главе мы узнали больше о зависимостях Микса и о зонтичных проектах. Тогда как мы можем запустить приложение <code class="highlighter-rouge">kv</code> без сервера, сам сервер <code class="highlighter-rouge">kv_server</code> прямо зависит от <code class="highlighter-rouge">kv</code>. Разделив их на изолированные приложения, мы получаем больший контроль над их разработкой и тестированием.</p>
+
+<p>При использовании зонтичных приложений очень важно иметь чёткие границы между ними. Предстоящий к написанию <code class="highlighter-rouge">kv_server</code> должен иметь доступ только к публичному API, определённому в приложении <code class="highlighter-rouge">kv</code>. Отнеситесь к зонтичным приложениям как любым другим зависимостям или даже самому Эликсиру: вы можете осуществить доступ только к тому, что публично и задокументированно. Доступ к приватной функциональности ваших зависимостей – плохая практика, которая может привести к поломке проекта при обновлении версий зависимостей.</p>
+
+<p>Зонтичные приложения можно использовать как промежуточный этап при выделении некоторой функциональности из вашего кода в отдельное приложение. Например, представьте веб-приложение, которое отправляет «пуш-уведомления» своим пользователям. Вся «система пуш-уведомлений» может быть разработана как зонтичное приложение, с собственным супервизором и API. Если вы когда-нибудь столкнётесь с ситуацией, когда другой проект тоже должен отправлять пуш-уведомления, отделение этой логики будет предельно простым, а зависеть будет только от изменений API. Неважно, сделаете вы это на вторую неделю или третий год разработки. Выделенная однажды, система пуш-уведомлений может быть перемещена в приватный репозиторий или публичный пакет на сайте  <code class="highlighter-rouge">Hex.pm</code>.</p>
+
+<p>Разработчики также могут использовать зонтичные приложения для разделения объёмной бизнес-логики на части. Главное в этой ситуации – убедиться, что эти части не зависят друг от друга в двух направлениях (это называется циклической зависимостью). Если такая ситуация происходит, эти приложения не изолированы друг от друга, как вы думали изначально, и у вас есть проблемы в архитектуре и проектировании, которые нужно решить. Резюмируя, зонтичные приложения не являются магическим улучшением структуры вашего кода. Они могут, однако, помочь соблюдению границ, когда код хорошо спроектирован.</p>
+
+<p>Наконец, помните, что приложения в зонтичном проекте разделяют друг с другом одну конфигурацию и зависимости. Если два приложения в вашем проекте нуждаются в указании одних зависимостей кардинально разными способами или даже разных версий, это невозможно внутри зонтичной структуры, и эти приложения наверняка нужно разделить по разным проектам.</p>
+
+<p>Имея наш работающий зонтичный проект, самое время перейти к написанию самого—сервера.</p>
+
+    </div>
+</article>
+
+<nav class="docs_nav pure-g">
+    <div class="docs_nav__inner pure-u-1 pure-u-md-3-4">
+        <div class="pure-g">
+            <div class="docs_nav__column docs_nav__column--prev pure-u-1-3">
+                
+                    <a href="/docs/mix-otp/ets.html" class="docs_nav__link pure-button">
+                        &larr;<span class="h-hidden_mobile"> Назад</span></a>
+                
+            </div>
+
+            <div class="docs_nav__column docs_nav__column--contents pure-u-1-3">
+                <a href="#docsContents" class="docs_nav__link docs_nav__link--contents pure-button">☰</a>
+            </div>
+
+            <div class="docs_nav__column docs_nav__column--next pure-u-1-3">
+                
+                    <a href="/docs/mix-otp/task-and-gen-tcp.html" class="docs_nav__link pure-button">
+                        <span class="h-hidden_mobile">Вперёд </span>&rarr;
+                    </a>
+                
+            </div>
+        </div>
+    </div>
+</nav>
+
+<div id="docsContents" class="modal modal--docs_contents modal--close_backdrop">
+    <div class="modal__content">
+        <a href="#close" title="Закрыть" class="modal__close">x</a>
+
+        <h2 class="modal__title">Содержание</h2>
+
+        
+        <h3 id="руководство-для-начинающих">Руководство для начинающих</h3>
+<ul>
+  <li><a href="/docs">Введение</a></li>
+  <li><a href="/docs/basic-types.html">Базовые типы</a></li>
+  <li><a href="/docs/basic-operators.html">Базовые операторы</a></li>
+  <li><a href="/docs/pattern-matching.html">Сопоставление с образцом</a></li>
+  <li><a href="/docs/case-cond-and-if.html">Конструкции ветвления</a></li>
+  <li><a href="/docs/binaries-strings-and-char-lists.html">Двоичные данные, строки и списки символов</a></li>
+  <li><a href="/docs/keywords-and-maps.html">Ключевые списки и словари</a></li>
+  <li><a href="/docs/modules-and-functions.html">Модули и функции</a></li>
+  <li><a href="/docs/recursion.html">Рекурсия</a></li>
+  <li><a href="/docs/enumerables-and-streams.html">Перечисления и потоки</a></li>
+  <li><a href="/docs/processes.html">Процессы</a></li>
+  <li><a href="/docs/io-and-the-file-system.html">Ввод/вывод и файловая система</a></li>
+  <li><a href="/docs/alias-require-and-import.html">Директивы <code class="highlighter-rouge">alias</code>, <code class="highlighter-rouge">require</code> и <code class="highlighter-rouge">import</code></a></li>
+  <li><a href="/docs/module-attributes.html">Атрибуты модулей</a></li>
+  <li><a href="/docs/structs.html">Структуры</a></li>
+  <li><a href="/docs/protocols.html">Протоколы</a></li>
+  <li><a href="/docs/comprehensions.html">Списковые выражения</a></li>
+  <li><a href="/docs/sigils.html">Сигилы</a></li>
+  <li><a href="/docs/try-catch-and-rescue.html">Конструкция <code class="highlighter-rouge">try</code>, <code class="highlighter-rouge">catch</code> и <code class="highlighter-rouge">rescue</code></a></li>
+  <li><a href="/docs/typespecs-and-behaviours.html">Спецификации типов и поведения</a></li>
+  <li><a href="/docs/erlang-libraries.html">Библиотеки Эрланга</a></li>
+  <li><a href="/docs/where-to-go-next.html">Куда двигаться дальше</a></li>
+</ul>
+
+<h3 id="микс-и-otp">Микс и <code class="highlighter-rouge">OTP</code></h3>
+<ul>
+  <li><a href="/docs/mix-otp/introduction-to-mix.html">Введение в Микс</a></li>
+  <li><a href="/docs/mix-otp/agent.html">Агент</a></li>
+  <li><a href="/docs/mix-otp/genserver.html">GenServer</a></li>
+  <li><a href="/docs/mix-otp/supervisor-and-application.html">Супервизор и приложение</a></li>
+  <li><a href="/docs/mix-otp/dynamic-supervisor.html">Динамический супервизор</a></li>
+  <li><a href="/docs/mix-otp/ets.html">ETS</a></li>
+  <li><a href="/docs/mix-otp/dependencies-and-umbrella-apps.html">Зависимости и зонтичные проекты</a></li>
+  <li><a href="/docs/mix-otp/task-and-gen-tcp.html">Модули <code class="highlighter-rouge">Task</code> и <code class="highlighter-rouge">:gen_tcp</code></a></li>
+  <li><a href="/docs/mix-otp/docs-tests-and-with.html">Доктесты, паттерны и оператор <code class="highlighter-rouge">with</code></a></li>
+  <li><a href="/docs/mix-otp/distributed-tasks-and-configuration.html">Распределенные задачи и конфигурация</a></li>
+</ul>
+
+<h3 id="метапрограммирование">Метапрограммирование</h3>
+<ul>
+  <li><a href="/docs/meta/quote-and-unquote.html">Конструкции <code class="highlighter-rouge">quote</code> и <code class="highlighter-rouge">unquote</code></a></li>
+  <li><a href="/docs/meta/macros.html">Макросы</a></li>
+  <li><a href="/docs/meta/domain-specific-languages.html">Предметно-ориентированные языки</a></li>
+</ul>
+
+    </div>
+</div>
+
+
+
+        <footer class="footer">
+    &copy; 2020
+    / Россия
+
+    <span class="pull-right">Любые мысли и вопросы пишите на <a href="mailto:elixir@wunsh.ru">elixir@wunsh.ru</a>.</span>
+</footer>
+
+        <div id="subscribeModal" class="modal">
+    <div class="modal__content">
+        <a href="#close" title="Close" class="modal__close">x</a>
+
+        <h2 class="modal__title">Ламповая рассылка про&nbsp;Эликсир</h2>
+
+        <p>Один-два раза в&nbsp;неделю присылаем тёплые письма об&nbsp;Эликсире: переводы самых интересных статей до&nbsp;их&nbsp;появления в&nbsp;открытом доступе, анонсы событий и&nbsp;вкусные бонусы.</p>
+
+        <form action="//wunsh.us14.list-manage.com/subscribe/post?u=c81ca3d4693f62db7f7f67c71&amp;id=a192e2dfef" method="post" id="mc-embedded-subscribe-form" name="mc-embedded-subscribe-form" class="pure-form h-tc validate" target="_blank" novalidate>
+            <input type="email" value="" name="EMAIL" class="modal__input pure-input-rounded large" id="mce-EMAIL" placeholder="Твоя почта" required>
+            <div style="position: absolute; left: -5000px;" aria-hidden="true"><input type="text" name="b_c81ca3d4693f62db7f7f67c71_a192e2dfef" tabindex="-1" value=""></div>
+
+            <input type="submit" value="Присоединиться" name="subscribe" onClick="yaCounter39773490.reachGoal('SUBSCRIBED'); return true" id="mc-embedded-subscribe" class="pure-button button-success large">
+        </form>
+
+        <p>Обязательно подтверди почту, перейдя по&nbsp;ссылке в&nbsp;письме, иначе мы&nbsp;не&nbsp;сможем делиться с&nbsp;тобой полезностями.</p>
+
+        <p>Надоедать точно не&nbsp;будем :)</p>
+    </div>
+</div>
+
+        <script src="/assets/js/vendors/zepto.min.js"></script>
+
+<script>
+    if ($(".post--docs").length) {
+        $(".footer").addClass("footer--docs")
+    }
+
+    $(".modal--close_backdrop").click(function(){
+        window.location.hash = "";
+    });
+</script>
+
+        <!-- Yandex.Metrika counter -->
+<script type="text/javascript">
+    (function (d, w, c) {
+        (w[c] = w[c] || []).push(function() {
+            try {
+                w.yaCounter39773490 = new Ya.Metrika({
+                    id:39773490,
+                    clickmap:true,
+                    trackLinks:true,
+                    accurateTrackBounce:true,
+                    webvisor:true,
+                    ut:"noindex"
+                });
+            } catch(e) { }
+        });
+
+        var n = d.getElementsByTagName("script")[0],
+            s = d.createElement("script"),
+            f = function () { n.parentNode.insertBefore(s, n); };
+        s.type = "text/javascript";
+        s.async = true;
+        s.src = "https://mc.yandex.ru/metrika/watch.js";
+
+        if (w.opera == "[object Opera]") {
+            d.addEventListener("DOMContentLoaded", f, false);
+        } else { f(); }
+    })(document, window, "yandex_metrika_callbacks");
+</script>
+<noscript><div><img src="https://mc.yandex.ru/watch/39773490?ut=noindex" style="position:absolute; left:-9999px;" alt="" /></div></noscript>
+<!-- /Yandex.Metrika counter -->
+
+      </div>
+    </div>
+  </body>
+</html>

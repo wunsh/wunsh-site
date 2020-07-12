@@ -1,0 +1,507 @@
+<!DOCTYPE html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Оптимизация Elixir- и Phoenix-приложений с помощью ETS |> Сообщество Elixir и Phoenix Framework</title>
+    <meta name="description" content="Статья про оптимизацию кода на Эликсире с помощью инструмента под названием ETS.">
+
+    <link rel="alternate" type="application/rss+xml" title="Сообщество Elixir и Phoenix Framework" href="/feed.xml" />
+    <link rel="canonical" href="https://wunsh.ru/articles/elixir-ets.html">
+
+    <style type="text/css">@import url("//fonts.googleapis.com/css?family=Source+Sans+Pro:400,700&subset=cyrillic");</style>
+    <link rel="stylesheet" href="/assets/css/vendors/pure.min.css">
+    <link rel="stylesheet" href="/assets/css/vendors/pure-grids-responsive.min.css">
+    <link rel="stylesheet" href="/assets/css/style.css?1594516983">
+
+    <link rel="shortcut icon" type="image/png" href="/assets/favicon.png" >
+</head>
+
+
+  <body>
+    <div class="wunsh pure-g">
+      
+
+
+
+
+<div class="menu pure-u-1 pure-u-md-1-4">
+  <div class="header">
+    <h2 class="header__title">
+      
+        <a href="https://wunsh.ru" class="header__title_link" title="На главную">Эликсир и&nbsp;Вунш</a>
+      
+    </h2>
+    <h3 class="header__tagline">Erlang + Ruby = &#10084;</h3>
+
+    <nav class="nav">
+      <ul class="nav_list">
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/elixir" class="nav_list__item_link pure-button">О языке</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/install/linux-asdf" class="nav_list__item_link pure-button">Установка</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/docs/" class="nav_list__item_link pure-button">Документация</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/guides" class="nav_list__item_link pure-button">Гайды</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/news" class="nav_list__item_link pure-button">Новости</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/articles" class="nav_list__item_link pure-button">Статьи</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/videos" class="nav_list__item_link pure-button">Видео</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/vacancies" class="nav_list__item_link pure-button">Вакансии</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/faq" class="nav_list__item_link pure-button">FAQ</a>
+            </li>
+          
+        
+      </ul>
+    </nav>
+
+    <a href="#subscribeModal" class="pure-button header__subscribe_link">Подписаться на рассылку</a>
+  </div>
+</div>
+
+
+      <div class="content pure-u-1 pure-u-md-3-4">
+        
+
+<article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+  <header class="post__header">
+    
+    <h1 class="post__title" itemprop="name headline">Оптимизация Elixir- и Phoenix-приложений с помощью ETS</h1>
+
+    <div class="post__meta post_meta">
+      <ul class="meta_list">
+        <li class="meta_list__item">
+          
+          <span class="">
+            <small class="meta_list__item_name">Дата</small>
+            <time class="h-bold" datetime="2017-08-04T00:00:00+00:00" itemprop="datePublished">
+              
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+04 августа 2017
+
+            </time>
+          </span>
+          
+
+          
+        </li>
+        
+        <li class="meta_list__item">
+            <span class="tag_cloud tags_cloud--inline h-no_margin">
+              <small class="meta_list__item_name">Теги</small> 
+
+
+<ul class="tags_cloud__list">
+  
+    <a href="/tags/#ets" class="tags_cloud__link tag tag--ets">ets</a>
+  
+</ul>
+
+            </span>
+        </li>
+        
+        <li class="meta_list__item">
+          <span itemprop="author" itemscope itemtype="http://schema.org/Person">
+            <small class="meta_list__item_name">
+              
+                Перевод
+              
+            </small>
+            <span itemprop="name" class="h-bold">Надежда Нестерова</span>
+          </span>
+        </li>
+
+        <li class="meta_list__item">
+          
+            <div >
+              <small>Оригинал</small>
+              <strong>
+                &laquo;<a href="https://dockyard.com/blog/2017/05/19/optimizing-elixir-and-phoenix-with-ets" style="text-transform: none; text-decoration: underline; color: #4b2e39;">Optimizing Your Elixir and Phoenix Projects with ETS</a>&raquo;
+              </strong>
+              <small>&copy;</small>
+              <strong>Chris McCord</strong>
+            </div>
+          
+        </li>
+      </ul>
+    </div>
+  </header>
+
+  <div class="post__content" itemprop="articleBody">
+    <p>Многие Elixir-разработчики наверняка слышали о «ETS» или встречали в коде вызовы Erlang-модуля <code class="highlighter-rouge">:ets</code>, но, скорее всего, большинство из них всё ещё никогда не применяли этот подход на практике. Настало время это изменить.</p>
+
+<p><strong>ETS (Erlang Term Storage)</strong> — один из инструментов Erlang, который всё это время прятался на видном месте. Такие проекты, как <code class="highlighter-rouge">Phoenix.PubSub</code>, <code class="highlighter-rouge">Phoenix.Presence</code> и <code class="highlighter-rouge">Registry</code>, наряду с многочисленными Elixir- и Erlang-модулями пользуются преимуществами ETS. В двух словах: ETS — это хранилище данных с быстрым доступом для объектов Elixir и Erlang, главной особенностью которого является возможность получения состояния за пределами процесса и без передачи сообщений. Прежде чем перейти к вопросу об уместности использования ETS, пробежимся по основам основ, запустив <code class="highlighter-rouge">iex</code>.</p>
+
+<p>Сначала создадим ETS-таблицу с помощью команды <code class="highlighter-rouge">:ets.new/2</code>:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">iex</span><span class="o">&gt;</span> <span class="n">tab</span> <span class="o">=</span> <span class="ss">:ets</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="ss">:my_table</span><span class="p">,</span> <span class="p">[</span><span class="ss">:set</span><span class="p">])</span>
+<span class="m">8211</span>
+</code></pre></div></div>
+
+<p>Ничего сложного. Мы создали таблицу типа <code class="highlighter-rouge">:set</code>, которая позволит связывать уникальные ключи со значениями подобно обычному хранилищу «ключ-значение». Добавим в неё парочку строк:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">iex</span><span class="o">&gt;</span> <span class="ss">:ets</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">tab</span><span class="p">,</span> <span class="p">{</span><span class="ss">:key1</span><span class="p">,</span> <span class="sd">"</span><span class="s2">value1"</span><span class="p">})</span>
+<span class="no">true</span>
+<span class="n">iex</span><span class="o">&gt;</span> <span class="ss">:ets</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">tab</span><span class="p">,</span> <span class="p">{</span><span class="ss">:key2</span><span class="p">,</span> <span class="sd">"</span><span class="s2">value1"</span><span class="p">})</span>
+<span class="no">true</span>
+</code></pre></div></div>
+
+<p>Теперь, имея несколько значений, осуществим поиск: <code class="highlighter-rouge">elixir iex&gt; :ets.lookup(tab, :key1) [key1: "value1"]</code></p>
+
+<p>Заметьте, что повторного связывания таблицы с новым значением после вставки элементов не происходит. ETS-таблицами управляет виртуальная машина, и их существование зависит от процесса, в котором они были созданы. На практике это можно увидеть, уничтожив текущий процесс <code class="highlighter-rouge">iex</code>:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">iex</span><span class="o">&gt;</span> <span class="no">Process</span><span class="o">.</span><span class="k">exit</span><span class="p">(</span><span class="n">self</span><span class="p">(),</span> <span class="ss">:kill</span><span class="p">)</span>
+<span class="o">**</span> <span class="p">(</span><span class="no">EXIT</span> <span class="n">from</span> <span class="c1">#PID&lt;0.88.0&gt;) killed</span>
+
+<span class="no">Interactive</span> <span class="no">Elixir</span> <span class="p">(</span><span class="m">1.4</span><span class="o">.</span><span class="m">4</span><span class="p">)</span> <span class="o">-</span> <span class="n">press</span> <span class="no">Ctrl</span><span class="o">+</span><span class="no">C</span> <span class="n">to</span> <span class="k">exit</span> <span class="p">(</span><span class="n">type</span> <span class="n">h</span><span class="p">()</span> <span class="no">ENTER</span> <span class="n">for</span> <span class="n">help</span><span class="p">)</span>
+<span class="n">iex</span><span class="o">&gt;</span> <span class="ss">:ets</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="m">8211</span><span class="p">,</span> <span class="p">{</span><span class="ss">:key1</span><span class="p">,</span> <span class="sd">"</span><span class="s2">value1"</span><span class="p">})</span>
+<span class="o">**</span> <span class="p">(</span><span class="no">ArgumentError</span><span class="p">)</span> <span class="n">argument</span> <span class="n">error</span>
+    <span class="p">(</span><span class="n">stdlib</span><span class="p">)</span> <span class="ss">:ets</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="m">12307</span><span class="p">,</span> <span class="p">{</span><span class="ss">:key1</span><span class="p">,</span> <span class="sd">"</span><span class="s2">value1"</span><span class="p">})</span>
+</code></pre></div></div>
+
+<p>Как только это произойдет, прежние связи будут утеряны, но можно будет передать функции <code class="highlighter-rouge">:ets.new/2</code> возвращаемый вызовом идентификатор таблицы. Можно заметить, что когда мы запросили доступ к таблице, после того как её процесс-создатель был остановлен, возникла ошибка <code class="highlighter-rouge">ArgumentError</code>. Такая автоматическая чистка таблиц и данных после аварийного завершения процесса-создателя — одна из главных особенностей ETS. Незачем беспокоиться об утечках памяти, если процесс завершается после создания таблиц и ввода данных. Здесь вы столкнетесь с мистическим API <code class="highlighter-rouge">:ets</code> и его зачастую неинформативными ошибками (в нашем случае <code class="highlighter-rouge">ArgumentError</code>), не содержащими каких-либо намеков на то, что могло их породить. Но чем чаще вы будете работать с модулем <code class="highlighter-rouge">:ets</code>, тем лучше познакомитесь с этими досадными ошибками и изучите документацию <code class="highlighter-rouge">:ets</code> вдоль и поперёк.</p>
+
+<p>Функции, которые мы использовали, — лишь малая часть того, что предлагает ETS. Помните, что основное его преимущество в быстром чтении и записи в хранилище «ключ-значение» и возможности сопоставления большинства содержащихся в таблице объектов, за исключением объектов типа map. В рамках этой статьи мы рассмотрим только простейшие пары «ключ-значение» и несколько основных операций поиска, поэтому для получения более подробной информации о возможностях ETS лучше обратиться к документации.</p>
+
+<h2 id="оптимизация-доступа-кgenserver-спомощью-ets-таблицы">Оптимизация доступа к GenServer с помощью ETS-таблицы</h2>
+
+<p>Оптимизация кода приносит свои плоды, особенно, когда не нужно менять публичный интерфейс. Рассмотрим один из часто используемых способов применения ETS для оптимизации доступа к состоянию, обёрнутому в <code class="highlighter-rouge">GenServer</code>.</p>
+
+<p>Предположим, нужно разработать <code class="highlighter-rouge">GenServer</code> с ограничением скорости — процесс в приложении, который будет подсчитывать количество запросов пользователя и закрывать доступ к данным, если пользователем превышено определённое количество запросов в минуту. Очевидно, что состояние подсчета запросов пользователей и процесс, подчищающий это состояние раз в минуту, нужно будет где-то хранить. Наброски простейшего кода с <code class="highlighter-rouge">GenServer</code> выглядят примерно так:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">defmodule</span> <span class="no">RateLimiter</span> <span class="k">do</span>
+  <span class="kn">use</span> <span class="no">GenServer</span>
+  <span class="kn">require</span> <span class="no">Logger</span>
+
+  <span class="nv">@max_per_minute</span> <span class="m">5</span>
+  <span class="nv">@sweep_after</span> <span class="ss">:timer</span><span class="o">.</span><span class="n">seconds</span><span class="p">(</span><span class="m">60</span><span class="p">)</span>
+
+  <span class="c1">## Client</span>
+
+  <span class="k">def</span> <span class="n">start_link</span> <span class="k">do</span>
+    <span class="no">GenServer</span><span class="o">.</span><span class="n">start_link</span><span class="p">(</span><span class="bp">__MODULE__</span><span class="p">,</span> <span class="p">[],</span> <span class="ss">name:</span> <span class="bp">__MODULE__</span><span class="p">)</span>
+  <span class="k">end</span>
+
+  <span class="k">def</span> <span class="n">log</span><span class="p">(</span><span class="n">uid</span><span class="p">)</span> <span class="k">do</span>
+    <span class="no">GenServer</span><span class="o">.</span><span class="n">call</span><span class="p">(</span><span class="bp">__MODULE__</span><span class="p">,</span> <span class="p">{</span><span class="ss">:log</span><span class="p">,</span> <span class="n">uid</span><span class="p">})</span>
+  <span class="k">end</span>
+
+  <span class="c1">## Server</span>
+  <span class="k">def</span> <span class="n">init</span><span class="p">(</span><span class="n">_</span><span class="p">)</span> <span class="k">do</span>
+    <span class="n">schedule_sweep</span><span class="p">()</span>
+    <span class="p">{</span><span class="ss">:ok</span><span class="p">,</span> <span class="p">%{</span><span class="ss">requests:</span> <span class="p">%{}}}</span>
+  <span class="k">end</span>
+
+  <span class="k">def</span> <span class="n">handle_info</span><span class="p">(</span><span class="ss">:sweep</span><span class="p">,</span> <span class="n">state</span><span class="p">)</span> <span class="k">do</span>
+    <span class="no">Logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sd">"</span><span class="s2">Sweeping requests"</span><span class="p">)</span>
+    <span class="n">schedule_sweep</span><span class="p">()</span>
+    <span class="p">{</span><span class="ss">:noreply</span><span class="p">,</span> <span class="p">%{</span><span class="n">state</span> <span class="o">|</span> <span class="ss">requests:</span> <span class="p">%{}}}</span>
+  <span class="k">end</span>
+
+  <span class="k">def</span> <span class="n">handle_call</span><span class="p">({</span><span class="ss">:log</span><span class="p">,</span> <span class="n">uid</span><span class="p">},</span> <span class="n">_from</span><span class="p">,</span> <span class="n">state</span><span class="p">)</span> <span class="k">do</span>
+    <span class="k">case</span> <span class="n">state</span><span class="o">.</span><span class="n">requests</span><span class="p">[</span><span class="n">uid</span><span class="p">]</span> <span class="k">do</span>
+      <span class="n">count</span> <span class="ow">when</span> <span class="n">is_nil</span><span class="p">(</span><span class="n">count</span><span class="p">)</span> <span class="ow">or</span> <span class="n">count</span> <span class="o">&lt;</span> <span class="nv">@max_per_minute</span> <span class="o">-&gt;</span>
+        <span class="p">{</span><span class="ss">:reply</span><span class="p">,</span> <span class="ss">:ok</span><span class="p">,</span> <span class="n">put_in</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="p">[</span><span class="ss">:requests</span><span class="p">,</span> <span class="n">uid</span><span class="p">],</span> <span class="p">(</span><span class="n">count</span> <span class="o">||</span> <span class="m">0</span><span class="p">)</span> <span class="o">+</span> <span class="m">1</span><span class="p">)}</span>
+      <span class="n">count</span> <span class="ow">when</span> <span class="n">count</span> <span class="o">&gt;=</span> <span class="nv">@max_per_minute</span> <span class="o">-&gt;</span>
+        <span class="p">{</span><span class="ss">:reply</span><span class="p">,</span> <span class="p">{</span><span class="ss">:error</span><span class="p">,</span> <span class="ss">:rate_limited</span><span class="p">},</span> <span class="n">state</span><span class="p">}</span>
+    <span class="k">end</span>
+  <span class="k">end</span>
+
+  <span class="k">defp</span> <span class="n">schedule_sweep</span> <span class="k">do</span>
+    <span class="no">Process</span><span class="o">.</span><span class="n">send_after</span><span class="p">(</span><span class="n">self</span><span class="p">(),</span> <span class="ss">:sweep</span><span class="p">,</span> <span class="nv">@sweep_after</span><span class="p">)</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<p>Сначала определим функцию <code class="highlighter-rouge">start_link/0</code>, которая запустит <code class="highlighter-rouge">GenServer</code>, используя модуль <code class="highlighter-rouge">RateLimiter</code> в качестве модуля обратного вызова. Сервер назовём так же, как и модуль, чтобы впоследствии ссылаться на него при обращении к функции <code class="highlighter-rouge">log/1</code>. Теперь определим функцию <code class="highlighter-rouge">log/1</code>, осуществляющую синхронный вызов к <code class="highlighter-rouge">GenServer</code> и производящую логирование запросов пользователя. На выходе ожидаем получить либо <code class="highlighter-rouge">:ok</code>, сигнализирующее о том, что пользователь не превысил допустимое количество запросов и может продолжать свои действия, либо <code class="highlighter-rouge">{:error, :rate_limited}</code> в противном случае.</p>
+
+<p>Далее в <code class="highlighter-rouge">init/1</code> вызываем функцию <code class="highlighter-rouge">schedule_sweep/0</code>, которая раз в минуту посылает серверу сообщения для удаления всех данных запросов. После этого определяем условие <code class="highlighter-rouge">handle_info/2</code>, чтобы перехватить событие <code class="highlighter-rouge">:sweep</code> и сбросить состояние запроса. И напоследок определяем условие <code class="highlighter-rouge">handle_call/3</code>, которое будет отслеживать состояние запроса пользователя и возвращать <code class="highlighter-rouge">:ok</code> или <code class="highlighter-rouge">{:error, :rate_limited}</code> вызывающей функции <code class="highlighter-rouge">log/2</code>.</p>
+
+<p>Попробуем выполнить это в <code class="highlighter-rouge">iex</code>:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">iex</span><span class="o">&gt;</span> <span class="no">RateLimiter</span><span class="o">.</span><span class="n">start_link</span><span class="p">()</span>
+<span class="p">{</span><span class="ss">:ok</span><span class="p">,</span> <span class="c1">#PID&lt;0.126.0&gt;}</span>
+<span class="n">iex</span><span class="o">&gt;</span> <span class="no">RateLimiter</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="sd">"</span><span class="s2">user1"</span><span class="p">)</span>
+<span class="ss">:ok</span>
+<span class="n">iex</span><span class="o">&gt;</span> <span class="no">RateLimiter</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="sd">"</span><span class="s2">user1"</span><span class="p">)</span>
+<span class="ss">:ok</span>
+<span class="n">iex</span><span class="o">&gt;</span> <span class="no">RateLimiter</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="sd">"</span><span class="s2">user1"</span><span class="p">)</span>
+<span class="ss">:ok</span>
+<span class="n">iex</span><span class="o">&gt;</span> <span class="no">RateLimiter</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="sd">"</span><span class="s2">user1"</span><span class="p">)</span>
+<span class="ss">:ok</span>
+<span class="n">iex</span><span class="o">&gt;</span> <span class="no">RateLimiter</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="sd">"</span><span class="s2">user1"</span><span class="p">)</span>
+<span class="ss">:ok</span>
+<span class="n">iex</span><span class="o">&gt;</span> <span class="no">RateLimiter</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="sd">"</span><span class="s2">user1"</span><span class="p">)</span>
+<span class="p">{</span><span class="ss">:error</span><span class="p">,</span> <span class="ss">:rate_limited</span><span class="p">}</span>
+
+<span class="m">13</span><span class="p">:</span><span class="m">55</span><span class="p">:</span><span class="m">44.803</span> <span class="p">[</span><span class="n">debug</span><span class="p">]</span> <span class="no">Sweeping</span> <span class="n">requests</span>
+<span class="n">iex</span><span class="p">(</span><span class="m">9</span><span class="p">)</span><span class="o">&gt;</span> <span class="no">RateLimiter</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="sd">"</span><span class="s2">user1"</span><span class="p">)</span>
+<span class="ss">:ok</span>
+</code></pre></div></div>
+
+<p>Работает! Если количество запросов пользователя в минуту превысит 5, то сервер возвратит ожидаемое сообщение об ошибке. По прошествии некоторого времени вывод отладчика покажет сброс состояния, и счетчик количества запросов обнулится. Вроде неплохо, да? К сожалению, в приведённой выше реализации присутствуют серьёзные проблемы производительности. Давайте-ка разберёмся.</p>
+
+<p>Поскольку нашей целью было ограничение количества запросов в единицу времени, <em>все запросы пользователя</em> должны проходить через заданный сервер. Сообщения обрабатываются последовательно, что сводит наше приложение в однопоточное, и этот единственный процесс превращается в узкое место программы.</p>
+
+<h2 id="ets-спешит-напомощь">ETS спешит на помощь</h2>
+
+<p>К счастью, Erlang-разработчики уже придумали решение этой проблемы за нас. Можно провести рефакторинг кода, чтобы сервер использовал общедоступную ETS-таблицу и клиенты могли вводить свои запросы напрямую в ETS, а процесс-создатель отвечал бы только за очистку таблицы. Это позволит производить чтение и запись конкурентно и избавит от необходимости упорядочивания вызовов на сервере. Что ж, реализуем всё вышесказанное:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">defmodule</span> <span class="no">RateLimiter</span> <span class="k">do</span>
+  <span class="kn">use</span> <span class="no">GenServer</span>
+  <span class="kn">require</span> <span class="no">Logger</span>
+
+  <span class="nv">@max_per_minute</span> <span class="m">5</span>
+  <span class="nv">@sweep_after</span> <span class="ss">:timer</span><span class="o">.</span><span class="n">seconds</span><span class="p">(</span><span class="m">60</span><span class="p">)</span>
+  <span class="nv">@tab</span> <span class="ss">:rate_limiter_requests</span>
+
+  <span class="c1">## Client</span>
+
+  <span class="k">def</span> <span class="n">start_link</span> <span class="k">do</span>
+    <span class="no">GenServer</span><span class="o">.</span><span class="n">start_link</span><span class="p">(</span><span class="bp">__MODULE__</span><span class="p">,</span> <span class="p">[],</span> <span class="ss">name:</span> <span class="bp">__MODULE__</span><span class="p">)</span>
+  <span class="k">end</span>
+
+  <span class="k">def</span> <span class="n">log</span><span class="p">(</span><span class="n">uid</span><span class="p">)</span> <span class="k">do</span>
+    <span class="k">case</span> <span class="ss">:ets</span><span class="o">.</span><span class="n">update_counter</span><span class="p">(</span><span class="nv">@tab</span><span class="p">,</span> <span class="n">uid</span><span class="p">,</span> <span class="p">{</span><span class="m">2</span><span class="p">,</span> <span class="m">1</span><span class="p">},</span> <span class="p">{</span><span class="n">uid</span><span class="p">,</span> <span class="m">0</span><span class="p">})</span> <span class="k">do</span>
+      <span class="n">count</span> <span class="ow">when</span> <span class="n">count</span> <span class="o">&gt;</span> <span class="nv">@max_per_minute</span> <span class="o">-&gt;</span> <span class="p">{</span><span class="ss">:error</span><span class="p">,</span> <span class="ss">:rate_limited</span><span class="p">}</span>
+      <span class="n">_count</span> <span class="o">-&gt;</span> <span class="ss">:ok</span>
+    <span class="k">end</span>
+  <span class="k">end</span>
+
+  <span class="c1">## Server</span>
+  <span class="k">def</span> <span class="n">init</span><span class="p">(</span><span class="n">_</span><span class="p">)</span> <span class="k">do</span>
+    <span class="ss">:ets</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="nv">@tab</span><span class="p">,</span> <span class="p">[</span><span class="ss">:set</span><span class="p">,</span> <span class="ss">:named_table</span><span class="p">,</span> <span class="ss">:public</span><span class="p">,</span> <span class="ss">read_concurrency:</span> <span class="no">true</span><span class="p">,</span>
+                                                 <span class="ss">write_concurrency:</span> <span class="no">true</span><span class="p">])</span>
+    <span class="n">schedule_sweep</span><span class="p">()</span>
+    <span class="p">{</span><span class="ss">:ok</span><span class="p">,</span> <span class="p">%{}}</span>
+  <span class="k">end</span>
+
+  <span class="k">def</span> <span class="n">handle_info</span><span class="p">(</span><span class="ss">:sweep</span><span class="p">,</span> <span class="n">state</span><span class="p">)</span> <span class="k">do</span>
+    <span class="no">Logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sd">"</span><span class="s2">Sweeping requests"</span><span class="p">)</span>
+    <span class="ss">:ets</span><span class="o">.</span><span class="n">delete_all_objects</span><span class="p">(</span><span class="nv">@tab</span><span class="p">)</span>
+    <span class="n">schedule_sweep</span><span class="p">()</span>
+    <span class="p">{</span><span class="ss">:noreply</span><span class="p">,</span> <span class="n">state</span><span class="p">}</span>
+  <span class="k">end</span>
+
+  <span class="k">defp</span> <span class="n">schedule_sweep</span> <span class="k">do</span>
+    <span class="no">Process</span><span class="o">.</span><span class="n">send_after</span><span class="p">(</span><span class="n">self</span><span class="p">(),</span> <span class="ss">:sweep</span><span class="p">,</span> <span class="nv">@sweep_after</span><span class="p">)</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<p>Во-первых, сделаем так, чтобы функция <code class="highlighter-rouge">init/1</code> создавала ETS-таблицу с опциями <code class="highlighter-rouge">:named_table</code> и <code class="highlighter-rouge">:public</code>, тогда вызывающие функции вне процесса смогут получить к ней доступ. Также для оптимизации доступа воспользуемся функциями <code class="highlighter-rouge">read_concurrency</code> и <code class="highlighter-rouge">write_concurrency</code>. Далее, поправим функцию <code class="highlighter-rouge">log/1</code>, чтобы она записывала количество запросов напрямую в <code class="highlighter-rouge">:ets</code>, а не через <code class="highlighter-rouge">GenServer</code>. Таким образом, запросы сами будут отслеживать, не превышен ли на них лимит. Кроме этого будем использовать свойство ETS <code class="highlighter-rouge">update_counter/4</code>, что позволит нам обновлять счетчик быстро и атомарно. После проверки предельного значения в вызывающую функцию будет передано то же число, что и раньше. И последнее, в обратном вызове <code class="highlighter-rouge">:sweep</code> для очистки таблицы будем использовать <code class="highlighter-rouge">:ets.delete_all_objects/1</code>.</p>
+
+<p>Ну, что, попробуем?</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">iex</span><span class="o">&gt;</span> <span class="no">RateLimiter</span><span class="o">.</span><span class="n">start_link</span>
+<span class="p">{</span><span class="ss">:ok</span><span class="p">,</span> <span class="c1">#PID&lt;0.124.0&gt;}</span>
+<span class="n">iex</span><span class="o">&gt;</span> <span class="no">RateLimiter</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="sd">"</span><span class="s2">user1"</span><span class="p">)</span>
+<span class="ss">:ok</span>
+<span class="n">iex</span><span class="o">&gt;</span> <span class="no">RateLimiter</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="sd">"</span><span class="s2">user1"</span><span class="p">)</span>
+<span class="ss">:ok</span>
+<span class="n">iex</span><span class="o">&gt;</span> <span class="no">RateLimiter</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="sd">"</span><span class="s2">user1"</span><span class="p">)</span>
+<span class="ss">:ok</span>
+<span class="n">iex</span><span class="o">&gt;</span> <span class="no">RateLimiter</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="sd">"</span><span class="s2">user1"</span><span class="p">)</span>
+<span class="ss">:ok</span>
+<span class="n">iex</span><span class="o">&gt;</span> <span class="no">RateLimiter</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="sd">"</span><span class="s2">user1"</span><span class="p">)</span>
+<span class="ss">:ok</span>
+<span class="n">iex</span><span class="o">&gt;</span> <span class="no">RateLimiter</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="sd">"</span><span class="s2">user1"</span><span class="p">)</span>
+<span class="p">{</span><span class="ss">:error</span><span class="p">,</span> <span class="ss">:rate_limited</span><span class="p">}</span>
+<span class="n">iex</span><span class="o">&gt;</span> <span class="ss">:ets</span><span class="o">.</span><span class="n">tab2list</span><span class="p">(</span><span class="ss">:rate_limiter_requests</span><span class="p">)</span>
+<span class="p">[{</span><span class="sd">"</span><span class="s2">user1"</span><span class="p">,</span> <span class="m">7</span><span class="p">}]</span>
+<span class="n">iex</span><span class="o">&gt;</span> <span class="no">RateLimiter</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="sd">"</span><span class="s2">user2"</span><span class="p">)</span>
+<span class="ss">:ok</span>
+<span class="n">iex</span><span class="o">&gt;</span> <span class="ss">:ets</span><span class="o">.</span><span class="n">tab2list</span><span class="p">(</span><span class="ss">:rate_limiter_requests</span><span class="p">)</span>
+<span class="p">[{</span><span class="sd">"</span><span class="s2">user2"</span><span class="p">,</span> <span class="m">1</span><span class="p">},</span> <span class="p">{</span><span class="sd">"</span><span class="s2">user1"</span><span class="p">,</span> <span class="m">7</span><span class="p">}]</span>
+
+<span class="m">14</span><span class="p">:</span><span class="m">27</span><span class="p">:</span><span class="m">19.082</span> <span class="p">[</span><span class="n">debug</span><span class="p">]</span> <span class="no">Sweeping</span> <span class="n">requests</span>
+
+<span class="n">iex</span><span class="o">&gt;</span> <span class="ss">:ets</span><span class="o">.</span><span class="n">tab2list</span><span class="p">(</span><span class="ss">:rate_limiter_requests</span><span class="p">)</span>
+<span class="p">[]</span>
+<span class="n">iex</span><span class="o">&gt;</span> <span class="no">RateLimiter</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="sd">"</span><span class="s2">user1"</span><span class="p">)</span>
+<span class="ss">:ok</span>
+</code></pre></div></div>
+
+<p>И снова всё работает. Для отслеживания данных в таблице можно использовать <code class="highlighter-rouge">:ets.tab2list/1</code>. Можно видеть, что механизмы подсчета запросов пользователей и очистки таблицы работают верно.</p>
+
+<p>Вот, пожалуй, и всё. Публичный интерфейс остался нетронутым, а производительность важнейшей функции в приложении значительно возросла. Здорово, правда?</p>
+
+<h2 id="terra-incognita">TERRA INCOGNITA</h2>
+
+<p>В данной статье мы затронули лишь часть необозримых возможностей ETS. Но прежде чем эти возможности затуманят ваш разум и вы решите перенести весь код с последовательным доступом к данным из <code class="highlighter-rouge">GenServer</code> и <code class="highlighter-rouge">Agent</code> в ETS, хорошенько подумайте о том, какие действия в ваших приложениях атомарны, а какие требуют последовательной обработки. В погоне за производительностью, разрешив конкурентные чтение и запись, можно с лёгкостью заполучить состояние гонки.</p>
+
+<p>Одна из выигрышных особенностей процессной модели Elixir — это последовательная обработка сообщений, позволяющая избежать состояния гонки путём упорядочивания доступа к состоянию, требующему атомарных операций. В случае с нашим примером, каждый пользователь производит запись в ETS с помощью атомарной операции <code class="highlighter-rouge">update_counter</code>, поэтому конкурентная запись не вызывает проблем. Для определения возможности перехода от последовательного доступа к ETS пользуйтесь следующими правилами:</p>
+
+<ul>
+  <li>
+    <p>Операции должны быть атомарными. Если клиенты осуществляют чтение данных из ETS в одной операции, то, записывая напрямую в ETS, вы получите состояние гонки, и выходом из этой ситуации будет последовательный доступ к данным на сервере.</p>
+  </li>
+  <li>
+    <p>Если операции не атомарные, сделайте так, чтобы разные процессы производили запись в разные ключевые поля. Например, реестр Elixir в качестве ключей использует PID и позволяет изменять данные только текущему процессу. Таким образом, в системе гарантированно не возникнет состояния гонки, т. к. каждый процесс будет обрабатывать разные строки ETS-таблицы.</p>
+  </li>
+  <li>
+    <p>Если первые два подхода неприменимы, стоит рассматривать последовательное выполнение операций. Конкурентное считывание и последовательная запись — основная модель работы с ETS.</p>
+  </li>
+</ul>
+
+<p>Если вам интересна тема применения ETS для свободного от зависимостей хранящегося в памяти кэша, обратите внимание на библиотеку <a href="https://github.com/sasa1977/con_cache">ConCache</a>.</p>
+
+  </div>
+
+  <!-- uSocial -->
+  <div class="post__share_block share_block">
+    <script async src="https://usocial.pro/usocial/usocial.js?v=6.1.4" data-script="usocial" charset="utf-8"></script>
+    <div class="uSocial-Share" data-pid="2fd19544e551bce292425ee8adaa31be" data-type="share" data-options="round,style2,default,absolute,horizontal,size32,counter1,counter-before,upArrow-right,nomobile" data-social="telegram,fb,vk,gPlus,twi,bookmarks"></div>
+  </div>
+  <!-- /uSocial -->
+</article>
+
+
+        <footer class="footer">
+    &copy; 2020
+    / Россия
+
+    <span class="pull-right">Любые мысли и вопросы пишите на <a href="mailto:elixir@wunsh.ru">elixir@wunsh.ru</a>.</span>
+</footer>
+
+        <div id="subscribeModal" class="modal">
+    <div class="modal__content">
+        <a href="#close" title="Close" class="modal__close">x</a>
+
+        <h2 class="modal__title">Ламповая рассылка про&nbsp;Эликсир</h2>
+
+        <p>Один-два раза в&nbsp;неделю присылаем тёплые письма об&nbsp;Эликсире: переводы самых интересных статей до&nbsp;их&nbsp;появления в&nbsp;открытом доступе, анонсы событий и&nbsp;вкусные бонусы.</p>
+
+        <form action="//wunsh.us14.list-manage.com/subscribe/post?u=c81ca3d4693f62db7f7f67c71&amp;id=a192e2dfef" method="post" id="mc-embedded-subscribe-form" name="mc-embedded-subscribe-form" class="pure-form h-tc validate" target="_blank" novalidate>
+            <input type="email" value="" name="EMAIL" class="modal__input pure-input-rounded large" id="mce-EMAIL" placeholder="Твоя почта" required>
+            <div style="position: absolute; left: -5000px;" aria-hidden="true"><input type="text" name="b_c81ca3d4693f62db7f7f67c71_a192e2dfef" tabindex="-1" value=""></div>
+
+            <input type="submit" value="Присоединиться" name="subscribe" onClick="yaCounter39773490.reachGoal('SUBSCRIBED'); return true" id="mc-embedded-subscribe" class="pure-button button-success large">
+        </form>
+
+        <p>Обязательно подтверди почту, перейдя по&nbsp;ссылке в&nbsp;письме, иначе мы&nbsp;не&nbsp;сможем делиться с&nbsp;тобой полезностями.</p>
+
+        <p>Надоедать точно не&nbsp;будем :)</p>
+    </div>
+</div>
+
+        <script src="/assets/js/vendors/zepto.min.js"></script>
+
+<script>
+    if ($(".post--docs").length) {
+        $(".footer").addClass("footer--docs")
+    }
+
+    $(".modal--close_backdrop").click(function(){
+        window.location.hash = "";
+    });
+</script>
+
+        <!-- Yandex.Metrika counter -->
+<script type="text/javascript">
+    (function (d, w, c) {
+        (w[c] = w[c] || []).push(function() {
+            try {
+                w.yaCounter39773490 = new Ya.Metrika({
+                    id:39773490,
+                    clickmap:true,
+                    trackLinks:true,
+                    accurateTrackBounce:true,
+                    webvisor:true,
+                    ut:"noindex"
+                });
+            } catch(e) { }
+        });
+
+        var n = d.getElementsByTagName("script")[0],
+            s = d.createElement("script"),
+            f = function () { n.parentNode.insertBefore(s, n); };
+        s.type = "text/javascript";
+        s.async = true;
+        s.src = "https://mc.yandex.ru/metrika/watch.js";
+
+        if (w.opera == "[object Opera]") {
+            d.addEventListener("DOMContentLoaded", f, false);
+        } else { f(); }
+    })(document, window, "yandex_metrika_callbacks");
+</script>
+<noscript><div><img src="https://mc.yandex.ru/watch/39773490?ut=noindex" style="position:absolute; left:-9999px;" alt="" /></div></noscript>
+<!-- /Yandex.Metrika counter -->
+
+      </div>
+    </div>
+  </body>
+</html>

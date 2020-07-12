@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Деплой Elixir при помощи Docker. Часть 2 |> Сообщество Elixir и Phoenix Framework</title>
+    <meta name="description" content="Рассказываем о деплое Elixir-приложений через Docker с помощью Rancher, а также о том, как соединить несколько экземпляров в один Erlang-кластер.">
+
+    <link rel="alternate" type="application/rss+xml" title="Сообщество Elixir и Phoenix Framework" href="/feed.xml" />
+    <link rel="canonical" href="https://wunsh.ru/articles/elixir-deploy-2.html">
+
+    <style type="text/css">@import url("//fonts.googleapis.com/css?family=Source+Sans+Pro:400,700&subset=cyrillic");</style>
+    <link rel="stylesheet" href="/assets/css/vendors/pure.min.css">
+    <link rel="stylesheet" href="/assets/css/vendors/pure-grids-responsive.min.css">
+    <link rel="stylesheet" href="/assets/css/style.css?1594516983">
+
+    <link rel="shortcut icon" type="image/png" href="/assets/favicon.png" >
+</head>
+
+
+  <body>
+    <div class="wunsh pure-g">
+      
+
+
+
+
+<div class="menu pure-u-1 pure-u-md-1-4">
+  <div class="header">
+    <h2 class="header__title">
+      
+        <a href="https://wunsh.ru" class="header__title_link" title="На главную">Эликсир и&nbsp;Вунш</a>
+      
+    </h2>
+    <h3 class="header__tagline">Erlang + Ruby = &#10084;</h3>
+
+    <nav class="nav">
+      <ul class="nav_list">
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/elixir" class="nav_list__item_link pure-button">О языке</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/install/linux-asdf" class="nav_list__item_link pure-button">Установка</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/docs/" class="nav_list__item_link pure-button">Документация</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/guides" class="nav_list__item_link pure-button">Гайды</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/news" class="nav_list__item_link pure-button">Новости</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/articles" class="nav_list__item_link pure-button">Статьи</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/videos" class="nav_list__item_link pure-button">Видео</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/vacancies" class="nav_list__item_link pure-button">Вакансии</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/faq" class="nav_list__item_link pure-button">FAQ</a>
+            </li>
+          
+        
+      </ul>
+    </nav>
+
+    <a href="#subscribeModal" class="pure-button header__subscribe_link">Подписаться на рассылку</a>
+  </div>
+</div>
+
+
+      <div class="content pure-u-1 pure-u-md-3-4">
+        
+
+<article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+  <header class="post__header">
+    
+    <h1 class="post__title" itemprop="name headline">Деплой Elixir при помощи Docker. Часть 2</h1>
+
+    <div class="post__meta post_meta">
+      <ul class="meta_list">
+        <li class="meta_list__item">
+          
+          <span class="">
+            <small class="meta_list__item_name">Дата</small>
+            <time class="h-bold" datetime="2017-02-10T00:00:00+00:00" itemprop="datePublished">
+              
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+10 февраля 2017
+
+            </time>
+          </span>
+          
+
+          
+        </li>
+        
+        <li class="meta_list__item">
+            <span class="tag_cloud tags_cloud--inline h-no_margin">
+              <small class="meta_list__item_name">Теги</small> 
+
+
+<ul class="tags_cloud__list">
+  
+    <a href="/tags/#deploy" class="tags_cloud__link tag tag--deploy">deploy</a>
+  
+    <a href="/tags/#docker" class="tags_cloud__link tag tag--docker">docker</a>
+  
+</ul>
+
+            </span>
+        </li>
+        
+        <li class="meta_list__item">
+          <span itemprop="author" itemscope itemtype="http://schema.org/Person">
+            <small class="meta_list__item_name">
+              
+                Перевод
+              
+            </small>
+            <span itemprop="name" class="h-bold">Надежда Нестерова</span>
+          </span>
+        </li>
+
+        <li class="meta_list__item">
+          
+            <div >
+              <small>Оригинал</small>
+              <strong>
+                &laquo;<a href="http://teamon.eu/2017/setting-up-elixir-cluster-using-docker-and-rancher/" style="text-transform: none; text-decoration: underline; color: #4b2e39;">Setting Up Elixir Cluster Using Docker and Rancher</a>&raquo;
+              </strong>
+              <small>&copy;</small>
+              <strong>Tymon Tobolski</strong>
+            </div>
+          
+        </li>
+      </ul>
+    </div>
+  </header>
+
+  <div class="post__content" itemprop="articleBody">
+    <p>В&nbsp;<a href="/articles/elixir-deploy-1.html">предыдущей статье</a> мы&nbsp;рассмотрели процесс упаковки Elixir-приложения в&nbsp;Docker-образ. Один из&nbsp;недостатков использования Docker для Elixir-приложений заключается в&nbsp;том, что из-за наличия у&nbsp;контейнеров собственной сети, две Elixir-ноды, находящиеся в&nbsp;двух разных контейнерах, не&nbsp;могут подключаться друг к&nbsp;другу, даже если запускать их&nbsp;на&nbsp;одном и&nbsp;том&nbsp;же физическом сервере.</p>
+<p>Более того, деплой контейнеров проводится на&nbsp;платформе <a href="http://rancher.com/">Rancher</a>, которая распределяет их&nbsp;между несколькими физическими машинами. По&nbsp;этой причине отобразить порты Docker-контейнера на&nbsp;сервер невозможно, ведь на&nbsp;каждом сервере несколько контейнеров могут запускать одно и&nbsp;то&nbsp;же приложение. Однако в&nbsp;Rancher имеется встроенный DNS-сервис для автоматического поиска новых нод и&nbsp;подключения к&nbsp;ним.</p>
+<h2>Как работает Rancher</h2>
+<p>Основой Rancher являются сервисы. Каждый сервис представляет собой Docker-образ с&nbsp;соответствующими конфигурациями (ENV, command, volumes и&nbsp;др.) и&nbsp;способен запускать несколько одинаковых контейнеров на&nbsp;нескольких машинах.</p>
+<p>Для осуществления маршрутизации между этими контейнерами в&nbsp;Rancher существует своя оверлейная сеть и&nbsp;DNS-протокол обнаружения сервисов.</p>
+<p>Например, у&nbsp;нас есть сервис &laquo;my-hello-service&raquo; с&nbsp;тремя контейнерами, запускающий функцию <code>nslookup</code> в&nbsp;одном из&nbsp;контейнеров:</p>
+<figure class="highlight"><pre><code class="language-shell" data-lang="shell">/opt/app <span class="nv">$ </span>nslookup my-hello-service
+Name:      my-hello-service
+Address 1: 10.42.72.199
+Address 2: 10.42.96.65
+Address 3: 10.42.240.66</code></pre></figure>
+<p>Поскольку все контейнеры одного сервиса могут связываться друг с&nbsp;другом посредством этой оверлейной сети, нужно лишь сделать так, чтобы каждая нода &laquo;видела&raquo; все другие ноды.</p>
+<h2>Динамические адреса и&nbsp;имена</h2>
+<p>Все вышеуказанные IP-адреса являются динамическими, а&nbsp;значит, срок их&nbsp;жизни равен сроку жизни контейнера. Адреса изменятся если перезапустить/обновить контейнер или провести масштабирование (добавить контейнер в&nbsp;сервис или удалить его). В&nbsp;связи с&nbsp;этим использовать статическую конфигурацию файла из&nbsp;<code>sys.config</code> (подробнее об&nbsp;этом <a href="https://dockyard.com/blog/2016/01/28/running-elixir-and-phoenix-projects-on-a-cluster-of-nodes">здесь</a>) уже не&nbsp;получится.</p>
+<p>Так что познакомим наше приложение с&nbsp;Rancher DNS и&nbsp;постараемся извлечь из&nbsp;этого максимум пользы.</p>
+<h2>Настройка ноды Elixir</h2>
+<p>Прежде чем перейти к&nbsp;обнаружению нод, сделаем так, чтобы Elixir-ноды смогли &laquo;видеть&raquo; друг друга. При использовании модуля <a href="https://github.com/recruitee/mix_docker">mix_docker</a> (точнее <a href="https://github.com/bitwalker/distillery">distillery</a>) ноде по&nbsp;умолчанию даётся имя <code>appname@127.0.0.1</code>. Но, если нужно подключиться к&nbsp;другим нодам сети <code>10.42.x.x</code>, это имя необходимо будет изменить. Кроме того, оно должно динамически создаваться внутри контейнера при его запуске (только в&nbsp;этом случае можно быть уверенным, что сеть Rancher перекроет IP-адрес).</p>
+<p>Я&nbsp;достаточно долго размышлял на&nbsp;тему того, как это можно сделать, и, наконец, нашёл решение. В&nbsp;двух словах, нужно сделать так, чтобы <code>vm.args</code> стали доступны переменные среды, а&nbsp;затем поместить эти переменные в&nbsp;контейнер.</p>
+<p><strong>ПРИМЕЧАНИЕ</strong>: прежде чем читать дальше, рекомендую сначала ознакомиться с&nbsp;<a href="/articles/elixir-deploy-1.html">предыдущей статьёй об&nbsp;Elixir и&nbsp;Docker</a>.</p>
+<p>Для начала укажем в&nbsp;модуле distillery путь к&nbsp;своему <code>vm.args</code> файлу:</p>
+<figure class="highlight"><pre><code class="language-elixir" data-lang="elixir"><span class="c1"># rel/config.exs</span>
+<span class="c1"># ...</span>
+<span class="n">environment</span> <span class="ss">:prod</span> <span class="k">do</span>
+  <span class="c1"># ...</span>
+  <span class="n">set</span> <span class="ss">vm_args:</span> <span class="sd">"</span><span class="s2">rel/vm.args"</span>
+<span class="k">end</span></code></pre></figure>
+<p>А&nbsp;сам файл <code>vm.args</code> будет выглядеть так:</p>
+<figure class="highlight"><pre><code class="language-shell" data-lang="shell"><span class="c"># rel/vm.args</span>
+<span class="c">## Name of the node - this is the only change</span>
+<span class="nt">-name</span> hello@<span class="k">${</span><span class="nv">RANCHER_IP</span><span class="k">}</span>
+
+<span class="c">## Cookie for distributed erlang</span>
+<span class="nt">-setcookie</span> something-secret-here-please-change-me
+
+<span class="c">## Heartbeat management; auto-restarts VM if it dies or becomes unresponsive</span>
+<span class="c">## (Disabled by default..use with caution!)</span>
+<span class="c">##-heart</span>
+
+<span class="c">## Enable kernel poll and a few async threads</span>
+<span class="c">##+K true</span>
+<span class="c">##+A 5</span>
+
+<span class="c">## Increase number of concurrent ports/sockets</span>
+<span class="c">##-env ERL_MAX_PORTS 4096</span>
+
+<span class="c">## Tweak GC to run more often</span>
+<span class="c">##-env ERL_FULLSWEEP_AFTER 10</span>
+
+<span class="c"># Enable SMP automatically based on availability</span>
+<span class="nt">-smp</span> auto</code></pre></figure>
+<p>Синтаксис <code>${RANCHER_IP}</code> и&nbsp;конфигурация <code>REPLACE_OS_VARS=true</code> модуля distillery позволяют задавать имя ноды динамически на&nbsp;основе переменной среды <code>RANCHER_IP</code>.</p>
+<p>Далее, воспользуемся встроенным в&nbsp;Rancher Metadata API, чтобы создать переменную <code>RANCHER_IP</code>. Поместим следующий код в&nbsp;скрипт <code>rel/rancher_boot.sh</code>, который будет выступать в&nbsp;качестве точки входа контейнера.</p>
+<figure class="highlight"><pre><code class="language-shell" data-lang="shell"><span class="c">#!/bin/sh</span>
+<span class="nb">set</span> <span class="nt">-e</span>
+
+<span class="nb">export </span><span class="nv">RANCHER_IP</span><span class="o">=</span><span class="k">$(</span>wget <span class="nt">-qO-</span> http://rancher-metadata.rancher.internal/latest/self/container/primary_ip<span class="k">)</span>
+
+/opt/app/bin/hello <span class="nv">$@</span></code></pre></figure>
+
+<p>И&nbsp;напоследок, немного изменим Docker-файл релиза: будем использовать свои настройки вместо стандартных значений из&nbsp;mix_docker.</p>
+<figure class="highlight"><pre><code class="language-shell" data-lang="shell"><span class="c"># Dockerfile.release</span>
+FROM bitwalker/alpine-erlang:6.1
+
+RUN apk update <span class="o">&amp;&amp;</span> <span class="se">\</span>
+apk <span class="nt">--no-cache</span> <span class="nt">--update</span> add libgcc libstdc++ <span class="o">&amp;&amp;</span> <span class="se">\</span>
+<span class="nb">rm</span> <span class="nt">-rf</span> /var/cache/apk/<span class="k">*</span>
+
+EXPOSE 4000
+ENV <span class="nv">PORT</span><span class="o">=</span>4000 <span class="nv">MIX_ENV</span><span class="o">=</span>prod <span class="nv">REPLACE_OS_VARS</span><span class="o">=</span><span class="nb">true </span><span class="nv">SHELL</span><span class="o">=</span>/bin/sh
+
+ADD hello.tar.gz ./
+RUN <span class="nb">chown</span> <span class="nt">-R</span> default ./releases
+
+USER default
+
+<span class="c"># the only change are these two lines</span>
+COPY rel/rancher_boot.sh /opt/app/bin/rancher_boot.sh
+ENTRYPOINT <span class="o">[</span><span class="s2">"/opt/app/bin/rancher_boot.sh"</span><span class="o">]</span></code></pre></figure>
+<p>Построив образ и&nbsp;обновив сервис Rancher, проверим, могут&nbsp;ли контейнеры подключаться друг к&nbsp;другу. Для этого подключимся к&nbsp;удалённой машине с&nbsp;помощью SSH и&nbsp;запустим <code>docker exec</code>:</p>
+<figure class="highlight"><pre><code class="language-shell" data-lang="shell">core@host1 ~ <span class="nv">$ </span>docker <span class="nb">exec</span> <span class="nt">-it</span> e3c6a817b618 /opt/app/bin/rancher_boot.sh remote_console
+Erlang/OTP 18 <span class="o">[</span>erts-7.3.1] <span class="o">[</span><span class="nb">source</span><span class="o">]</span> <span class="o">[</span>64-bit] <span class="o">[</span>smp:2:2] <span class="o">[</span>async-threads:10] <span class="o">[</span>kernel-poll:false]
+
+Interactive Elixir <span class="o">(</span>1.3.4<span class="o">)</span> - press Ctrl+C to <span class="nb">exit</span> <span class="o">(</span><span class="nb">type </span>h<span class="o">()</span> ENTER <span class="k">for </span><span class="nb">help</span><span class="o">)</span>
+iex<span class="o">(</span>hello@10.42.96.65<span class="o">)</span>1&gt;</code></pre></figure>
+<p>Как видно из&nbsp;подсказки iex, ноде присвоен&nbsp;IP оверлейной сети Rancher. Теперь запустим ещё один контейнер для того&nbsp;же сервиса и&nbsp;получим его&nbsp;IP (в&nbsp;той&nbsp;же сети <code>10.42.x.x</code>). Чтобы убедиться, что ноды могут &laquo;видеть&raquo; друг друга, попробуйте подключить одну ноду к&nbsp;другой через <code>Node.connect</code>. Предположим, что IP-адрес второго контейнера&nbsp;&mdash; <code>10.42.240.66</code>:</p>
+<figure class="highlight"><pre><code class="language-elixir" data-lang="elixir"><span class="n">iex</span><span class="p">(</span><span class="n">hello</span><span class="err">@</span><span class="m">10.42</span><span class="o">.</span><span class="m">96.65</span><span class="p">)</span><span class="m">1</span><span class="o">&gt;</span> <span class="no">Node</span><span class="o">.</span><span class="n">connect</span> <span class="ss">:"hello@10.42.240.66"</span>
+<span class="no">true</span>
+<span class="n">iex</span><span class="p">(</span><span class="n">hello</span><span class="err">@</span><span class="m">10.42</span><span class="o">.</span><span class="m">96.65</span><span class="p">)</span><span class="m">2</span><span class="o">&gt;</span> <span class="no">Node</span><span class="o">.</span><span class="n">list</span>
+<span class="p">[</span><span class="ss">:"hello@10.42.240.66"</span><span class="p">]</span></code></pre></figure>
+<p>Для второй ноды:</p>
+<figure class="highlight"><pre><code class="language-elixir" data-lang="elixir"><span class="n">core</span><span class="nv">@host2</span> <span class="err">~</span> <span class="err">$</span> <span class="n">docker</span> <span class="n">exec</span> <span class="o">-</span><span class="n">it</span> <span class="err">47</span><span class="n">dd4308fe8e</span> <span class="o">/</span><span class="n">opt</span><span class="o">/</span><span class="n">app</span><span class="o">/</span><span class="n">bin</span><span class="o">/</span><span class="n">rancher_boot</span><span class="o">.</span><span class="n">sh</span> <span class="n">remote_console</span>
+<span class="no">Erlang</span><span class="o">/</span><span class="no">OTP</span> <span class="m">18</span> <span class="p">[</span><span class="n">erts</span><span class="o">-</span><span class="m">7.3</span><span class="o">.</span><span class="m">1</span><span class="p">]</span> <span class="p">[</span><span class="n">source</span><span class="p">]</span> <span class="p">[</span><span class="m">64</span><span class="o">-</span><span class="n">bit</span><span class="p">]</span> <span class="p">[</span><span class="ss">smp:</span><span class="m">2</span><span class="p">:</span><span class="m">2</span><span class="p">]</span> <span class="p">[</span><span class="n">async</span><span class="o">-</span><span class="ss">threads:</span><span class="m">10</span><span class="p">]</span> <span class="p">[</span><span class="n">kernel</span><span class="o">-</span><span class="ss">poll:</span><span class="no">false</span><span class="p">]</span>
+
+<span class="no">Interactive</span> <span class="no">Elixir</span> <span class="p">(</span><span class="m">1.3</span><span class="o">.</span><span class="m">4</span><span class="p">)</span> <span class="o">-</span> <span class="n">press</span> <span class="no">Ctrl</span><span class="o">+</span><span class="no">C</span> <span class="n">to</span> <span class="k">exit</span> <span class="p">(</span><span class="n">type</span> <span class="n">h</span><span class="p">()</span> <span class="no">ENTER</span> <span class="n">for</span> <span class="n">help</span><span class="p">)</span>
+<span class="n">iex</span><span class="p">(</span><span class="n">hello</span><span class="err">@</span><span class="m">10.42</span><span class="o">.</span><span class="m">240.66</span><span class="p">)</span><span class="m">1</span><span class="o">&gt;</span> <span class="no">Node</span><span class="o">.</span><span class="n">list</span>
+<span class="p">[</span><span class="ss">:"hello@10.42.96.65"</span><span class="p">]</span></code></pre></figure>
+<p>Теперь в&nbsp;Elixir/Erlang можно осуществлять распределения с&nbsp;помощью модуля <code>Node</code>.</p>
+<h2>Автообнаружение на&nbsp;основе DNS</h2>
+<p>Мы&nbsp;рассмотрели, как установить связь между двумя нодами Elixir, но&nbsp;для этого пришлось вводить IP-адрес второй ноды вручную. Такой способ определённо неуместен в&nbsp;продакшне, поэтому попробуем сделать это через DNS.</p>
+<p>Эквивалентом nslookup в&nbsp;Elixir выступает функция <code>:inet.gethostbyname</code>, а&nbsp;если быть точнее, то <code>:inet_tcp.getaddrs(name)</code>. Вызвав эту функцию в&nbsp;одном из&nbsp;контейнеров, получим список всех IP-адресов контейнеров сервиса:</p>
+<figure class="highlight"><pre><code class="language-elixir" data-lang="elixir"><span class="n">iex</span><span class="p">(</span><span class="n">hello</span><span class="err">@</span><span class="m">10.42</span><span class="o">.</span><span class="m">96.65</span><span class="p">)</span><span class="m">11</span><span class="o">&gt;</span> <span class="ss">:inet_tcp</span><span class="o">.</span><span class="n">getaddrs</span> <span class="s1">'my-hello-service'</span>
+<span class="p">{</span><span class="ss">:ok</span><span class="p">,</span> <span class="p">[{</span><span class="m">10</span><span class="p">,</span> <span class="m">42</span><span class="p">,</span> <span class="m">72</span><span class="p">,</span> <span class="m">199</span><span class="p">},</span> <span class="p">{</span><span class="m">10</span><span class="p">,</span> <span class="m">42</span><span class="p">,</span> <span class="m">240</span><span class="p">,</span> <span class="m">66</span><span class="p">},</span> <span class="p">{</span><span class="m">10</span><span class="p">,</span> <span class="m">42</span><span class="p">,</span> <span class="m">96</span><span class="p">,</span> <span class="m">65</span><span class="p">}]}</span></code></pre></figure>
+<p>Теперь осталось только создать на&nbsp;каждой ноде erlang-процесс, который&nbsp;бы периодически вызывал эту функцию и&nbsp;подключался&nbsp;бы к&nbsp;другим нодам. Достаточно создать простой GenServer, который будет проверять DNS каждые 5&nbsp;секунд.</p>
+<figure class="highlight"><pre><code class="language-elixir" data-lang="elixir"><span class="c1"># lib/hello/rancher.ex</span>
+<span class="k">defmodule</span> <span class="no">Hello</span><span class="o">.</span><span class="no">Rancher</span> <span class="k">do</span>
+  <span class="kn">use</span> <span class="no">GenServer</span>
+
+  <span class="nv">@connect_interval</span> <span class="m">5000</span> <span class="c1"># try to connect every 5 seconds</span>
+
+  <span class="k">def</span> <span class="n">start_link</span> <span class="k">do</span>
+    <span class="no">GenServer</span><span class="o">.</span><span class="n">start_link</span> <span class="bp">__MODULE__</span><span class="p">,</span> <span class="p">[],</span> <span class="ss">name:</span> <span class="bp">__MODULE__</span>
+  <span class="k">end</span>
+
+  <span class="k">def</span> <span class="n">init</span><span class="p">([])</span> <span class="k">do</span>
+    <span class="n">name</span> <span class="o">=</span> <span class="no">Application</span><span class="o">.</span><span class="n">fetch_env!</span><span class="p">(</span><span class="ss">:hello</span><span class="p">,</span> <span class="ss">:rancher_service_name</span><span class="p">)</span>
+    <span class="n">send</span> <span class="n">self</span><span class="p">,</span> <span class="ss">:connect</span>
+
+    <span class="p">{</span><span class="ss">:ok</span><span class="p">,</span> <span class="n">to_char_list</span><span class="p">(</span><span class="n">name</span><span class="p">)}</span>
+  <span class="k">end</span>
+
+  <span class="k">def</span> <span class="n">handle_info</span><span class="p">(</span><span class="ss">:connect</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span> <span class="k">do</span>
+    <span class="k">case</span> <span class="ss">:inet_tcp</span><span class="o">.</span><span class="n">getaddrs</span><span class="p">(</span><span class="n">name</span><span class="p">)</span> <span class="k">do</span>
+      <span class="p">{</span><span class="ss">:ok</span><span class="p">,</span> <span class="n">ips</span><span class="p">}</span> <span class="o">-&gt;</span>
+        <span class="no">IO</span><span class="o">.</span><span class="n">puts</span> <span class="sd">"</span><span class="s2">Connecting to </span><span class="si">#{</span><span class="n">name</span><span class="si">}</span><span class="s2">: </span><span class="si">#{</span><span class="n">inspect</span> <span class="n">ips</span><span class="si">}</span><span class="s2">"</span>
+        <span class="n">for</span> <span class="p">{</span><span class="n">a</span><span class="p">,</span><span class="n">b</span><span class="p">,</span><span class="n">c</span><span class="p">,</span><span class="n">d</span><span class="p">}</span> <span class="o">&lt;-</span> <span class="n">ips</span> <span class="k">do</span>
+          <span class="no">Node</span><span class="o">.</span><span class="n">connect</span> <span class="ss">:"hello@</span><span class="si">#{</span><span class="n">a</span><span class="si">}</span><span class="ss">.</span><span class="si">#{</span><span class="n">b</span><span class="si">}</span><span class="ss">.</span><span class="si">#{</span><span class="n">c</span><span class="si">}</span><span class="ss">.</span><span class="si">#{</span><span class="n">d</span><span class="si">}</span><span class="ss">"</span>
+        <span class="k">end</span>
+
+      <span class="p">{</span><span class="ss">:error</span><span class="p">,</span> <span class="n">reason</span><span class="p">}</span> <span class="o">-&gt;</span>
+        <span class="no">IO</span><span class="o">.</span><span class="n">puts</span> <span class="sd">"</span><span class="s2">Error resolving </span><span class="si">#{</span><span class="n">inspect</span> <span class="n">name</span><span class="si">}</span><span class="s2">: </span><span class="si">#{</span><span class="n">inspect</span> <span class="n">reason</span><span class="si">}</span><span class="s2">"</span>
+    <span class="k">end</span>
+
+    <span class="no">IO</span><span class="o">.</span><span class="n">puts</span> <span class="sd">"</span><span class="s2">Nodes: </span><span class="si">#{</span><span class="n">inspect</span> <span class="no">Node</span><span class="o">.</span><span class="n">list</span><span class="si">}</span><span class="s2">"</span>
+    <span class="no">Process</span><span class="o">.</span><span class="n">send_after</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="ss">:connect</span><span class="p">,</span> <span class="nv">@connect_interval</span><span class="p">)</span>
+
+    <span class="p">{</span><span class="ss">:noreply</span><span class="p">,</span> <span class="n">name</span><span class="p">}</span>
+  <span class="k">end</span>
+<span class="k">end</span></code></pre></figure>
+<p>Подключим его в&nbsp;дерево супервизоров приложения:</p>
+<figure class="highlight"><pre><code class="language-elixir" data-lang="elixir"><span class="c1"># lib/hello.ex</span>
+<span class="n">children</span> <span class="o">=</span> <span class="p">[</span>
+  <span class="c1"># ...</span>
+  <span class="n">worker</span><span class="p">(</span><span class="no">Hello</span><span class="o">.</span><span class="no">Rancher</span><span class="p">,</span> <span class="p">[])</span>
+<span class="p">]</span></code></pre></figure>
+<p>Ноды будут автоматически удаляться из&nbsp;списка сразу после отключения. <code>Node.connect</code> предотвращает двойное подключение к&nbsp;одной и&nbsp;той&nbsp;же ноде, поэтому проверять <code>Node.list</code> перед подключением не&nbsp;обязательно.</p>
+<p>Ещё одна возможность, которая упростит вам жизнь,&nbsp;&mdash; это динамическое именование сервисов Rancher.</p>
+<p>Как видно из&nbsp;примера выше, имя сервиса (а&nbsp;значит, и&nbsp;DNS-сервера) взято из&nbsp;ключа <code>:rancher_service_name</code> конфигурации приложения. В&nbsp;<code>config/prod.exs</code> можно сделать это имя статическим, но&nbsp;гораздо лучше оставить всё как есть.</p>
+<p>Поместим следующий код в&nbsp;config/prod.exs:</p>
+<figure class="highlight"><pre><code class="language-elixir" data-lang="elixir"><span class="n">config</span> <span class="ss">:hello</span><span class="p">,</span> <span class="ss">:rancher_service_name</span><span class="p">,</span> <span class="sd">"</span><span class="s2">${RANCHER_SERVICE_NAME}"</span></code></pre></figure>
+<p>А&nbsp;<code>rel/rancher_boot.sh</code> приведём в&nbsp;соответствие со&nbsp;следующим:</p>
+<figure class="highlight"><pre><code class="language-elixir" data-lang="elixir"><span class="c1">#!/bin/sh</span>
+<span class="n">set</span> <span class="o">-</span><span class="n">e</span>
+
+<span class="n">export</span> <span class="no">RANCHER_IP</span><span class="o">=</span><span class="err">$</span><span class="p">(</span><span class="n">wget</span> <span class="o">-</span><span class="n">qO</span><span class="o">-</span> <span class="ss">http:</span><span class="o">//</span><span class="n">rancher</span><span class="o">-</span><span class="n">metadata</span><span class="o">.</span><span class="n">rancher</span><span class="o">.</span><span class="n">internal</span><span class="o">/</span><span class="n">latest</span><span class="o">/</span><span class="n">self</span><span class="o">/</span><span class="n">container</span><span class="o">/</span><span class="n">primary_ip</span><span class="p">)</span>
+<span class="n">export</span> <span class="no">RANCHER_SERVICE_NAME</span><span class="o">=</span><span class="err">$</span><span class="p">(</span><span class="n">wget</span> <span class="o">-</span><span class="n">qO</span><span class="o">-</span> <span class="ss">http:</span><span class="o">//</span><span class="n">rancher</span><span class="o">-</span><span class="n">metadata</span><span class="o">.</span><span class="n">rancher</span><span class="o">.</span><span class="n">internal</span><span class="o">/</span><span class="n">latest</span><span class="o">/</span><span class="n">self</span><span class="o">/</span><span class="n">service</span><span class="o">/</span><span class="n">name</span><span class="p">)</span>
+
+<span class="o">/</span><span class="n">opt</span><span class="o">/</span><span class="n">app</span><span class="o">/</span><span class="n">bin</span><span class="o">/</span><span class="n">hello</span> <span class="err">$@</span></code></pre></figure>
+<p>Здесь для получения имени текущего сервиса снова используется встроенный в&nbsp;Rancher сервис метаданных. Такой подход позволяет использовать один и&nbsp;тот&nbsp;же образ-контейнер повторно для различных сервисов (с&nbsp;различными конфигурациями среды выполнения).</p>
+<h2>Победа!</h2>
+<p>Посмотреть, как в&nbsp;реальности работает&nbsp;то, что у&nbsp;нас получилось, можно на&nbsp;<a href="https://v.usetapes.com/SdRPIY7jph">видео по ссылке</a>. С&nbsp;левой стороны представлен живой лог одного из&nbsp;контейнеров, а&nbsp;с&nbsp;правой&nbsp;&mdash; список контейнеров, запущенных сервисом &laquo;my-hello-service&raquo;. При добавлении и&nbsp;удалении запущенных сервисом контейнеров можно видеть, как в&nbsp;логе контейнера справа учитываются все изменения и&nbsp;обновляется список подключённых нод.</p>
+
+  </div>
+
+  <!-- uSocial -->
+  <div class="post__share_block share_block">
+    <script async src="https://usocial.pro/usocial/usocial.js?v=6.1.4" data-script="usocial" charset="utf-8"></script>
+    <div class="uSocial-Share" data-pid="2fd19544e551bce292425ee8adaa31be" data-type="share" data-options="round,style2,default,absolute,horizontal,size32,counter1,counter-before,upArrow-right,nomobile" data-social="telegram,fb,vk,gPlus,twi,bookmarks"></div>
+  </div>
+  <!-- /uSocial -->
+</article>
+
+
+        <footer class="footer">
+    &copy; 2020
+    / Россия
+
+    <span class="pull-right">Любые мысли и вопросы пишите на <a href="mailto:elixir@wunsh.ru">elixir@wunsh.ru</a>.</span>
+</footer>
+
+        <div id="subscribeModal" class="modal">
+    <div class="modal__content">
+        <a href="#close" title="Close" class="modal__close">x</a>
+
+        <h2 class="modal__title">Ламповая рассылка про&nbsp;Эликсир</h2>
+
+        <p>Один-два раза в&nbsp;неделю присылаем тёплые письма об&nbsp;Эликсире: переводы самых интересных статей до&nbsp;их&nbsp;появления в&nbsp;открытом доступе, анонсы событий и&nbsp;вкусные бонусы.</p>
+
+        <form action="//wunsh.us14.list-manage.com/subscribe/post?u=c81ca3d4693f62db7f7f67c71&amp;id=a192e2dfef" method="post" id="mc-embedded-subscribe-form" name="mc-embedded-subscribe-form" class="pure-form h-tc validate" target="_blank" novalidate>
+            <input type="email" value="" name="EMAIL" class="modal__input pure-input-rounded large" id="mce-EMAIL" placeholder="Твоя почта" required>
+            <div style="position: absolute; left: -5000px;" aria-hidden="true"><input type="text" name="b_c81ca3d4693f62db7f7f67c71_a192e2dfef" tabindex="-1" value=""></div>
+
+            <input type="submit" value="Присоединиться" name="subscribe" onClick="yaCounter39773490.reachGoal('SUBSCRIBED'); return true" id="mc-embedded-subscribe" class="pure-button button-success large">
+        </form>
+
+        <p>Обязательно подтверди почту, перейдя по&nbsp;ссылке в&nbsp;письме, иначе мы&nbsp;не&nbsp;сможем делиться с&nbsp;тобой полезностями.</p>
+
+        <p>Надоедать точно не&nbsp;будем :)</p>
+    </div>
+</div>
+
+        <script src="/assets/js/vendors/zepto.min.js"></script>
+
+<script>
+    if ($(".post--docs").length) {
+        $(".footer").addClass("footer--docs")
+    }
+
+    $(".modal--close_backdrop").click(function(){
+        window.location.hash = "";
+    });
+</script>
+
+        <!-- Yandex.Metrika counter -->
+<script type="text/javascript">
+    (function (d, w, c) {
+        (w[c] = w[c] || []).push(function() {
+            try {
+                w.yaCounter39773490 = new Ya.Metrika({
+                    id:39773490,
+                    clickmap:true,
+                    trackLinks:true,
+                    accurateTrackBounce:true,
+                    webvisor:true,
+                    ut:"noindex"
+                });
+            } catch(e) { }
+        });
+
+        var n = d.getElementsByTagName("script")[0],
+            s = d.createElement("script"),
+            f = function () { n.parentNode.insertBefore(s, n); };
+        s.type = "text/javascript";
+        s.async = true;
+        s.src = "https://mc.yandex.ru/metrika/watch.js";
+
+        if (w.opera == "[object Opera]") {
+            d.addEventListener("DOMContentLoaded", f, false);
+        } else { f(); }
+    })(document, window, "yandex_metrika_callbacks");
+</script>
+<noscript><div><img src="https://mc.yandex.ru/watch/39773490?ut=noindex" style="position:absolute; left:-9999px;" alt="" /></div></noscript>
+<!-- /Yandex.Metrika counter -->
+
+      </div>
+    </div>
+  </body>
+</html>

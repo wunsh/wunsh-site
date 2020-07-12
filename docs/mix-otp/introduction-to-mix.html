@@ -1,0 +1,559 @@
+<!DOCTYPE html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Введение в Микс |> Сообщество Elixir и Phoenix Framework</title>
+    <meta name="description" content="Русскоязычное сообщество Elixir и Phoenix Framework
+">
+
+    <link rel="alternate" type="application/rss+xml" title="Сообщество Elixir и Phoenix Framework" href="/feed.xml" />
+    <link rel="canonical" href="https://wunsh.ru/docs/mix-otp/introduction-to-mix">
+
+    <style type="text/css">@import url("//fonts.googleapis.com/css?family=Source+Sans+Pro:400,700&subset=cyrillic");</style>
+    <link rel="stylesheet" href="/assets/css/vendors/pure.min.css">
+    <link rel="stylesheet" href="/assets/css/vendors/pure-grids-responsive.min.css">
+    <link rel="stylesheet" href="/assets/css/style.css?1594516983">
+
+    <link rel="shortcut icon" type="image/png" href="/assets/favicon.png" >
+</head>
+
+
+  <body>
+    <div class="wunsh pure-g">
+      
+
+
+
+
+<div class="menu pure-u-1 pure-u-md-1-4">
+  <div class="header">
+    <h2 class="header__title">
+      
+        <a href="https://wunsh.ru" class="header__title_link" title="На главную">Эликсир и&nbsp;Вунш</a>
+      
+    </h2>
+    <h3 class="header__tagline">Erlang + Ruby = &#10084;</h3>
+
+    <nav class="nav">
+      <ul class="nav_list">
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/elixir" class="nav_list__item_link pure-button">О языке</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/install/linux-asdf" class="nav_list__item_link pure-button">Установка</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/docs/" class="nav_list__item_link pure-button">Документация</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/guides" class="nav_list__item_link pure-button">Гайды</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/news" class="nav_list__item_link pure-button">Новости</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/articles" class="nav_list__item_link pure-button">Статьи</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/videos" class="nav_list__item_link pure-button">Видео</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/vacancies" class="nav_list__item_link pure-button">Вакансии</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/faq" class="nav_list__item_link pure-button">FAQ</a>
+            </li>
+          
+        
+      </ul>
+    </nav>
+
+    <a href="#subscribeModal" class="pure-button header__subscribe_link">Подписаться на рассылку</a>
+  </div>
+</div>
+
+
+      <div class="content pure-u-1 pure-u-md-3-4">
+        <article class="post post--docs" itemscope itemtype="http://schema.org/BlogPosting">
+    <header class="post__header">
+        <h1 class="post__title" itemprop="name headline">
+            <p>Введение в Микс</p>
+
+        </h1>
+    </header>
+
+    <div class="post__content" itemprop="articleBody">
+        <p>В этом руководстве мы научимся создавать полноценные приложения на Эликсире. В них будут использоваться супервизоры, конфигурация, тесты и многое другое.</p>
+
+<p>Приложение работает в качестве распределенного хранилища ключ-значение. Мы собираемся организовать пары ключ-значение в корзины и распространять эти корзины по нескольким нодам. Мы также построим простой клиент, который позволит подключаться к любому из узлов, а также посылать запросы, такие как:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>CREATE shopping
+OK
+
+PUT shopping milk 1
+OK
+
+PUT shopping eggs 3
+OK
+
+GET shopping milk
+1
+OK
+
+DELETE shopping eggs
+OK
+</code></pre></div></div>
+
+<p>Для того, чтобы создать наше приложение, мы будем использовать три основных инструмента, идущих в коробке с Эликсиром:</p>
+
+<ul>
+  <li>
+    <p><strong><em><code class="highlighter-rouge">OTP</code> (Open Telecom Platform)</em></strong> – набор библиотек из арсенала Эрланга. Эрлангисты используют <code class="highlighter-rouge">OTP</code> для построения надёжных, отказоустойчивых приложений. В этой главе будет рассмотрено как много аспектов <code class="highlighter-rouge">OTP</code> интегрируются с Эликсиром, включая деревья супервизоров, менеджеры событий и многое другое;</p>
+  </li>
+  <li>
+    <p><strong><em>Микс</em></strong> – инструмент для сборки, решающий задачи по созданию, компиляции, тестированию приложения, управлению его зависимостями и многому другому;</p>
+  </li>
+  <li>
+    <p><strong><em><code class="highlighter-rouge">ExUnit</code></em></strong> – фреймворк для модульного тестирования.</p>
+  </li>
+</ul>
+
+<p>В этой главе мы создадим наш первый проект с использованием Микса и исследуем различные особенности в <abbr title="Open Telecom Platform">OTP</abbr>, Микс и <code class="highlighter-rouge">ExUnit</code>.</p>
+
+<p>Давайте начнем!</p>
+
+<blockquote>
+  <p>Примечание: это руководство требует Эликсир (версии 1.2.0 или более поздней). Вы можете проверить свою версию Эликсира, введя в терминале <code class="highlighter-rouge">elixir ‐‐version</code>, и установить более свежую версию, если требуется. Выполните действия, описанные во <a href="/docs">«Введении»</a>.</p>
+
+  <p>Полный код для этого руководства вы можете найти в <a href="https://github.com/josevalim/kv_umbrella">репозитории</a></p>
+</blockquote>
+
+<h2 id="наш-первый-проект">Наш первый проект</h2>
+
+<p>При установке Эликсира, кроме получения исполняемых файлов <code class="highlighter-rouge">elixir</code>, <code class="highlighter-rouge">elixirc</code> и <code class="highlighter-rouge">iex</code>, вы также получите исполняемый Эликсиром сценарий <code class="highlighter-rouge">mix</code>.</p>
+
+<p>Давайте создадим наш первый проект с помощью вызова <code class="highlighter-rouge">mix new</code> из командной строки. Передадим в нее имя проекта в качестве аргумента (<code class="highlighter-rouge">kv</code> в данном случае), и скажем Миксу, что наш главный модуль должен состоять из прописных букв <code class="highlighter-rouge">KV</code>, вместо <code class="highlighter-rouge">Kv</code> по умолчанию:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span>mix new kv <span class="nt">--module</span> KV
+</code></pre></div></div>
+
+<p>Микс создаcт директорию <code class="highlighter-rouge">kv</code> с несколькими файлами в ней:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>* creating README.md
+* creating .gitignore
+* creating mix.exs
+* creating config
+* creating config/config.exs
+* creating lib
+* creating lib/kv.ex
+* creating test
+* creating test/test_helper.exs
+* creating test/kv_test.exs
+</code></pre></div></div>
+
+<p>Давайте кратко рассмотрим эти сгенерированные файлы.</p>
+
+<blockquote>
+  <p>Примечание: Микс представляет собой исполняемый файл для Эликсира. Это означает, что для работы команды <code class="highlighter-rouge">mix</code> вы должны иметь его в вашей переменной <code class="highlighter-rouge">PATH</code>. Если он там отсутствует, вы можете запустить его из директории сценария, используя в качестве аргумента <code class="highlighter-rouge">elixir</code>:</p>
+
+  <div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span>bin/elixir bin/mix new kv <span class="nt">--module</span> KV
+</code></pre></div>  </div>
+  <p>Обратите внимание, что директория Эликсира находится в переменной <code class="highlighter-rouge">PATH</code>. Вы также можете выполнить любой скрипт с помощью опции <code class="highlighter-rouge">-S</code>:</p>
+
+  <div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span>bin/elixir <span class="nt">-S</span> mix new kv <span class="nt">--module</span> KV
+</code></pre></div>  </div>
+
+  <p>При использовании опции <code class="highlighter-rouge">-S</code> команда <code class="highlighter-rouge">elixir</code> находит сценарий, где бы он ни находился в переменной <code class="highlighter-rouge">PATH</code> и выполняет его.</p>
+</blockquote>
+
+<h2 id="компиляция-проекта">Компиляция проекта</h2>
+
+<p>Файл <code class="highlighter-rouge">mix.exs</code> был сгенерирован внутри папки проекта <code class="highlighter-rouge">kv</code>, и его основной задачей является конфигурирование проекта. Давайте взглянем на него:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">defmodule</span> <span class="no">KV</span><span class="o">.</span><span class="no">Mixfile</span> <span class="k">do</span>
+  <span class="kn">use</span> <span class="no">Mix</span><span class="o">.</span><span class="no">Project</span>
+
+  <span class="k">def</span> <span class="n">project</span> <span class="k">do</span>
+    <span class="p">[</span><span class="ss">app:</span> <span class="ss">:kv</span><span class="p">,</span>
+     <span class="ss">version:</span> <span class="sd">"</span><span class="s2">0.1.0"</span><span class="p">,</span>
+     <span class="ss">elixir:</span> <span class="sd">"</span><span class="s2">~&gt; 1.3"</span><span class="p">,</span>
+     <span class="ss">start_permanent:</span> <span class="no">Mix</span><span class="o">.</span><span class="n">env</span> <span class="o">==</span> <span class="ss">:prod</span><span class="p">,</span>
+     <span class="ss">deps:</span> <span class="n">deps</span><span class="p">()]</span>
+  <span class="k">end</span>
+
+  <span class="k">def</span> <span class="n">application</span> <span class="k">do</span>
+    <span class="p">[</span><span class="ss">extra_applications:</span> <span class="p">[</span><span class="ss">:logger</span><span class="p">]]</span>
+  <span class="k">end</span>
+
+  <span class="k">defp</span> <span class="n">deps</span> <span class="k">do</span>
+    <span class="p">[]</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<p>Файл <code class="highlighter-rouge">mix.exs</code> определяет две публичные функции: <code class="highlighter-rouge">project</code>, которая возвращает конфигурацию проекта, содержащую имя проекта, версию приложения, версию Эликсира; и <code class="highlighter-rouge">application</code>, которая используется для генерации файла приложения.</p>
+
+<p>В этом файле также представлена вызываемая из функции <code class="highlighter-rouge">project</code> приватная функция <code class="highlighter-rouge">deps</code>,  которая определяет зависимости проекта. Определение <code class="highlighter-rouge">deps</code> как отдельной функции не является обязательным, но это помогает держать конфигурацию проекта в аккуратном виде.</p>
+
+<p>Микс также создает файл <code class="highlighter-rouge">lib/kv.ex</code>, в котором просто определяется модуль приложения:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">defmodule</span> <span class="no">KV</span> <span class="k">do</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<p>Этой структуры достаточно для компиляции проекта:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span><span class="nb">cd </span>kv
+<span class="nv">$ </span>mix compile
+</code></pre></div></div>
+
+<p>На выходе:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Compiling 1 file (.ex)
+Generated kv app
+</code></pre></div></div>
+
+<p>Файл <code class="highlighter-rouge">lib/kv.ex</code> был скомпилирован, манифест приложения <code class="highlighter-rouge">kv.app</code> – создан, и все протоколы объединены, как описано в руководстве по <a href="/docs/protocols.html">«Протоколам»</a>. Все артефакты компиляции помещаются в директорию <code class="highlighter-rouge">_build</code>, используя параметры из файла <code class="highlighter-rouge">mix.exs</code>.</p>
+
+<p>После того, как проект скомпилирован, можно запустить сессию <code class="highlighter-rouge">IEx</code> внутри проекта:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span>iex <span class="nt">-S</span> mix
+</code></pre></div></div>
+
+<h2 id="выполнение-тестов">Выполнение тестов</h2>
+
+<p>Микс также подготавливает структуру для запуска тестов проекта. Такие проекты обычно следуют договоренности наличия файлов <code class="highlighter-rouge">&lt;filename&gt;_test.exs</code> в директории <code class="highlighter-rouge">test</code> для каждого файла в директории <code class="highlighter-rouge">lib</code>. По этой причине мы  уже можем найти файл <code class="highlighter-rouge">test/kv_test.exs</code>, соответствующий файлу <code class="highlighter-rouge">lib/kv.ex</code>. Пока он почти ничего не делает:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">defmodule</span> <span class="no">KVTest</span> <span class="k">do</span>
+  <span class="kn">use</span> <span class="no">ExUnit</span><span class="o">.</span><span class="no">Case</span>
+  <span class="n">doctest</span> <span class="no">KV</span>
+
+  <span class="n">test</span> <span class="sd">"</span><span class="s2">the truth"</span> <span class="k">do</span>
+    <span class="n">assert</span> <span class="m">1</span> <span class="o">+</span> <span class="m">1</span> <span class="o">==</span> <span class="m">2</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<p>Важно отметить пару вещей:</p>
+
+<ol>
+  <li>
+    <p>Тестовый файл – это файл сценария на Эликсире с расширением <code class="highlighter-rouge">.exs</code>. Благодаря этому соглашение не нужно компилировать тестовые файлы перед их запуском;</p>
+  </li>
+  <li>
+    <p>Мы определяем тестовый модуль с названием <code class="highlighter-rouge">KVTest</code>, используем модуль <a href="https://hexdocs.pm/ex_unit/ExUnit.Case.html"><code class="highlighter-rouge">ExUnit.Case</code></a> для добавления к нему API тестирования и определяем простой тест с помощью макроса <code class="highlighter-rouge">test/2</code>;</p>
+  </li>
+</ol>
+
+<p>Микс также создает файл с названием <code class="highlighter-rouge">test/test_helper.exs</code>, который отвечает за настройку тестового фреймворка:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="no">ExUnit</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+</code></pre></div></div>
+
+<p>Этот файл будет автоматически подключаться Миксом каждый раз перед запуском тестов. Мы можем запустить тесты с помощью команды <code class="highlighter-rouge">mix test</code>:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Compiled lib/kv.ex
+Generated kv app
+[...]
+.
+
+Finished in 0.04 seconds (0.04s on load, 0.00s on tests)
+1 test, 0 failures
+
+Randomized with seed 540224
+</code></pre></div></div>
+
+<p>Обратите внимание, что при запуске команды <code class="highlighter-rouge">mix test</code>, Микс компилирует исходные файлы и генерирует файл приложения еще раз. Это происходит, потому что Микс поддерживает несколько окружений, которые мы будем изучать в следующем разделе.</p>
+
+<p>Кроме того, вы можете увидеть, что <code class="highlighter-rouge">ExUnit</code> печатает точку для каждого успешного теста и автоматически рандомизирует тесты. Давайте сделаем ошибочный тест и посмотрим, что произойдет.</p>
+
+<p>Изменим утверждение в файле <code class="highlighter-rouge">test/kv_test.exs</code> на следующее:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">assert</span> <span class="m">1</span> <span class="o">+</span> <span class="m">1</span> <span class="o">==</span> <span class="m">3</span>
+</code></pre></div></div>
+
+<p>Теперь запустите команду <code class="highlighter-rouge">mix test</code> снова (заметьте, в этот раз не будет никакой компиляции):</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>  1) test the truth (KVTest)
+     test/kv_test.exs:5
+     Assertion with == failed
+     code: 1 + 1 == 3
+     lhs:  2
+     rhs:  3
+     stacktrace:
+       test/kv_test.exs:6
+
+Finished in 0.05 seconds (0.05s on load, 0.00s on tests)
+1 test, 1 failure
+</code></pre></div></div>
+
+<p>Для каждой ошибки <code class="highlighter-rouge">ExUnit</code> печатает подробный отчет, содержащий  имя теста, причину падения, непрошедший успешно код, и значения выражения для левой стороны (<code class="highlighter-rouge">lhs</code>) и правой стороны (<code class="highlighter-rouge">rhs</code>) для оператора <code class="highlighter-rouge">==</code>.</p>
+
+<p>Во второй строке падения теста, сразу под названием тестового файла, есть место, где тест был определен. Если вы скопируете расположение теста на второй линии (в том числе файл и номер строки) и добавите его в команду <code class="highlighter-rouge">mix test</code>,  Микс загрузит и выполнит только этот тест:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span>mix <span class="nb">test test</span>/kv_test.exs:5
+</code></pre></div></div>
+
+<p>Такое сокращение чрезвычайно полезно для быстрого запуска конкретного теста.</p>
+
+<p>Наконец, трассировка стека во время падения дает информацию о тесте и часто о месте падения в исходном файле.</p>
+
+<h2 id="окружения">Окружения</h2>
+
+<p>Микс поддерживает концепцию «окружений». Они позволяют разработчику настроить компиляцию и другие опции для конкретных сценариев. По умолчанию, Микс понимает три окружения:</p>
+
+<ul>
+  <li><code class="highlighter-rouge">:dev</code> – в которой задачи Микса (такие как <code class="highlighter-rouge">compile</code>) запускаются по умолчанию;</li>
+  <li><code class="highlighter-rouge">:test</code> – используется командой <code class="highlighter-rouge">mix test</code>;</li>
+  <li><code class="highlighter-rouge">:prod</code> – используется для запуска проекта в продакшне.</li>
+</ul>
+
+<p>Окружения применяется только к текущему проекту. Как мы увидим позже, любые зависимости, которые вы добавляете в проект по умолчанию будут работать в окружении <code class="highlighter-rouge">:prod</code>.</p>
+
+<p>Настройки окружения могут быть сделаны путем доступа к функции <a href="https://hexdocs.pm/mix/Mix.html#env/1"><code class="highlighter-rouge">Mix.env</code></a> в файле <code class="highlighter-rouge">mix.exs</code>, которая возвращает текущее окружение в виде атома. Это используется в функции <code class="highlighter-rouge">:start_permanent</code>:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">def</span> <span class="n">project</span> <span class="k">do</span>
+  <span class="p">[</span><span class="o">...</span><span class="p">,</span>
+   <span class="ss">start_permanent:</span> <span class="no">Mix</span><span class="o">.</span><span class="n">env</span> <span class="o">==</span> <span class="ss">:prod</span><span class="p">,</span>
+   <span class="o">...</span><span class="p">]</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<p>При истинности опции <code class="highlighter-rouge">:start_permanent</code> приложение будет запущено в перманентном режиме, в котором виртуальная машина Эрланга упадёт, при отключении дерева супервизоров. Заметьте, мы не хотим, чтобы такое поведение было в режимах разработки и тестирования, потому что нужно оставить работающий экземпляр виртуальной машины для устранения неполадок.</p>
+
+<p>Микс по умолчанию работает в <code class="highlighter-rouge">:dev</code> окружении, за исключением тестовых задач, которые будут работать по умолчанию в среде <code class="highlighter-rouge">:test</code>. Окружение может быть изменено через переменную среды <code class="highlighter-rouge">MIX_ENV</code>:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ MIX_ENV</span><span class="o">=</span>prod mix compile
+</code></pre></div></div>
+
+<p>или для Виндоус:</p>
+
+<pre><code class="language-batch">&gt; set "MIX_ENV=prod" &amp;&amp; mix compile
+</code></pre>
+
+<blockquote>
+  <p>Микс – это инструмент сборки, и он не всегда будет доступен в продакшнe, особенно если ваша команда использует явные шаги сборки приложений. Поэтому рекомендуется использовать <code class="highlighter-rouge">Mix.env</code> только в файлах конфигурации и внутри <code class="highlighter-rouge">mix.exs</code>. И никогда в коде приложения (внутри директории <code class="highlighter-rouge">lib</code>).</p>
+</blockquote>
+
+<h2 id="исследование">Исследование</h2>
+
+<p>Есть очень много всего, чего хотелось бы сказать о Миксе. Узнать больше можно <a href="https://hexdocs.pm/mix/">в документации</a>.</p>
+
+<p>Имейте в виду, что список всех существующих задач можно вызвать командой:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span>mix <span class="nb">help</span>
+</code></pre></div></div>
+
+<p>Вы можете получить дополнительную информацию о конкретной задаче, вызвав команду <code class="highlighter-rouge">mix help TASK</code>.</p>
+
+<p>Давайте уже напишем немного кода!</p>
+
+    </div>
+</article>
+
+<nav class="docs_nav pure-g">
+    <div class="docs_nav__inner pure-u-1 pure-u-md-3-4">
+        <div class="pure-g">
+            <div class="docs_nav__column docs_nav__column--prev pure-u-1-3">
+                
+                    <a href="/docs/where-to-go-next.html" class="docs_nav__link pure-button">
+                        &larr;<span class="h-hidden_mobile"> Назад</span></a>
+                
+            </div>
+
+            <div class="docs_nav__column docs_nav__column--contents pure-u-1-3">
+                <a href="#docsContents" class="docs_nav__link docs_nav__link--contents pure-button">☰</a>
+            </div>
+
+            <div class="docs_nav__column docs_nav__column--next pure-u-1-3">
+                
+                    <a href="/docs/mix-otp/agent.html" class="docs_nav__link pure-button">
+                        <span class="h-hidden_mobile">Вперёд </span>&rarr;
+                    </a>
+                
+            </div>
+        </div>
+    </div>
+</nav>
+
+<div id="docsContents" class="modal modal--docs_contents modal--close_backdrop">
+    <div class="modal__content">
+        <a href="#close" title="Закрыть" class="modal__close">x</a>
+
+        <h2 class="modal__title">Содержание</h2>
+
+        
+        <h3 id="руководство-для-начинающих">Руководство для начинающих</h3>
+<ul>
+  <li><a href="/docs">Введение</a></li>
+  <li><a href="/docs/basic-types.html">Базовые типы</a></li>
+  <li><a href="/docs/basic-operators.html">Базовые операторы</a></li>
+  <li><a href="/docs/pattern-matching.html">Сопоставление с образцом</a></li>
+  <li><a href="/docs/case-cond-and-if.html">Конструкции ветвления</a></li>
+  <li><a href="/docs/binaries-strings-and-char-lists.html">Двоичные данные, строки и списки символов</a></li>
+  <li><a href="/docs/keywords-and-maps.html">Ключевые списки и словари</a></li>
+  <li><a href="/docs/modules-and-functions.html">Модули и функции</a></li>
+  <li><a href="/docs/recursion.html">Рекурсия</a></li>
+  <li><a href="/docs/enumerables-and-streams.html">Перечисления и потоки</a></li>
+  <li><a href="/docs/processes.html">Процессы</a></li>
+  <li><a href="/docs/io-and-the-file-system.html">Ввод/вывод и файловая система</a></li>
+  <li><a href="/docs/alias-require-and-import.html">Директивы <code class="highlighter-rouge">alias</code>, <code class="highlighter-rouge">require</code> и <code class="highlighter-rouge">import</code></a></li>
+  <li><a href="/docs/module-attributes.html">Атрибуты модулей</a></li>
+  <li><a href="/docs/structs.html">Структуры</a></li>
+  <li><a href="/docs/protocols.html">Протоколы</a></li>
+  <li><a href="/docs/comprehensions.html">Списковые выражения</a></li>
+  <li><a href="/docs/sigils.html">Сигилы</a></li>
+  <li><a href="/docs/try-catch-and-rescue.html">Конструкция <code class="highlighter-rouge">try</code>, <code class="highlighter-rouge">catch</code> и <code class="highlighter-rouge">rescue</code></a></li>
+  <li><a href="/docs/typespecs-and-behaviours.html">Спецификации типов и поведения</a></li>
+  <li><a href="/docs/erlang-libraries.html">Библиотеки Эрланга</a></li>
+  <li><a href="/docs/where-to-go-next.html">Куда двигаться дальше</a></li>
+</ul>
+
+<h3 id="микс-и-otp">Микс и <code class="highlighter-rouge">OTP</code></h3>
+<ul>
+  <li><a href="/docs/mix-otp/introduction-to-mix.html">Введение в Микс</a></li>
+  <li><a href="/docs/mix-otp/agent.html">Агент</a></li>
+  <li><a href="/docs/mix-otp/genserver.html">GenServer</a></li>
+  <li><a href="/docs/mix-otp/supervisor-and-application.html">Супервизор и приложение</a></li>
+  <li><a href="/docs/mix-otp/dynamic-supervisor.html">Динамический супервизор</a></li>
+  <li><a href="/docs/mix-otp/ets.html">ETS</a></li>
+  <li><a href="/docs/mix-otp/dependencies-and-umbrella-apps.html">Зависимости и зонтичные проекты</a></li>
+  <li><a href="/docs/mix-otp/task-and-gen-tcp.html">Модули <code class="highlighter-rouge">Task</code> и <code class="highlighter-rouge">:gen_tcp</code></a></li>
+  <li><a href="/docs/mix-otp/docs-tests-and-with.html">Доктесты, паттерны и оператор <code class="highlighter-rouge">with</code></a></li>
+  <li><a href="/docs/mix-otp/distributed-tasks-and-configuration.html">Распределенные задачи и конфигурация</a></li>
+</ul>
+
+<h3 id="метапрограммирование">Метапрограммирование</h3>
+<ul>
+  <li><a href="/docs/meta/quote-and-unquote.html">Конструкции <code class="highlighter-rouge">quote</code> и <code class="highlighter-rouge">unquote</code></a></li>
+  <li><a href="/docs/meta/macros.html">Макросы</a></li>
+  <li><a href="/docs/meta/domain-specific-languages.html">Предметно-ориентированные языки</a></li>
+</ul>
+
+    </div>
+</div>
+
+
+
+        <footer class="footer">
+    &copy; 2020
+    / Россия
+
+    <span class="pull-right">Любые мысли и вопросы пишите на <a href="mailto:elixir@wunsh.ru">elixir@wunsh.ru</a>.</span>
+</footer>
+
+        <div id="subscribeModal" class="modal">
+    <div class="modal__content">
+        <a href="#close" title="Close" class="modal__close">x</a>
+
+        <h2 class="modal__title">Ламповая рассылка про&nbsp;Эликсир</h2>
+
+        <p>Один-два раза в&nbsp;неделю присылаем тёплые письма об&nbsp;Эликсире: переводы самых интересных статей до&nbsp;их&nbsp;появления в&nbsp;открытом доступе, анонсы событий и&nbsp;вкусные бонусы.</p>
+
+        <form action="//wunsh.us14.list-manage.com/subscribe/post?u=c81ca3d4693f62db7f7f67c71&amp;id=a192e2dfef" method="post" id="mc-embedded-subscribe-form" name="mc-embedded-subscribe-form" class="pure-form h-tc validate" target="_blank" novalidate>
+            <input type="email" value="" name="EMAIL" class="modal__input pure-input-rounded large" id="mce-EMAIL" placeholder="Твоя почта" required>
+            <div style="position: absolute; left: -5000px;" aria-hidden="true"><input type="text" name="b_c81ca3d4693f62db7f7f67c71_a192e2dfef" tabindex="-1" value=""></div>
+
+            <input type="submit" value="Присоединиться" name="subscribe" onClick="yaCounter39773490.reachGoal('SUBSCRIBED'); return true" id="mc-embedded-subscribe" class="pure-button button-success large">
+        </form>
+
+        <p>Обязательно подтверди почту, перейдя по&nbsp;ссылке в&nbsp;письме, иначе мы&nbsp;не&nbsp;сможем делиться с&nbsp;тобой полезностями.</p>
+
+        <p>Надоедать точно не&nbsp;будем :)</p>
+    </div>
+</div>
+
+        <script src="/assets/js/vendors/zepto.min.js"></script>
+
+<script>
+    if ($(".post--docs").length) {
+        $(".footer").addClass("footer--docs")
+    }
+
+    $(".modal--close_backdrop").click(function(){
+        window.location.hash = "";
+    });
+</script>
+
+        <!-- Yandex.Metrika counter -->
+<script type="text/javascript">
+    (function (d, w, c) {
+        (w[c] = w[c] || []).push(function() {
+            try {
+                w.yaCounter39773490 = new Ya.Metrika({
+                    id:39773490,
+                    clickmap:true,
+                    trackLinks:true,
+                    accurateTrackBounce:true,
+                    webvisor:true,
+                    ut:"noindex"
+                });
+            } catch(e) { }
+        });
+
+        var n = d.getElementsByTagName("script")[0],
+            s = d.createElement("script"),
+            f = function () { n.parentNode.insertBefore(s, n); };
+        s.type = "text/javascript";
+        s.async = true;
+        s.src = "https://mc.yandex.ru/metrika/watch.js";
+
+        if (w.opera == "[object Opera]") {
+            d.addEventListener("DOMContentLoaded", f, false);
+        } else { f(); }
+    })(document, window, "yandex_metrika_callbacks");
+</script>
+<noscript><div><img src="https://mc.yandex.ru/watch/39773490?ut=noindex" style="position:absolute; left:-9999px;" alt="" /></div></noscript>
+<!-- /Yandex.Metrika counter -->
+
+      </div>
+    </div>
+  </body>
+</html>

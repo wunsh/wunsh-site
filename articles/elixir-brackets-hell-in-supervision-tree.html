@@ -1,0 +1,1017 @@
+<!DOCTYPE html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Воюем со скобками в дереве супервизоров |> Сообщество Elixir и Phoenix Framework</title>
+    <meta name="description" content="Как бороться со скобочным адом в супервизорах Эликсира.">
+
+    <link rel="alternate" type="application/rss+xml" title="Сообщество Elixir и Phoenix Framework" href="/feed.xml" />
+    <link rel="canonical" href="https://wunsh.ru/articles/elixir-brackets-hell-in-supervision-tree.html">
+
+    <style type="text/css">@import url("//fonts.googleapis.com/css?family=Source+Sans+Pro:400,700&subset=cyrillic");</style>
+    <link rel="stylesheet" href="/assets/css/vendors/pure.min.css">
+    <link rel="stylesheet" href="/assets/css/vendors/pure-grids-responsive.min.css">
+    <link rel="stylesheet" href="/assets/css/style.css?1594516983">
+
+    <link rel="shortcut icon" type="image/png" href="/assets/favicon.png" >
+</head>
+
+
+  <body>
+    <div class="wunsh pure-g">
+      
+
+
+
+
+<div class="menu pure-u-1 pure-u-md-1-4">
+  <div class="header">
+    <h2 class="header__title">
+      
+        <a href="https://wunsh.ru" class="header__title_link" title="На главную">Эликсир и&nbsp;Вунш</a>
+      
+    </h2>
+    <h3 class="header__tagline">Erlang + Ruby = &#10084;</h3>
+
+    <nav class="nav">
+      <ul class="nav_list">
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/elixir" class="nav_list__item_link pure-button">О языке</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/install/linux-asdf" class="nav_list__item_link pure-button">Установка</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/docs/" class="nav_list__item_link pure-button">Документация</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/guides" class="nav_list__item_link pure-button">Гайды</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/news" class="nav_list__item_link pure-button">Новости</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/articles" class="nav_list__item_link pure-button">Статьи</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/videos" class="nav_list__item_link pure-button">Видео</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/vacancies" class="nav_list__item_link pure-button">Вакансии</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/faq" class="nav_list__item_link pure-button">FAQ</a>
+            </li>
+          
+        
+      </ul>
+    </nav>
+
+    <a href="#subscribeModal" class="pure-button header__subscribe_link">Подписаться на рассылку</a>
+  </div>
+</div>
+
+
+      <div class="content pure-u-1 pure-u-md-3-4">
+        
+
+<article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+  <header class="post__header">
+    
+    <h1 class="post__title" itemprop="name headline">Воюем со скобками в дереве супервизоров</h1>
+
+    <div class="post__meta post_meta">
+      <ul class="meta_list">
+        <li class="meta_list__item">
+          
+          <span class="">
+            <small class="meta_list__item_name">Дата</small>
+            <time class="h-bold" datetime="2017-12-15T00:00:00+00:00" itemprop="datePublished">
+              
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+15 декабря 2017
+
+            </time>
+          </span>
+          
+
+          
+        </li>
+        
+        <li class="meta_list__item">
+            <span class="tag_cloud tags_cloud--inline h-no_margin">
+              <small class="meta_list__item_name">Теги</small> 
+
+
+<ul class="tags_cloud__list">
+  
+    <a href="/tags/#advanced" class="tags_cloud__link tag tag--advanced">advanced</a>
+  
+    <a href="/tags/#genserver" class="tags_cloud__link tag tag--genserver">genserver</a>
+  
+    <a href="/tags/#erlang" class="tags_cloud__link tag tag--erlang">erlang</a>
+  
+    <a href="/tags/#supervisor" class="tags_cloud__link tag tag--supervisor">supervisor</a>
+  
+</ul>
+
+            </span>
+        </li>
+        
+        <li class="meta_list__item">
+          <span itemprop="author" itemscope itemtype="http://schema.org/Person">
+            <small class="meta_list__item_name">
+              
+                Перевод
+              
+            </small>
+            <span itemprop="name" class="h-bold">Надежда Нестерова</span>
+          </span>
+        </li>
+
+        <li class="meta_list__item">
+          
+            <div >
+              <small>Оригинал</small>
+              <strong>
+                &laquo;<a href="https://virviil.github.io/2017/10/25/Elixir-Brackets-Hell-in-Supervision-tree.html" style="text-transform: none; text-decoration: underline; color: #4b2e39;">Elixir: Brackets Hell in Supervision tree</a>&raquo;
+              </strong>
+              <small>&copy;</small>
+              <strong>Źmićer Rubinštejn</strong>
+            </div>
+          
+        </li>
+      </ul>
+    </div>
+  </header>
+
+  <div class="post__content" itemprop="articleBody">
+    <p>В Эликсире версии 1.5 был представлен новый подход к управлению дочерними процессами, что сделало модуль <code class="highlighter-rouge">Supervisor.Spec</code> устаревшим. Все методы объявления дерева супервизоров были подвержены значительным изменениям, и сейчас самое время разобраться в процессе передачи аргументов – от супервизора, находящегося на самой вершине, до простых воркеров или <code class="highlighter-rouge">GenServer</code>.</p>
+
+<h2 id="постановка-задачи">Постановка задачи</h2>
+
+<p>При объявлении аргументов в цепочке <code class="highlighter-rouge">Supervisor → GenServer</code> можно столкнуться с некоторыми проблемами. Например, заглянув <a href="https://hexdocs.pm/elixir/Supervisor.html#module-child-specification">в документацию поведения <code class="highlighter-rouge">Supervisor</code></a>, можно увидеть следующее:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="no">Stack</span><span class="o">.</span><span class="n">child_spec</span><span class="p">([</span><span class="ss">:hello</span><span class="p">])</span>
+<span class="c1">#=&gt; %{</span>
+  <span class="ss">id:</span> <span class="no">Stack</span><span class="p">,</span>
+  <span class="ss">start:</span> <span class="p">{</span><span class="no">Stack</span><span class="p">,</span> <span class="ss">:start_link</span><span class="p">,</span> <span class="p">[[</span><span class="ss">:hello</span><span class="p">]]},</span>
+  <span class="ss">restart:</span> <span class="ss">:permanent</span><span class="p">,</span>
+  <span class="ss">shutdown:</span> <span class="m">5000</span><span class="p">,</span>
+  <span class="ss">type:</span> <span class="ss">:worker</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>Что здесь вообще происходит? Почему атом <code class="highlighter-rouge">:hello</code> помещён в одинарные скобки в первой строке, а в четвёртой уже в двойные?</p>
+
+<p>Как же определить, сколько скобок должно быть в тот или иной раз? Например, как должен выглядять атом <code class="highlighter-rouge">:ok</code> в модуле <code class="highlighter-rouge">GenServer</code> – так <code class="highlighter-rouge">:ok</code>, или так <code class="highlighter-rouge">[:ok]</code>, или так <code class="highlighter-rouge">[[:ok]]</code>? Как сопоставлять это значение в функциях <code class="highlighter-rouge">start_link</code>, <code class="highlighter-rouge">chils_spec</code> и <code class="highlighter-rouge">init</code>? Давайте же разберёмся с этими «чудесами» вместе.</p>
+
+<h2 id="арность-функции-init1--единица">Арность функции <code class="highlighter-rouge">init/1</code> – единица</h2>
+
+<p>Пожалуй, начнём с самых азов, а именно с функции, в которой сразу известно, какой аргумент передавать и что с ним потом делать. Единственная функция, подходящая под данное описание, – это <code class="highlighter-rouge">init/1</code> из модуля <code class="highlighter-rouge">GenServer</code>.</p>
+
+<p>Как правило, при передаче аргументов происходит инициализация состояния воркера:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">def</span> <span class="n">init</span><span class="p">(</span><span class="n">_something_</span><span class="p">)</span> <span class="k">do</span>
+  <span class="n">state</span> <span class="o">=</span> <span class="o">...</span>
+  <span class="c1"># некоторое преобразование документов</span>
+  <span class="p">{</span><span class="ss">:ok</span><span class="p">,</span> <span class="n">state</span><span class="p">}</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<p>Основное правило, которое при этом нужно помнить:</p>
+
+<blockquote>
+  <p>Арность функции <code class="highlighter-rouge">init/1</code> – единица!</p>
+</blockquote>
+
+<p>Если необходимо больше одного аргумента, придётся обернуть их в какую-нибудь <strong>структуру данных</strong>, чтобы их можно было передать в функцию с арностью 1.</p>
+
+<p>Тут же возникнут две основные проблемы:</p>
+
+<ol>
+  <li>У вас есть лишь один аргумент (например, нужно передать <code class="highlighter-rouge">true</code> или <code class="highlighter-rouge">:ok</code>):</li>
+</ol>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">def</span> <span class="n">init</span><span class="p">([</span><span class="no">true</span><span class="p">])</span> <span class="k">do</span>
+  <span class="p">{</span><span class="ss">:ok</span><span class="p">,</span> <span class="p">%{}}</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<p>Вам не кажется, что скобки здесь ни к чему? В них явно нет никакого смысла, так что просто откажитесь от них!</p>
+
+<p>Есть аргументы, уже обёрнутые в кортеж, словарь или список:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">map</span> <span class="o">=</span> <span class="p">%{</span><span class="ss">name:</span> <span class="sd">"</span><span class="s2">Joe"</span><span class="p">,</span> <span class="ss">age:</span> <span class="m">21</span><span class="p">}</span>
+<span class="n">tuple</span> <span class="o">=</span> <span class="p">{</span><span class="sd">"</span><span class="s2">Joe"</span><span class="p">,</span> <span class="m">21</span><span class="p">}</span>
+<span class="n">list</span> <span class="o">=</span> <span class="p">[</span><span class="sd">"</span><span class="s2">Joe"</span><span class="p">,</span> <span class="m">21</span><span class="p">]</span>
+</code></pre></div></div>
+<p>И вы пытаетесь обернуть их в скобки?</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">def</span> <span class="n">init</span><span class="p">([%{</span><span class="ss">name:</span> <span class="sd">"</span><span class="s2">Joe"</span><span class="p">,</span> <span class="ss">age:</span> <span class="m">21</span><span class="p">}])</span> <span class="k">do</span>
+  <span class="p">{</span><span class="ss">:ok</span><span class="p">,</span> <span class="p">%{</span><span class="ss">name:</span> <span class="sd">"</span><span class="s2">Joe"</span><span class="p">,</span> <span class="ss">age:</span> <span class="m">21</span><span class="p">}}</span>
+<span class="k">end</span>
+
+<span class="k">def</span> <span class="n">init</span><span class="p">([{</span><span class="sd">"</span><span class="s2">Joe"</span><span class="p">,</span> <span class="m">21</span><span class="p">}])</span> <span class="k">do</span>
+  <span class="p">{</span><span class="ss">:ok</span><span class="p">,</span> <span class="p">{</span><span class="sd">"</span><span class="s2">Joe"</span><span class="p">,</span> <span class="m">21</span><span class="p">}}</span>
+<span class="k">end</span>
+
+<span class="k">def</span> <span class="n">init</span><span class="p">([[</span><span class="sd">"</span><span class="s2">Joe"</span><span class="p">,</span> <span class="m">21</span><span class="p">]])</span> <span class="k">do</span>
+  <span class="p">{</span><span class="ss">:ok</span><span class="p">,</span> <span class="p">[</span><span class="sd">"</span><span class="s2">Joe"</span><span class="p">,</span> <span class="m">21</span><span class="p">]}</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<p>Отличная идея… Даёшь тысячи ненужных скобок!</p>
+
+<p>Ещё кое-что: благодаря <code class="highlighter-rouge">use GenServer</code> определение функции <code class="highlighter-rouge">init\1</code> выглядит следующим образом:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">def</span> <span class="n">init</span><span class="p">(</span><span class="n">state</span><span class="p">)</span> <span class="k">do</span>
+  <span class="p">{</span><span class="ss">:ok</span><span class="p">,</span> <span class="n">state</span><span class="p">}</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<p>Говоря прямо, есть только две причины добавлять <strong>единственный аргумент в скобки</strong>:</p>
+
+<ul>
+  <li>
+    <p>вы <strong>хотите получить состояние <code class="highlighter-rouge">GenServer</code> в виде списка с одним элементом</strong> после инициализации;</p>
+  </li>
+  <li>
+    <p>вы <strong>не хотите переопределять</strong> функцию <code class="highlighter-rouge">init/1</code>.</p>
+  </li>
+</ul>
+
+<p>И в заключении:</p>
+
+<ul>
+  <li>
+    <p>если в вашем модуле, использующем <code class="highlighter-rouge">GenServer</code>, не определена функция <code class="highlighter-rouge">init/1</code>, то вы знаете, что делать.</p>
+  </li>
+  <li>
+    <p>если ваша функция <code class="highlighter-rouge">init/1</code> выглядит так же, как <code class="highlighter-rouge">init/1</code>, определённая ранее, не переопределяйте её в коде вручную!</p>
+  </li>
+</ul>
+
+<p>Не стоит использовать скобки только потому, что вы увидели их в документации. Возможно, там был приведён неудачный пример.</p>
+
+<h2 id="функция-genserverstart_link--вы-уже-знаете-что-делать">Функция <code class="highlighter-rouge">GenServer.start_link</code> . Вы уже знаете, что делать</h2>
+
+<p>Чтобы передать данные функции <code class="highlighter-rouge">init/1</code> модуля <code class="highlighter-rouge">GenServer</code> следует запустить сервер с помощью функции <code class="highlighter-rouge">GenServer.start_link/3</code>. Вот её спецификация:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">start_link</span><span class="p">(</span><span class="ss">module:</span> <span class="n">atom</span><span class="p">,</span> <span class="ss">args:</span> <span class="n">any</span><span class="p">,</span> <span class="ss">options:</span> <span class="no">Keyword</span><span class="o">.</span><span class="n">t</span><span class="p">)</span> <span class="p">::</span> <span class="n">on_start</span>
+</code></pre></div></div>
+
+<p>Всё просто: есть только <strong>одна</strong> позиция для аргументов, которые затем передадутся в функцию <code class="highlighter-rouge">init/1</code>, арность которой равна <strong>единице</strong>. Вам даже не придётся ничего искать, вы и так знаете, что делать!</p>
+
+<p>Например:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># Так хорошо</span>
+
+<span class="no">GenServer</span><span class="o">.</span><span class="n">start_link</span><span class="p">(</span><span class="bp">__MODULE__</span><span class="p">,</span> <span class="no">true</span><span class="p">)</span>
+<span class="k">def</span> <span class="n">init</span><span class="p">(</span><span class="no">true</span><span class="p">),</span> <span class="k">do</span><span class="p">:</span> <span class="o">...</span>
+
+<span class="no">GenServer</span><span class="o">.</span><span class="n">start_link</span><span class="p">(</span><span class="bp">__MODULE__</span><span class="p">,</span> <span class="p">%{</span><span class="ss">name:</span> <span class="sd">"</span><span class="s2">Joe"</span><span class="p">,</span> <span class="ss">age:</span> <span class="m">21</span><span class="p">})</span>
+<span class="k">def</span> <span class="n">init</span><span class="p">(%{</span><span class="ss">name:</span> <span class="sd">"</span><span class="s2">Joe"</span><span class="p">,</span> <span class="ss">age:</span> <span class="m">21</span><span class="p">}),</span> <span class="k">do</span><span class="p">:</span> <span class="o">...</span>
+
+<span class="no">GenServer</span><span class="o">.</span><span class="n">start_link</span><span class="p">(</span><span class="bp">__MODULE__</span><span class="p">,</span> <span class="p">{</span><span class="sd">"</span><span class="s2">Joe"</span><span class="p">,</span> <span class="m">21</span><span class="p">})</span>
+<span class="k">def</span> <span class="n">init</span><span class="p">({</span><span class="sd">"</span><span class="s2">Joe"</span><span class="p">,</span> <span class="m">21</span><span class="p">}),</span> <span class="k">do</span><span class="p">:</span> <span class="o">...</span>
+
+<span class="no">GenServer</span><span class="o">.</span><span class="n">start_link</span><span class="p">(</span><span class="bp">__MODULE__</span><span class="p">,</span> <span class="p">[</span><span class="sd">"</span><span class="s2">Joe"</span><span class="p">,</span> <span class="m">21</span><span class="p">])</span>
+<span class="k">def</span> <span class="n">init</span><span class="p">([</span><span class="sd">"</span><span class="s2">Joe"</span><span class="p">,</span> <span class="m">21</span><span class="p">]),</span> <span class="k">do</span><span class="p">:</span> <span class="o">...</span>
+
+
+<span class="c1"># Никогда так не делайте!</span>
+
+<span class="no">GenServer</span><span class="o">.</span><span class="n">start_link</span><span class="p">(</span><span class="bp">__MODULE__</span><span class="p">,</span> <span class="p">[</span><span class="no">true</span><span class="p">])</span>
+<span class="k">def</span> <span class="n">init</span><span class="p">(</span><span class="no">true</span><span class="p">),</span> <span class="k">do</span><span class="p">:</span> <span class="o">...</span>
+<span class="o">**</span> <span class="p">(</span><span class="no">FunctionClauseError</span><span class="p">)</span> <span class="n">no</span> <span class="n">function</span> <span class="n">clause</span> <span class="n">matching</span>
+
+<span class="no">GenServer</span><span class="o">.</span><span class="n">start_link</span><span class="p">(</span><span class="bp">__MODULE__</span><span class="p">,</span> <span class="p">[</span><span class="no">true</span><span class="p">])</span>
+<span class="k">def</span> <span class="n">init</span><span class="p">([</span><span class="no">true</span><span class="p">]),</span> <span class="k">do</span><span class="p">:</span> <span class="o">...</span>
+
+
+<span class="c1"># 4 ненужных скобки...</span>
+
+<span class="no">GenServer</span><span class="o">.</span><span class="n">start_link</span><span class="p">(</span><span class="bp">__MODULE__</span><span class="p">,</span> <span class="p">[{</span><span class="sd">"</span><span class="s2">Joe"</span><span class="p">,</span> <span class="m">21</span><span class="p">}])</span>
+<span class="k">def</span> <span class="n">init</span><span class="p">({</span><span class="sd">"</span><span class="s2">Joe"</span><span class="p">,</span> <span class="m">21</span><span class="p">}),</span> <span class="k">do</span><span class="p">:</span> <span class="o">...</span>
+<span class="o">**</span> <span class="p">(</span><span class="no">FunctionClauseError</span><span class="p">)</span> <span class="n">no</span> <span class="n">function</span> <span class="n">clause</span> <span class="n">matching</span>
+
+<span class="no">GenServer</span><span class="o">.</span><span class="n">start_link</span><span class="p">(</span><span class="bp">__MODULE__</span><span class="p">,</span> <span class="p">[[</span><span class="sd">"</span><span class="s2">Joe"</span><span class="p">,</span> <span class="m">21</span><span class="p">]])</span>
+<span class="k">def</span> <span class="n">init</span><span class="p">([[</span><span class="sd">"</span><span class="s2">Joe"</span><span class="p">,</span> <span class="m">21</span><span class="p">]]),</span> <span class="k">do</span><span class="p">:</span> <span class="o">...</span>
+
+<span class="c1"># Да вы шутите?</span>
+</code></pre></div></div>
+
+<p>Кажется, что всё очень просто? Не спешите радоваться…</p>
+
+<h2 id="функция-_module_start_link-что-с-ней-так">Функция <code class="highlighter-rouge">_MODULE_.start_link</code>. Что с ней так?</h2>
+
+<p>Где ещё в <code class="highlighter-rouge">GenServer</code> вызывать <code class="highlighter-rouge">GenServer.start_link/3</code>, как ни в своей собственной функции <code class="highlighter-rouge">start_link</code>.</p>
+
+<p>Для начала давайте посмотрим, какие функции добавятся в модуль после вызова макроса <code class="highlighter-rouge">use GenServer</code>:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">iex</span><span class="o">&gt;</span> <span class="k">defmodule</span> <span class="no">Foo</span><span class="p">,</span> <span class="k">do</span><span class="p">:</span> <span class="kn">use</span> <span class="no">GenServer</span>
+<span class="n">iex</span><span class="o">&gt;</span> <span class="no">Foo</span><span class="o">.</span><span class="n">__info__</span><span class="p">(</span><span class="ss">:functions</span><span class="p">)</span>
+<span class="p">[</span><span class="ss">child_spec:</span> <span class="m">1</span><span class="p">,</span> <span class="ss">code_change:</span> <span class="m">3</span><span class="p">,</span> <span class="ss">handle_call:</span> <span class="m">3</span><span class="p">,</span> <span class="ss">handle_cast:</span> <span class="m">2</span><span class="p">,</span> <span class="ss">handle_info:</span> <span class="m">2</span><span class="p">,</span> <span class="ss">init:</span> <span class="m">1</span><span class="p">,</span> <span class="ss">terminate:</span> <span class="m">2</span><span class="p">]</span>
+</code></pre></div></div>
+
+<p>Как видно, что среди перечисленных функций не оказалось функции <code class="highlighter-rouge">start_link</code>, поэтому определим её сами.</p>
+
+<p>Ну наконец-то можно поиграться с арностью и задать функции <code class="highlighter-rouge">start_link</code> столько аргументов, сколько захочется!</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># Просто пример - пните разработчика, который напишет это в продакшн</span>
+<span class="k">def</span> <span class="n">start_link</span><span class="p">(</span><span class="n">_a</span><span class="p">,</span><span class="n">_b</span><span class="p">,</span><span class="n">_c</span><span class="p">,</span> <span class="o">...</span> <span class="n">_z</span><span class="p">)</span> <span class="k">do</span> <span class="c1"># И до 255 - максимальная арность в Эрланге</span>
+  <span class="no">GenServer</span><span class="o">.</span><span class="n">start_link</span><span class="p">(</span><span class="bp">__MODULE__</span><span class="p">,</span> <span class="no">true</span><span class="p">)</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<p>А теперь вызовем функцию <code class="highlighter-rouge">start_link/255</code>:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">{</span><span class="ss">:ok</span><span class="p">,</span> <span class="n">pid</span><span class="p">}</span> <span class="o">=</span> <span class="no">MyGenServer</span><span class="o">.</span><span class="n">start_link</span><span class="p">(</span><span class="m">1</span><span class="p">,</span><span class="m">2</span><span class="p">,</span><span class="m">3</span><span class="p">,</span><span class="m">4</span><span class="p">,</span><span class="o">...</span><span class="m">255</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p>Как вы думаете, в каких случаях при определении <code class="highlighter-rouge">start_link</code> реально может понадобиться больше одного аргумента? Не будем философствовать на темы «Кому это вообще нужно?» и «Что это: паттерн это или антипаттерн?», а просто приведём несколько примеров:</p>
+
+<ul>
+  <li>задание динамического имени:</li>
+</ul>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">def</span> <span class="n">start_link</span><span class="p">(</span><span class="n">init_arg</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span> <span class="k">do</span>
+  <span class="no">GenServer</span><span class="o">.</span><span class="n">start_link</span><span class="p">(</span><span class="bp">__MODULE__</span><span class="p">,</span> <span class="n">init_arg</span><span class="p">,</span> <span class="ss">name:</span> <span class="n">name</span><span class="p">)</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<ul>
+  <li>обращение к модулю, определяющему колбеки для вашего <code class="highlighter-rouge">GenServer</code>:</li>
+</ul>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">def</span> <span class="n">start_link</span><span class="p">(</span><span class="n">dynamic_module_name</span><span class="p">,</span> <span class="n">init_arg</span><span class="p">)</span> <span class="k">do</span>
+  <span class="no">GenServer</span><span class="o">.</span><span class="n">start_link</span><span class="p">(</span><span class="n">dynamic_module_name</span><span class="p">,</span> <span class="n">init_arg</span><span class="p">)</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<ul>
+  <li>какие-либо действия с <code class="highlighter-rouge">opts</code>:</li>
+</ul>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">def</span> <span class="n">start_link</span><span class="p">(</span><span class="n">init_arg</span><span class="p">,</span> <span class="n">opts</span><span class="p">)</span> <span class="k">do</span>
+  <span class="no">GenServer</span><span class="o">.</span><span class="n">start_link</span><span class="p">(</span><span class="bp">__MODULE__</span><span class="p">,</span> <span class="n">init_arg</span><span class="p">,</span> <span class="n">opts</span><span class="p">)</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<p>Как вы понимаете, нельзя заранее определить, какую арность будет иметь функция <code class="highlighter-rouge">start_link</code>. Здесь-то и начинаются все проблемы. Это и есть портал в скобочный ад…</p>
+
+<h2 id="спецификации-потомков">Спецификации потомков</h2>
+
+<p>Прежде чем объявить скобкам войну, хорошо бы вооружиться знаниями о спецификации потомков. Откровенно говоря, спецификации потомков впервые появились ещё до версии <code class="highlighter-rouge">1.5</code>. Но, по правде, до сих пор не было подходящих инструментов для работы с ними, если только вы не фанат метапрограммирования и похожих вещей.</p>
+
+<p>Спецификации потомков используются супервизором для понимания как:</p>
+
+<ul>
+  <li>
+    <p>запускать дочерние процессы;</p>
+  </li>
+  <li>
+    <p>перезапускать дочерние процессы.</p>
+  </li>
+</ul>
+
+<p>В свою очередь у супервизора также есть свои спецификации, которые диктуют ему:</p>
+
+<ul>
+  <li>
+    <p>когда перезапускать дочерние процессы (стратегия перезапуска);</p>
+  </li>
+  <li>
+    <p>с какой частотой это делать, пока процесс ещё жив.</p>
+  </li>
+</ul>
+
+<p>Обратимся к примеру спецификации потомка для вышеописанного модуля <code class="highlighter-rouge">Foo</code> с функцией <code class="highlighter-rouge">start_link/255</code>:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">%{</span>
+  <span class="ss">id:</span> <span class="no">Foo</span><span class="p">,</span>
+  <span class="ss">start:</span> <span class="p">{</span><span class="no">Foo</span><span class="p">,</span> <span class="ss">:start_link</span><span class="p">,</span> <span class="p">[</span><span class="m">1</span><span class="p">,</span> <span class="m">2</span><span class="p">,</span> <span class="m">3</span><span class="p">,</span> <span class="o">...</span><span class="p">,</span> <span class="m">255</span><span class="p">]},</span>
+  <span class="ss">restart:</span> <span class="ss">:permanent</span><span class="p">,</span>
+  <span class="ss">shutdown:</span> <span class="m">5000</span><span class="p">,</span>
+  <span class="ss">type:</span> <span class="ss">:worker</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>Все параметры описаны <a href="https://hexdocs.pm/elixir/Supervisor.html#module-child-specification">здесь</a>, так что нет смысла перечислять их снова.</p>
+
+<p>Видите эти непонятные три пары скобок внутри кортежа <code class="highlighter-rouge">start</code>? Сразу же хочется спросить:</p>
+
+<ul>
+  <li>
+    <p>Нужны ли они здесь?</p>
+  </li>
+  <li>
+    <p>Можно ли их опустить, имея только один аргумент?</p>
+  </li>
+</ul>
+
+<p>Не хотелось бы вас расстраивать, но в данном случае скобки выполняют особые задачи, следовательно, выкинуть их не получится.</p>
+
+<p>Попробуем разобраться во всём по порядку.</p>
+
+<h2 id="арность-функции-start_link-неизвестна">Арность функции <code class="highlighter-rouge">start_link</code> неизвестна</h2>
+
+<p>К первой паре претензий нет: арность функции <code class="highlighter-rouge">start_link</code> в вашем модуле неизвестна (на момент создания спецификации).</p>
+
+<p>В связи с этим необходимо какое-то средство, чтобы задать количество аргументов динамически, будь то один аргумент, или два, или 255. Здесь-то и пригодится хорошо известный в Эрланге подход…</p>
+
+<h2 id="функция-kernelapply">Функция <code class="highlighter-rouge">Kernel.apply</code></h2>
+
+<p>Обратимся к спецификации <code class="highlighter-rouge">Kernel.apply/3</code>:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">apply</span><span class="p">(</span><span class="ss">module:</span> <span class="n">atom</span><span class="p">,</span> <span class="ss">function_name:</span> <span class="n">atom</span><span class="p">,</span> <span class="ss">args:</span> <span class="p">[</span><span class="n">any</span><span class="p">])</span> <span class="p">::</span> <span class="n">any</span>
+</code></pre></div></div>
+
+<p>Примеры:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">iex</span><span class="o">&gt;</span> <span class="no">Enum</span><span class="o">.</span><span class="n">reverse</span><span class="p">([</span><span class="m">1</span><span class="p">,</span> <span class="m">2</span><span class="p">,</span> <span class="m">3</span><span class="p">])</span>
+<span class="p">[</span><span class="m">3</span><span class="p">,</span> <span class="m">2</span><span class="p">,</span> <span class="m">1</span><span class="p">]</span>
+
+<span class="n">iex</span><span class="o">&gt;</span> <span class="n">apply</span><span class="p">(</span><span class="no">Enum</span><span class="p">,</span> <span class="ss">:reverse</span><span class="p">,</span> <span class="p">[[</span><span class="m">1</span><span class="p">,</span> <span class="m">2</span><span class="p">,</span> <span class="m">3</span><span class="p">]])</span>
+<span class="p">[</span><span class="m">3</span><span class="p">,</span> <span class="m">2</span><span class="p">,</span> <span class="m">1</span><span class="p">]</span>
+</code></pre></div></div>
+
+<p>Как видите, функция <code class="highlighter-rouge">apply/3</code> может только догадываться, сколько аргументов вы хотите ей передать. Поэтому необходимо представить аргументы в виде списка, и, даже если аргумент всего один, обернуть его в скобки. На этом отдельно заостряется внимание в  спецификации функции <code class="highlighter-rouge">apply/3</code>.</p>
+
+<p>Хуже того, имея всего один аргумент в виде списка (как в приведённом примере), придётся смириться с двойными скобками…</p>
+
+<p>Что ж, вернёмся к спецификацииям потомков. Возьмём кортеж, следующий после ключевого слова <code class="highlighter-rouge">start</code>, и передадим его элементы в качестве аргументов функции <code class="highlighter-rouge">Kernel.apply</code>:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">iex</span><span class="o">&gt;</span> <span class="no">Kernel</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="no">Foo</span><span class="p">,</span> <span class="ss">:start_link</span><span class="p">,</span> <span class="p">[</span><span class="m">1</span><span class="p">,</span> <span class="m">2</span><span class="p">,</span> <span class="m">3</span><span class="p">,</span> <span class="o">...</span> <span class="m">255</span><span class="p">])</span>
+
+<span class="c1"># это то же самое, что и...</span>
+
+<span class="n">iex</span><span class="o">&gt;</span> <span class="no">Foo</span><span class="o">.</span><span class="n">start_link</span><span class="p">(</span><span class="m">1</span><span class="p">,</span> <span class="m">2</span><span class="p">,</span> <span class="m">3</span><span class="p">,</span> <span class="o">...</span><span class="p">,</span> <span class="m">255</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p>Вы это видите? Спецификация потомка никак не изменяет ситуацию: кортеж просто копируется и вставляется в <code class="highlighter-rouge">Kernel.apply</code>. Для этого и нужны скобки, что тут скажешь.</p>
+
+<p>На минутку вспомним самый первый пример:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="no">Stack</span><span class="o">.</span><span class="n">child_spec</span><span class="p">([</span><span class="ss">:hello</span><span class="p">])</span>
+<span class="c1">#=&gt; %{</span>
+  <span class="ss">id:</span> <span class="no">Stack</span><span class="p">,</span>
+  <span class="ss">start:</span> <span class="p">{</span><span class="no">Stack</span><span class="p">,</span> <span class="ss">:start_link</span><span class="p">,</span> <span class="p">[[</span><span class="ss">:hello</span><span class="p">]]},</span>
+  <span class="ss">restart:</span> <span class="ss">:permanent</span><span class="p">,</span>
+  <span class="ss">shutdown:</span> <span class="m">5000</span><span class="p">,</span>
+  <span class="ss">type:</span> <span class="ss">:worker</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>Как можно заметить, <code class="highlighter-rouge">Stack.start_link/1</code> на входе ожидает получить один аргумент, и этот аргумент – список. Вот почему <code class="highlighter-rouge">:hello</code> нужно поместить в двойные скобки.</p>
+
+<p>Подведём итоги одним мнемоническим правилом:</p>
+
+<blockquote>
+  <p>Если функция передаётся по своему имени, то можно убрать одну пару скобок!</p>
+</blockquote>
+
+<p>Эти скобки нужны для передачи аргументов в виде списка, так что такая нотация опустит скобки и передаст эти аргументы, как в вызове функции.</p>
+
+<h2 id="функция-child_spec1-динамическая-точка-в-воркерах">Функция <code class="highlighter-rouge">child_spec/1</code>. Динамическая точка в воркерах</h2>
+
+<p>Помните те функции, что появляются после вызова <code class="highlighter-rouge">use GenServer</code>?</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">iex</span><span class="o">&gt;</span> <span class="k">defmodule</span> <span class="no">Foo</span><span class="p">,</span> <span class="k">do</span><span class="p">:</span> <span class="kn">use</span> <span class="no">GenServer</span>
+
+<span class="n">iex</span><span class="o">&gt;</span> <span class="no">Foo</span><span class="o">.</span><span class="n">__info__</span><span class="p">(</span><span class="ss">:functions</span><span class="p">)</span>
+<span class="p">[</span><span class="ss">child_spec:</span> <span class="m">1</span><span class="p">,</span> <span class="ss">code_change:</span> <span class="m">3</span><span class="p">,</span> <span class="ss">handle_call:</span> <span class="m">3</span><span class="p">,</span> <span class="ss">handle_cast:</span> <span class="m">2</span><span class="p">,</span> <span class="ss">handle_info:</span> <span class="m">2</span><span class="p">,</span> <span class="ss">init:</span> <span class="m">1</span><span class="p">,</span> <span class="ss">terminate:</span> <span class="m">2</span><span class="p">]</span>
+</code></pre></div></div>
+
+<p>Среди этого списка есть кое-что новенькое, чего не было ни в Эрланге, ни в Эликсире версии 1.4 и более низких версиях, – <code class="highlighter-rouge">child_spec/1</code>.</p>
+
+<p>Заглянем в её исходный код, чтобы понять, какие задачи она выполняет:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">spec</span> <span class="o">=</span> <span class="p">[</span>
+  <span class="ss">id:</span> <span class="n">opts</span><span class="p">[</span><span class="ss">:id</span><span class="p">]</span> <span class="o">||</span> <span class="bp">__MODULE__</span><span class="p">,</span>
+  <span class="ss">start:</span> <span class="no">Macro</span><span class="o">.</span><span class="n">escape</span><span class="p">(</span><span class="n">opts</span><span class="p">[</span><span class="ss">:start</span><span class="p">])</span> <span class="o">||</span> <span class="kn">quote</span><span class="p">(</span><span class="k">do</span><span class="p">:</span> <span class="p">{</span><span class="bp">__MODULE__</span><span class="p">,</span> <span class="ss">:start_link</span><span class="p">,</span> <span class="p">[</span><span class="n">arg</span><span class="p">]}),</span>
+  <span class="ss">restart:</span> <span class="n">opts</span><span class="p">[</span><span class="ss">:restart</span><span class="p">]</span> <span class="o">||</span> <span class="ss">:permanent</span><span class="p">,</span>
+  <span class="ss">shutdown:</span> <span class="n">opts</span><span class="p">[</span><span class="ss">:shutdown</span><span class="p">]</span> <span class="o">||</span> <span class="m">5000</span><span class="p">,</span>
+  <span class="ss">type:</span> <span class="ss">:worker</span>
+<span class="p">]</span>
+
+<span class="nv">@doc</span> <span class="no">false</span>
+<span class="k">def</span> <span class="n">child_spec</span><span class="p">(</span><span class="n">arg</span><span class="p">)</span> <span class="k">do</span>
+  <span class="p">%{</span><span class="n">unquote_splicing</span><span class="p">(</span><span class="n">spec</span><span class="p">)}</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<p>Всё довольно просто. Ожидается передача некоторых аргументов в выражение <code class="highlighter-rouge">use GenServer</code>, чтобы как-то изменить отношение спецификации потомка. Можно, например, сделать так:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">use</span> <span class="no">GenServer</span><span class="p">,</span> <span class="ss">restart:</span> <span class="ss">:transient</span>
+</code></pre></div></div>
+
+<p>Это переопределит стратегию перезапуска.</p>
+
+<p>Единственное место, вызывающее интерес, – это кортеж <code class="highlighter-rouge">{MODULE, :start_link, [arg]}</code> после ключевого слова <code class="highlighter-rouge">key</code> в спецификации потомка. Аргумент, который передаётся функции <code class="highlighter-rouge">child_spec/1</code>, помещён в скобки и уже подготовлен для передачи в <code class="highlighter-rouge">start_link/1</code>, определённой в том же модуле.</p>
+
+<p>Как известно, эти скобки будут опущены, значит, вызов будет выглядеть так:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="no">MyGenServer</span><span class="o">.</span><span class="n">start_link</span><span class="p">(</span><span class="n">arg</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p>Очевидно, функцию <code class="highlighter-rouge">child_spec/1</code> можно переопределить, но только не забывайте, что её арность равна единице. Таким образом, для того, чтобы задать что-либо динамически, необходимо обернуть данные в структуру:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">def</span> <span class="n">child_spec</span><span class="p">({</span><span class="n">id</span><span class="p">,</span> <span class="p">{</span><span class="n">_module</span><span class="p">,</span> <span class="n">_fun</span><span class="p">,</span> <span class="n">args</span><span class="p">}</span> <span class="o">=</span> <span class="n">start</span><span class="p">,</span> <span class="n">restart</span><span class="p">,</span> <span class="n">shutdown</span><span class="p">})</span> <span class="k">do</span>
+	<span class="p">%{</span>
+      <span class="ss">id:</span> <span class="n">id</span><span class="p">,</span>
+      <span class="o">...</span>
+    <span class="p">}</span>
+<span class="k">end</span>
+
+<span class="c1"># или</span>
+
+<span class="k">def</span> <span class="n">child_spec</span><span class="p">([</span><span class="n">id</span><span class="p">,</span> <span class="p">{</span><span class="n">_module</span><span class="p">,</span> <span class="n">_fun</span><span class="p">,</span> <span class="n">args</span><span class="p">}</span> <span class="o">=</span> <span class="n">start</span><span class="p">,</span> <span class="n">restart</span><span class="p">,</span> <span class="n">shutdown</span><span class="p">])</span> <span class="k">do</span>
+	<span class="p">%{</span>
+      <span class="ss">id:</span> <span class="n">id</span>
+      <span class="o">...</span>
+    <span class="p">}</span>
+<span class="k">end</span>
+
+<span class="c1"># или (эта функция не имеет смысла, но для примера... )</span>
+
+<span class="k">def</span> <span class="n">child_spec</span><span class="p">(%{</span><span class="ss">id:</span> <span class="n">id</span><span class="p">,</span> <span class="ss">start:</span> <span class="p">{</span><span class="n">_module</span><span class="p">,</span> <span class="n">_fun</span><span class="p">,</span> <span class="n">args</span><span class="p">}</span> <span class="o">=</span> <span class="n">start</span><span class="p">,</span> <span class="ss">restart:</span> <span class="n">restart</span><span class="p">,</span> <span class="ss">shutdown:</span> <span class="n">shutdown</span><span class="p">}</span> <span class="o">=</span> <span class="n">spec</span><span class="p">)</span> <span class="k">do</span>
+  <span class="n">spec</span>
+<span class="k">end</span>
+
+
+<span class="c1"># Никогда так не делайте!</span>
+
+<span class="k">def</span> <span class="n">child_spec</span><span class="p">(</span><span class="n">id</span><span class="p">,</span> <span class="p">{</span><span class="n">_module</span><span class="p">,</span> <span class="n">_fun</span><span class="p">,</span> <span class="n">args</span><span class="p">}</span> <span class="o">=</span> <span class="n">start</span><span class="p">,</span> <span class="n">restart</span><span class="p">,</span> <span class="n">shutdown</span><span class="p">)</span> <span class="k">do</span>
+	<span class="p">%{</span>
+      <span class="ss">id:</span> <span class="n">id</span>
+      <span class="o">...</span>
+    <span class="p">}</span>
+<span class="k">end</span>
+
+<span class="c1"># Все будут пытаться вызвать функцию `YourModule.child_spec/1`,</span>
+<span class="c1"># но вы определили её как `YourModule.child_spec/4`.</span>
+<span class="c1"># Ваша функция не переопределит функцию `child_spec/1`.</span>
+</code></pre></div></div>
+
+<p>Вот мы и подошли к последней битве…</p>
+
+<h2 id="учим-супервизора-вызывать-воркеры">Учим супервизора вызывать воркеры</h2>
+
+<p>Запуск серверов GenServer с помощью <code class="highlighter-rouge">start_link</code> прямо в коде – не лучшая идея. Существует отличный <code class="highlighter-rouge">OTP</code>-фреймворк, побуждающий запускать все процессы в дереве супервизоров. Выглядит он как обычный список воркеров:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="no">Supervisor</span><span class="o">.</span><span class="n">start_link</span><span class="p">([</span>
+  <span class="n">_worker1_</span><span class="p">,</span>
+  <span class="n">_worker2_</span><span class="p">,</span>
+  <span class="o">...</span>
+  <span class="n">_workerN_</span>
+<span class="p">],</span> <span class="n">opts</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p>Воркеры могут быть определены тремя различными способами, но каждый из них в итоге приводит к спецификации потомка. Рассмотрим каждый из них по очереди.</p>
+
+<ol>
+  <li>Словарь, представляющий собой саму спецификацию потомка, описанную в одном из предыдущих примеров:</li>
+</ol>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="no">Supervisor</span><span class="o">.</span><span class="n">start_link</span><span class="p">([</span>
+  <span class="p">%{</span>
+    <span class="ss">id:</span> <span class="sd">"</span><span class="s2">id"</span><span class="p">,</span>
+    <span class="ss">start:</span> <span class="p">{</span><span class="no">MyModule</span><span class="p">,</span> <span class="ss">:start_link</span><span class="p">,</span> <span class="p">[</span><span class="no">true</span><span class="p">]},</span>
+    <span class="ss">restart:</span> <span class="ss">:transient</span><span class="p">,</span>
+    <span class="ss">shutdown:</span> <span class="m">500</span><span class="p">,</span>
+    <span class="ss">type:</span> <span class="n">worker</span>
+  <span class="p">}</span>
+<span class="p">],</span> <span class="n">opts</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p>Здесь супервизор даже не соприкасается с функцией <code class="highlighter-rouge">YourModule.child_spec/1</code>, а запускает контролируемый процесс напрямую из спецификации. Так что даже если вам приглянётся библиотека в Хексе, но <code class="highlighter-rouge">child_spec/1</code> главного <code class="highlighter-rouge">GenServer</code> реализована кое-как, можно воспользоваться данным подходом и адаптировать её для своего дерева супервизоров.</p>
+
+<ol>
+  <li>Кортеж с модулем в качестве первого элемента и стартовый аргумент в качестве второго:</li>
+</ol>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="no">Supervisor</span><span class="o">.</span><span class="n">start_link</span><span class="p">([</span>
+  <span class="p">{</span><span class="no">MyModule</span><span class="p">,</span> <span class="no">true</span><span class="p">}</span>
+<span class="p">],</span> <span class="n">opts</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p>При таком способе супервизор извлечёт спецификацию потомка из модуля <code class="highlighter-rouge">MyModule</code>. Вы же помните, что <code class="highlighter-rouge">child_spec/1</code> имеет арность 1? Как раз тот случай, когда это может пригодиться:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">{</span><span class="no">MyModule</span><span class="p">,</span> <span class="no">true</span><span class="p">}</span>
+
+<span class="c1"># внутри процесса инициализации супервизора превращается в</span>
+
+<span class="no">MyModule</span><span class="o">.</span><span class="n">child_spec</span><span class="p">(</span><span class="no">true</span><span class="p">)</span>
+
+
+<span class="c1"># Плохой пример</span>
+
+<span class="p">{</span><span class="no">MyModule</span><span class="p">,</span> <span class="p">[</span><span class="no">true</span><span class="p">]}</span>
+
+<span class="c1"># внутри процесса инициализации супервизора превращается в</span>
+
+<span class="no">MyModule</span><span class="o">.</span><span class="n">child_spec</span><span class="p">([</span><span class="no">true</span><span class="p">])</span>
+
+<span class="c1"># и вероятно вы ожидали не этого...</span>
+</code></pre></div></div>
+
+<p>Модуль:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="no">Supervisor</span><span class="o">.</span><span class="n">start_link</span><span class="p">([</span>
+  <span class="no">MyModule</span>
+<span class="p">],</span> <span class="n">opts</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p>В данном случае это эквивалентно передаче <code class="highlighter-rouge">{MyModule, []}</code>:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="no">MyModule</span>
+
+<span class="c1"># внутри процесса инициализации супервизора превращается в</span>
+
+<span class="no">MyModule</span><span class="o">.</span><span class="n">child_spec</span><span class="p">([])</span>
+</code></pre></div></div>
+
+<h2 id="функция-supervisorstart_child-ещё-один-скользкий-момент">Функция <code class="highlighter-rouge">Supervisor.start_child</code>. Ещё один скользкий момент</h2>
+
+<p>Есть и ещё один способ запустить воркер супервизором – функция <code class="highlighter-rouge">start_child/2</code>.</p>
+
+<p>Изучим её спецификацию:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">start_child</span><span class="p">(</span>
+  <span class="ss">supervisor:</span> <span class="n">supervisor</span><span class="p">,</span>
+  <span class="ss">child_spec_or_args:</span> <span class="ss">:supervisor</span><span class="o">.</span><span class="n">child_spec</span> <span class="o">|</span> <span class="p">[</span><span class="n">term</span><span class="p">]</span>
+<span class="p">)</span> <span class="p">::</span> <span class="n">on_start_child</span>
+</code></pre></div></div>
+<p>Видите переменную с очень любопытным именем – <code class="highlighter-rouge">child_spec_or_args</code>? Значит ли это, что потомок может быть запущен как с помощью спецификации, так и с помощью аргументов?</p>
+
+<p>Вовсе нет! Второй аргумент функции <code class="highlighter-rouge">start_child/2</code> будет зависеть от стратегии надзора:</p>
+
+<ul>
+  <li>
+    <p><code class="highlighter-rouge">:simple_one_for_one</code> – передаём аргументы;</p>
+  </li>
+  <li>
+    <p>любая другая стратегия – передаём спецификацию потомка.</p>
+  </li>
+</ul>
+
+<p>Давайте разбираться.</p>
+
+<h3 id="не-simple_one_for_one">НЕ <code class="highlighter-rouge">:simple_one_for_one</code></h3>
+
+<p>Определение спецификации потомка происходит одновременно с запуском воркера. Поэтому просто передаём спецификацию, и новый воркер запускается!</p>
+
+<h3 id="simple_one_for_one"><code class="highlighter-rouge">:simple_one_for_one</code></h3>
+
+<p>При использовании стратегии <code class="highlighter-rouge">:simple_one_for_one</code>, определение спецификации потомка происходит одновременно с инициализацией супервизора, но потомки запускаются динамически. Тут могут возникнуть проблемы.</p>
+
+<p>Во время инициализации супервизора пока неизвестно, какие аргументы понадобятся для будущей работы различных воркеров. Но мы можем передать эти аргументы в виде списка с помощью функции <code class="highlighter-rouge">start_child/2</code>! Связывая два списка <code class="highlighter-rouge">(list1++list2)</code>, она добавит их к уже существующим аргументам в определённой ранее спецификации потомка:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">%{</span>
+  <span class="ss">id:</span> <span class="sd">"</span><span class="s2">id"</span><span class="p">,</span>
+  <span class="ss">start:</span> <span class="p">{</span><span class="no">MyModule</span><span class="p">,</span> <span class="ss">:start_link</span><span class="p">,</span> <span class="p">[</span><span class="no">true</span><span class="p">]},</span>
+  <span class="ss">restart:</span> <span class="ss">:transient</span><span class="p">,</span>
+  <span class="ss">shutdown:</span> <span class="m">500</span><span class="p">,</span>
+  <span class="ss">type:</span> <span class="n">worker</span>
+<span class="p">}</span>
+
+<span class="c1"># Если запускать потомка не нужно, необходимо переопределить </span>
+<span class="c1"># стартовую часть и передать 0 аргументов:</span>
+<span class="n">spec</span> <span class="o">=</span> <span class="no">Supervisor</span><span class="o">.</span><span class="n">child_spec</span><span class="p">(</span><span class="no">MyModule</span><span class="p">,</span> <span class="ss">start:</span> <span class="p">{</span><span class="no">MyModule</span><span class="p">,</span> <span class="ss">:start_link</span><span class="p">,</span> <span class="p">[]})</span>
+
+<span class="c1"># После этой манипуляции, спецификация потомка внутри переменной `spec` будет:</span>
+<span class="p">%{</span>
+  <span class="ss">id:</span> <span class="sd">"</span><span class="s2">id"</span><span class="p">,</span>
+  <span class="ss">start:</span> <span class="p">{</span><span class="no">MyModule</span><span class="p">,</span> <span class="ss">:start_link</span><span class="p">,</span> <span class="p">[]},</span>
+  <span class="ss">restart:</span> <span class="ss">:transient</span><span class="p">,</span>
+  <span class="ss">shutdown:</span> <span class="m">500</span><span class="p">,</span>
+  <span class="ss">type:</span> <span class="n">worker</span>
+<span class="p">}</span>
+
+<span class="c1"># Затем запускаем супервизор:</span>
+<span class="p">{</span><span class="ss">:ok</span><span class="p">,</span> <span class="n">pid</span><span class="p">}</span> <span class="o">=</span> <span class="no">Supervisor</span><span class="o">.</span><span class="n">start_link</span><span class="p">([</span><span class="n">spec</span><span class="p">],</span> <span class="ss">strategy:</span> <span class="ss">:simple_one_for_one</span><span class="p">)</span>
+<span class="c1"># Воркер не запустится, потому что функция `start_link` с нулём аргументов не определена</span>
+
+<span class="c1"># Теперь запускаем воркер динамически:</span>
+<span class="no">Supervisor</span><span class="o">.</span><span class="n">start_child</span><span class="p">(</span><span class="n">pid</span><span class="p">,</span> <span class="p">[</span><span class="no">true</span><span class="p">])</span> <span class="c1"># здесь ставим скобки, поскольку это список.</span>
+
+<span class="c1"># Нужно, чтобы спецификация потомка была:</span>
+<span class="p">%{</span>
+  <span class="ss">id:</span> <span class="sd">"</span><span class="s2">id"</span><span class="p">,</span>
+  <span class="ss">start:</span> <span class="p">{</span><span class="no">MyModule</span><span class="p">,</span> <span class="ss">:start_link</span><span class="p">,</span> <span class="p">[]</span><span class="o">++</span><span class="p">[</span><span class="no">true</span><span class="p">]},</span> <span class="c1"># or simply [true]</span>
+  <span class="ss">restart:</span> <span class="ss">:transient</span><span class="p">,</span>
+  <span class="ss">shutdown:</span> <span class="m">500</span><span class="p">,</span>
+  <span class="ss">type:</span> <span class="n">worker</span>
+<span class="p">}</span>
+<span class="c1"># И новый воркер запустится.</span>
+</code></pre></div></div>
+
+<h2 id="примеры-кода">Примеры кода</h2>
+
+<p>Подводя итоги, понаблюдаем за полным циклом передачи аргументов в различных условиях.</p>
+
+<p>Простейший случай: самый обычный GenServer без какого-либо полезного состояния. Давайте напишем только самый необходимый минимум кода:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># В супервизоре:</span>
+<span class="no">Supervisor</span><span class="o">.</span><span class="n">start_link</span><span class="p">([</span><span class="no">SimpleModule</span><span class="p">],</span> <span class="n">opts</span><span class="p">)</span>
+
+<span class="c1"># Функция `child_spec` будет вызвана следующим образом:</span>
+<span class="no">SimpleModule</span><span class="o">.</span><span class="n">child_spec</span><span class="p">([])</span>
+
+<span class="c1"># Я слишком ленив, чтобы переопределять `child_spec`, так что спецификация будет:</span>
+<span class="p">%{</span>
+  <span class="ss">id:</span> <span class="no">SimpleModule</span><span class="p">,</span>
+  <span class="ss">start:</span> <span class="p">{</span><span class="no">SimpleModule</span><span class="p">,</span> <span class="ss">:start_link</span><span class="p">,</span> <span class="p">[[]]},</span> <span class="c1"># double brackets, but you already know why!</span>
+  <span class="ss">restart:</span> <span class="ss">:permanent</span><span class="p">,</span>
+  <span class="ss">shutdown:</span> <span class="m">5000</span><span class="p">,</span>
+  <span class="ss">type:</span> <span class="ss">:worker</span>
+<span class="p">}</span>
+
+<span class="c1"># Используя эту спецификацию потомка, супервизор запустит сервер следующим образом:</span>
+<span class="no">SimpleModule</span><span class="o">.</span><span class="n">start_link</span><span class="p">([])</span>
+
+<span class="c1"># Я слишком ленив, чтобы думать об аргументах, так что решил пропустить их напрямую в `init`</span>
+<span class="c1"># через функцию `start_link`, которую определил так:</span>
+<span class="k">def</span> <span class="n">start_link</span><span class="p">(</span><span class="n">arg</span><span class="p">),</span> <span class="k">do</span><span class="p">:</span> <span class="no">GenServer</span><span class="o">.</span><span class="n">start_link</span><span class="p">(</span><span class="bp">__MODULE__</span><span class="p">,</span> <span class="n">arg</span><span class="p">)</span>
+
+<span class="c1"># Больше не нужно переопределять `init`, так что вызовем её так:</span>
+<span class="no">SimpleModule</span><span class="o">.</span><span class="n">init</span><span class="p">([])</span>
+
+<span class="c1"># Сервер запустится с состоянием:</span>
+<span class="p">{</span><span class="ss">:ok</span><span class="p">,</span> <span class="p">[]}</span>
+</code></pre></div></div>
+
+<p>Допустим, вам не нравится имя <code class="highlighter-rouge">start_link</code>, и вы заменяете его на <code class="highlighter-rouge">star_blink</code>:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># В супервизоре:</span>
+<span class="no">Supervisor</span><span class="o">.</span><span class="n">start_link</span><span class="p">([</span><span class="no">AstronomyModule</span><span class="p">],</span> <span class="n">opts</span><span class="p">)</span>
+
+<span class="c1"># Функция `child_spec` будет вызвана так:</span>
+<span class="no">AstronomyModule</span><span class="o">.</span><span class="n">child_spec</span><span class="p">([])</span>
+
+<span class="c1"># Необходимо переопределить функцию `child_spec`, чтобы сообщить супервизору, как запустить мой модуль:</span>
+
+<span class="k">def</span> <span class="n">child_spec</span><span class="p">(</span><span class="n">arg</span><span class="p">)</span> <span class="k">do</span>
+  <span class="p">%{</span>
+    <span class="ss">id:</span> <span class="bp">__MODULE__</span><span class="p">,</span>
+    <span class="ss">start:</span> <span class="p">{</span><span class="bp">__MODULE__</span><span class="p">,</span> <span class="ss">:star_blink</span><span class="p">,</span> <span class="p">[</span><span class="n">arg</span><span class="p">]},</span>
+    <span class="ss">restart:</span> <span class="ss">:permanent</span><span class="p">,</span>
+    <span class="ss">shutdown:</span> <span class="m">5000</span><span class="p">,</span>
+    <span class="ss">type:</span> <span class="ss">:worker</span>
+<span class="p">}</span>
+<span class="k">end</span>
+
+<span class="c1"># Эта спецификация возвращает:</span>
+<span class="p">%{</span>
+  <span class="ss">id:</span> <span class="no">AstronomyModule</span><span class="p">,</span>
+  <span class="ss">start:</span> <span class="p">{</span><span class="no">AstronomyModule</span><span class="p">,</span> <span class="ss">:star_blink</span><span class="p">,</span> <span class="p">[[]]},</span> <span class="c1"># как в предыдущем примере</span>
+  <span class="ss">restart:</span> <span class="ss">:permanent</span><span class="p">,</span>
+  <span class="ss">shutdown:</span> <span class="m">5000</span><span class="p">,</span>
+  <span class="ss">type:</span> <span class="ss">:worker</span>
+<span class="p">}</span>
+
+<span class="c1"># Используя эту спецификацию потомка, супервизор запустит сервер следующим образом:</span>
+<span class="no">AstronomyModule</span><span class="o">.</span><span class="n">star_blink</span><span class="p">([])</span>
+
+<span class="c1"># Пропускаем аргумент в функцию `init` через `star_blink`:</span>
+<span class="k">def</span> <span class="n">star_blink</span><span class="p">(</span><span class="n">arg</span><span class="p">),</span> <span class="k">do</span><span class="p">:</span> <span class="no">GenServer</span><span class="o">.</span><span class="n">start_link</span><span class="p">(</span><span class="bp">__MODULE__</span><span class="p">,</span> <span class="n">arg</span><span class="p">)</span>
+
+<span class="c1"># Функция `init` будет вызвана так:</span>
+<span class="no">AstronomyModule</span><span class="o">.</span><span class="n">init</span><span class="p">([])</span>
+
+<span class="c1"># и запустит сервер с состоянием:</span>
+<span class="p">{</span><span class="ss">:ok</span><span class="p">,</span> <span class="p">[]}</span>
+</code></pre></div></div>
+
+<p>У вас есть аргумент-список с одним элементом, но вы не читали эту статью и решили добавить ещё одну пару скобок, ну чтобы наверняка:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># В супервизоре:</span>
+<span class="no">Supervisor</span><span class="o">.</span><span class="n">start_link</span><span class="p">([</span>
+  <span class="p">{</span><span class="no">BracketsModule</span><span class="p">,</span> <span class="p">[[</span><span class="ss">:element</span><span class="p">]]}</span>
+<span class="p">],</span> <span class="n">opts</span><span class="p">)</span>
+
+<span class="c1"># Функция `child_spec` будет вызвана так:</span>
+<span class="no">BracketsModule</span><span class="o">.</span><span class="n">child_spec</span><span class="p">([[</span><span class="ss">:element</span><span class="p">]])</span>
+
+<span class="c1"># Эта спецификация возвращает:</span>
+<span class="p">%{</span>
+  <span class="ss">id:</span> <span class="no">BracketsModule</span><span class="p">,</span>
+  <span class="ss">start:</span> <span class="p">{</span><span class="no">BracketsModule</span><span class="p">,</span> <span class="ss">:start_link</span><span class="p">,</span> <span class="p">[[[</span><span class="ss">:element</span><span class="p">]]]},</span> <span class="c1"># OH SHI~</span>
+  <span class="ss">restart:</span> <span class="ss">:permanent</span><span class="p">,</span>
+  <span class="ss">shutdown:</span> <span class="m">5000</span><span class="p">,</span>
+  <span class="ss">type:</span> <span class="ss">:worker</span>
+<span class="p">}</span>
+
+<span class="c1"># Используя эту спецификацию потомка, супервизор запустит сервер следующим образом:</span>
+<span class="no">BracketsModule</span><span class="o">.</span><span class="n">start_link</span><span class="p">([[</span><span class="ss">:element</span><span class="p">]])</span>
+
+<span class="c1"># Пропускаем аргумент в функцию `init` через `star_blink`:</span>
+<span class="k">def</span> <span class="n">start_link</span><span class="p">(</span><span class="n">arg</span><span class="p">),</span> <span class="k">do</span><span class="p">:</span> <span class="no">GenServer</span><span class="o">.</span><span class="n">start_link</span><span class="p">(</span><span class="bp">__MODULE__</span><span class="p">,</span> <span class="n">arg</span><span class="p">)</span>
+
+<span class="c1"># Функция `init` будет вызвана так:</span>
+<span class="no">AstronomyModule</span><span class="o">.</span><span class="n">init</span><span class="p">([[</span><span class="ss">:element</span><span class="p">]])</span>
+
+<span class="c1"># и запустит сервер с состоянием:</span>
+<span class="p">{</span><span class="ss">:ok</span><span class="p">,</span> <span class="p">[[</span><span class="ss">:element</span><span class="p">]]}</span>
+</code></pre></div></div>
+
+<p>Естественно, вам не хотелось бы иметь список в списке в качестве состояния. Проблему можно решить несколькими способами:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># Единственный верный способ - изменить корень (он же супервизор)</span>
+
+<span class="no">Supervisor</span><span class="o">.</span><span class="n">start_link</span><span class="p">([</span>
+  <span class="p">{</span><span class="no">BracketsModule</span><span class="p">,</span> <span class="p">[</span><span class="ss">:element</span><span class="p">]}</span>
+<span class="p">],</span> <span class="n">opts</span><span class="p">)</span>
+
+
+<span class="c1"># Никогда так не делайте!</span>
+
+<span class="c1"># Переопределяем функцию `child_spec`:</span>
+<span class="k">def</span> <span class="n">child_spec</span><span class="p">([</span><span class="n">arg</span><span class="p">])</span> <span class="k">do</span> <span class="c1"># пытаемся сопоставить скобки</span>
+  <span class="p">%{</span>
+    <span class="ss">id:</span> <span class="bp">__MODULE__</span><span class="p">,</span>
+    <span class="ss">start:</span> <span class="p">{</span><span class="bp">__MODULE__</span><span class="p">,</span> <span class="ss">:star_blink</span><span class="p">,</span> <span class="p">[</span><span class="n">arg</span><span class="p">]},</span>
+    <span class="ss">restart:</span> <span class="ss">:permanent</span><span class="p">,</span>
+    <span class="ss">shutdown:</span> <span class="m">5000</span><span class="p">,</span>
+    <span class="ss">type:</span> <span class="ss">:worker</span>
+<span class="p">}</span>
+<span class="k">end</span>
+
+<span class="c1"># Переопределяем функцию `start_link`</span>
+<span class="k">def</span> <span class="n">start_link</span><span class="p">([</span><span class="n">arg</span><span class="p">]),</span> <span class="k">do</span><span class="p">:</span> <span class="no">GenServer</span><span class="o">.</span><span class="n">start_link</span><span class="p">(</span><span class="bp">__MODULE__</span><span class="p">,</span> <span class="n">arg</span><span class="p">)</span>
+
+<span class="c1"># Или переопределяем функцию `init`</span>
+<span class="k">def</span> <span class="n">init</span><span class="p">([</span><span class="n">arg</span><span class="p">]),</span> <span class="k">do</span><span class="p">:</span> <span class="p">{</span><span class="ss">:ok</span><span class="p">,</span> <span class="n">arg</span><span class="p">}}</span>
+</code></pre></div></div>
+
+<h2 id="заключение">Заключение</h2>
+
+<p>Как видите, битва со скобками оказалась не такой уж и страшной! Теперь вам не придётся перезапускать свои программы из-за глупых ошибок со скобками в супервизорах, функциях <code class="highlighter-rouge">spec</code>, <code class="highlighter-rouge">start_link</code> и <code class="highlighter-rouge">init</code>.</p>
+
+<p>Напоследок пару советов, которые могут помочь вам и вашей команде сделать код чище.</p>
+
+<ul>
+  <li>
+    <p><strong>При построении кода двигайтесь от воркеров к супервизорам, словно от веточек к корням.</strong> Ведь именно воркерам поручено выполнять основную работу, они – главная часть программы. Данная статья – некий обзор всего необходимого для правильного запуска воркеров независимо от того, как они были определены. Не пытайтесь «переупаковать» данные в функциях <code class="highlighter-rouge">init</code> и <code class="highlighter-rouge">start_link</code>, а передавайте их напрямую из супервизора.</p>
+  </li>
+  <li>
+    <p><strong>Возьмите на вооружение принцип KISS – не усложняйте код.</strong> К примеру, не переопределяйте <code class="highlighter-rouge">init</code> в <code class="highlighter-rouge">GenServer</code>, когда можно передать начальное состояние с помощью функции <code class="highlighter-rouge">start_link</code>. Не переопределяйте также и child_spec, если требуется создать простой <code class="highlighter-rouge">GenServer</code>-воркер. Лучше сделать это через макрос using, используя аргументы.</p>
+  </li>
+  <li>
+    <p><strong>Основное внимание следует уделить функции <code class="highlighter-rouge">child_spec</code>.</strong> Даже если ваш код – уникальное произведение искусства, старайтесь, во-первых, реализовать <code class="highlighter-rouge">init</code> и <code class="highlighter-rouge">start_link</code> как можно более стандартно и, во-вторых, не использовать спецификации потомков непосредственно в <code class="highlighter-rouge">Supervisor.init</code>. Лучше поместить всю логику по запуску воркера в <code class="highlighter-rouge">child_spec</code>.</p>
+  </li>
+</ul>
+
+<blockquote>
+  <p><strong>Жозе Валим:</strong> <em>«Одна из причин, почему в Эликсире версии 1.5 была представлена новая спецификация потомков, – привести в порядок функции <code class="highlighter-rouge">start_link/1</code> и and <code class="highlighter-rouge">init/1</code>. Предыдущий подход, при котором количество аргументов <code class="highlighter-rouge">start_link</code> было переменным, а <code class="highlighter-rouge">init</code> имела всего один, показал свою неэффективность. Больным местом, как вы отметили в своей статье, теперь является супервизор <code class="highlighter-rouge">:simple_one_for_one</code>, и мы обратим внимание на эту проблему при разработке Эликсира версии 1.6. Надеюсь, тогда изжившие себя методы постепенно канут в небытие, и рабочий процесс пойдёт как по маслу»</em>.</p>
+</blockquote>
+
+  </div>
+
+  <!-- uSocial -->
+  <div class="post__share_block share_block">
+    <script async src="https://usocial.pro/usocial/usocial.js?v=6.1.4" data-script="usocial" charset="utf-8"></script>
+    <div class="uSocial-Share" data-pid="2fd19544e551bce292425ee8adaa31be" data-type="share" data-options="round,style2,default,absolute,horizontal,size32,counter1,counter-before,upArrow-right,nomobile" data-social="telegram,fb,vk,gPlus,twi,bookmarks"></div>
+  </div>
+  <!-- /uSocial -->
+</article>
+
+
+        <footer class="footer">
+    &copy; 2020
+    / Россия
+
+    <span class="pull-right">Любые мысли и вопросы пишите на <a href="mailto:elixir@wunsh.ru">elixir@wunsh.ru</a>.</span>
+</footer>
+
+        <div id="subscribeModal" class="modal">
+    <div class="modal__content">
+        <a href="#close" title="Close" class="modal__close">x</a>
+
+        <h2 class="modal__title">Ламповая рассылка про&nbsp;Эликсир</h2>
+
+        <p>Один-два раза в&nbsp;неделю присылаем тёплые письма об&nbsp;Эликсире: переводы самых интересных статей до&nbsp;их&nbsp;появления в&nbsp;открытом доступе, анонсы событий и&nbsp;вкусные бонусы.</p>
+
+        <form action="//wunsh.us14.list-manage.com/subscribe/post?u=c81ca3d4693f62db7f7f67c71&amp;id=a192e2dfef" method="post" id="mc-embedded-subscribe-form" name="mc-embedded-subscribe-form" class="pure-form h-tc validate" target="_blank" novalidate>
+            <input type="email" value="" name="EMAIL" class="modal__input pure-input-rounded large" id="mce-EMAIL" placeholder="Твоя почта" required>
+            <div style="position: absolute; left: -5000px;" aria-hidden="true"><input type="text" name="b_c81ca3d4693f62db7f7f67c71_a192e2dfef" tabindex="-1" value=""></div>
+
+            <input type="submit" value="Присоединиться" name="subscribe" onClick="yaCounter39773490.reachGoal('SUBSCRIBED'); return true" id="mc-embedded-subscribe" class="pure-button button-success large">
+        </form>
+
+        <p>Обязательно подтверди почту, перейдя по&nbsp;ссылке в&nbsp;письме, иначе мы&nbsp;не&nbsp;сможем делиться с&nbsp;тобой полезностями.</p>
+
+        <p>Надоедать точно не&nbsp;будем :)</p>
+    </div>
+</div>
+
+        <script src="/assets/js/vendors/zepto.min.js"></script>
+
+<script>
+    if ($(".post--docs").length) {
+        $(".footer").addClass("footer--docs")
+    }
+
+    $(".modal--close_backdrop").click(function(){
+        window.location.hash = "";
+    });
+</script>
+
+        <!-- Yandex.Metrika counter -->
+<script type="text/javascript">
+    (function (d, w, c) {
+        (w[c] = w[c] || []).push(function() {
+            try {
+                w.yaCounter39773490 = new Ya.Metrika({
+                    id:39773490,
+                    clickmap:true,
+                    trackLinks:true,
+                    accurateTrackBounce:true,
+                    webvisor:true,
+                    ut:"noindex"
+                });
+            } catch(e) { }
+        });
+
+        var n = d.getElementsByTagName("script")[0],
+            s = d.createElement("script"),
+            f = function () { n.parentNode.insertBefore(s, n); };
+        s.type = "text/javascript";
+        s.async = true;
+        s.src = "https://mc.yandex.ru/metrika/watch.js";
+
+        if (w.opera == "[object Opera]") {
+            d.addEventListener("DOMContentLoaded", f, false);
+        } else { f(); }
+    })(document, window, "yandex_metrika_callbacks");
+</script>
+<noscript><div><img src="https://mc.yandex.ru/watch/39773490?ut=noindex" style="position:absolute; left:-9999px;" alt="" /></div></noscript>
+<!-- /Yandex.Metrika counter -->
+
+      </div>
+    </div>
+  </body>
+</html>

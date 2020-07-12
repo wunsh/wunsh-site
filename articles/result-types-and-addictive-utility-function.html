@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Результирующие типы данных в Эликсире |> Сообщество Elixir и Phoenix Framework</title>
+    <meta name="description" content="Как мы используем результирующие типы, даже не подозревая об этом.">
+
+    <link rel="alternate" type="application/rss+xml" title="Сообщество Elixir и Phoenix Framework" href="/feed.xml" />
+    <link rel="canonical" href="https://wunsh.ru/articles/result-types-and-addictive-utility-function.html">
+
+    <style type="text/css">@import url("//fonts.googleapis.com/css?family=Source+Sans+Pro:400,700&subset=cyrillic");</style>
+    <link rel="stylesheet" href="/assets/css/vendors/pure.min.css">
+    <link rel="stylesheet" href="/assets/css/vendors/pure-grids-responsive.min.css">
+    <link rel="stylesheet" href="/assets/css/style.css?1594516983">
+
+    <link rel="shortcut icon" type="image/png" href="/assets/favicon.png" >
+</head>
+
+
+  <body>
+    <div class="wunsh pure-g">
+      
+
+
+
+
+<div class="menu pure-u-1 pure-u-md-1-4">
+  <div class="header">
+    <h2 class="header__title">
+      
+        <a href="https://wunsh.ru" class="header__title_link" title="На главную">Эликсир и&nbsp;Вунш</a>
+      
+    </h2>
+    <h3 class="header__tagline">Erlang + Ruby = &#10084;</h3>
+
+    <nav class="nav">
+      <ul class="nav_list">
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/elixir" class="nav_list__item_link pure-button">О языке</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/install/linux-asdf" class="nav_list__item_link pure-button">Установка</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/docs/" class="nav_list__item_link pure-button">Документация</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/guides" class="nav_list__item_link pure-button">Гайды</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/news" class="nav_list__item_link pure-button">Новости</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/articles" class="nav_list__item_link pure-button">Статьи</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/videos" class="nav_list__item_link pure-button">Видео</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/vacancies" class="nav_list__item_link pure-button">Вакансии</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/faq" class="nav_list__item_link pure-button">FAQ</a>
+            </li>
+          
+        
+      </ul>
+    </nav>
+
+    <a href="#subscribeModal" class="pure-button header__subscribe_link">Подписаться на рассылку</a>
+  </div>
+</div>
+
+
+      <div class="content pure-u-1 pure-u-md-3-4">
+        
+
+<article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+  <header class="post__header">
+    
+    <h1 class="post__title" itemprop="name headline">Результирующие типы данных в Эликсире</h1>
+
+    <div class="post__meta post_meta">
+      <ul class="meta_list">
+        <li class="meta_list__item">
+          
+          <span class="">
+            <small class="meta_list__item_name">Дата</small>
+            <time class="h-bold" datetime="2018-06-22T00:00:00+00:00" itemprop="datePublished">
+              
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+22 июня 2018
+
+            </time>
+          </span>
+          
+
+          
+        </li>
+        
+        <li class="meta_list__item">
+            <span class="tag_cloud tags_cloud--inline h-no_margin">
+              <small class="meta_list__item_name">Теги</small> 
+
+
+<ul class="tags_cloud__list">
+  
+    <a href="/tags/#overview" class="tags_cloud__link tag tag--overview">overview</a>
+  
+    <a href="/tags/#refactoring" class="tags_cloud__link tag tag--refactoring">refactoring</a>
+  
+</ul>
+
+            </span>
+        </li>
+        
+        <li class="meta_list__item">
+          <span itemprop="author" itemscope itemtype="http://schema.org/Person">
+            <small class="meta_list__item_name">
+              
+                Перевод
+              
+            </small>
+            <span itemprop="name" class="h-bold">Надежда Нестерова</span>
+          </span>
+        </li>
+
+        <li class="meta_list__item">
+          
+            <div >
+              <small>Оригинал</small>
+              <strong>
+                &laquo;<a href="https://medium.com/@bcoop713/result-types-and-addictive-utility-functions-f93fce197b88" style="text-transform: none; text-decoration: underline; color: #4b2e39;">Result Types and Addictive Utility Functions</a>&raquo;
+              </strong>
+              <small>&copy;</small>
+              <strong>Robert Cooper</strong>
+            </div>
+          
+        </li>
+      </ul>
+    </div>
+  </header>
+
+  <div class="post__content" itemprop="articleBody">
+    <blockquote>
+  <p>Переведено в <a href="https://docdog.io"><strong>Докдоге</strong></a> – системе перевода технических текстов.</p>
+</blockquote>
+
+<p><em><strong>От переводчиков:</strong> суть статьи – не в побуждении использовать библиотеку автора. Главная цель перевода именно этого материала – заставить читателей поразмышлять на тему railway-подхода к написаню кода, отсутствия в Эликсире полноценных составных (результирующих) типов данных и монад, организации цепочек функций. Прочитайте мысли автора, посмотрите код его библиотеки, попробуйте найти для себя ключ к более удобной организации кода. Своими умозаключениями и применяемыми техниками заходите делиться в <a href="https://t.me/wunsh"><strong>наш Телеграм-чат</strong></a>.</em></p>
+
+<p>Многие функциональные языки оперируют таким термином, как <strong>результирующий тип</strong>. Это структура данных, представляющая результат вызова функции, который может быть как значением, так и ошибкой. Классическим примером послужит результат обычного HTTP-запроса. Это может быть либо тело ответа, либо код ошибки. Результирующего типа как такового в Эликсире не существует, результат в обоих случаях представлен в виде кортежей <code class="highlighter-rouge">{:ok, result}</code> и <code class="highlighter-rouge">{:error, reason}</code>. Принцип использования этих двух кортежей многим хорошо знаком, и их описание можно найти в стандартной библиотеке. Например, в документации к <code class="highlighter-rouge">File.read</code>:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="no">File</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="sd">"</span><span class="s2">hello.txt"</span><span class="p">)</span> 
+<span class="c1">#=&gt; {:ok, "World"} </span>
+<span class="err">​</span> 
+<span class="no">File</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="sd">"</span><span class="s2">invalid.txt"</span><span class="p">)</span> 
+<span class="c1">#=&gt; {:error, :enoent}</span>
+</code></pre></div></div>
+
+<h2 id="в-чем-проблема">В чем проблема?</h2>
+
+<p>Данные кортежи идеально передают сам смысл результирующего типа, но в присущих Эликсиру конструкциях они ведут себя проблематично. Эликсирщики души не чают в пайп-операторе и, надо сказать, совершенно оправданно, ведь это лаконичный способ отследить все процессы и изменения, которые происходят со входным параметром во время выполнения программы. Взгляните на пример:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="sd">"</span><span class="s2">World"</span> 
+<span class="o">|&gt;</span> <span class="no">String</span><span class="o">.</span><span class="n">upcase</span> 
+<span class="o">|&gt;</span> <span class="no">String</span><span class="o">.</span><span class="n">slice</span><span class="p">(</span><span class="m">1</span><span class="o">..</span><span class="m">3</span><span class="p">)</span> 
+<span class="o">|&gt;</span> <span class="no">String</span><span class="o">.</span><span class="n">duplicate</span><span class="p">(</span><span class="m">2</span><span class="p">)</span> 
+<span class="c1">#=&gt; "ORLORL"</span>
+</code></pre></div></div>
+
+<p>Очевидно, связать в цепочку результирующие кортежи - плохая идея, многие функции ожидают получить не весь кортеж <code class="highlighter-rouge">{:ok, value}</code>, а только значение, содержащееся в нём. А если в результате содержится ошибка, чаще всего её вообще не нужно передавать в функцию, и это давно знакомая всем проблема. Большинство функциональных языков программирования для таких случаев имеют в своём арсенале вспомогательные функции, но Эликсир почему-то не разделяет этой тенденции. Вместо этого типичным решением будет провести сопоставление с образцом по результирующему типу и запускать различные блоки в зависимости от результата.</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">def</span> <span class="n">transform_world</span><span class="p">(</span><span class="n">str</span><span class="p">)</span> <span class="k">do</span> 
+<span class="n">str</span> 
+<span class="o">|&gt;</span> <span class="no">String</span><span class="o">.</span><span class="n">upcase</span> 
+<span class="o">|&gt;</span> <span class="no">String</span><span class="o">.</span><span class="n">slice</span><span class="p">(</span><span class="m">1</span><span class="o">..</span><span class="m">3</span><span class="p">)</span> 
+<span class="o">|&gt;</span> <span class="no">String</span><span class="o">.</span><span class="n">duplicate</span><span class="p">(</span><span class="m">2</span><span class="p">)</span> 
+<span class="k">end</span> 
+<span class="err">​</span> 
+<span class="k">case</span> <span class="no">File</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="sd">"</span><span class="s2">hello.txt"</span><span class="p">)</span> <span class="k">do</span> 
+<span class="p">{</span><span class="ss">:ok</span><span class="p">,</span> <span class="n">value</span><span class="p">}</span> <span class="o">-&gt;</span> <span class="p">{</span><span class="ss">:ok</span><span class="p">,</span> <span class="n">transform_world</span><span class="p">(</span><span class="n">value</span><span class="p">)}</span> 
+<span class="n">error</span> <span class="o">-&gt;</span> <span class="n">error</span> 
+<span class="k">end</span> 
+<span class="err">​</span> 
+<span class="c1">#=&gt; {:ok, "ORLORL"}</span>
+</code></pre></div></div>
+
+<p>Может быть, решение не так уж и плохо, но можно сделать лучше. С усложнением приложения, оперируя со значениями и результирующими кортежами, проводя сопоставление с образцом по этим значениям по всей кодовой базе, можно в результате получить довольно громоздкий код и навредить чистоте структуры проекта на Эликсире.</p>
+
+<p>Работать с результирующими кортежами станет ещё сложнее, если сцепить пайп-оператором несколько функций, также возвращающих результирующие кортежи:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">def</span> <span class="n">api_call1</span><span class="p">(</span><span class="n">payload</span><span class="p">)</span> <span class="k">do</span> 
+  <span class="k">case</span> <span class="n">payload</span> <span class="k">do</span> 
+    <span class="p">{</span><span class="ss">:ok</span><span class="p">,</span> <span class="n">value</span><span class="p">}</span> <span class="o">-&gt;</span> <span class="no">Http</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="sd">"</span><span class="s2">/api1"</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span> 
+    <span class="n">error</span> <span class="o">-&gt;</span> <span class="n">error</span> 
+  <span class="k">end</span> 
+<span class="k">end</span> 
+<span class="err">​</span> 
+<span class="k">def</span> <span class="n">to_payload2</span><span class="p">(</span><span class="n">resp1</span><span class="p">)</span> <span class="k">do</span> 
+  <span class="k">case</span> <span class="n">resp1</span> <span class="k">do</span> 
+    <span class="p">{</span><span class="ss">:ok</span><span class="p">,</span> <span class="n">value</span><span class="p">}</span> <span class="o">-&gt;</span> <span class="p">{</span><span class="ss">:ok</span><span class="p">,</span> <span class="n">resp1_to_payload2</span><span class="p">(</span><span class="n">value</span><span class="p">)}</span> 
+    <span class="n">error</span> <span class="o">-&gt;</span> <span class="n">error</span> 
+  <span class="k">end</span> 
+<span class="k">end</span> 
+<span class="err">​</span> 
+<span class="k">def</span> <span class="n">api_call2</span><span class="p">(</span><span class="n">payload2</span><span class="p">)</span> <span class="k">do</span> 
+  <span class="k">case</span> <span class="n">payload2</span> <span class="k">do</span> 
+    <span class="p">{</span><span class="ss">:ok</span><span class="p">,</span> <span class="n">value</span><span class="p">}</span> <span class="o">-&gt;</span> <span class="no">Http</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="sd">"</span><span class="s2">/api2"</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span> 
+    <span class="n">error</span> <span class="o">-&gt;</span> <span class="n">error</span> 
+  <span class="k">end</span> 
+<span class="k">end</span> 
+<span class="err">​</span> 
+<span class="p">{</span><span class="ss">:ok</span><span class="p">,</span> <span class="m">3</span><span class="p">}</span> 
+<span class="o">|&gt;</span> <span class="n">api_call1</span> 
+<span class="o">|&gt;</span> <span class="n">to_payload2</span> 
+<span class="o">|&gt;</span> <span class="n">api_call2</span>
+</code></pre></div></div>
+
+<p>Кажется, что-то не то… Каждая функция реализует один и тот же блок сопоставления с образцом. DRY отдыхает. Писать код таким образом было абсолютно нормально, но в Эликсире версии 1.2 появилась специальный оператор <code class="highlighter-rouge">with</code>. Восхищаясь его достоинствами, перепишем предыдущий код:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>def api_call1(payload) do 
+  Http.get("/api1", value) 
+end 
+​ 
+def to_payload2(resp1) do 
+  resp1_to_payload2(value) 
+end 
+​ 
+def api_call2(payload2) do 
+  Http.get("/api2", value) 
+end 
+​ 
+with {:ok, resp1} &lt;- api_call1({:ok, 3}), 
+     {:ok, payload2} &lt;- to_payload2(resp1), 
+     do: api_call2(payload2)
+</code></pre></div></div>
+
+<p>Ну да, так намного лучше! Определения <code class="highlighter-rouge">api_call1</code> и <code class="highlighter-rouge">api_call2</code> стали гораздо проще, а <code class="highlighter-rouge">to_payload2</code>в данном случае можно вообще выкинуть, заменив на <code class="highlighter-rouge">resp1_to_payload2</code>(в примере она присутствует для наглядности). Но… Кажется по-прежнему что-то не так. Выражение с <code class="highlighter-rouge">with</code> не так уж и просто понять с первого взгляда, в нашем случае оно просто берёт значение из одного вызова и склеивает его с другим. Для этого и нужен пайп-оператор, но, к сожалению, не хотелось бы писать лишний код, необходимый для функций пайплайна.</p>
+
+<h2 id="может-попробовать-по-другому">Может, попробовать по-другому?</h2>
+
+<p>В каждом языке программирования случается, что непонятно то ли функция отсутствует, то ли она не из стандартной библиотеки. В Джаваскрипте, например, однозначно не хватает стандартной библиотеки. Вот и приходится на скорую руку лепить необходимые хелперы и вспомогательные функции из сторонних библиотек. Одна из таких библиотек, вдохновившая автора статьи на создание своей библиотеки для Эликсира, называется <a href="http://folktale.origamitower.com/">Folktale.js</a>. Folktale содержит функции для создания, преобразования результирующих (и любых других типов) типов и сопоставления их с образцом.</p>
+
+<p><strong><em>Далее речь пойдёт от лица автора</em></strong></p>
+
+<p>Когда для своих сторонних проектов я переключился на Эликсир, мне показалось, что в нём есть <em>почти</em> всё необходимое для решения этих проблем, за исключением преобразования типов. Я создал библиотеку под названием <a href="https://hexdocs.pm/moonsugar/0.1.2/api-reference.html">Moonsugar</a>, чтобы узнать, насколько возможно сделать существующие решения лучше.</p>
+
+<p>Вернёмся к первому примеру и посмотрим, можно ли что-то изменить в лучшею сторону, используя хелперы из <code class="highlighter-rouge">Moonsugar</code>:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code># Без `Moonsugar` 
+def transform_world(str) do 
+  str 
+  |&gt; String.upcase 
+  |&gt; String.slice(1..3) 
+  |&gt; String.duplicate(2) 
+end 
+​ 
+case File.read("hello.txt") do 
+  {:ok, value} -&gt; {:ok, transform_world(value)} 
+  error -&gt; error 
+end 
+#=&gt; {:ok, "ORLORL"}
+</code></pre></div></div>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code># С `Moonsugar` 
+alias Moonsugar.Result as: MR 
+​ 
+File.read("hello.txt") 
+|&gt; MR.map(&amp;String.upcase/1) 
+|&gt; MR.map(&amp;(String.slice(&amp;1, 1..3))) 
+|&gt; MR.map(&amp;(String.duplicate(&amp;1, 2)) 
+#=&gt; {:ok, "ORLORL"}
+</code></pre></div></div>
+
+<p>Здесь используется функция <code class="highlighter-rouge">map</code> из Moonsugar, которая позволяет направить действие какой-либо функции на значение в кортеже <code class="highlighter-rouge">{:ok, value}</code>. Однако если функции <code class="highlighter-rouge">map</code> передать кортеж <code class="highlighter-rouge">{:error, reason}</code>, она не сработает, и ошибка пройдёт дальше:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>File.read("no_file_exists_here.txt") 
+|&gt; MR.map(&amp;String.upcase/1) 
+|&gt; MR.map(&amp;(String.slice(&amp;1, 1..3))) 
+|&gt; MR.map(&amp;(String.duplicate(&amp;1, 2)) 
+#=&gt; {:error, "Can not find file"}
+</code></pre></div></div>
+
+<p>Эффективно ли использовать данный метод обработки результатов? Не знаю, может быть. Мне нравится, что функции можно соединять в цепочки, не беспокоясь об обработке ошибок. С другой стороны, пайплайн стал немного менее читабельным. В целом, мне кажется, это победа.</p>
+
+<p>И ещё одно решение - API-вызовы:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code># Без `Moonsugar` 
+def api_call1(payload) do 
+Http.get("/api1", value) 
+end 
+​ 
+def to_payload2(resp1) do 
+resp1_to_payload2(value) 
+end 
+​ 
+def api_call2(payload2) do 
+Http.get("/api2", value) 
+end 
+​ 
+with {:ok, resp1} &lt;- api_call1(payload1), 
+{:ok, payload2} &lt;- to_payload2(resp1), 
+do: api_call2(payload2)
+</code></pre></div></div>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code># С `Moonsugar` 
+alias Moonsugar.Result as: MR 
+​ 
+def api_call1(payload) do 
+Http.get("/api1", value) 
+end 
+​ 
+def to_payload2(resp1) do 
+resp1_to_payload2(value) 
+end 
+​ 
+def api_call2(payload2) do 
+Http.get("/api2", value) 
+end 
+​ 
+payload1 
+|&gt; MR.chain(&amp;api_call1/1) 
+|&gt; MR.chain(&amp;to_payload2/1) 
+|&gt; MR.chain(&amp;api_call2/1)
+</code></pre></div></div>
+
+<p>Здесь используется функция <code class="highlighter-rouge">chain</code>, которая ведёт себя абсолютно так же, как и <code class="highlighter-rouge">map</code> из предыдущего примера, но вместо функции, возвращающей значение, она принимает функцию, возвращающую кортеж. Это позволяет… соединять в цепочку как нормальные функции, так и функции с ошибкой.</p>
+
+<p>Ура! Мы вернулись к пайплайну. Выигрывает ли это решение у предыдущего? Определённо да. Мне никогда не импонировал оператор <code class="highlighter-rouge">with</code>. Когда я только начинал изучать Эликсир, я всегда забывал про запятые, и мне казалось странным то, что синтаксис так сильно отличался. Думаю, используя функцию <code class="highlighter-rouge">chain</code>, можно сделать поток данных нагляднее.</p>
+
+<h3 id="maybe">Maybe</h3>
+
+<p>Существуют и другие типы, похожие на результирующие, которые часто используются в функциональном программировании. Один из них - тип <code class="highlighter-rouge">maybe</code>, который может быть представлен в Эликсире как <code class="highlighter-rouge">{:just, value}</code> или <code class="highlighter-rouge">:nothing</code>. Обычно они предназначены для замены пустых значений (<code class="highlighter-rouge">nil</code>). Используя вместо них тип <code class="highlighter-rouge">maybe</code>, можно также получить доступ к нескольким вспомогательным функциям Moonsugar и вместе с тем и определить, какие значения являются пустыми. Пару примеров из документации библиотеки:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Maybe.map({:just, 3}, fn(x) -&gt; x * 2 end) 
+#=&gt; {:just, 6} 
+​ 
+Maybe.map(:nothing, fn(x) -&gt; x * 2 end) 
+#=&gt; :nothing
+</code></pre></div></div>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Maybe.get_with_default({:just, 3}, 0) 
+#=&gt; 3 
+​ 
+Maybe.get_with_default(:nothing, 0) 
+#=&gt; 0
+</code></pre></div></div>
+
+<h3 id="валидация">Валидация</h3>
+
+<p>Тип валидации - ещё одна структура, вокруг которой построена библиотека Moonsugar. В Эликсире он представлен кортежами <code class="highlighter-rouge">{:success, value}</code> и <code class="highlighter-rouge">{:failure, reasons}</code>. Данный тип очень схож с результирующим, но он создан для отображения значений, представляющих собой набор ошибок. Образно говоря, результирующий тип остановится после первой ошибки, в то время как тип валидации пойдёт дальше. Очень полезное свойство для валидации данных, введённых пользователем. Например, если пользователь пытается задать пароль из приемлемых символов, но неверной длины или без заглавных букв:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>user_password 
+|&gt; MV.concat(&amp;valid_length/1) 
+|&gt; MV.concat(&amp;valid_chars/1) 
+|&gt; MV.concat(&amp;has_one_cap/1) 
+#=&gt; {:failure, ["Not long enough", "Not enough capital letters"]}
+</code></pre></div></div>
+
+<h3 id="оправдает-ли-moonsugar-ожидания">Оправдает ли Moonsugar ожидания?</h3>
+
+<p>Вопрос на миллион. Добавив библиотеку в проект, вы всегда получаете накладные вычислителные издержки в придачу. Плюс ко всему, вашему преемнику или коллеге придётся тоже с ней ознакомиться. Не знаю, насколько полезной окажется библиотека именно для вас, но, переписывая ещё одну свою библиотеку, используя Moonsugar, я заметил, что мой код стал проще и читабельнее, но я не могу здесь мыслить объективно. Пошерстите документацию на  <a href="https://hexdocs.pm/moonsugar/0.1.2/api-reference.html">Хексе</a> и поделитесь своими мыслями.</p>
+
+<h2 id="ps-от-вунша">P. S. от Вунша</h2>
+
+<p><em>Участники <a href="https://t.me/wunsh"><strong>нашего чата</strong></a> подсказывают аналогичные библиотеки, на которые тоже стоит взглянуть:</em></p>
+<ul>
+  <li><em><a href="https://github.com/rmies/monad"><strong>monad</strong></a> – из названия очевидно, что проблема решается через реализацию монад на Эликсире;</em></li>
+  <li><em><a href="https://github.com/Nebo15/sage"><strong>sage</strong></a> – здесь проблема рассматривается в виде «распределённых транзакций» и обработки ошибок с сохранением правильного состояния. У библиотеки довольно подробное описание на Гитхабе, так что обязательно переходите по ссылке и посмотрите сами.</em></li>
+</ul>
+
+  </div>
+
+  <!-- uSocial -->
+  <div class="post__share_block share_block">
+    <script async src="https://usocial.pro/usocial/usocial.js?v=6.1.4" data-script="usocial" charset="utf-8"></script>
+    <div class="uSocial-Share" data-pid="2fd19544e551bce292425ee8adaa31be" data-type="share" data-options="round,style2,default,absolute,horizontal,size32,counter1,counter-before,upArrow-right,nomobile" data-social="telegram,fb,vk,gPlus,twi,bookmarks"></div>
+  </div>
+  <!-- /uSocial -->
+</article>
+
+
+        <footer class="footer">
+    &copy; 2020
+    / Россия
+
+    <span class="pull-right">Любые мысли и вопросы пишите на <a href="mailto:elixir@wunsh.ru">elixir@wunsh.ru</a>.</span>
+</footer>
+
+        <div id="subscribeModal" class="modal">
+    <div class="modal__content">
+        <a href="#close" title="Close" class="modal__close">x</a>
+
+        <h2 class="modal__title">Ламповая рассылка про&nbsp;Эликсир</h2>
+
+        <p>Один-два раза в&nbsp;неделю присылаем тёплые письма об&nbsp;Эликсире: переводы самых интересных статей до&nbsp;их&nbsp;появления в&nbsp;открытом доступе, анонсы событий и&nbsp;вкусные бонусы.</p>
+
+        <form action="//wunsh.us14.list-manage.com/subscribe/post?u=c81ca3d4693f62db7f7f67c71&amp;id=a192e2dfef" method="post" id="mc-embedded-subscribe-form" name="mc-embedded-subscribe-form" class="pure-form h-tc validate" target="_blank" novalidate>
+            <input type="email" value="" name="EMAIL" class="modal__input pure-input-rounded large" id="mce-EMAIL" placeholder="Твоя почта" required>
+            <div style="position: absolute; left: -5000px;" aria-hidden="true"><input type="text" name="b_c81ca3d4693f62db7f7f67c71_a192e2dfef" tabindex="-1" value=""></div>
+
+            <input type="submit" value="Присоединиться" name="subscribe" onClick="yaCounter39773490.reachGoal('SUBSCRIBED'); return true" id="mc-embedded-subscribe" class="pure-button button-success large">
+        </form>
+
+        <p>Обязательно подтверди почту, перейдя по&nbsp;ссылке в&nbsp;письме, иначе мы&nbsp;не&nbsp;сможем делиться с&nbsp;тобой полезностями.</p>
+
+        <p>Надоедать точно не&nbsp;будем :)</p>
+    </div>
+</div>
+
+        <script src="/assets/js/vendors/zepto.min.js"></script>
+
+<script>
+    if ($(".post--docs").length) {
+        $(".footer").addClass("footer--docs")
+    }
+
+    $(".modal--close_backdrop").click(function(){
+        window.location.hash = "";
+    });
+</script>
+
+        <!-- Yandex.Metrika counter -->
+<script type="text/javascript">
+    (function (d, w, c) {
+        (w[c] = w[c] || []).push(function() {
+            try {
+                w.yaCounter39773490 = new Ya.Metrika({
+                    id:39773490,
+                    clickmap:true,
+                    trackLinks:true,
+                    accurateTrackBounce:true,
+                    webvisor:true,
+                    ut:"noindex"
+                });
+            } catch(e) { }
+        });
+
+        var n = d.getElementsByTagName("script")[0],
+            s = d.createElement("script"),
+            f = function () { n.parentNode.insertBefore(s, n); };
+        s.type = "text/javascript";
+        s.async = true;
+        s.src = "https://mc.yandex.ru/metrika/watch.js";
+
+        if (w.opera == "[object Opera]") {
+            d.addEventListener("DOMContentLoaded", f, false);
+        } else { f(); }
+    })(document, window, "yandex_metrika_callbacks");
+</script>
+<noscript><div><img src="https://mc.yandex.ru/watch/39773490?ut=noindex" style="position:absolute; left:-9999px;" alt="" /></div></noscript>
+<!-- /Yandex.Metrika counter -->
+
+      </div>
+    </div>
+  </body>
+</html>

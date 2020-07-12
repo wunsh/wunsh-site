@@ -1,0 +1,771 @@
+<!DOCTYPE html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Создание веб-приложения на Фениксе и Элме |> Сообщество Elixir и Phoenix Framework</title>
+    <meta name="description" content="Создание веб-приложения на Фениксе и Элме">
+
+    <link rel="alternate" type="application/rss+xml" title="Сообщество Elixir и Phoenix Framework" href="/feed.xml" />
+    <link rel="canonical" href="https://wunsh.ru/articles/writing-a-full-site-in-phoenix-and-elm-part-1.html">
+
+    <style type="text/css">@import url("//fonts.googleapis.com/css?family=Source+Sans+Pro:400,700&subset=cyrillic");</style>
+    <link rel="stylesheet" href="/assets/css/vendors/pure.min.css">
+    <link rel="stylesheet" href="/assets/css/vendors/pure-grids-responsive.min.css">
+    <link rel="stylesheet" href="/assets/css/style.css?1594516983">
+
+    <link rel="shortcut icon" type="image/png" href="/assets/favicon.png" >
+</head>
+
+
+  <body>
+    <div class="wunsh pure-g">
+      
+
+
+
+
+<div class="menu pure-u-1 pure-u-md-1-4">
+  <div class="header">
+    <h2 class="header__title">
+      
+        <a href="https://wunsh.ru" class="header__title_link" title="На главную">Эликсир и&nbsp;Вунш</a>
+      
+    </h2>
+    <h3 class="header__tagline">Erlang + Ruby = &#10084;</h3>
+
+    <nav class="nav">
+      <ul class="nav_list">
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/elixir" class="nav_list__item_link pure-button">О языке</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/install/linux-asdf" class="nav_list__item_link pure-button">Установка</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/docs/" class="nav_list__item_link pure-button">Документация</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/guides" class="nav_list__item_link pure-button">Гайды</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/news" class="nav_list__item_link pure-button">Новости</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/articles" class="nav_list__item_link pure-button">Статьи</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/videos" class="nav_list__item_link pure-button">Видео</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/vacancies" class="nav_list__item_link pure-button">Вакансии</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/faq" class="nav_list__item_link pure-button">FAQ</a>
+            </li>
+          
+        
+      </ul>
+    </nav>
+
+    <a href="#subscribeModal" class="pure-button header__subscribe_link">Подписаться на рассылку</a>
+  </div>
+</div>
+
+
+      <div class="content pure-u-1 pure-u-md-3-4">
+        
+
+<article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+  <header class="post__header">
+    
+    <h1 class="post__title" itemprop="name headline">Создание веб-приложения на Фениксе и Элме</h1>
+
+    <div class="post__meta post_meta">
+      <ul class="meta_list">
+        <li class="meta_list__item">
+          
+          <span class="">
+            <small class="meta_list__item_name">Дата</small>
+            <time class="h-bold" datetime="2017-12-22T00:00:00+00:00" itemprop="datePublished">
+              
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+22 декабря 2017
+
+            </time>
+          </span>
+          
+
+          
+        </li>
+        
+        <li class="meta_list__item">
+            <span class="tag_cloud tags_cloud--inline h-no_margin">
+              <small class="meta_list__item_name">Теги</small> 
+
+
+<ul class="tags_cloud__list">
+  
+    <a href="/tags/#elm" class="tags_cloud__link tag tag--elm">elm</a>
+  
+    <a href="/tags/#phoenix" class="tags_cloud__link tag tag--phoenix">phoenix</a>
+  
+    <a href="/tags/#practical" class="tags_cloud__link tag tag--practical">practical</a>
+  
+</ul>
+
+            </span>
+        </li>
+        
+        <li class="meta_list__item">
+          <span itemprop="author" itemscope itemtype="http://schema.org/Person">
+            <small class="meta_list__item_name">
+              
+                Перевод
+              
+            </small>
+            <span itemprop="name" class="h-bold">Сообщество</span>
+          </span>
+        </li>
+
+        <li class="meta_list__item">
+          
+            <div >
+              <small>Оригинал</small>
+              <strong>
+                &laquo;<a href="https://medium.com/@diamondgfx/writing-a-full-site-in-phoenix-and-elm-a100804c9499" style="text-transform: none; text-decoration: underline; color: #4b2e39;">Writing A Full Site in Phoenix and Elm</a>&raquo;
+              </strong>
+              <small>&copy;</small>
+              <strong>Brandon Richey</strong>
+            </div>
+          
+        </li>
+      </ul>
+    </div>
+  </header>
+
+  <div class="post__content" itemprop="articleBody">
+    <h2 id="вступление">Вступление</h2>
+
+<p>Эликсир – классный функциональный язык, а в связке с Фениксом появляется возможность создавать крутые бэкенды для  веб-приложений. Однако, проблема в том, что всё больше сайты превращаются в Джаваскрипт-монстров, а мы пишем всё меньше серверного кода на классном функциональном языке. Какие есть варианты, если хочется использовать функциональное программирование и на сервере, и на клиенте?</p>
+
+<p>Один из вариантов, который мы можем выбрать – это Элм. Он быстрый, чистый, но больше всего подкупает то, что Элм фактически не даёт ошибкам времени выполнения просочиться в ваш фронтенд, оставляя вас с беспрецедентно быстрым и чрезвычайно безопасным пользовательским интерфейсом.</p>
+
+<h3 id="используемые-версии">Используемые версии</h3>
+
+<ul>
+  <li>Эликсир: v1.2.6;</li>
+  <li>Феникс: v1.1.6;</li>
+  <li>Элм: v0.17.</li>
+</ul>
+
+<h2 id="создаём-сайт-на-фениксе">Создаём сайт на Фениксе</h2>
+
+<p>Начнём с создания базового приложения на Фениксе, чтобы отдавать пользователю фронтенд на Элме и предоставлять API для него. Запустите следующую команду:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ mix phoenix.new elm_articles
+</code></pre></div></div>
+
+<p>Ответьте <code class="highlighter-rouge">Y</code> на вопрос о загрузке/установке зависимостей. Настроим Феникс позже, а пока достаточно и этого.</p>
+
+<h2 id="добавляем-элм-в-brunch">Добавляем Элм в Brunch</h2>
+
+<p>Начнём с добавления пакета <code class="highlighter-rouge">brunch-elm</code> из Npm, который позволит работать Элму вместе с приложением на Фениксе:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ npm install --save-dev elm-brunch
+</code></pre></div></div>
+
+<p>Теперь нужно настроить <code class="highlighter-rouge">elm-brunch</code>. Откройте <code class="highlighter-rouge">brunch-config.js</code> и добавьте конфигурацию для <code class="highlighter-rouge">elmBrunch</code>. Предположим, что у нас будет одно главное приложение на Элме, и мы собираемся забросить его к остальному фронтенд-коду на Джаваскрипте. Вот пример измененного файла <code class="highlighter-rouge">brunch-config</code>:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>// Configure your plugins
+  plugins: {
+    babel: {
+      // Do not use ES6 compiler in vendor code
+      ignore: [/web\/static\/vendor/]
+    },
+    elmBrunch: {
+      elmFolder: 'web/elm',
+      mainModules: ['Main.elm'],
+      outputFolder: '../static/js',
+    }
+  },
+</code></pre></div></div>
+
+<p>А также нужно обновить ключ <code class="highlighter-rouge">watched</code>, чтобы изменения Элм-файлов отслеживались внутри <code class="highlighter-rouge">web/elm</code>:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>watched: [
+  'web/static',
+  'test/static',
+  'web/elm',
+],
+</code></pre></div></div>
+
+<p>Наконец, откройте файл <code class="highlighter-rouge">app.js</code> и добавьте:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>import Elm from './main';
+const elmDiv = document.querySelector('#elm-target');
+if (elmDiv) {
+  Elm.Main.embed(elmDiv);
+}
+</code></pre></div></div>
+
+<p>Затем выполните:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ mkdir web/elm
+$ cd web/elm
+$ elm package install elm-lang/html
+</code></pre></div></div>
+
+<h2 id="создаём-сайт-на-элме">Создаём сайт на Элме</h2>
+
+<p>Пришло время написать первый код в рамках нашего первого погружения в Элм. Выполните следующую команду:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ touch web/elm/Main.elm
+</code></pre></div></div>
+
+<p>Затем добавьте в файл <code class="highlighter-rouge">web/elm/Main.elm</code> код:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>module Main exposing (..)
+import Html exposing (text, Html)
+main : Html a
+main =
+  text "Hello Foo"
+</code></pre></div></div>
+
+<p>И измените шаблон страниц, чтобы Элм-приложение могло быть отображено. Допишите в файл <code class="highlighter-rouge">web/templates/page/index.html.eex</code>:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>&lt;div id="elm-target"&gt;&lt;/div&gt;
+</code></pre></div></div>
+
+<p>Теперь, когда страница обновится, вы должны увидеть, что всё корректно отображается в браузере! Мы будем использовать Феникс в качестве бэкенда, поэтому возьмём его основной шаблон. Всё остальное, что относится к фронтенду, будет на Элме!</p>
+
+<p>Теперь давайте создадим директорию <code class="highlighter-rouge">Components</code>, которая будет отвечать за хранение разных отдельных компонетов, кроме <code class="highlighter-rouge">Main</code>, и добавим компонент <code class="highlighter-rouge">ArticleList</code>.</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ mkdir web/elm/Components
+$ touch web/elm/Components/ArticleList.elm
+</code></pre></div></div>
+
+<p>Теперь нам нужно настроить Элм, чтобы он исопользовал новую директорию <code class="highlighter-rouge">Components</code>. Откройте файл <code class="highlighter-rouge">elm-package.json</code>, найдите там ключ <code class="highlighter-rouge">"source-directories"</code>, и измените его, чтобы он выглядел следующим образом:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>"source-directories": [
+    ".",
+    "./Components"
+],
+</code></pre></div></div>
+
+<p>Теперь можно собрать небольшой образец компонента, чтобы сделать первый шаг. Откройте файл <code class="highlighter-rouge">web/elm/Components/ArticleList.elm</code>:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>module Components.ArticleList exposing (view)
+import Html exposing (Html, text, ul, li, div, h2)
+import Html.Attributes exposing (class)
+view : Html a
+view =
+  div [ class "article-list" ] [
+    h2 [] [ text "Article List" ],
+      ul []
+        [ li [] [ text "Article 1" ]
+        , li [] [ text "Article 2" ]
+        , li [] [ text "Article 3" ] ] ]
+</code></pre></div></div>
+
+<p>Затем проследуем обратно в файл <code class="highlighter-rouge">web/elm/Main.elm</code> и подключим <code class="highlighter-rouge">ArticleList</code> внутри компонента <code class="highlighter-rouge">Main</code>:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>module Main exposing (..)
+import Html exposing (Html, text, div)
+import Html.Attributes exposing (class)
+import Components.ArticleList as ArticleList
+main : Html a
+main =
+  div [ class "elm-app" ] [ ArticleList.view ]
+</code></pre></div></div>
+
+<p>Теперь, когда страница обновится, вы должны увидеть заголовок <code class="highlighter-rouge">Article List</code> сверху и список из трёх статей, с которым мы начали. Это достаточно хороший старт и хороший способ показать, как разбивать вашу логику на компоненты и модули в Элме, чтобы с кодом было проще работать. Однако то, что мы написали в <code class="highlighter-rouge">ArticleList.elm</code> всё ещё достаточно неуклюже. Давайте отрефакторим отображение статей, разделив функции. Измените файл <code class="highlighter-rouge">web/elm/Components/ArticleList.elm</code>:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>module Components.ArticleList exposing (view)
+import Html exposing (Html, text, ul, li, div, h2)
+import Html.Attributes exposing (class)
+renderArticles : List (Html a)
+renderArticles =
+  [ li [] [ text "Article 1" ]
+  , li [] [ text "Article 2" ]
+  , li [] [ text "Article 3" ] ]
+view : Html a
+view =
+  div [ class "article-list" ] [
+    h2 [] [ text "Article List" ]
+    , ul [] renderArticles ]
+</code></pre></div></div>
+
+<p>Будет гораздо легче делать рефакторинг рендера статьи, когда есть отдельный компонент <code class="highlighter-rouge">Article</code>. Давайте реализуем его. Создайте и откройте файл <code class="highlighter-rouge">web/elm/Components/Article.elm</code>:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>module Article exposing (view, Model)
+import Html exposing (Html, span, strong, em, a, text)
+import Html.Attributes exposing (class, href)
+type alias Model =
+  { title : String, url : String, postedBy : String, postedOn: String }
+view : Model -&gt; Html a
+view model =
+  span [ class "article" ] 
+    [a [ href model.url ] [ strong [ ] [ text model.title ] ]
+    , span [ ] [ text (" Posted by: " ++ model.postedBy) ]
+    , em [ ] [ text (" (posted on: " ++ model.postedOn ++ ")") ]
+    ]
+</code></pre></div></div>
+
+<p>Этот компонент немного сложнее. Мы добавили внутреннее представление модели, чтобы иметь возможность создавать объекты <code class="highlighter-rouge">Article</code> в будущем. Для начала статья будет содержать атрибуты <code class="highlighter-rouge">title</code>, <code class="highlighter-rouge">url</code>, <code class="highlighter-rouge">postedBy</code> и <code class="highlighter-rouge">postedOn</code>, которые дадут нам некоторую информацию о каждом объекте. Кроме того, мы определили функцию <code class="highlighter-rouge">view</code>, которая принимает модель и возвращает HTML. Остальной код - просто шаблон на Элме, поэтому нет смысла тратить много времени на него, но алиас типа вверху достаточно интересен, поэтому на нём ненадолго остановимся.</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>type alias Model =
+  { title : String, url : String, postedBy : String, postedOn: String }
+</code></pre></div></div>
+
+<p>Здесь говорится, чтобы Элм, встречая модель в нашем коде, в действительности понимал это как тип записи с четырьмя ключами <code class="highlighter-rouge">String</code>: <code class="highlighter-rouge">title</code>, <code class="highlighter-rouge">url</code>, <code class="highlighter-rouge">postedBy</code>, <code class="highlighter-rouge">postedOn</code>. А в определении типа для функции представления как раз принимается <code class="highlighter-rouge">Model</code> и возвращается HTML, подходящий для этой модели!</p>
+
+<p>Наверху компонента <code class="highlighter-rouge">Article</code> раскрываются <code class="highlighter-rouge">view</code> и <code class="highlighter-rouge">Model</code> любому импортёру так, чтобы они могли работать с определёнными здесь структурами данных!</p>
+
+<p>Давайте вернёмся к файлу ` web/elm/Components/ArticleList.elm<code class="highlighter-rouge"> и добавим в него взаимодействие с компонентом </code>Article`:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>module Components.ArticleList exposing (view)
+import Html exposing (Html, text, ul, li, div, h2)
+import Html.Attributes exposing (class)
+import List
+import Article
+articles : List Article.Model
+articles =
+  [ { title = "Article 1", url = "http://google.com", postedBy = "Author", postedOn = "06/20/16" }
+  , { title = "Article 2", url = "http://google.com", postedBy = "Author 2", postedOn = "06/20/16" }
+  , { title = "Article 3", url = "http://google.com", postedBy = "Author 3", postedOn = "06/20/16" }
+  ]
+renderArticle : Article.Model -&gt; Html a
+renderArticle article =
+  li [ ] [ Article.view article ]
+renderArticles : List (Html a)
+renderArticles =
+  List.map renderArticle articles
+view : Html a
+view =
+  div [ class "article-list" ]
+    [ h2 [] [ text "Article List" ]
+    , ul [] renderArticles ]
+</code></pre></div></div>
+
+<p>Теперь мы начинаем с импорта двух новых модулей <code class="highlighter-rouge">List</code> и <code class="highlighter-rouge">Article</code> в <code class="highlighter-rouge">ArticleList</code>. <code class="highlighter-rouge">List</code> - встроен в Элм, а <code class="highlighter-rouge">Article</code> мы только что создали. Нам нужен <code class="highlighter-rouge">List</code> для вызова функции<code class="highlighter-rouge"> List.map</code>.</p>
+
+<p>Затем мы реализовали функцию <code class="highlighter-rouge">articles</code>, которая просто возвращает три статьи-болванки, не используя никакого источника. Тип функции <code class="highlighter-rouge">articles</code> - <code class="highlighter-rouge">List</code> из объектов типа <code class="highlighter-rouge">Article.Model</code>. Затем мы определили две функции функции для рендера: первая для одиночной статьи (<code class="highlighter-rouge">renderArticle</code>) и вторая для вызова <code class="highlighter-rouge">renderArticle</code> для каждой статьи из нашего ресурса-заглушки.</p>
+
+<p>Функция <code class="highlighter-rouge">renderArticle</code> оборачивает открытую функцию <code class="highlighter-rouge">Article.view</code> (которая принимает тип <code class="highlighter-rouge">Article.Model</code>) и возвращает <code class="highlighter-rouge">Html</code> этой статьи. Затем функция <code class="highlighter-rouge">renderArticles</code> проходит по списку статей и вызывает функцию <code class="highlighter-rouge">renderArticle</code> на каждой из них).</p>
+
+<p>Наконец, функция <code class="highlighter-rouge">view</code> немного изменена так, что неупорядочный список лишь вызывает функцию <code class="highlighter-rouge">renderArticles</code>, вместо определени] списка потомков (так как функция <code class="highlighter-rouge">renderArticles</code>, основанная на просмотре определения типа, возвращает список HTML-элементов).</p>
+
+<h2 id="приводим-articlelistelm-в-порядок">Приводим <code class="highlighter-rouge">ArticleList.elm</code> в порядок</h2>
+
+<p>Компонент <code class="highlighter-rouge">ArticleList</code> работает, но он полностью отделён от любого значимого взаимодействия с пользователем. Если мы хотим, чтобы он имел возможность действительно реагировать на какие-либо взаимодействия или события, необходимо сделать код более идиоматичным Элму. Для этого определим исходную моделль, инициализатор, функцию представления, функцию обновления и объединённый тип <code class="highlighter-rouge">Msg</code>. Определение модели сойдёт в текущем виде.</p>
+
+<p>Откройте файл <code class="highlighter-rouge">web/elm/Components/ArticleList.elm</code> и добавьте в него:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>module Components.ArticleList exposing (..)
+</code></pre></div></div>
+
+<p>Достанем из компонента <code class="highlighter-rouge">Components.ArticleList</code> все функции с помощью <code class="highlighter-rouge">(..)</code>.</p>
+
+<p>Затем давайте изменим импорты, так как наш компонент явно делает намного больше:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>import Html exposing (Html, text, ul, li, div, h2, button)
+import Html.Attributes exposing (class)
+import Html.Events exposing (onClick)
+import List
+import Article
+</code></pre></div></div>
+
+<p>Нам нужно предоставить текущему компоненту также кнопку <code class="highlighter-rouge">button</code> из модуля <code class="highlighter-rouge">Html</code> и добавить импорт функции <code class="highlighter-rouge">onClick</code> из модуля <code class="highlighter-rouge">Html.Events</code>. Затем нужно сделать определение типа модели записью с ключами:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>type alias Model =
+  { articles: List Article.Model }
+</code></pre></div></div>
+
+<p>А также нужно заставить старую функцию <code class="highlighter-rouge">articles</code> работать с новым определением модели:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>articles : Model
+articles =
+  { articles =
+    [ { title = "Article 1", url = "http://google.com", postedBy = "Author", postedOn = "06/20/16" }
+    , { title = "Article 2", url = "http://google.com", postedBy = "Author 2", postedOn = "06/20/16" }
+    , { title = "Article 3", url = "http://google.com", postedBy = "Author 3", postedOn = "06/20/16" } ] }
+</code></pre></div></div>
+
+<p>Вот как выглядит объединённый тип <code class="highlighter-rouge">Msg</code>:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>type Msg
+  = NoOp
+  | Fetch
+</code></pre></div></div>
+
+<p>Использование сообщения <code class="highlighter-rouge">NoOp</code> для каждого объединённого типа <code class="highlighter-rouge">Msg</code> – хороший способ отслеживать случаи, когда приходит событие, которое ничего не делает. Переходим к функции <code class="highlighter-rouge">update</code>:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>update : Msg -&gt; Model -&gt; (Model, Cmd Msg)
+update msg model =
+  case msg of
+    NoOp -&gt;
+      (model, Cmd.none)
+    Fetch -&gt;
+      (articles, Cmd.none)
+</code></pre></div></div>
+
+<p>Наконец, реализуем функцию <code class="highlighter-rouge">initialModel</code>:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>initialModel : Model
+initialModel =
+  { articles = [] }
+</code></pre></div></div>
+
+<p>Это позволит <code class="highlighter-rouge">ArticleList</code> начинать работу с пустым списком статей. Следом добавим в компонент <code class="highlighter-rouge">ArticleList</code> кнопку, которая при срабатывании будет отправлять сообщение <code class="highlighter-rouge">Fetch</code>, определённое в <code class="highlighter-rouge">Msg</code>:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>view : Model -&gt; Html Msg
+view model =
+  div [ class "article-list" ]
+    [ h2 [] [ text "Article List" ]
+    , button [ onClick Fetch, class "btn btn-primary" ] [ text "Fetch Articles" ]
+    , ul [] (renderArticles model) ]
+</code></pre></div></div>
+
+<p>И наконец, давайте изменим функцию <code class="highlighter-rouge">renderArticles</code>, чтобы она принимала модель и рендерила список статей, основанный на ключе <code class="highlighter-rouge">articles</code> из модели:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>renderArticles : Model -&gt; List (Html a)
+renderArticles model =
+  List.map renderArticle model.articles
+</code></pre></div></div>
+
+<h2 id="приводим-articlelistelm-в-порядок-1">Приводим <code class="highlighter-rouge">ArticleList.elm</code> в порядок</h2>
+
+<p>Вероятно, вы заметили, что в <code class="highlighter-rouge">Main.elm</code> особо нет стандартного кода, встречающегося в больших приложениях на Элме, и в целом он спроектирован не по стандартной архитектуре Элма, что делает встраивание приложений, которые имеют какое-либо отношение к взаимодействию с пользователем значительно сложнее! Кроме того, предыдущий компонент, который теперь более идиоматичен, не работает из-за существенного рефакторинга!</p>
+
+<p>Чтобы это исправить, нужно сделать структуру основного приложения в стиле Элма. Опять же, нам нужно определить начальную модель, инициализатор, функцию представления, функцию обновления и функцию подписки. Начнём с определения модели, чтобы иметь концепцию некоторых её дочерних компонентов и их моделей. Откройте файл <code class="highlighter-rouge">web/elm/Main.elm</code> и давайте начнём его изменять:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>type alias Model =
+  { articleListModel: ArticleList.Model }
+</code></pre></div></div>
+
+<p>Это говорит о том, что модель будет содержать модели дочерних компоненов. Далее, определим начальное состояние основной модели:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>initialModel : Model
+initialModel =
+  { articleListModel = ArticleList.initialModel }
+</code></pre></div></div>
+<p>Здесь мы также говорим, что любые данные, связанные с <code class="highlighter-rouge">articleListModel</code> должны быть с самого начала спроецированы в функции <code class="highlighter-rouge">initialModel</code>. Далее напишем инициализатор для модуля:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>init : (Model, Cmd Msg)
+init =
+  ( initialModel, Cmd.none )
+</code></pre></div></div>
+
+<p>Инициализатор возвращает <code class="highlighter-rouge">initialModel</code> и команду ничего не делать. Далее рассмотрим такое определение:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>type Msg
+  = ArticleListMsg ArticleList.Msg
+</code></pre></div></div>
+
+<p>Здесь говорится, что любые сообщения, транслируемые из компонента <code class="highlighter-rouge">ArticleList</code> могут быть обёрнуты в родительский компонент (<code class="highlighter-rouge">Main.elm</code>) в качестве сообщения <code class="highlighter-rouge">Msg</code> типа <code class="highlighter-rouge">ArticleListMsg</code>. Далее рассмотрим функцию обновления:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>update : Msg -&gt; Model -&gt; (Model, Cmd Msg)
+update msg model =
+  case msg of
+    ArticleListMsg articleMsg -&gt;
+      let (updatedModel, cmd) = ArticleList.update articleMsg model.articleListModel
+      in ( { model | articleListModel = updatedModel }, Cmd.map ArticleListMsg cmd )
+</code></pre></div></div>
+
+<p>Здесь немного посложнее, но по сути принятое сообщение <code class="highlighter-rouge">Msg</code> просто сопоставляется с образцом. Если это <code class="highlighter-rouge">ArticleListMsg</code> (сообщение, полученное из компонента <code class="highlighter-rouge">ArticleList</code>), то вызывается функция обновления, определённая в компоненте <code class="highlighter-rouge">ArticleList</code> и возвращается обновлённая часть модели (сообщения <code class="highlighter-rouge">ArticleListMsg</code> могут обновлять только часть модели <code class="highlighter-rouge">articleListModel</code>). Затем мы сопоставим любые дополнительные <code class="highlighter-rouge">Msgs</code> из компонента <code class="highlighter-rouge">ArticleList</code> как тип <code class="highlighter-rouge">ArticleListMsg</code>.</p>
+
+<p>Затем необхоидмо написать обработчик подписок, который сейчас будет просто шаблонным кодом:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>subscriptions : Model -&gt; Sub Msg
+subscriptions model =
+  Sub.none
+</code></pre></div></div>
+
+<p>Прямо сейчас у нас нет подписчиков, так что не будем беспокоиться о том, как оно работает. Теперь пришло время перейти к рассмотрению функции представления. Мы будем использовать <code class="highlighter-rouge">Html.App</code>, который отобразит сообщения от потомков в сообщение, которые будет включено нашим родительским приложением, поэтому добавьте следующую строку наверх:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>import Html.App
+</code></pre></div></div>
+
+<p>И затем измените функцию <code class="highlighter-rouge">view</code>:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>view : Model -&gt; Html Msg
+view model =
+  div [ class "elm-app" ]
+    [ Html.App.map ArticleListMsg (ArticleList.view model.articleListModel) ]
+</code></pre></div></div>
+
+<p>Поскольку наша функция представления в компоненте <code class="highlighter-rouge">ArticleList</code> определяется как модель представления, нам необходимо предоставить их обе. Кроме того, нам нужно сказать компоненту <code class="highlighter-rouge">ArticleList</code>, что модель будет изменяться с помощью обновлений из родительского компонента.</p>
+
+<p>Наконец, посмотрите на функцию <code class="highlighter-rouge">main</code>:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>main : Program Never
+main =
+  Html.App.program
+    { init = init
+    , view = view
+    , update = update
+    , subscriptions = subscriptions
+    }
+</code></pre></div></div>
+
+<p>Теперь, когда мы запускаем наше приложение, мы должны увидеть красивую синюю кнопку с надписью «Получить статьи». После нажатия этой кнопки у вас должен появиться список статей. Ура! Взаимодействие с пользователем и правильная разбивка компонентов!</p>
+
+<h2 id="весь-код">Весь код</h2>
+
+<p>Файл <code class="highlighter-rouge">web/elm/Components/ArticleList.elm</code>:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>module Components.ArticleList exposing (..)
+import Html exposing (Html, text, ul, li, div, h2, button)
+import Html.Attributes exposing (class)
+import Html.Events exposing (onClick)
+import List
+import Article
+type alias Model =
+  { articles: List Article.Model }
+type Msg
+  = NoOp
+  | Fetch
+update : Msg -&gt; Model -&gt; (Model, Cmd Msg)
+update msg model =
+  case msg of
+    NoOp -&gt;
+      (model, Cmd.none)
+    Fetch -&gt;
+      (articles, Cmd.none)
+articles : Model
+articles =
+  { articles =
+    [ { title = "Article 1", url = "http://google.com", postedBy = "Author", postedOn = "06/20/16" }
+    , { title = "Article 2", url = "http://google.com", postedBy = "Author 2", postedOn = "06/20/16" }
+    , { title = "Article 3", url = "http://google.com", postedBy = "Author 3", postedOn = "06/20/16" } ] }
+renderArticle : Article.Model -&gt; Html a
+renderArticle article =
+  li [ ] [ Article.view article ]
+renderArticles : Model -&gt; List (Html a)
+renderArticles articles =
+  List.map renderArticle articles.articles
+initialModel : Model
+initialModel =
+  { articles = [] }
+view : Model -&gt; Html Msg
+view model =
+  div [ class "article-list" ]
+    [ h2 [] [ text "Article List" ]
+    , button [ onClick Fetch, class "btn btn-primary" ] [ text "Fetch Articles" ]
+    , ul [] (renderArticles model) ]
+</code></pre></div></div>
+
+<p>Файл <code class="highlighter-rouge">web/elm/Components/Article.elm</code>:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>module Article exposing (view, Model)
+import Html exposing (Html, span, strong, em, a, text)
+import Html.Attributes exposing (class, href)
+type alias Model =
+  { title : String, url : String, postedBy : String, postedOn: String }
+view : Model -&gt; Html a
+view model =
+  span [ class "article" ] [
+    a [ href model.url ] [ strong [ ] [ text model.title ] ]
+    , span [ ] [ text (" Posted by: " ++ model.postedBy) ]
+    , em [ ] [ text (" (posted on: " ++ model.postedOn ++ ")")
+    ]
+  ]
+</code></pre></div></div>
+
+<p>Файл: <code class="highlighter-rouge">web/elm/Main.elm</code>:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>module Main exposing (..)
+import Html exposing (Html, text, div)
+import Html.App
+import Html.Attributes exposing (class)
+import Components.ArticleList as ArticleList
+-- MODEL
+type alias Model =
+  { articleListModel : ArticleList.Model }
+initialModel : Model
+initialModel =
+  { articleListModel = ArticleList.initialModel }
+init : (Model, Cmd Msg)
+init =
+  ( initialModel, Cmd.none )
+-- UPDATE
+type Msg
+  = ArticleListMsg ArticleList.Msg
+update : Msg -&gt; Model -&gt; (Model, Cmd Msg)
+update msg model =
+  case msg of
+    ArticleListMsg articleMsg -&gt;
+      let (updatedModel, cmd) = ArticleList.update articleMsg model.articleListModel
+      in ( { model | articleListModel = updatedModel }, Cmd.map ArticleListMsg cmd )
+subscriptions : Model -&gt; Sub Msg
+subscriptions model =
+  Sub.none
+-- VIEW
+view : Model -&gt; Html Msg
+view model =
+  div [ class "elm-app" ]
+    [ Html.App.map ArticleListMsg (ArticleList.view model.articleListModel) ]
+-- MAIN
+main : Program Never
+main =
+  Html.App.program
+    { init = init
+    , view = view
+    , update = update
+    , subscriptions = subscriptions
+    }
+</code></pre></div></div>
+
+<h2 id="следующие-шаги">Следующие шаги</h2>
+
+<p>Как-то многовато для начала, поэтому остановимся здесь и продолжим в следующей статье этой серии, где мы будем получать данные по API и начнём соединять работающий сайт и SPA.</p>
+
+<p>Если вы хотите посмотреть готовый исходный код этого учебника, то переходите в <a href="https://github.com/Diamond/elm_articles">Гитхаб-репозиторий</a>.</p>
+
+  </div>
+
+  <!-- uSocial -->
+  <div class="post__share_block share_block">
+    <script async src="https://usocial.pro/usocial/usocial.js?v=6.1.4" data-script="usocial" charset="utf-8"></script>
+    <div class="uSocial-Share" data-pid="2fd19544e551bce292425ee8adaa31be" data-type="share" data-options="round,style2,default,absolute,horizontal,size32,counter1,counter-before,upArrow-right,nomobile" data-social="telegram,fb,vk,gPlus,twi,bookmarks"></div>
+  </div>
+  <!-- /uSocial -->
+</article>
+
+
+        <footer class="footer">
+    &copy; 2020
+    / Россия
+
+    <span class="pull-right">Любые мысли и вопросы пишите на <a href="mailto:elixir@wunsh.ru">elixir@wunsh.ru</a>.</span>
+</footer>
+
+        <div id="subscribeModal" class="modal">
+    <div class="modal__content">
+        <a href="#close" title="Close" class="modal__close">x</a>
+
+        <h2 class="modal__title">Ламповая рассылка про&nbsp;Эликсир</h2>
+
+        <p>Один-два раза в&nbsp;неделю присылаем тёплые письма об&nbsp;Эликсире: переводы самых интересных статей до&nbsp;их&nbsp;появления в&nbsp;открытом доступе, анонсы событий и&nbsp;вкусные бонусы.</p>
+
+        <form action="//wunsh.us14.list-manage.com/subscribe/post?u=c81ca3d4693f62db7f7f67c71&amp;id=a192e2dfef" method="post" id="mc-embedded-subscribe-form" name="mc-embedded-subscribe-form" class="pure-form h-tc validate" target="_blank" novalidate>
+            <input type="email" value="" name="EMAIL" class="modal__input pure-input-rounded large" id="mce-EMAIL" placeholder="Твоя почта" required>
+            <div style="position: absolute; left: -5000px;" aria-hidden="true"><input type="text" name="b_c81ca3d4693f62db7f7f67c71_a192e2dfef" tabindex="-1" value=""></div>
+
+            <input type="submit" value="Присоединиться" name="subscribe" onClick="yaCounter39773490.reachGoal('SUBSCRIBED'); return true" id="mc-embedded-subscribe" class="pure-button button-success large">
+        </form>
+
+        <p>Обязательно подтверди почту, перейдя по&nbsp;ссылке в&nbsp;письме, иначе мы&nbsp;не&nbsp;сможем делиться с&nbsp;тобой полезностями.</p>
+
+        <p>Надоедать точно не&nbsp;будем :)</p>
+    </div>
+</div>
+
+        <script src="/assets/js/vendors/zepto.min.js"></script>
+
+<script>
+    if ($(".post--docs").length) {
+        $(".footer").addClass("footer--docs")
+    }
+
+    $(".modal--close_backdrop").click(function(){
+        window.location.hash = "";
+    });
+</script>
+
+        <!-- Yandex.Metrika counter -->
+<script type="text/javascript">
+    (function (d, w, c) {
+        (w[c] = w[c] || []).push(function() {
+            try {
+                w.yaCounter39773490 = new Ya.Metrika({
+                    id:39773490,
+                    clickmap:true,
+                    trackLinks:true,
+                    accurateTrackBounce:true,
+                    webvisor:true,
+                    ut:"noindex"
+                });
+            } catch(e) { }
+        });
+
+        var n = d.getElementsByTagName("script")[0],
+            s = d.createElement("script"),
+            f = function () { n.parentNode.insertBefore(s, n); };
+        s.type = "text/javascript";
+        s.async = true;
+        s.src = "https://mc.yandex.ru/metrika/watch.js";
+
+        if (w.opera == "[object Opera]") {
+            d.addEventListener("DOMContentLoaded", f, false);
+        } else { f(); }
+    })(document, window, "yandex_metrika_callbacks");
+</script>
+<noscript><div><img src="https://mc.yandex.ru/watch/39773490?ut=noindex" style="position:absolute; left:-9999px;" alt="" /></div></noscript>
+<!-- /Yandex.Metrika counter -->
+
+      </div>
+    </div>
+  </body>
+</html>

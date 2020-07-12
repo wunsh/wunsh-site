@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Потоковая обработка данных с помощью Ecto |> Сообщество Elixir и Phoenix Framework</title>
+    <meta name="description" content="Streaming Data with Ecto">
+
+    <link rel="alternate" type="application/rss+xml" title="Сообщество Elixir и Phoenix Framework" href="/feed.xml" />
+    <link rel="canonical" href="https://wunsh.ru/articles/streaming-with-ecto.html">
+
+    <style type="text/css">@import url("//fonts.googleapis.com/css?family=Source+Sans+Pro:400,700&subset=cyrillic");</style>
+    <link rel="stylesheet" href="/assets/css/vendors/pure.min.css">
+    <link rel="stylesheet" href="/assets/css/vendors/pure-grids-responsive.min.css">
+    <link rel="stylesheet" href="/assets/css/style.css?1594516983">
+
+    <link rel="shortcut icon" type="image/png" href="/assets/favicon.png" >
+</head>
+
+
+  <body>
+    <div class="wunsh pure-g">
+      
+
+
+
+
+<div class="menu pure-u-1 pure-u-md-1-4">
+  <div class="header">
+    <h2 class="header__title">
+      
+        <a href="https://wunsh.ru" class="header__title_link" title="На главную">Эликсир и&nbsp;Вунш</a>
+      
+    </h2>
+    <h3 class="header__tagline">Erlang + Ruby = &#10084;</h3>
+
+    <nav class="nav">
+      <ul class="nav_list">
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/elixir" class="nav_list__item_link pure-button">О языке</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/install/linux-asdf" class="nav_list__item_link pure-button">Установка</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/docs/" class="nav_list__item_link pure-button">Документация</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/guides" class="nav_list__item_link pure-button">Гайды</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/news" class="nav_list__item_link pure-button">Новости</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/articles" class="nav_list__item_link pure-button">Статьи</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/videos" class="nav_list__item_link pure-button">Видео</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/vacancies" class="nav_list__item_link pure-button">Вакансии</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/faq" class="nav_list__item_link pure-button">FAQ</a>
+            </li>
+          
+        
+      </ul>
+    </nav>
+
+    <a href="#subscribeModal" class="pure-button header__subscribe_link">Подписаться на рассылку</a>
+  </div>
+</div>
+
+
+      <div class="content pure-u-1 pure-u-md-3-4">
+        
+
+<article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+  <header class="post__header">
+    
+    <h1 class="post__title" itemprop="name headline">Потоковая обработка данных с помощью Ecto</h1>
+
+    <div class="post__meta post_meta">
+      <ul class="meta_list">
+        <li class="meta_list__item">
+          
+          <span class="">
+            <small class="meta_list__item_name">Дата</small>
+            <time class="h-bold" datetime="2017-08-25T00:00:00+00:00" itemprop="datePublished">
+              
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+25 августа 2017
+
+            </time>
+          </span>
+          
+
+          
+        </li>
+        
+        <li class="meta_list__item">
+            <span class="tag_cloud tags_cloud--inline h-no_margin">
+              <small class="meta_list__item_name">Теги</small> 
+
+
+<ul class="tags_cloud__list">
+  
+    <a href="/tags/#practical" class="tags_cloud__link tag tag--practical">practical</a>
+  
+    <a href="/tags/#stream" class="tags_cloud__link tag tag--stream">stream</a>
+  
+</ul>
+
+            </span>
+        </li>
+        
+        <li class="meta_list__item">
+          <span itemprop="author" itemscope itemtype="http://schema.org/Person">
+            <small class="meta_list__item_name">
+              
+                Перевод
+              
+            </small>
+            <span itemprop="name" class="h-bold">Надежда Нестерова</span>
+          </span>
+        </li>
+
+        <li class="meta_list__item">
+          
+            <div >
+              <small>Оригинал</small>
+              <strong>
+                &laquo;<a href="http://joeellis.la/streaming-with-ecto/" style="text-transform: none; text-decoration: underline; color: #4b2e39;">Streaming Data with Ecto</a>&raquo;
+              </strong>
+              <small>&copy;</small>
+              <strong>Joe Ellis</strong>
+            </div>
+          
+        </li>
+      </ul>
+    </div>
+  </header>
+
+  <div class="post__content" itemprop="articleBody">
+    <p>Примечание: если вы не знакомы с потоками Elixir, советуем <a href="http://elixir-lang.org/getting-started/enumerables-and-streams.html#streams">обратиться к документации</a>, иначе содержимое данной статьи может вызвать затруднения.</p>
+
+<p>Любой разработчик неизбежно сталкивается с необходимостью проведения определённых операций над набором данных. Если данных не так много, то часто можно отделаться разовой выборкой записей и выполнить с ними необходимые действия. Но при больших объёмах данных неизбежно возникнут некоторые типовые проблемы. Процесс этот <strong>медленный</strong>, создаёт блокирующее соединение с базой данных, и большинство библиотек базы будут загружать данные в память, что может замедлить или даже уничтожить ваш сервер.</p>
+
+<p>К счастью, как раз для такой ситуации в Ecto имеется <a href="https://hexdocs.pm/ecto/Ecto.Repo.html#c:stream/2">отличный инструмент</a> <code class="highlighter-rouge">Repo.stream/2</code>. Вместо разовой загрузки данных он выполняет её в итеративном цикле, обрабатывая каждую запись отдельно.</p>
+
+<p>Рассмотрим пример, прекрасно иллюстрирующий гибкость потоков Elixir, в котором реализуем экспорт записей из базы данных в CSV-файлы.</p>
+
+<p>Для начала взгляните на код:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">defmodule</span> <span class="no">UserExporter</span> <span class="k">do</span>
+  <span class="nv">@columns</span> <span class="sx">~w( id email inserted_at updated_at )a</span>
+
+  <span class="k">def</span> <span class="n">export</span><span class="p">(</span><span class="n">query</span><span class="p">)</span> <span class="k">do</span>
+    <span class="n">path</span> <span class="o">=</span> <span class="sd">"</span><span class="s2">/tmp/users.csv"</span>
+
+    <span class="no">Repo</span><span class="o">.</span><span class="n">transaction</span> <span class="k">fn</span> <span class="o">-&gt;</span>
+      <span class="n">query</span>
+      <span class="o">|&gt;</span> <span class="no">Repo</span><span class="o">.</span><span class="n">stream</span>
+      <span class="o">|&gt;</span> <span class="no">Stream</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="o">&amp;</span><span class="n">parse_line</span><span class="o">/</span><span class="m">1</span><span class="p">)</span>
+      <span class="o">|&gt;</span> <span class="no">CSV</span><span class="o">.</span><span class="n">encode</span>
+      <span class="o">|&gt;</span> <span class="no">Enum</span><span class="o">.</span><span class="n">into</span><span class="p">(</span><span class="no">File</span><span class="o">.</span><span class="n">stream!</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="p">[</span><span class="ss">:write</span><span class="p">,</span> <span class="ss">:utf8</span><span class="p">]))</span>
+    <span class="k">end</span>
+  <span class="k">end</span>
+
+  <span class="k">defp</span> <span class="n">parse_line</span><span class="p">(</span><span class="n">user</span><span class="p">)</span> <span class="k">do</span>
+    <span class="c1"># order our data to match our column order</span>
+    <span class="no">Enum</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="nv">@columns</span><span class="p">,</span> <span class="o">&amp;</span><span class="no">Map</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">user</span><span class="p">,</span> <span class="nv">&amp;1</span><span class="p">))</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<p>Итак, имеется модуль с одной общедоступной функцией <code class="highlighter-rouge">export/1</code>, получающей Ecto-запрос на входе и возвращающей файловый поток на выходе.</p>
+
+<p>В самом начале указываем атрибут модуля <code class="highlighter-rouge">@columns</code>, чтобы определить, какие именно данные будут записаны в файл. Позднее к этому атрибуту необходимо будет обратиться ещё раз для повторного упорядочивания данных в CSV-файле.</p>
+
+<p>Дальше за дело берётся модуль экспорта. Первое, что он делает, – открывает транзакцию базы данных. Это обязательное действие при использовании <code class="highlighter-rouge">Repo.stream/2</code> в MySQL или Postgres, но ещё это хорошее решение для работы с итерационными операциями над большим массивом данных. Все действия с <code class="highlighter-rouge">Repo.stream/2</code> необходимо выполнять в рамках транзакции.</p>
+
+<p>Открыв транзакцию, передаём запрос к <code class="highlighter-rouge">Repo.stream/2</code>, после чего произойдёт создание начального потока. Обратите внимание, что это лишь создаёт поток, и, поскольку потоки исполняются лениво, никаких запросов к базе данных ещё не отправляется.</p>
+
+<p>Следующим шагом передаём поток функции <code class="highlighter-rouge">Stream.map</code>, которая осуществит выборку и преобразует данные каждой структуры пользователя в список в соответствии с порядком, указанном ранее в <code class="highlighter-rouge">@columns</code>.</p>
+
+<p>Воспользовавшись <a href="https://github.com/beatrichartz/csv">библиотекой CSV</a>, передадим поток функции <code class="highlighter-rouge">CSV.encode/1</code>, и она проделает всю основную работу. <code class="highlighter-rouge">CSV.encode/1</code> оперирует потоками как на входе, так и на выходе, следовательно, она идеально вписывается в наш пайплайн.</p>
+
+<p>Наконец, запускаем поток вызовом <code class="highlighter-rouge">Enum.into</code>, после чего начинают выполняться запросы к базе данных. <code class="highlighter-rouge">Repo.stream/2</code> по умолчанию обрабатывает 500 записей разом, каждая из них анализируется и записывается в файл по адресу <code class="highlighter-rouge">tmp/users.csv</code>. И последнее, функция возвращает файловый поток с указателем на только что созданный файл. Этот новый поток можно использовать для выполнения множества других операций с файлами или потоками, например, загрузка файла на Amazon S3 и т. п.</p>
+
+<p>В качестве теста можно вывести содержимое CSV-файла в консоль <code class="highlighter-rouge">iex</code>:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">iex</span><span class="o">&gt;</span> <span class="p">{</span><span class="ss">:ok</span><span class="p">,</span> <span class="n">file</span><span class="p">}</span> <span class="o">=</span> <span class="no">UserExporter</span><span class="o">.</span><span class="n">export</span><span class="p">(</span><span class="n">from</span> <span class="n">u</span> <span class="ow">in</span> <span class="no">User</span><span class="p">)</span>
+<span class="p">{</span><span class="ss">:ok</span><span class="p">,</span>
+ <span class="p">%</span><span class="no">File</span><span class="o">.</span><span class="no">Stream</span><span class="p">{</span><span class="ss">line_or_bytes:</span> <span class="ss">:line</span><span class="p">,</span>
+  <span class="ss">modes:</span> <span class="p">[</span><span class="ss">:write</span><span class="p">,</span> <span class="p">{</span><span class="ss">:encoding</span><span class="p">,</span> <span class="ss">:utf8</span><span class="p">},</span> <span class="ss">:binary</span><span class="p">],</span> <span class="ss">path:</span> <span class="sd">"</span><span class="s2">/tmp/users.csv"</span><span class="p">,</span>
+  <span class="ss">raw:</span> <span class="no">false</span><span class="p">}}</span>
+  
+<span class="n">iex</span><span class="o">&gt;</span> <span class="no">File</span><span class="o">.</span><span class="n">read!</span><span class="p">(</span><span class="n">file</span><span class="o">.</span><span class="n">path</span><span class="p">)</span>
+<span class="c1">#=&gt; "1,joe@example.com,2017-04-27 21:57:42.972524,2017-05-20 18:48:16.235083\r\n2,jane@example.com,2017-04-27 18:36:32.053556,2017-04-27 18:36:32.065434\r\n3,jill@example.com,2017-04-27 18:37:43.503567,2017-04-27 18:37:43.503575\r\n"</span>
+</code></pre></div></div>
+
+<p>Здорово, правда? С помощью потоков был создан простой и последовательный пайплайн для эффективной выборки данных, их преобразования и записи в файл по 500 строк за раз. <code class="highlighter-rouge">Repo.stream/2</code> – очень полезный инструмент, предназначенный для работы с большими объёмами данных. Рекомендую опробовать его, если вы ещё этого не сделали.</p>
+
+  </div>
+
+  <!-- uSocial -->
+  <div class="post__share_block share_block">
+    <script async src="https://usocial.pro/usocial/usocial.js?v=6.1.4" data-script="usocial" charset="utf-8"></script>
+    <div class="uSocial-Share" data-pid="2fd19544e551bce292425ee8adaa31be" data-type="share" data-options="round,style2,default,absolute,horizontal,size32,counter1,counter-before,upArrow-right,nomobile" data-social="telegram,fb,vk,gPlus,twi,bookmarks"></div>
+  </div>
+  <!-- /uSocial -->
+</article>
+
+
+        <footer class="footer">
+    &copy; 2020
+    / Россия
+
+    <span class="pull-right">Любые мысли и вопросы пишите на <a href="mailto:elixir@wunsh.ru">elixir@wunsh.ru</a>.</span>
+</footer>
+
+        <div id="subscribeModal" class="modal">
+    <div class="modal__content">
+        <a href="#close" title="Close" class="modal__close">x</a>
+
+        <h2 class="modal__title">Ламповая рассылка про&nbsp;Эликсир</h2>
+
+        <p>Один-два раза в&nbsp;неделю присылаем тёплые письма об&nbsp;Эликсире: переводы самых интересных статей до&nbsp;их&nbsp;появления в&nbsp;открытом доступе, анонсы событий и&nbsp;вкусные бонусы.</p>
+
+        <form action="//wunsh.us14.list-manage.com/subscribe/post?u=c81ca3d4693f62db7f7f67c71&amp;id=a192e2dfef" method="post" id="mc-embedded-subscribe-form" name="mc-embedded-subscribe-form" class="pure-form h-tc validate" target="_blank" novalidate>
+            <input type="email" value="" name="EMAIL" class="modal__input pure-input-rounded large" id="mce-EMAIL" placeholder="Твоя почта" required>
+            <div style="position: absolute; left: -5000px;" aria-hidden="true"><input type="text" name="b_c81ca3d4693f62db7f7f67c71_a192e2dfef" tabindex="-1" value=""></div>
+
+            <input type="submit" value="Присоединиться" name="subscribe" onClick="yaCounter39773490.reachGoal('SUBSCRIBED'); return true" id="mc-embedded-subscribe" class="pure-button button-success large">
+        </form>
+
+        <p>Обязательно подтверди почту, перейдя по&nbsp;ссылке в&nbsp;письме, иначе мы&nbsp;не&nbsp;сможем делиться с&nbsp;тобой полезностями.</p>
+
+        <p>Надоедать точно не&nbsp;будем :)</p>
+    </div>
+</div>
+
+        <script src="/assets/js/vendors/zepto.min.js"></script>
+
+<script>
+    if ($(".post--docs").length) {
+        $(".footer").addClass("footer--docs")
+    }
+
+    $(".modal--close_backdrop").click(function(){
+        window.location.hash = "";
+    });
+</script>
+
+        <!-- Yandex.Metrika counter -->
+<script type="text/javascript">
+    (function (d, w, c) {
+        (w[c] = w[c] || []).push(function() {
+            try {
+                w.yaCounter39773490 = new Ya.Metrika({
+                    id:39773490,
+                    clickmap:true,
+                    trackLinks:true,
+                    accurateTrackBounce:true,
+                    webvisor:true,
+                    ut:"noindex"
+                });
+            } catch(e) { }
+        });
+
+        var n = d.getElementsByTagName("script")[0],
+            s = d.createElement("script"),
+            f = function () { n.parentNode.insertBefore(s, n); };
+        s.type = "text/javascript";
+        s.async = true;
+        s.src = "https://mc.yandex.ru/metrika/watch.js";
+
+        if (w.opera == "[object Opera]") {
+            d.addEventListener("DOMContentLoaded", f, false);
+        } else { f(); }
+    })(document, window, "yandex_metrika_callbacks");
+</script>
+<noscript><div><img src="https://mc.yandex.ru/watch/39773490?ut=noindex" style="position:absolute; left:-9999px;" alt="" /></div></noscript>
+<!-- /Yandex.Metrika counter -->
+
+      </div>
+    </div>
+  </body>
+</html>

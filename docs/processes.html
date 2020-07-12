@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Процессы |> Сообщество Elixir и Phoenix Framework</title>
+    <meta name="description" content="Русскоязычное сообщество Elixir и Phoenix Framework
+">
+
+    <link rel="alternate" type="application/rss+xml" title="Сообщество Elixir и Phoenix Framework" href="/feed.xml" />
+    <link rel="canonical" href="https://wunsh.ru/docs/processes">
+
+    <style type="text/css">@import url("//fonts.googleapis.com/css?family=Source+Sans+Pro:400,700&subset=cyrillic");</style>
+    <link rel="stylesheet" href="/assets/css/vendors/pure.min.css">
+    <link rel="stylesheet" href="/assets/css/vendors/pure-grids-responsive.min.css">
+    <link rel="stylesheet" href="/assets/css/style.css?1594516983">
+
+    <link rel="shortcut icon" type="image/png" href="/assets/favicon.png" >
+</head>
+
+
+  <body>
+    <div class="wunsh pure-g">
+      
+
+
+
+
+<div class="menu pure-u-1 pure-u-md-1-4">
+  <div class="header">
+    <h2 class="header__title">
+      
+        <a href="https://wunsh.ru" class="header__title_link" title="На главную">Эликсир и&nbsp;Вунш</a>
+      
+    </h2>
+    <h3 class="header__tagline">Erlang + Ruby = &#10084;</h3>
+
+    <nav class="nav">
+      <ul class="nav_list">
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/elixir" class="nav_list__item_link pure-button">О языке</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/install/linux-asdf" class="nav_list__item_link pure-button">Установка</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/docs/" class="nav_list__item_link pure-button">Документация</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/guides" class="nav_list__item_link pure-button">Гайды</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/news" class="nav_list__item_link pure-button">Новости</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/articles" class="nav_list__item_link pure-button">Статьи</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/videos" class="nav_list__item_link pure-button">Видео</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/vacancies" class="nav_list__item_link pure-button">Вакансии</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/faq" class="nav_list__item_link pure-button">FAQ</a>
+            </li>
+          
+        
+      </ul>
+    </nav>
+
+    <a href="#subscribeModal" class="pure-button header__subscribe_link">Подписаться на рассылку</a>
+  </div>
+</div>
+
+
+      <div class="content pure-u-1 pure-u-md-3-4">
+        <article class="post post--docs" itemscope itemtype="http://schema.org/BlogPosting">
+    <header class="post__header">
+        <h1 class="post__title" itemprop="name headline">
+            <p>Процессы</p>
+
+        </h1>
+    </header>
+
+    <div class="post__content" itemprop="articleBody">
+        <p>В Эликсире весь код запускается внутри процессов. Процессы изолированы друг от друга, запускаются параллельно и взаимодействуют через отправку сообщений. Процессы – не единственная основа параллельной работы в Эликсире, но они предоставляют базу для построения распределённых и отказоустойчивых программ.</p>
+
+<p>Процессы Эликсира не следует путать с процессами операционной системы. Процессы в Эликсире очень легковесны в плане использования памяти и процессора (в отличие от потоков во многих других языках программирования). Поэтому запуск десятков или даже сотен тысяч процессов одновременно не проблема.</p>
+
+<p>В этой главе мы изучим базовые конструкции для порождения новых процессов, а также отправку и приём сообщений между процессами.</p>
+
+<h2 id="функция-spawn">Функция <code class="highlighter-rouge">spawn</code></h2>
+
+<p>Основной механизм порождения новых процессов – автоматически импортируемая функция <code class="highlighter-rouge">spawn/1</code>:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">iex</span><span class="o">&gt;</span> <span class="n">spawn</span> <span class="k">fn</span> <span class="o">-&gt;</span> <span class="m">1</span> <span class="o">+</span> <span class="m">2</span> <span class="k">end</span>
+<span class="c1">#PID&lt;0.43.0&gt;</span>
+</code></pre></div></div>
+
+<p>Функция <code class="highlighter-rouge">spawn/1</code> принимает функцию, которую она выполнит в другом процессе.</p>
+
+<p>Обратите внимание, что функция <code class="highlighter-rouge">spawn/1</code> возвращает идентификатор процесса <code class="highlighter-rouge">PID</code>. К этому моменту, процесс, который вы породили, скорее всего мёртв. Порождённый процесс выполнит переданную функцию и умрёт после её окончания:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">iex</span><span class="o">&gt;</span> <span class="n">pid</span> <span class="o">=</span> <span class="n">spawn</span> <span class="k">fn</span> <span class="o">-&gt;</span> <span class="m">1</span> <span class="o">+</span> <span class="m">2</span> <span class="k">end</span>
+<span class="c1">#PID&lt;0.44.0&gt;</span>
+
+<span class="n">iex</span><span class="o">&gt;</span> <span class="no">Process</span><span class="o">.</span><span class="n">alive?</span><span class="p">(</span><span class="n">pid</span><span class="p">)</span>
+<span class="no">false</span>
+</code></pre></div></div>
+
+<blockquote>
+  <p>Вы скорее всего получите идентификаторы процессов, отличные от представленных в этом руководстве.</p>
+</blockquote>
+
+<p>Мы можем получить <code class="highlighter-rouge">PID</code> текущего процесса, вызвав функцию <code class="highlighter-rouge">self/0</code>:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">iex</span><span class="o">&gt;</span> <span class="n">self</span><span class="p">()</span>
+<span class="c1">#PID&lt;0.41.0&gt;</span>
+
+<span class="n">iex</span><span class="o">&gt;</span> <span class="no">Process</span><span class="o">.</span><span class="n">alive?</span><span class="p">(</span><span class="n">self</span><span class="p">())</span>
+<span class="no">true</span>
+</code></pre></div></div>
+
+<p>Процессы становятся намного интереснее, когда мы можем отправлять и получать сообщения.</p>
+
+<h2 id="функции-send-и-receive">Функции <code class="highlighter-rouge">send</code> и <code class="highlighter-rouge">receive</code></h2>
+
+<p>Мы можем отправлять сообщения в процесс с помощью функции <code class="highlighter-rouge">send/2</code> и принимать их через функцию <code class="highlighter-rouge">recieve/1</code></p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">iex</span><span class="o">&gt;</span> <span class="n">send</span> <span class="n">self</span><span class="p">(),</span> <span class="p">{</span><span class="ss">:hello</span><span class="p">,</span> <span class="sd">"</span><span class="s2">world"</span><span class="p">}</span>
+<span class="p">{</span><span class="ss">:hello</span><span class="p">,</span> <span class="sd">"</span><span class="s2">world"</span><span class="p">}</span>
+
+<span class="n">iex</span><span class="o">&gt;</span> <span class="k">receive</span> <span class="k">do</span>
+<span class="o">...&gt;</span>   <span class="p">{</span><span class="ss">:hello</span><span class="p">,</span> <span class="n">msg</span><span class="p">}</span> <span class="o">-&gt;</span> <span class="n">msg</span>
+<span class="o">...&gt;</span>   <span class="p">{</span><span class="ss">:world</span><span class="p">,</span> <span class="n">msg</span><span class="p">}</span> <span class="o">-&gt;</span> <span class="sd">"</span><span class="s2">won't match"</span>
+<span class="o">...&gt;</span> <span class="k">end</span>
+<span class="sd">"</span><span class="s2">world"</span>
+</code></pre></div></div>
+
+<p>Когда сообщение отправлено в процесс, оно хранится в почтовом ящике процесса. Блок функции <code class="highlighter-rouge">recieve/1</code> проходит через почтовый ящик текущего процесса в поисах сообщения, которое подходит под переданный шаблон. Функция <code class="highlighter-rouge">receive/1</code> поддерживает ограничительные условия и множественные варианты входа так же, как <code class="highlighter-rouge">case/2</code>.</p>
+
+<p>Процесс, который отправляет сообщение, не блокируется на функции <code class="highlighter-rouge">send/2</code>, он помещает сообщение в почтовый ящик получателя и продолжается. В частности, процесс может отправлять сообщение сам себе.</p>
+
+<p>Если в ящике нет сообщений, подходящих какому-либо из шаблонов, текущий процесс будет ждать, пока не появится подходящее сообщение. Время ожидания также может быть задано:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">iex</span><span class="o">&gt;</span> <span class="k">receive</span> <span class="k">do</span>
+<span class="o">...&gt;</span>   <span class="p">{</span><span class="ss">:hello</span><span class="p">,</span> <span class="n">msg</span><span class="p">}</span>  <span class="o">-&gt;</span> <span class="n">msg</span>
+<span class="o">...&gt;</span> <span class="k">after</span>
+<span class="o">...&gt;</span>   <span class="m">1_000</span> <span class="o">-&gt;</span> <span class="sd">"</span><span class="s2">nothing after 1s"</span>
+<span class="o">...&gt;</span> <span class="k">end</span>
+<span class="sd">"</span><span class="s2">nothing after 1s"</span>
+</code></pre></div></div>
+
+<p>Можно установить таймаут 0, если ожидается, что сообщение уже должно быть в ящике.</p>
+
+<p>Давайте объединим всё и отправим сообщение между процессами:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">iex</span><span class="o">&gt;</span> <span class="n">parent</span> <span class="o">=</span> <span class="n">self</span><span class="p">()</span>
+<span class="c1">#PID&lt;0.41.0&gt;</span>
+
+<span class="n">iex</span><span class="o">&gt;</span> <span class="n">spawn</span> <span class="k">fn</span> <span class="o">-&gt;</span> <span class="n">send</span><span class="p">(</span><span class="n">parent</span><span class="p">,</span> <span class="p">{</span><span class="ss">:hello</span><span class="p">,</span> <span class="n">self</span><span class="p">()})</span> <span class="k">end</span>
+<span class="c1">#PID&lt;0.48.0&gt;</span>
+
+<span class="n">iex</span><span class="o">&gt;</span> <span class="k">receive</span> <span class="k">do</span>
+<span class="o">...&gt;</span>   <span class="p">{</span><span class="ss">:hello</span><span class="p">,</span> <span class="n">pid</span><span class="p">}</span> <span class="o">-&gt;</span> <span class="sd">"</span><span class="s2">Got hello from </span><span class="si">#{</span><span class="n">inspect</span> <span class="n">pid</span><span class="si">}</span><span class="s2">"</span>
+<span class="o">...&gt;</span> <span class="k">end</span>
+<span class="sd">"</span><span class="s2">Got hello from </span><span class="err">#</span><span class="s2">PID&lt;0.48.0&gt;"</span>
+</code></pre></div></div>
+
+<p>Функция <code class="highlighter-rouge">inspect/1</code> используется для конвертации внутреннего представления структур данных в строки, обычно для вывода. Помните, что когда блок функции <code class="highlighter-rouge">recieve</code> выполняется, процесс отправитель может быть уже мёртв, т. к. единственная его инструкция – отправка сообщения.</p>
+
+<p>Во время работы в консоли, вы можете найти достаточно полезным хелпер <code class="highlighter-rouge">flush/0</code>. Он получает и печатает все сообщения из ящика:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">iex</span><span class="o">&gt;</span> <span class="n">send</span> <span class="n">self</span><span class="p">(),</span> <span class="ss">:hello</span>
+<span class="ss">:hello</span>
+
+<span class="n">iex</span><span class="o">&gt;</span> <span class="n">flush</span><span class="p">()</span>
+<span class="ss">:hello</span>
+<span class="ss">:ok</span>
+</code></pre></div></div>
+
+<h2 id="ссылки">Ссылки</h2>
+
+<p>Большую часть времени, порождая процессы в Эликсире, мы порождаем их как связанные процессы. До того, как мы покажем пример с использованием функции <code class="highlighter-rouge">spawn_link/1</code>, давайте посмотрим, что произойдёт, когда процесс, начатый функцией <code class="highlighter-rouge">spawn/1</code> завершится с ошибкой:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">iex</span><span class="o">&gt;</span> <span class="n">spawn</span> <span class="k">fn</span> <span class="o">-&gt;</span> <span class="k">raise</span> <span class="sd">"</span><span class="s2">oops"</span> <span class="k">end</span>
+<span class="c1">#PID&lt;0.58.0&gt;</span>
+
+<span class="p">[</span><span class="n">error</span><span class="p">]</span> <span class="no">Process</span> <span class="c1">#PID&lt;0.58.00&gt; raised an exception</span>
+<span class="o">**</span> <span class="p">(</span><span class="no">RuntimeError</span><span class="p">)</span> <span class="n">oops</span>
+    <span class="ss">:erlang</span><span class="o">.</span><span class="n">apply</span><span class="o">/</span><span class="m">2</span>
+</code></pre></div></div>
+
+<p>Он просто выведет ошибку, но процесс-родитель будет всё равно запущен. Это происходит, т. к. процессы изолированы. Если мы хотим, чтобы отказ одного процесса приводил к отказу другого, следует связать их. Это можно сделать с помощью <code class="highlighter-rouge">spawn_link/1</code>:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">iex</span><span class="o">&gt;</span> <span class="n">spawn_link</span> <span class="k">fn</span> <span class="o">-&gt;</span> <span class="k">raise</span> <span class="sd">"</span><span class="s2">oops"</span> <span class="k">end</span>
+<span class="c1">#PID&lt;0.41.0&gt;</span>
+
+<span class="o">**</span> <span class="p">(</span><span class="no">EXIT</span> <span class="n">from</span> <span class="c1">#PID&lt;0.41.0&gt;) an exception was raised:</span>
+    <span class="o">**</span> <span class="p">(</span><span class="no">RuntimeError</span><span class="p">)</span> <span class="n">oops</span>
+        <span class="ss">:erlang</span><span class="o">.</span><span class="n">apply</span><span class="o">/</span><span class="m">2</span>
+</code></pre></div></div>
+
+<p>Т. к. процессы связаны, мы видим сообщение о том, что процесс-родитель, а это процесс консоли, получил сигнал <code class="highlighter-rouge">EXIT</code> от другого процесса, что привело к завершению работы консоли. IEx определяет такую ситуацию и начинает новую сессию.</p>
+
+<p>Связывание также можно сделать вручную, вызвав функцию <code class="highlighter-rouge">Process.link/1</code>. Мы рекомендуем взглянуть на <a href="https://hexdocs.pm/elixir/Process.html">модуль <code class="highlighter-rouge">Process</code></a>, чтобы узнать о другой функциональности процессов.</p>
+
+<p>Процессы и ссылки играют важную роль в создании отказоустойчивых систем. Процессы Эликсира изолированы и ничего не делят между собой по умолчанию. Таким образом, завершение процесса с ошибкой никогда не завершит и не нарушит другой процесс. Однако, ссылки позволяют установить зависимость на случай ошибки. Мы часто связываем наши процессы с супервизором, что позволяет обнаруживать смерть процесса и начинать новый на его месте.</p>
+
+<p>В то время, как другие языки предусматривают отлов и обработку исключений, в Эликсире мы на самом деле нормально относимся к ошибкам и ожидаем, что супервизор просто перезапустит систему. «Failing fast» – основная философия написания ПО на Эликсире!</p>
+
+<p>Функции <code class="highlighter-rouge">spawn/1</code> и <code class="highlighter-rouge">spawn_link/1</code> самые основные функции порождения процессов в Эликсире. Хотя мы их и используем, большую часть времени мы будем использовать абстракции, основанные на них. Давайте разберём одну из основных, которая называется задачи.</p>
+
+<h2 id="задачи">Задачи</h2>
+
+<p>Задачи основаны на функциях порождения и предоставляют лучшие отчёты об ошибках:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">iex</span><span class="p">(</span><span class="m">1</span><span class="p">)</span><span class="o">&gt;</span> <span class="no">Task</span><span class="o">.</span><span class="n">start</span> <span class="k">fn</span> <span class="o">-&gt;</span> <span class="k">raise</span> <span class="sd">"</span><span class="s2">oops"</span> <span class="k">end</span>
+<span class="p">{</span><span class="ss">:ok</span><span class="p">,</span> <span class="c1">#PID&lt;0.55.0&gt;}</span>
+
+<span class="m">15</span><span class="p">:</span><span class="m">22</span><span class="p">:</span><span class="m">33.046</span> <span class="p">[</span><span class="n">error</span><span class="p">]</span> <span class="no">Task</span> <span class="c1">#PID&lt;0.55.0&gt; started from #PID&lt;0.53.0&gt; terminating</span>
+<span class="o">**</span> <span class="p">(</span><span class="no">RuntimeError</span><span class="p">)</span> <span class="n">oops</span>
+    <span class="p">(</span><span class="n">elixir</span><span class="p">)</span> <span class="n">lib</span><span class="o">/</span><span class="n">task</span><span class="o">/</span><span class="n">supervised</span><span class="o">.</span><span class="ss">ex:</span><span class="m">74</span><span class="p">:</span> <span class="no">Task</span><span class="o">.</span><span class="no">Supervised</span><span class="o">.</span><span class="n">do_apply</span><span class="o">/</span><span class="m">2</span>
+    <span class="p">(</span><span class="n">stdlib</span><span class="p">)</span> <span class="n">proc_lib</span><span class="o">.</span><span class="ss">erl:</span><span class="m">239</span><span class="p">:</span> <span class="ss">:proc_lib</span><span class="o">.</span><span class="n">init_p_do_apply</span><span class="o">/</span><span class="m">3</span>
+<span class="ss">Function:</span> <span class="c1">#Function&lt;20.90072148/0 in :erl_eval.expr/5&gt;</span>
+    <span class="ss">Args:</span> <span class="p">[]</span>
+</code></pre></div></div>
+
+<p>В отличии от функций <code class="highlighter-rouge">spawn/1</code> и <code class="highlighter-rouge">spawn_link/1</code> мы используем функции <code class="highlighter-rouge">Task.start/1</code> и <code class="highlighter-rouge">Task.start_link/1</code>, которые возвращают <code class="highlighter-rouge">{:ok, pid}</code>, а не только <code class="highlighter-rouge">PID</code>. Это то, что позволяет использовать задачи в деревьях супервизоров. Более того, модуль <code class="highlighter-rouge">Task</code> предоставляет удобные функции, такие как <code class="highlighter-rouge">Task.async/1</code> и <code class="highlighter-rouge">Task.await/1</code>, и функциональность для облегчения организации распределённой работы.</p>
+
+<p>Мы будем разбирать эту функциональность в <strong><em>Руководстве по Mix и OTP</em></strong>, сейчас достаточно запомнить, что <code class="highlighter-rouge">Task</code> используется для получения лучших отчётов об ошибках.</p>
+
+<h2 id="состояние">Состояние</h2>
+
+<p>Мы до сих пор не говорили о состояниях в этом руководстве. Когда вы разрабатываете приложение, которому нужно состояние, например, для хранения конфигурации приложения, или вам нужно распарсить файл и держать его в памяти, где бы вы хранили это?</p>
+
+<p>Процессы – наиболее частый ответ на этот вопрос. Мы можем написать процессы, которые зациклены бесконечно, хранят состояние, принимают и отправляют сообщения. В качестве примера давайте напишем модуль, который создаёт новые процессы, которые работают как хранилище ключ-значение в файле с названием <code class="highlighter-rouge">kv.exs</code>:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">defmodule</span> <span class="no">KV</span> <span class="k">do</span>
+  <span class="k">def</span> <span class="n">start_link</span> <span class="k">do</span>
+    <span class="no">Task</span><span class="o">.</span><span class="n">start_link</span><span class="p">(</span><span class="k">fn</span> <span class="o">-&gt;</span> <span class="k">loop</span><span class="p">(%{})</span> <span class="k">end</span><span class="p">)</span>
+  <span class="k">end</span>
+
+  <span class="k">defp</span> <span class="k">loop</span><span class="p">(</span><span class="n">map</span><span class="p">)</span> <span class="k">do</span>
+    <span class="k">receive</span> <span class="k">do</span>
+      <span class="p">{</span><span class="ss">:get</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">caller</span><span class="p">}</span> <span class="o">-&gt;</span>
+        <span class="n">send</span> <span class="n">caller</span><span class="p">,</span> <span class="no">Map</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">map</span><span class="p">,</span> <span class="n">key</span><span class="p">)</span>
+        <span class="k">loop</span><span class="p">(</span><span class="n">map</span><span class="p">)</span>
+      <span class="p">{</span><span class="ss">:put</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">}</span> <span class="o">-&gt;</span>
+        <span class="k">loop</span><span class="p">(</span><span class="no">Map</span><span class="o">.</span><span class="n">put</span><span class="p">(</span><span class="n">map</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">))</span>
+    <span class="k">end</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<p>Обратите внимание, что функция <code class="highlighter-rouge">start_link</code> начинает новый процесс, который запускает функцию <code class="highlighter-rouge">loop/1</code> с пустым словарем. Функция <code class="highlighter-rouge">loop/1</code> затем ждёт сообщения и выполняет подходящее действие на каждое сообщение. В случае получения сообщения <code class="highlighter-rouge">:get</code>, она отправляет сообщение назад и вызывает <code class="highlighter-rouge">loop/1</code> снова, в ожидании нового сообщения. Тогда как сообщение <code class="highlighter-rouge">:put</code> запускает <code class="highlighter-rouge">loop/1</code> с новой версией словаря, сохранив переданные <code class="highlighter-rouge">key</code> и <code class="highlighter-rouge">value</code>.</p>
+
+<p>Давайте опробуем это на практике, запустив <code class="highlighter-rouge">iex kv.exs</code>:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">iex</span><span class="o">&gt;</span> <span class="p">{</span><span class="ss">:ok</span><span class="p">,</span> <span class="n">pid</span><span class="p">}</span> <span class="o">=</span> <span class="no">KV</span><span class="o">.</span><span class="n">start_link</span>
+<span class="p">{</span><span class="ss">:ok</span><span class="p">,</span> <span class="c1">#PID&lt;0.62.0&gt;}</span>
+<span class="n">iex</span><span class="o">&gt;</span> <span class="n">send</span> <span class="n">pid</span><span class="p">,</span> <span class="p">{</span><span class="ss">:get</span><span class="p">,</span> <span class="ss">:hello</span><span class="p">,</span> <span class="n">self</span><span class="p">()}</span>
+<span class="p">{</span><span class="ss">:get</span><span class="p">,</span> <span class="ss">:hello</span><span class="p">,</span> <span class="c1">#PID&lt;0.41.0&gt;}</span>
+<span class="n">iex</span><span class="o">&gt;</span> <span class="n">flush</span><span class="p">()</span>
+<span class="no">nil</span>
+<span class="ss">:ok</span>
+</code></pre></div></div>
+
+<p>В начале словарь процесса не имеет ключей, поэтому отправка сообщения <code class="highlighter-rouge">:get</code> и затем чтение почтового ящика текущего процесса возвращает <code class="highlighter-rouge">nil</code>. Давайте отправим сообщение <code class="highlighter-rouge">:put</code> и попробуем получить значение снова:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">iex</span><span class="o">&gt;</span> <span class="n">send</span> <span class="n">pid</span><span class="p">,</span> <span class="p">{</span><span class="ss">:put</span><span class="p">,</span> <span class="ss">:hello</span><span class="p">,</span> <span class="ss">:world</span><span class="p">}</span>
+<span class="p">{</span><span class="ss">:put</span><span class="p">,</span> <span class="ss">:hello</span><span class="p">,</span> <span class="ss">:world</span><span class="p">}</span>
+<span class="n">iex</span><span class="o">&gt;</span> <span class="n">send</span> <span class="n">pid</span><span class="p">,</span> <span class="p">{</span><span class="ss">:get</span><span class="p">,</span> <span class="ss">:hello</span><span class="p">,</span> <span class="n">self</span><span class="p">()}</span>
+<span class="p">{</span><span class="ss">:get</span><span class="p">,</span> <span class="ss">:hello</span><span class="p">,</span> <span class="c1">#PID&lt;0.41.0&gt;}</span>
+<span class="n">iex</span><span class="o">&gt;</span> <span class="n">flush</span><span class="p">()</span>
+<span class="ss">:world</span>
+<span class="ss">:ok</span>
+</code></pre></div></div>
+
+<p>Теперь мы видим, как процесс хранит состояние и мы можем получить и обновить его, отправляя процессу сообщения. Фактически, любой процесс, который знает <code class="highlighter-rouge">pid</code> выше, сможет отправлять сообщения и изменять состояние.</p>
+
+<p>Также можно зарегистрировать <code class="highlighter-rouge">pid</code>, присвоив ему имя, и позволить всем, кто знает это имя, отправлять ему сообщения:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">iex</span><span class="o">&gt;</span> <span class="no">Process</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="n">pid</span><span class="p">,</span> <span class="ss">:kv</span><span class="p">)</span>
+<span class="no">true</span>
+<span class="n">iex</span><span class="o">&gt;</span> <span class="n">send</span> <span class="ss">:kv</span><span class="p">,</span> <span class="p">{</span><span class="ss">:get</span><span class="p">,</span> <span class="ss">:hello</span><span class="p">,</span> <span class="n">self</span><span class="p">()}</span>
+<span class="p">{</span><span class="ss">:get</span><span class="p">,</span> <span class="ss">:hello</span><span class="p">,</span> <span class="c1">#PID&lt;0.41.0&gt;}</span>
+<span class="n">iex</span><span class="o">&gt;</span> <span class="n">flush</span><span class="p">()</span>
+<span class="ss">:world</span>
+<span class="ss">:ok</span>
+</code></pre></div></div>
+
+<p>Использование процессов для хранения состояний и регистрация имён – очень распространённые шаблоны в приложениях на Эликсире. Однако, в основном мы не будем вручную реализовывать эти шаблоны, как показано выше, а будем использовать одну из многих абстракций, которые поставляются вместе с Эликсиром. Например, Эликсир предоставляет <a href="https://hexdocs.pm/elixir/Agent.html">агентов</a>, которые являются простой абстракцией вокруг состояний:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">iex</span><span class="o">&gt;</span> <span class="p">{</span><span class="ss">:ok</span><span class="p">,</span> <span class="n">pid</span><span class="p">}</span> <span class="o">=</span> <span class="no">Agent</span><span class="o">.</span><span class="n">start_link</span><span class="p">(</span><span class="k">fn</span> <span class="o">-&gt;</span> <span class="p">%{}</span> <span class="k">end</span><span class="p">)</span>
+<span class="p">{</span><span class="ss">:ok</span><span class="p">,</span> <span class="c1">#PID&lt;0.72.0&gt;}</span>
+<span class="n">iex</span><span class="o">&gt;</span> <span class="no">Agent</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">pid</span><span class="p">,</span> <span class="k">fn</span> <span class="n">map</span> <span class="o">-&gt;</span> <span class="no">Map</span><span class="o">.</span><span class="n">put</span><span class="p">(</span><span class="n">map</span><span class="p">,</span> <span class="ss">:hello</span><span class="p">,</span> <span class="ss">:world</span><span class="p">)</span> <span class="k">end</span><span class="p">)</span>
+<span class="ss">:ok</span>
+<span class="n">iex</span><span class="o">&gt;</span> <span class="no">Agent</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">pid</span><span class="p">,</span> <span class="k">fn</span> <span class="n">map</span> <span class="o">-&gt;</span> <span class="no">Map</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">map</span><span class="p">,</span> <span class="ss">:hello</span><span class="p">)</span> <span class="k">end</span><span class="p">)</span>
+<span class="ss">:world</span>
+</code></pre></div></div>
+
+<p>Опция <code class="highlighter-rouge">:name</code> также может быть передана в <code class="highlighter-rouge">Agent.start_link/2</code> и оно будет автоматически зарегистрировано. Помимо агентов, Эликсир предоставляет API для создания генсерверов (generic servers, <code class="highlighter-rouge">GenServer</code>), задач и прочего, всё это основано на процессах. Всё, что связано с деревом супервизора, будет рассмотрено детально в <strong><em>Руководстве по Миксу и OTP</em></strong>, в котором будет рассказано о создании законченного Эликсир-приложения от начала до конца.</p>
+
+<p>Теперь давайте продолжим и поговорим о вводе/выводе (I/O) в Эликсире.</p>
+
+    </div>
+</article>
+
+<nav class="docs_nav pure-g">
+    <div class="docs_nav__inner pure-u-1 pure-u-md-3-4">
+        <div class="pure-g">
+            <div class="docs_nav__column docs_nav__column--prev pure-u-1-3">
+                
+                    <a href="/docs/enumerables-and-streams.html" class="docs_nav__link pure-button">
+                        &larr;<span class="h-hidden_mobile"> Назад</span></a>
+                
+            </div>
+
+            <div class="docs_nav__column docs_nav__column--contents pure-u-1-3">
+                <a href="#docsContents" class="docs_nav__link docs_nav__link--contents pure-button">☰</a>
+            </div>
+
+            <div class="docs_nav__column docs_nav__column--next pure-u-1-3">
+                
+                    <a href="/docs/io-and-the-file-system.html" class="docs_nav__link pure-button">
+                        <span class="h-hidden_mobile">Вперёд </span>&rarr;
+                    </a>
+                
+            </div>
+        </div>
+    </div>
+</nav>
+
+<div id="docsContents" class="modal modal--docs_contents modal--close_backdrop">
+    <div class="modal__content">
+        <a href="#close" title="Закрыть" class="modal__close">x</a>
+
+        <h2 class="modal__title">Содержание</h2>
+
+        
+        <h3 id="руководство-для-начинающих">Руководство для начинающих</h3>
+<ul>
+  <li><a href="/docs">Введение</a></li>
+  <li><a href="/docs/basic-types.html">Базовые типы</a></li>
+  <li><a href="/docs/basic-operators.html">Базовые операторы</a></li>
+  <li><a href="/docs/pattern-matching.html">Сопоставление с образцом</a></li>
+  <li><a href="/docs/case-cond-and-if.html">Конструкции ветвления</a></li>
+  <li><a href="/docs/binaries-strings-and-char-lists.html">Двоичные данные, строки и списки символов</a></li>
+  <li><a href="/docs/keywords-and-maps.html">Ключевые списки и словари</a></li>
+  <li><a href="/docs/modules-and-functions.html">Модули и функции</a></li>
+  <li><a href="/docs/recursion.html">Рекурсия</a></li>
+  <li><a href="/docs/enumerables-and-streams.html">Перечисления и потоки</a></li>
+  <li><a href="/docs/processes.html">Процессы</a></li>
+  <li><a href="/docs/io-and-the-file-system.html">Ввод/вывод и файловая система</a></li>
+  <li><a href="/docs/alias-require-and-import.html">Директивы <code class="highlighter-rouge">alias</code>, <code class="highlighter-rouge">require</code> и <code class="highlighter-rouge">import</code></a></li>
+  <li><a href="/docs/module-attributes.html">Атрибуты модулей</a></li>
+  <li><a href="/docs/structs.html">Структуры</a></li>
+  <li><a href="/docs/protocols.html">Протоколы</a></li>
+  <li><a href="/docs/comprehensions.html">Списковые выражения</a></li>
+  <li><a href="/docs/sigils.html">Сигилы</a></li>
+  <li><a href="/docs/try-catch-and-rescue.html">Конструкция <code class="highlighter-rouge">try</code>, <code class="highlighter-rouge">catch</code> и <code class="highlighter-rouge">rescue</code></a></li>
+  <li><a href="/docs/typespecs-and-behaviours.html">Спецификации типов и поведения</a></li>
+  <li><a href="/docs/erlang-libraries.html">Библиотеки Эрланга</a></li>
+  <li><a href="/docs/where-to-go-next.html">Куда двигаться дальше</a></li>
+</ul>
+
+<h3 id="микс-и-otp">Микс и <code class="highlighter-rouge">OTP</code></h3>
+<ul>
+  <li><a href="/docs/mix-otp/introduction-to-mix.html">Введение в Микс</a></li>
+  <li><a href="/docs/mix-otp/agent.html">Агент</a></li>
+  <li><a href="/docs/mix-otp/genserver.html">GenServer</a></li>
+  <li><a href="/docs/mix-otp/supervisor-and-application.html">Супервизор и приложение</a></li>
+  <li><a href="/docs/mix-otp/dynamic-supervisor.html">Динамический супервизор</a></li>
+  <li><a href="/docs/mix-otp/ets.html">ETS</a></li>
+  <li><a href="/docs/mix-otp/dependencies-and-umbrella-apps.html">Зависимости и зонтичные проекты</a></li>
+  <li><a href="/docs/mix-otp/task-and-gen-tcp.html">Модули <code class="highlighter-rouge">Task</code> и <code class="highlighter-rouge">:gen_tcp</code></a></li>
+  <li><a href="/docs/mix-otp/docs-tests-and-with.html">Доктесты, паттерны и оператор <code class="highlighter-rouge">with</code></a></li>
+  <li><a href="/docs/mix-otp/distributed-tasks-and-configuration.html">Распределенные задачи и конфигурация</a></li>
+</ul>
+
+<h3 id="метапрограммирование">Метапрограммирование</h3>
+<ul>
+  <li><a href="/docs/meta/quote-and-unquote.html">Конструкции <code class="highlighter-rouge">quote</code> и <code class="highlighter-rouge">unquote</code></a></li>
+  <li><a href="/docs/meta/macros.html">Макросы</a></li>
+  <li><a href="/docs/meta/domain-specific-languages.html">Предметно-ориентированные языки</a></li>
+</ul>
+
+    </div>
+</div>
+
+
+
+        <footer class="footer">
+    &copy; 2020
+    / Россия
+
+    <span class="pull-right">Любые мысли и вопросы пишите на <a href="mailto:elixir@wunsh.ru">elixir@wunsh.ru</a>.</span>
+</footer>
+
+        <div id="subscribeModal" class="modal">
+    <div class="modal__content">
+        <a href="#close" title="Close" class="modal__close">x</a>
+
+        <h2 class="modal__title">Ламповая рассылка про&nbsp;Эликсир</h2>
+
+        <p>Один-два раза в&nbsp;неделю присылаем тёплые письма об&nbsp;Эликсире: переводы самых интересных статей до&nbsp;их&nbsp;появления в&nbsp;открытом доступе, анонсы событий и&nbsp;вкусные бонусы.</p>
+
+        <form action="//wunsh.us14.list-manage.com/subscribe/post?u=c81ca3d4693f62db7f7f67c71&amp;id=a192e2dfef" method="post" id="mc-embedded-subscribe-form" name="mc-embedded-subscribe-form" class="pure-form h-tc validate" target="_blank" novalidate>
+            <input type="email" value="" name="EMAIL" class="modal__input pure-input-rounded large" id="mce-EMAIL" placeholder="Твоя почта" required>
+            <div style="position: absolute; left: -5000px;" aria-hidden="true"><input type="text" name="b_c81ca3d4693f62db7f7f67c71_a192e2dfef" tabindex="-1" value=""></div>
+
+            <input type="submit" value="Присоединиться" name="subscribe" onClick="yaCounter39773490.reachGoal('SUBSCRIBED'); return true" id="mc-embedded-subscribe" class="pure-button button-success large">
+        </form>
+
+        <p>Обязательно подтверди почту, перейдя по&nbsp;ссылке в&nbsp;письме, иначе мы&nbsp;не&nbsp;сможем делиться с&nbsp;тобой полезностями.</p>
+
+        <p>Надоедать точно не&nbsp;будем :)</p>
+    </div>
+</div>
+
+        <script src="/assets/js/vendors/zepto.min.js"></script>
+
+<script>
+    if ($(".post--docs").length) {
+        $(".footer").addClass("footer--docs")
+    }
+
+    $(".modal--close_backdrop").click(function(){
+        window.location.hash = "";
+    });
+</script>
+
+        <!-- Yandex.Metrika counter -->
+<script type="text/javascript">
+    (function (d, w, c) {
+        (w[c] = w[c] || []).push(function() {
+            try {
+                w.yaCounter39773490 = new Ya.Metrika({
+                    id:39773490,
+                    clickmap:true,
+                    trackLinks:true,
+                    accurateTrackBounce:true,
+                    webvisor:true,
+                    ut:"noindex"
+                });
+            } catch(e) { }
+        });
+
+        var n = d.getElementsByTagName("script")[0],
+            s = d.createElement("script"),
+            f = function () { n.parentNode.insertBefore(s, n); };
+        s.type = "text/javascript";
+        s.async = true;
+        s.src = "https://mc.yandex.ru/metrika/watch.js";
+
+        if (w.opera == "[object Opera]") {
+            d.addEventListener("DOMContentLoaded", f, false);
+        } else { f(); }
+    })(document, window, "yandex_metrika_callbacks");
+</script>
+<noscript><div><img src="https://mc.yandex.ru/watch/39773490?ut=noindex" style="position:absolute; left:-9999px;" alt="" /></div></noscript>
+<!-- /Yandex.Metrika counter -->
+
+      </div>
+    </div>
+  </body>
+</html>

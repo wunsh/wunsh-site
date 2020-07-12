@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Конструкции `quote` и `unquote` |> Сообщество Elixir и Phoenix Framework</title>
+    <meta name="description" content="Русскоязычное сообщество Elixir и Phoenix Framework
+">
+
+    <link rel="alternate" type="application/rss+xml" title="Сообщество Elixir и Phoenix Framework" href="/feed.xml" />
+    <link rel="canonical" href="https://wunsh.ru/docs/meta/quote-and-unquote">
+
+    <style type="text/css">@import url("//fonts.googleapis.com/css?family=Source+Sans+Pro:400,700&subset=cyrillic");</style>
+    <link rel="stylesheet" href="/assets/css/vendors/pure.min.css">
+    <link rel="stylesheet" href="/assets/css/vendors/pure-grids-responsive.min.css">
+    <link rel="stylesheet" href="/assets/css/style.css?1594516983">
+
+    <link rel="shortcut icon" type="image/png" href="/assets/favicon.png" >
+</head>
+
+
+  <body>
+    <div class="wunsh pure-g">
+      
+
+
+
+
+<div class="menu pure-u-1 pure-u-md-1-4">
+  <div class="header">
+    <h2 class="header__title">
+      
+        <a href="https://wunsh.ru" class="header__title_link" title="На главную">Эликсир и&nbsp;Вунш</a>
+      
+    </h2>
+    <h3 class="header__tagline">Erlang + Ruby = &#10084;</h3>
+
+    <nav class="nav">
+      <ul class="nav_list">
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/elixir" class="nav_list__item_link pure-button">О языке</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/install/linux-asdf" class="nav_list__item_link pure-button">Установка</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/docs/" class="nav_list__item_link pure-button">Документация</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/guides" class="nav_list__item_link pure-button">Гайды</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/news" class="nav_list__item_link pure-button">Новости</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/articles" class="nav_list__item_link pure-button">Статьи</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/videos" class="nav_list__item_link pure-button">Видео</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/vacancies" class="nav_list__item_link pure-button">Вакансии</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/faq" class="nav_list__item_link pure-button">FAQ</a>
+            </li>
+          
+        
+      </ul>
+    </nav>
+
+    <a href="#subscribeModal" class="pure-button header__subscribe_link">Подписаться на рассылку</a>
+  </div>
+</div>
+
+
+      <div class="content pure-u-1 pure-u-md-3-4">
+        <article class="post post--docs" itemscope itemtype="http://schema.org/BlogPosting">
+    <header class="post__header">
+        <h1 class="post__title" itemprop="name headline">
+            <p>Конструкции <code class="highlighter-rouge">quote</code> и <code class="highlighter-rouge">unquote</code></p>
+
+        </h1>
+    </header>
+
+    <div class="post__content" itemprop="articleBody">
+        <p>Это руководство познакомит вас с техниками метапрограммирования в Эликсире. Возможность представлять программу на Эликсире своими собственными структурами данных лежит в основе метапрограммирования. Эта глава начинается с изучения этих структур и взаимодействующих между собой конструкций <code class="highlighter-rouge">quote</code> и <code class="highlighter-rouge">unquote</code>. Благодаря этому, в следующей главе мы сможем познакомиться с макросами и наконец создать свой собственный предметно-ориентированный язык.</p>
+
+<h2 id="quoting">Quoting</h2>
+
+<p>Строительными блоками любой программы на Эликсире являются кортежи с тремя элементами. Например, вызов функции <code class="highlighter-rouge">sum(1, 2, 3)</code> представлен внутренне как:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">{</span><span class="ss">:sum</span><span class="p">,</span> <span class="p">[],</span> <span class="p">[</span><span class="m">1</span><span class="p">,</span> <span class="m">2</span><span class="p">,</span> <span class="m">3</span><span class="p">]}</span>
+</code></pre></div></div>
+
+<p>Вы можете получить представление любого выражения, используя макрос <code class="highlighter-rouge">quote</code>:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">iex</span><span class="o">&gt;</span> <span class="kn">quote</span> <span class="k">do</span><span class="p">:</span> <span class="n">sum</span><span class="p">(</span><span class="m">1</span><span class="p">,</span> <span class="m">2</span><span class="p">,</span> <span class="m">3</span><span class="p">)</span>
+<span class="p">{</span><span class="ss">:sum</span><span class="p">,</span> <span class="p">[],</span> <span class="p">[</span><span class="m">1</span><span class="p">,</span> <span class="m">2</span><span class="p">,</span> <span class="m">3</span><span class="p">]}</span>
+</code></pre></div></div>
+
+<p>Первый элемент – это имя функции, второй – список ключевых слов, содержащий матаданные, а третий – список аргументов.</p>
+
+<p>Также, в виде таких кортежей, представлены операторы:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">iex</span><span class="o">&gt;</span> <span class="kn">quote</span> <span class="k">do</span><span class="p">:</span> <span class="m">1</span> <span class="o">+</span> <span class="m">2</span>
+<span class="p">{</span><span class="ss">:+</span><span class="p">,</span> <span class="p">[</span><span class="ss">context:</span> <span class="no">Elixir</span><span class="p">,</span> <span class="kn">import</span><span class="p">:</span> <span class="no">Kernel</span><span class="p">],</span> <span class="p">[</span><span class="m">1</span><span class="p">,</span> <span class="m">2</span><span class="p">]}</span>
+</code></pre></div></div>
+
+<p>Даже словарь представляется как вызов <code class="highlighter-rouge">%{}</code>:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">iex</span><span class="o">&gt;</span> <span class="kn">quote</span> <span class="k">do</span><span class="p">:</span> <span class="p">%{</span><span class="m">1</span> <span class="o">=&gt;</span> <span class="m">2</span><span class="p">}</span>
+<span class="p">{</span><span class="ss">:%{}</span><span class="p">,</span> <span class="p">[],</span> <span class="p">[{</span><span class="m">1</span><span class="p">,</span> <span class="m">2</span><span class="p">}]}</span>
+</code></pre></div></div>
+
+<p>Переменные тоже представлены с использованием таких триплетов, за исключением лишь последнего элемента, который является атомом, а не списком:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">iex</span><span class="o">&gt;</span> <span class="kn">quote</span> <span class="k">do</span><span class="p">:</span> <span class="n">x</span>
+<span class="p">{</span><span class="ss">:x</span><span class="p">,</span> <span class="p">[],</span> <span class="no">Elixir</span><span class="p">}</span>
+</code></pre></div></div>
+
+<p>При маскировании более сложных выражений мы можем заметить, что код представлен в таких кортежах, которые часто вложены друг в друга, создавая тем самым структуру, напоминающую дерево. Многие языки назвали бы такое представление <abbr title="ABSTRACT SYNTAX TREE">абстрактным синтаксическим деревом</abbr>. Эликсир же называет их <abbr title="QUOTED EXPRESSIONS">маскирующими выражениями</abbr>:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">iex</span><span class="o">&gt;</span> <span class="kn">quote</span> <span class="k">do</span><span class="p">:</span> <span class="n">sum</span><span class="p">(</span><span class="m">1</span><span class="p">,</span> <span class="m">2</span> <span class="o">+</span> <span class="m">3</span><span class="p">,</span> <span class="m">4</span><span class="p">)</span>
+<span class="p">{</span><span class="ss">:sum</span><span class="p">,</span> <span class="p">[],</span> <span class="p">[</span><span class="m">1</span><span class="p">,</span> <span class="p">{</span><span class="ss">:+</span><span class="p">,</span> <span class="p">[</span><span class="ss">context:</span> <span class="no">Elixir</span><span class="p">,</span> <span class="kn">import</span><span class="p">:</span> <span class="no">Kernel</span><span class="p">],</span> <span class="p">[</span><span class="m">2</span><span class="p">,</span> <span class="m">3</span><span class="p">]},</span> <span class="m">4</span><span class="p">]}</span>
+</code></pre></div></div>
+
+<p>Иногда при работе с маскирующими выражениями может оказаться полезным вернуть код текстом. Что ж, это можно сделать с помощью функции <code class="highlighter-rouge">Macro.to_string/1</code>:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">iex</span><span class="o">&gt;</span> <span class="no">Macro</span><span class="o">.</span><span class="n">to_string</span><span class="p">(</span><span class="kn">quote</span> <span class="k">do</span><span class="p">:</span> <span class="n">sum</span><span class="p">(</span><span class="m">1</span><span class="p">,</span> <span class="m">2</span> <span class="o">+</span> <span class="m">3</span><span class="p">,</span> <span class="m">4</span><span class="p">))</span>
+<span class="sd">"</span><span class="s2">sum(1, 2 + 3, 4)"</span>
+</code></pre></div></div>
+
+<p>В целом, кортежи более структурированы в соответствии со следующим форматом:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">{</span><span class="n">atom</span> <span class="o">|</span> <span class="n">tuple</span><span class="p">,</span> <span class="n">list</span><span class="p">,</span> <span class="n">list</span> <span class="o">|</span> <span class="n">atom</span><span class="p">}</span>
+</code></pre></div></div>
+
+<ul>
+  <li>Первый элемент – это атом или другой кортеж в том же представлении;</li>
+  <li>Второй элемент – это список ключевых слов, содержащий метаданные, вроде чисел и контекстов;</li>
+  <li>Третий элемент – это либо список аргументов для вызова функции, либо атом. Когда этот элемент является атомом, это значит, что кортеж представляет из себя переменную.</li>
+</ul>
+
+<p>Помимо кортежа, определенного выше, существует также пять литералов Эликсира, которые при маскировке возвращаюся сами (вместо кортежа). Вот они:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="ss">:sum</span>         <span class="c1">#=&gt; Атомы</span>
+<span class="m">1.0</span>          <span class="c1">#=&gt; Числа</span>
+<span class="p">[</span><span class="m">1</span><span class="p">,</span> <span class="m">2</span><span class="p">]</span>       <span class="c1">#=&gt; Списки</span>
+<span class="sd">"</span><span class="s2">strings"</span>    <span class="c1">#=&gt; Строки</span>
+<span class="p">{</span><span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">}</span> <span class="c1">#=&gt; Кортежи с двумя элементами</span>
+</code></pre></div></div>
+
+<p>В основном, код на Эликсире переводится прямо в маскирующие выражения. Мы рекомендуем вам попробовать запустить различные примеры кода и посмотреть на получаемые результаты. Например, что означает <code class="highlighter-rouge">String.upcase("foo")</code>? Мы также узнали, что <code class="highlighter-rouge">if(true, do: :this, else: :that)</code> – это то же самое, что и <code class="highlighter-rouge">if true do :this else :that end</code>. Как это утверждение применяется в маскирующих выражениях?</p>
+
+<h2 id="unquoting">Unquoting</h2>
+
+<p>Конструкция <code class="highlighter-rouge">quote</code> – это получение внутреннего представления какого-то конкретого фрагмента кода. Однако, иногда нам может потребоваться ввести какой-нибудь другой фрагмент кода внутрь представления, которое мы хотим получить.</p>
+
+<p>Для примера, представьте, что у вас есть некая переменная <code class="highlighter-rouge">number</code>, содержащая номер, который вы хотите ввести в маскирующее выражение.</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">iex</span><span class="o">&gt;</span> <span class="n">number</span> <span class="o">=</span> <span class="m">13</span>
+
+<span class="n">iex</span><span class="o">&gt;</span> <span class="no">Macro</span><span class="o">.</span><span class="n">to_string</span><span class="p">(</span><span class="kn">quote</span> <span class="k">do</span><span class="p">:</span> <span class="m">11</span> <span class="o">+</span> <span class="n">number</span><span class="p">)</span>
+<span class="sd">"</span><span class="s2">11 + number"</span>
+</code></pre></div></div>
+
+<p>Это не то, что мы хотели увидеть, так как значение переменной <code class="highlighter-rouge">number</code> не было введено, <code class="highlighter-rouge">number</code> был лишь замаскирован в выражении. Чтобы на самом деле ввести значение переменной <code class="highlighter-rouge">number</code>, в маскирующем представлении должен использоваться <code class="highlighter-rouge">unquote</code>:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">iex</span><span class="o">&gt;</span> <span class="n">number</span> <span class="o">=</span> <span class="m">13</span>
+<span class="n">iex</span><span class="o">&gt;</span> <span class="no">Macro</span><span class="o">.</span><span class="n">to_string</span><span class="p">(</span><span class="kn">quote</span> <span class="k">do</span><span class="p">:</span> <span class="m">11</span> <span class="o">+</span> <span class="kn">unquote</span><span class="p">(</span><span class="n">number</span><span class="p">))</span>
+<span class="sd">"</span><span class="s2">11 + 13"</span>
+</code></pre></div></div>
+
+<p><code class="highlighter-rouge">unquote</code> может даже использоваться для ввода имён функций:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">iex</span><span class="o">&gt;</span> <span class="n">fun</span> <span class="o">=</span> <span class="ss">:hello</span>
+<span class="n">iex</span><span class="o">&gt;</span> <span class="no">Macro</span><span class="o">.</span><span class="n">to_string</span><span class="p">(</span><span class="kn">quote</span> <span class="k">do</span><span class="p">:</span> <span class="kn">unquote</span><span class="p">(</span><span class="n">fun</span><span class="p">)(</span><span class="ss">:world</span><span class="p">))</span>
+<span class="sd">"</span><span class="s2">hello(:world)"</span>
+</code></pre></div></div>
+
+<p>В некоторых случаях нам может потребоваться ввести много значений внутрь списка. Например, представьте, что у вас есть список, содержащий <code class="highlighter-rouge">[1, 2, 6]</code> и мы хотим ввести в него <code class="highlighter-rouge">[3, 4, 5]</code>. Использование <code class="highlighter-rouge">unquote</code> не даст желаемого результата:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">iex</span><span class="o">&gt;</span> <span class="n">inner</span> <span class="o">=</span> <span class="p">[</span><span class="m">3</span><span class="p">,</span> <span class="m">4</span><span class="p">,</span> <span class="m">5</span><span class="p">]</span>
+<span class="n">iex</span><span class="o">&gt;</span> <span class="no">Macro</span><span class="o">.</span><span class="n">to_string</span><span class="p">(</span><span class="kn">quote</span> <span class="k">do</span><span class="p">:</span> <span class="p">[</span><span class="m">1</span><span class="p">,</span> <span class="m">2</span><span class="p">,</span> <span class="kn">unquote</span><span class="p">(</span><span class="n">inner</span><span class="p">),</span> <span class="m">6</span><span class="p">])</span>
+<span class="sd">"</span><span class="s2">[1, 2, [3, 4, 5], 6]"</span>
+</code></pre></div></div>
+
+<p>Именно в такие моменты <code class="highlighter-rouge">unquote_splicing</code> приходит к нам на помощь:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">iex</span><span class="o">&gt;</span> <span class="n">inner</span> <span class="o">=</span> <span class="p">[</span><span class="m">3</span><span class="p">,</span> <span class="m">4</span><span class="p">,</span> <span class="m">5</span><span class="p">]</span>
+<span class="n">iex</span><span class="o">&gt;</span> <span class="no">Macro</span><span class="o">.</span><span class="n">to_string</span><span class="p">(</span><span class="kn">quote</span> <span class="k">do</span><span class="p">:</span> <span class="p">[</span><span class="m">1</span><span class="p">,</span> <span class="m">2</span><span class="p">,</span> <span class="n">unquote_splicing</span><span class="p">(</span><span class="n">inner</span><span class="p">),</span> <span class="m">6</span><span class="p">])</span>
+<span class="sd">"</span><span class="s2">[1, 2, 3, 4, 5, 6]"</span>
+</code></pre></div></div>
+
+<p>Конструкция <code class="highlighter-rouge">unquote</code> очень полезна при работе с макросами. Дело здесь в том, что при написании макросов разработчики могут получать необходимые куски кода и внедрять их в другие фрагменты программы, которые, в свою очередь, могут быть использованы для преобразования исходного кода или записи нового, генерирующего новый код во время компиляции.</p>
+
+<h2 id="экранирование">Экранирование</h2>
+
+<p>Как мы могли заметить в начале этой главы, только некоторые значения могут быть допустимыми маскирующими выражениями в Эликсире. Например, словарь не является допустимым маскирующим выражением. Также, нет кортежа с четырьмя элементами. Однако такие значения могут быть выражены как маскирующие выражения:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">iex</span><span class="o">&gt;</span> <span class="kn">quote</span> <span class="k">do</span><span class="p">:</span> <span class="p">%{</span><span class="m">1</span> <span class="o">=&gt;</span> <span class="m">2</span><span class="p">}</span>
+<span class="p">{</span><span class="ss">:%{}</span><span class="p">,</span> <span class="p">[],</span> <span class="p">[{</span><span class="m">1</span><span class="p">,</span> <span class="m">2</span><span class="p">}]}</span>
+</code></pre></div></div>
+
+<p>В некоторых случаях вам может потребоваться ввести такие значения в маскирующие выражения. Чтобы сделать это, нам необходимо сперва избежать этих значений в маскирующих выражениях с помощью функции <code class="highlighter-rouge">Macro.escape/1</code>:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">iex</span><span class="o">&gt;</span> <span class="n">map</span> <span class="o">=</span> <span class="p">%{</span><span class="ss">hello:</span> <span class="ss">:world</span><span class="p">}</span>
+<span class="n">iex</span><span class="o">&gt;</span> <span class="no">Macro</span><span class="o">.</span><span class="n">escape</span><span class="p">(</span><span class="n">map</span><span class="p">)</span>
+<span class="p">{</span><span class="ss">:%{}</span><span class="p">,</span> <span class="p">[],</span> <span class="p">[</span><span class="ss">hello:</span> <span class="ss">:world</span><span class="p">]}</span>
+</code></pre></div></div>
+
+<p>Макросы получают маскирующие выражения и должны их же и возвращать. Однако иногда во время выполнения макроса вам может понадобиться поработать со значениями и здесь нам уже нужно будет провести различие между значениями и маскирующими выражениями.</p>
+
+<p>Другими словами, важно провести различие между регулярными значениями Эликсира (вроде списков, словарей, процессов, ссылок и т. д.) и маскирующим выражением. Некоторые значения, такие как: числа, атомы и строки, имеют маскирующее выражение равное самому значению. Другое значение, вроде словаря, должно быть явно преобразовано. И наконец, значения, подобные функциям и ссылкам, вообще не могут быть преобразованы в маскирующее выражение.</p>
+
+<p>Вы можете больше узнать о конструкциях <code class="highlighter-rouge">quote</code> и <code class="highlighter-rouge">unquote</code> в <a href="https://hexdocs.pm/elixir/">модуле <code class="highlighter-rouge">Kernel.SpecialForms</code></a>. Документацию для <code class="highlighter-rouge">Macro.escape/1</code> и других функций, связанных с маскирующими выражениями, можно найти в <a href="https://hexdocs.pm/elixir/">модуле <code class="highlighter-rouge">Macros</code></a>.</p>
+
+<p>В этом введении мы заложили основу для написания нашего первого макроса, поэтому перейдём же к следующей главе.</p>
+
+    </div>
+</article>
+
+<nav class="docs_nav pure-g">
+    <div class="docs_nav__inner pure-u-1 pure-u-md-3-4">
+        <div class="pure-g">
+            <div class="docs_nav__column docs_nav__column--prev pure-u-1-3">
+                
+                    <a href="/docs/mix-otp/distributed-tasks-and-configuration.html" class="docs_nav__link pure-button">
+                        &larr;<span class="h-hidden_mobile"> Назад</span></a>
+                
+            </div>
+
+            <div class="docs_nav__column docs_nav__column--contents pure-u-1-3">
+                <a href="#docsContents" class="docs_nav__link docs_nav__link--contents pure-button">☰</a>
+            </div>
+
+            <div class="docs_nav__column docs_nav__column--next pure-u-1-3">
+                
+                    <a href="/docs/meta/macros.html" class="docs_nav__link pure-button">
+                        <span class="h-hidden_mobile">Вперёд </span>&rarr;
+                    </a>
+                
+            </div>
+        </div>
+    </div>
+</nav>
+
+<div id="docsContents" class="modal modal--docs_contents modal--close_backdrop">
+    <div class="modal__content">
+        <a href="#close" title="Закрыть" class="modal__close">x</a>
+
+        <h2 class="modal__title">Содержание</h2>
+
+        
+        <h3 id="руководство-для-начинающих">Руководство для начинающих</h3>
+<ul>
+  <li><a href="/docs">Введение</a></li>
+  <li><a href="/docs/basic-types.html">Базовые типы</a></li>
+  <li><a href="/docs/basic-operators.html">Базовые операторы</a></li>
+  <li><a href="/docs/pattern-matching.html">Сопоставление с образцом</a></li>
+  <li><a href="/docs/case-cond-and-if.html">Конструкции ветвления</a></li>
+  <li><a href="/docs/binaries-strings-and-char-lists.html">Двоичные данные, строки и списки символов</a></li>
+  <li><a href="/docs/keywords-and-maps.html">Ключевые списки и словари</a></li>
+  <li><a href="/docs/modules-and-functions.html">Модули и функции</a></li>
+  <li><a href="/docs/recursion.html">Рекурсия</a></li>
+  <li><a href="/docs/enumerables-and-streams.html">Перечисления и потоки</a></li>
+  <li><a href="/docs/processes.html">Процессы</a></li>
+  <li><a href="/docs/io-and-the-file-system.html">Ввод/вывод и файловая система</a></li>
+  <li><a href="/docs/alias-require-and-import.html">Директивы <code class="highlighter-rouge">alias</code>, <code class="highlighter-rouge">require</code> и <code class="highlighter-rouge">import</code></a></li>
+  <li><a href="/docs/module-attributes.html">Атрибуты модулей</a></li>
+  <li><a href="/docs/structs.html">Структуры</a></li>
+  <li><a href="/docs/protocols.html">Протоколы</a></li>
+  <li><a href="/docs/comprehensions.html">Списковые выражения</a></li>
+  <li><a href="/docs/sigils.html">Сигилы</a></li>
+  <li><a href="/docs/try-catch-and-rescue.html">Конструкция <code class="highlighter-rouge">try</code>, <code class="highlighter-rouge">catch</code> и <code class="highlighter-rouge">rescue</code></a></li>
+  <li><a href="/docs/typespecs-and-behaviours.html">Спецификации типов и поведения</a></li>
+  <li><a href="/docs/erlang-libraries.html">Библиотеки Эрланга</a></li>
+  <li><a href="/docs/where-to-go-next.html">Куда двигаться дальше</a></li>
+</ul>
+
+<h3 id="микс-и-otp">Микс и <code class="highlighter-rouge">OTP</code></h3>
+<ul>
+  <li><a href="/docs/mix-otp/introduction-to-mix.html">Введение в Микс</a></li>
+  <li><a href="/docs/mix-otp/agent.html">Агент</a></li>
+  <li><a href="/docs/mix-otp/genserver.html">GenServer</a></li>
+  <li><a href="/docs/mix-otp/supervisor-and-application.html">Супервизор и приложение</a></li>
+  <li><a href="/docs/mix-otp/dynamic-supervisor.html">Динамический супервизор</a></li>
+  <li><a href="/docs/mix-otp/ets.html">ETS</a></li>
+  <li><a href="/docs/mix-otp/dependencies-and-umbrella-apps.html">Зависимости и зонтичные проекты</a></li>
+  <li><a href="/docs/mix-otp/task-and-gen-tcp.html">Модули <code class="highlighter-rouge">Task</code> и <code class="highlighter-rouge">:gen_tcp</code></a></li>
+  <li><a href="/docs/mix-otp/docs-tests-and-with.html">Доктесты, паттерны и оператор <code class="highlighter-rouge">with</code></a></li>
+  <li><a href="/docs/mix-otp/distributed-tasks-and-configuration.html">Распределенные задачи и конфигурация</a></li>
+</ul>
+
+<h3 id="метапрограммирование">Метапрограммирование</h3>
+<ul>
+  <li><a href="/docs/meta/quote-and-unquote.html">Конструкции <code class="highlighter-rouge">quote</code> и <code class="highlighter-rouge">unquote</code></a></li>
+  <li><a href="/docs/meta/macros.html">Макросы</a></li>
+  <li><a href="/docs/meta/domain-specific-languages.html">Предметно-ориентированные языки</a></li>
+</ul>
+
+    </div>
+</div>
+
+
+
+        <footer class="footer">
+    &copy; 2020
+    / Россия
+
+    <span class="pull-right">Любые мысли и вопросы пишите на <a href="mailto:elixir@wunsh.ru">elixir@wunsh.ru</a>.</span>
+</footer>
+
+        <div id="subscribeModal" class="modal">
+    <div class="modal__content">
+        <a href="#close" title="Close" class="modal__close">x</a>
+
+        <h2 class="modal__title">Ламповая рассылка про&nbsp;Эликсир</h2>
+
+        <p>Один-два раза в&nbsp;неделю присылаем тёплые письма об&nbsp;Эликсире: переводы самых интересных статей до&nbsp;их&nbsp;появления в&nbsp;открытом доступе, анонсы событий и&nbsp;вкусные бонусы.</p>
+
+        <form action="//wunsh.us14.list-manage.com/subscribe/post?u=c81ca3d4693f62db7f7f67c71&amp;id=a192e2dfef" method="post" id="mc-embedded-subscribe-form" name="mc-embedded-subscribe-form" class="pure-form h-tc validate" target="_blank" novalidate>
+            <input type="email" value="" name="EMAIL" class="modal__input pure-input-rounded large" id="mce-EMAIL" placeholder="Твоя почта" required>
+            <div style="position: absolute; left: -5000px;" aria-hidden="true"><input type="text" name="b_c81ca3d4693f62db7f7f67c71_a192e2dfef" tabindex="-1" value=""></div>
+
+            <input type="submit" value="Присоединиться" name="subscribe" onClick="yaCounter39773490.reachGoal('SUBSCRIBED'); return true" id="mc-embedded-subscribe" class="pure-button button-success large">
+        </form>
+
+        <p>Обязательно подтверди почту, перейдя по&nbsp;ссылке в&nbsp;письме, иначе мы&nbsp;не&nbsp;сможем делиться с&nbsp;тобой полезностями.</p>
+
+        <p>Надоедать точно не&nbsp;будем :)</p>
+    </div>
+</div>
+
+        <script src="/assets/js/vendors/zepto.min.js"></script>
+
+<script>
+    if ($(".post--docs").length) {
+        $(".footer").addClass("footer--docs")
+    }
+
+    $(".modal--close_backdrop").click(function(){
+        window.location.hash = "";
+    });
+</script>
+
+        <!-- Yandex.Metrika counter -->
+<script type="text/javascript">
+    (function (d, w, c) {
+        (w[c] = w[c] || []).push(function() {
+            try {
+                w.yaCounter39773490 = new Ya.Metrika({
+                    id:39773490,
+                    clickmap:true,
+                    trackLinks:true,
+                    accurateTrackBounce:true,
+                    webvisor:true,
+                    ut:"noindex"
+                });
+            } catch(e) { }
+        });
+
+        var n = d.getElementsByTagName("script")[0],
+            s = d.createElement("script"),
+            f = function () { n.parentNode.insertBefore(s, n); };
+        s.type = "text/javascript";
+        s.async = true;
+        s.src = "https://mc.yandex.ru/metrika/watch.js";
+
+        if (w.opera == "[object Opera]") {
+            d.addEventListener("DOMContentLoaded", f, false);
+        } else { f(); }
+    })(document, window, "yandex_metrika_callbacks");
+</script>
+<noscript><div><img src="https://mc.yandex.ru/watch/39773490?ut=noindex" style="position:absolute; left:-9999px;" alt="" /></div></noscript>
+<!-- /Yandex.Metrika counter -->
+
+      </div>
+    </div>
+  </body>
+</html>

@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Списки ввода-вывода в&nbsp;Elixir. Часть&nbsp;3: преимущества использования |> Сообщество Elixir и Phoenix Framework</title>
+    <meta name="description" content="В этой статье рассказывается о практическом применении структуры под названием списки ввода-вывода.">
+
+    <link rel="alternate" type="application/rss+xml" title="Сообщество Elixir и Phoenix Framework" href="/feed.xml" />
+    <link rel="canonical" href="https://wunsh.ru/articles/elixir-io-lists-part-3.html">
+
+    <style type="text/css">@import url("//fonts.googleapis.com/css?family=Source+Sans+Pro:400,700&subset=cyrillic");</style>
+    <link rel="stylesheet" href="/assets/css/vendors/pure.min.css">
+    <link rel="stylesheet" href="/assets/css/vendors/pure-grids-responsive.min.css">
+    <link rel="stylesheet" href="/assets/css/style.css?1594516983">
+
+    <link rel="shortcut icon" type="image/png" href="/assets/favicon.png" >
+</head>
+
+
+  <body>
+    <div class="wunsh pure-g">
+      
+
+
+
+
+<div class="menu pure-u-1 pure-u-md-1-4">
+  <div class="header">
+    <h2 class="header__title">
+      
+        <a href="https://wunsh.ru" class="header__title_link" title="На главную">Эликсир и&nbsp;Вунш</a>
+      
+    </h2>
+    <h3 class="header__tagline">Erlang + Ruby = &#10084;</h3>
+
+    <nav class="nav">
+      <ul class="nav_list">
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/elixir" class="nav_list__item_link pure-button">О языке</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/install/linux-asdf" class="nav_list__item_link pure-button">Установка</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/docs/" class="nav_list__item_link pure-button">Документация</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/guides" class="nav_list__item_link pure-button">Гайды</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/news" class="nav_list__item_link pure-button">Новости</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/articles" class="nav_list__item_link pure-button">Статьи</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/videos" class="nav_list__item_link pure-button">Видео</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/vacancies" class="nav_list__item_link pure-button">Вакансии</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/faq" class="nav_list__item_link pure-button">FAQ</a>
+            </li>
+          
+        
+      </ul>
+    </nav>
+
+    <a href="#subscribeModal" class="pure-button header__subscribe_link">Подписаться на рассылку</a>
+  </div>
+</div>
+
+
+      <div class="content pure-u-1 pure-u-md-3-4">
+        
+
+<article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+  <header class="post__header">
+    
+    <h1 class="post__title" itemprop="name headline">Списки ввода-вывода в&nbsp;Elixir. Часть&nbsp;3: преимущества использования</h1>
+
+    <div class="post__meta post_meta">
+      <ul class="meta_list">
+        <li class="meta_list__item">
+          
+          <span class="">
+            <small class="meta_list__item_name">Дата</small>
+            <time class="h-bold" datetime="2017-03-09T00:00:00+00:00" itemprop="datePublished">
+              
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+09 марта 2017
+
+            </time>
+          </span>
+          
+
+          
+        </li>
+        
+        <li class="meta_list__item">
+            <span class="tag_cloud tags_cloud--inline h-no_margin">
+              <small class="meta_list__item_name">Теги</small> 
+
+
+<ul class="tags_cloud__list">
+  
+    <a href="/tags/#advanced" class="tags_cloud__link tag tag--advanced">advanced</a>
+  
+</ul>
+
+            </span>
+        </li>
+        
+        <li class="meta_list__item">
+          <span itemprop="author" itemscope itemtype="http://schema.org/Person">
+            <small class="meta_list__item_name">
+              
+                Перевод
+              
+            </small>
+            <span itemprop="name" class="h-bold">Надежда Нестерова</span>
+          </span>
+        </li>
+
+        <li class="meta_list__item">
+          
+            <div >
+              <small>Оригинал</small>
+              <strong>
+                &laquo;<a href="https://10consulting.com/2016/10/28/elixir-io-lists/" style="text-transform: none; text-decoration: underline; color: #4b2e39;">String Manipulation Micro Optimisation Using IO Lists in Elixir</a>&raquo;
+              </strong>
+              <small>&copy;</small>
+              <strong>Ben Smith</strong>
+            </div>
+          
+        </li>
+      </ul>
+    </div>
+  </header>
+
+  <div class="post__content" itemprop="articleBody">
+    <p>В предыдущих статьях (первая, вторая) было показано, как с помощью списков ввода-вывода сделать код более эффективным.</p>
+<p>В его примере список ввода-вывода создаётся при помощи <code>Enum.map</code>:</p>
+<figure class="highlight"><pre><code class="language-elixir" data-lang="elixir"><span class="n">users</span> <span class="o">=</span> <span class="p">[%{</span><span class="ss">name:</span> <span class="sd">"</span><span class="s2">Amy"</span><span class="p">},</span> <span class="p">%{</span><span class="ss">name:</span> <span class="sd">"</span><span class="s2">Joe"</span><span class="p">}]</span>
+
+<span class="n">response</span> <span class="o">=</span> <span class="no">Enum</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="n">users</span><span class="p">,</span> <span class="k">fn</span> <span class="p">(</span><span class="n">user</span><span class="p">)</span> <span class="o">-&gt;</span>
+  <span class="p">[</span><span class="sd">"</span><span class="s2">&lt;li&gt;"</span><span class="p">,</span> <span class="n">user</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="sd">"</span><span class="s2">&lt;/li&gt;"</span><span class="p">]</span>
+<span class="k">end</span><span class="p">)</span>
+
+<span class="no">IO</span><span class="o">.</span><span class="n">puts</span> <span class="n">response</span></code></pre></figure>
+<p>Повторяющиеся строки заносятся в память только один раз. Создание одинаковых строк с помощью интерполяции (<code>"&lt;li&gt;#{user.name}&lt;/li&gt;"</code>) или конкатенации (<code>&lt;li&gt;" &lt;&gt; user.name &lt;&gt; "&lt;/li&gt;"</code>) потребует дополнительных операций по выделению памяти и копированию данных. В результате память будет использоваться менее эффективно, а у сборщика мусора появится много лишней работы.</p>
+<h3>Использование списков</h3>
+<p>Ознакомившись со статьёй, я непременно решил воспользоваться списками ввода-вывода в одном из своих открытых проектов на Elixir. Речь пойдёт о <noindex><a href="https://github.com/slashdotdash/eventstore" rel="nofollow noreferrer">EventStore</a></noindex> PostgreSQL для сохранности данных. Конструирование SQL-оператора для вставки большого количества событий осуществляется путём конкатенации и интерполяции строк. Так как в конечной строке получается очень много повторов, то здесь как раз и пригодится список ввода-вывода.</p>
+<h3>Поддержка Postgrex запросов со списками ввода-вывода</h3>
+<p>В EventStore <noindex><a href="https://github.com/elixir-ecto/postgrex" rel="nofollow noreferrer">Postgrex</a></noindex>&nbsp;используется в качестве драйвера для взаимодействия с PostgreSQL. Таким образом, SQL-оператор insert превращается в функцию <code>Postgrex.query/4</code>. В документации к функции <code>query/4</code> сказано, что её аргументом должны выступать данные ввода-вывода. Получается, что этим аргументом может быть и список ввода-вывода.</p>
+<p>Итак, я подтверждаю, что запросы к PostgreSQL, состоящие из строки или списка ввода-вывода, выступающих в качестве SQL-оператора, при запуске кода в интерактивной консоли&nbsp;iex отлично справляются со своими задачами.</p>
+<figure class="highlight"><pre><code class="language-elixir" data-lang="elixir"><span class="err">$</span> <span class="n">iex</span> <span class="o">-</span><span class="no">S</span> <span class="n">mix</span>
+<span class="no">Erlang</span><span class="o">/</span><span class="no">OTP</span> <span class="m">19</span> <span class="p">[</span><span class="n">erts</span><span class="o">-</span><span class="m">8.1</span><span class="p">]</span> <span class="p">[</span><span class="n">source</span><span class="p">]</span> <span class="p">[</span><span class="m">64</span><span class="o">-</span><span class="n">bit</span><span class="p">]</span> <span class="p">[</span><span class="ss">smp:</span><span class="m">4</span><span class="p">:</span><span class="m">4</span><span class="p">]</span> <span class="p">[</span><span class="n">async</span><span class="o">-</span><span class="ss">threads:</span><span class="m">10</span><span class="p">]</span> <span class="p">[</span><span class="n">hipe</span><span class="p">]</span> <span class="p">[</span><span class="n">kernel</span><span class="o">-</span><span class="ss">poll:</span><span class="no">false</span><span class="p">]</span> <span class="p">[</span><span class="n">dtrace</span><span class="p">]</span>
+
+<span class="no">Interactive</span> <span class="no">Elixir</span> <span class="p">(</span><span class="m">1.3</span><span class="o">.</span><span class="m">3</span><span class="p">)</span> <span class="o">-</span> <span class="n">press</span> <span class="no">Ctrl</span><span class="o">+</span><span class="no">C</span> <span class="n">to</span> <span class="k">exit</span> <span class="p">(</span><span class="n">type</span> <span class="n">h</span><span class="p">()</span> <span class="no">ENTER</span> <span class="n">for</span> <span class="n">help</span><span class="p">)</span>
+
+<span class="n">iex</span><span class="p">(</span><span class="m">1</span><span class="p">)</span><span class="o">&gt;</span> <span class="n">storage_config</span> <span class="o">=</span> <span class="no">Application</span><span class="o">.</span><span class="n">get_env</span><span class="p">(</span><span class="ss">:eventstore</span><span class="p">,</span> <span class="no">EventStore</span><span class="o">.</span><span class="no">Storage</span><span class="p">)</span>
+<span class="p">[</span><span class="ss">username:</span> <span class="sd">"</span><span class="s2">postgres"</span><span class="p">,</span> <span class="ss">password:</span> <span class="sd">"</span><span class="s2">postgres"</span><span class="p">,</span> <span class="ss">database:</span> <span class="sd">"</span><span class="s2">eventstore_dev"</span><span class="p">,</span>
+<span class="ss">hostname:</span> <span class="sd">"</span><span class="s2">localhost"</span><span class="p">,</span> <span class="ss">pool_size:</span> <span class="m">10</span><span class="p">,</span>
+<span class="ss">extensions:</span> <span class="p">[{</span><span class="no">Postgrex</span><span class="o">.</span><span class="no">Extensions</span><span class="o">.</span><span class="no">Calendar</span><span class="p">,</span> <span class="p">[]}]]</span>
+
+<span class="n">iex</span><span class="p">(</span><span class="m">2</span><span class="p">)</span><span class="o">&gt;</span>  <span class="p">{</span><span class="ss">:ok</span><span class="p">,</span> <span class="n">conn</span><span class="p">}</span> <span class="o">=</span> <span class="no">Postgrex</span><span class="o">.</span><span class="n">start_link</span><span class="p">(</span><span class="n">storage_config</span><span class="p">)</span>
+<span class="p">{</span><span class="ss">:ok</span><span class="p">,</span> <span class="c1">#PID&lt;0.208.0&gt;}</span>
+
+<span class="n">iex</span><span class="p">(</span><span class="m">3</span><span class="p">)</span><span class="o">&gt;</span>  <span class="no">Postgrex</span><span class="o">.</span><span class="n">query!</span><span class="p">(</span><span class="n">conn</span><span class="p">,</span> <span class="sd">"</span><span class="s2">select * from events;"</span><span class="p">,</span> <span class="p">[])</span>
+<span class="p">%</span><span class="no">Postgrex</span><span class="o">.</span><span class="no">Result</span><span class="p">{</span><span class="ss">columns:</span> <span class="p">[</span><span class="sd">"</span><span class="s2">event_id"</span><span class="p">,</span> <span class="sd">"</span><span class="s2">stream_id"</span><span class="p">,</span> <span class="sd">"</span><span class="s2">stream_version"</span><span class="p">,</span>
+<span class="sd">"</span><span class="s2">event_type"</span><span class="p">,</span> <span class="sd">"</span><span class="s2">correlation_id"</span><span class="p">,</span> <span class="sd">"</span><span class="s2">data"</span><span class="p">,</span> <span class="sd">"</span><span class="s2">metadata"</span><span class="p">,</span> <span class="sd">"</span><span class="s2">created_at"</span><span class="p">],</span>
+<span class="ss">command:</span> <span class="ss">:select</span><span class="p">,</span> <span class="ss">connection_id:</span> <span class="m">16993</span><span class="p">,</span> <span class="ss">num_rows:</span> <span class="m">0</span><span class="p">,</span> <span class="ss">rows:</span> <span class="p">[]}</span>
+
+<span class="n">iex</span><span class="p">(</span><span class="m">4</span><span class="p">)</span><span class="o">&gt;</span>  <span class="no">Postgrex</span><span class="o">.</span><span class="n">query!</span><span class="p">(</span><span class="n">conn</span><span class="p">,</span> <span class="p">[</span><span class="sd">"</span><span class="s2">select *"</span><span class="p">,</span> <span class="sd">"</span><span class="s2">from events"</span><span class="p">,</span> <span class="sd">"</span><span class="s2">;"</span><span class="p">],</span> <span class="p">[])</span>
+<span class="p">%</span><span class="no">Postgrex</span><span class="o">.</span><span class="no">Result</span><span class="p">{</span><span class="ss">columns:</span> <span class="p">[</span><span class="sd">"</span><span class="s2">event_id"</span><span class="p">,</span> <span class="sd">"</span><span class="s2">stream_id"</span><span class="p">,</span> <span class="sd">"</span><span class="s2">stream_version"</span><span class="p">,</span>
+<span class="sd">"</span><span class="s2">event_type"</span><span class="p">,</span> <span class="sd">"</span><span class="s2">correlation_id"</span><span class="p">,</span> <span class="sd">"</span><span class="s2">data"</span><span class="p">,</span> <span class="sd">"</span><span class="s2">metadata"</span><span class="p">,</span> <span class="sd">"</span><span class="s2">created_at"</span><span class="p">],</span>
+<span class="ss">command:</span> <span class="ss">:select</span><span class="p">,</span> <span class="ss">connection_id:</span> <span class="m">16993</span><span class="p">,</span> <span class="ss">num_rows:</span> <span class="m">0</span><span class="p">,</span> <span class="ss">rows:</span> <span class="p">[]}</span></code></pre></figure>
+<h3>Реализация</h3>
+<p>Изменения в EventStore я внёс только в тело функции <code>EventStore.Sql.Statements.create_events/1</code>. Изначально SQL-оператор конструировался тем, что несколько событий помещались в insert с помощью интерполяции и конкатенации строк.</p>
+<figure class="highlight"><pre><code class="language-elixir" data-lang="elixir"><span class="k">def</span> <span class="n">create_events</span><span class="p">(</span><span class="n">number_of_events</span> <span class="p">\\</span> <span class="m">1</span><span class="p">)</span> <span class="k">do</span>
+  <span class="n">insert</span> <span class="o">=</span> <span class="sd">"</span><span class="s2">INSERT INTO events (event_id, stream_id, stream_version, correlation_id, event_type, data, metadata, created_at) VALUES"</span>
+
+  <span class="n">params</span> <span class="o">=</span>
+    <span class="m">1</span><span class="o">..</span><span class="n">number_of_events</span>
+    <span class="o">|&gt;</span> <span class="no">Enum</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="k">fn</span> <span class="n">event_number</span> <span class="o">-&gt;</span>
+      <span class="n">index</span> <span class="o">=</span> <span class="p">(</span><span class="n">event_number</span> <span class="o">-</span> <span class="m">1</span><span class="p">)</span> <span class="o">*</span> <span class="m">8</span>
+      <span class="sd">"</span><span class="s2">($</span><span class="si">#{</span><span class="n">index</span> <span class="o">+</span> <span class="m">1</span><span class="si">}</span><span class="s2">, $</span><span class="si">#{</span><span class="n">index</span> <span class="o">+</span> <span class="m">2</span><span class="si">}</span><span class="s2">, $</span><span class="si">#{</span><span class="n">index</span> <span class="o">+</span> <span class="m">3</span><span class="si">}</span><span class="s2">, $</span><span class="si">#{</span><span class="n">index</span> <span class="o">+</span> <span class="m">4</span><span class="si">}</span><span class="s2">, $</span><span class="si">#{</span><span class="n">index</span> <span class="o">+</span> <span class="m">5</span><span class="si">}</span><span class="s2">, $</span><span class="si">#{</span><span class="n">index</span> <span class="o">+</span> <span class="m">6</span><span class="si">}</span><span class="s2">, $</span><span class="si">#{</span><span class="n">index</span> <span class="o">+</span> <span class="m">7</span><span class="si">}</span><span class="s2">, $</span><span class="si">#{</span><span class="n">index</span> <span class="o">+</span> <span class="m">8</span><span class="si">}</span><span class="s2">)"</span>
+    <span class="k">end</span><span class="p">)</span>
+    <span class="o">|&gt;</span> <span class="no">Enum</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="sd">"</span><span class="s2">,"</span><span class="p">)</span>
+
+  <span class="n">insert</span> <span class="o">&lt;&gt;</span> <span class="sd">"</span><span class="s2"> "</span> <span class="o">&lt;&gt;</span> <span class="n">params</span> <span class="o">&lt;&gt;</span> <span class="sd">"</span><span class="s2">;"</span>
+<span class="k">end</span></code></pre></figure>
+<p>Теперь я сделал так, чтобы оператор составлялся с использованием вложенных списков ввода-вывода. Добавление элемента в список путём вложения &ndash; операция, которая выполнится за время O(1) и не потребует копирования данных.</p>
+<figure class="highlight"><pre><code class="language-elixir" data-lang="elixir"><span class="k">def</span> <span class="n">create_events</span><span class="p">(</span><span class="n">number_of_events</span> <span class="p">\\</span> <span class="m">1</span><span class="p">)</span> <span class="k">do</span>
+  <span class="n">insert</span> <span class="o">=</span> <span class="p">[</span><span class="sd">"</span><span class="s2">INSERT INTO events (event_id, stream_id, stream_version, correlation_id, event_type, data, metadata, created_at) VALUES"</span><span class="p">]</span>
+
+  <span class="n">params</span> <span class="o">=</span>
+    <span class="m">1</span><span class="o">..</span><span class="n">number_of_events</span>
+    <span class="o">|&gt;</span> <span class="no">Enum</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="k">fn</span> <span class="n">event_number</span> <span class="o">-&gt;</span>
+      <span class="n">index</span> <span class="o">=</span> <span class="p">(</span><span class="n">event_number</span> <span class="o">-</span> <span class="m">1</span><span class="p">)</span> <span class="o">*</span> <span class="m">8</span>
+      <span class="n">event_params</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="sd">"</span><span class="s2">($"</span><span class="p">,</span>
+        <span class="no">Integer</span><span class="o">.</span><span class="n">to_string</span><span class="p">(</span><span class="n">index</span> <span class="o">+</span> <span class="m">1</span><span class="p">),</span> <span class="sd">"</span><span class="s2">, $"</span><span class="p">,</span>
+        <span class="no">Integer</span><span class="o">.</span><span class="n">to_string</span><span class="p">(</span><span class="n">index</span> <span class="o">+</span> <span class="m">2</span><span class="p">),</span> <span class="sd">"</span><span class="s2">, $"</span><span class="p">,</span>
+        <span class="no">Integer</span><span class="o">.</span><span class="n">to_string</span><span class="p">(</span><span class="n">index</span> <span class="o">+</span> <span class="m">3</span><span class="p">),</span> <span class="sd">"</span><span class="s2">, $"</span><span class="p">,</span>
+        <span class="no">Integer</span><span class="o">.</span><span class="n">to_string</span><span class="p">(</span><span class="n">index</span> <span class="o">+</span> <span class="m">4</span><span class="p">),</span> <span class="sd">"</span><span class="s2">, $"</span><span class="p">,</span>
+        <span class="no">Integer</span><span class="o">.</span><span class="n">to_string</span><span class="p">(</span><span class="n">index</span> <span class="o">+</span> <span class="m">5</span><span class="p">),</span> <span class="sd">"</span><span class="s2">, $"</span><span class="p">,</span>
+        <span class="no">Integer</span><span class="o">.</span><span class="n">to_string</span><span class="p">(</span><span class="n">index</span> <span class="o">+</span> <span class="m">6</span><span class="p">),</span> <span class="sd">"</span><span class="s2">, $"</span><span class="p">,</span>
+        <span class="no">Integer</span><span class="o">.</span><span class="n">to_string</span><span class="p">(</span><span class="n">index</span> <span class="o">+</span> <span class="m">7</span><span class="p">),</span> <span class="sd">"</span><span class="s2">, $"</span><span class="p">,</span>
+        <span class="no">Integer</span><span class="o">.</span><span class="n">to_string</span><span class="p">(</span><span class="n">index</span> <span class="o">+</span> <span class="m">8</span><span class="p">),</span> <span class="sd">"</span><span class="s2">)"</span>
+      <span class="p">]</span>
+
+      <span class="k">if</span> <span class="n">event_number</span> <span class="o">==</span> <span class="n">number_of_events</span> <span class="k">do</span>
+        <span class="n">event_params</span>
+      <span class="k">else</span>
+        <span class="p">[</span><span class="n">event_params</span><span class="p">,</span> <span class="sd">"</span><span class="s2">,"</span><span class="p">]</span>
+      <span class="k">end</span>
+    <span class="k">end</span><span class="p">)</span>
+
+  <span class="p">[</span><span class="n">insert</span><span class="p">,</span> <span class="sd">"</span><span class="s2"> "</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="sd">"</span><span class="s2">;"</span><span class="p">]</span>
+<span class="k">end</span></code></pre></figure>
+<p>Чтобы убедиться, что использование списков приносит свои плоды, я провёл несколько юнит-тестов.</p>
+<h2>Тестирование</h2>
+<p>В EventStore имеется тестовый набор бенчмарков, использующих&nbsp;<a href="https://github.com/alco/benchfella">Benchfella</a> &ndash; инструмент для микробенчмаркинга в Elixir. Benchfella позволяет выбрать бенчмарк, запустить его несколько раз, сравнить результаты и представить их в виде графика.</p>
+<p>Существующие бенчмарки покрывают большинство основных сценариев использования EventStore, то есть запись событий в поток и считывание их из потока. Набор бенчмарков включает и отдельные тесты для одного, 10 или 100 конкурентных процессов чтения/записи.</p>
+<p>Ниже приведён пример бенчмарка для вставки 100 событий (сгенерированных до запуска теста) в EventStore.</p>
+<figure class="highlight"><pre><code class="language-elixir" data-lang="elixir"><span class="k">defmodule</span> <span class="no">AppendEventsBench</span> <span class="k">do</span>
+  <span class="kn">use</span> <span class="no">Benchfella</span>
+
+  <span class="n">alias</span> <span class="no">EventStore</span><span class="o">.</span><span class="no">EventFactory</span>
+  <span class="n">alias</span> <span class="no">EventStore</span><span class="o">.</span><span class="no">Storage</span>
+
+  <span class="n">setup_all</span> <span class="k">do</span>
+    <span class="no">Application</span><span class="o">.</span><span class="n">ensure_all_started</span><span class="p">(</span><span class="ss">:eventstore</span><span class="p">)</span>
+  <span class="k">end</span>
+
+  <span class="n">before_each_bench</span><span class="p">(</span><span class="n">store</span><span class="p">)</span> <span class="k">do</span>
+    <span class="p">{</span><span class="ss">:ok</span><span class="p">,</span> <span class="no">EventFactory</span><span class="o">.</span><span class="n">create_events</span><span class="p">(</span><span class="m">100</span><span class="p">)}</span>
+  <span class="k">end</span>
+
+  <span class="n">bench</span> <span class="sd">"</span><span class="s2">append events, single writer"</span> <span class="k">do</span>
+    <span class="no">EventStore</span><span class="o">.</span><span class="n">append_to_stream</span><span class="p">(</span><span class="no">UUID</span><span class="o">.</span><span class="n">uuid4</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="n">bench_context</span><span class="p">)</span>
+  <span class="k">end</span>
+<span class="k">end</span></code></pre></figure>
+<p>Я сравнил время выполнения операций до и после внесения изменений, используя <a href="https://github.com/slashdotdash/eventstore/tree/7d5e75ea7e433b1c670a46a8505e257629e7b30a/bench/storage">EventStore benchmark suite</a>, чтобы убедиться в том, что производительность действительно стала выше.</p>
+<h3>Запуск бенчмарков</h3>
+<p>Чтобы обеспечить чистое окружение, перед запуском тестов нужно удалить и заново создать базу данных PostgreSQL.</p>
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash"><span class="nv">MIX_ENV</span><span class="o">=</span>bench mix <span class="k">do </span>es.reset, app.start, bench</code></pre></figure>
+<h4>Результаты бенчмарка ДО</h4>
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash"><span class="c">## AppendEventsBench</span>
+benchmark name                         iterations   average <span class="nb">time
+</span>append events, single writer                  100   15787.46 µs/op
+append events, 10 concurrent writers           10   137400.10 µs/op
+append events, 100 concurrent writers           1   1495547.00 µs/op
+
+<span class="c">## ReadEventsBench</span>
+benchmark name                         iterations   average <span class="nb">time
+read </span>events, single reader                   1000   2151.71 µs/op
+<span class="nb">read </span>events, 10 concurrent readers            100   20172.47 µs/op
+<span class="nb">read </span>events, 100 concurrent readers            10   202203.20 µs/op</code></pre></figure>
+<h4>Результат бенчмарка ПОСЛЕ</h4>
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash"><span class="c">## AppendEventsBench</span>
+benchmark name                         iterations   average <span class="nb">time
+</span>append events, single writer                  100   12239.92 µs/op
+append events, 10 concurrent writers           10   108868.50 µs/op
+append events, 100 concurrent writers           1   1116299.00 µs/op
+
+<span class="c">## ReadEventsBench</span>
+benchmark name                         iterations   average <span class="nb">time
+read </span>events, single reader                   1000   1928.22 µs/op
+<span class="nb">read </span>events, 10 concurrent readers            100   20102.93 µs/op
+<span class="nb">read </span>events, 100 concurrent readers            10   201094.80 µs/op</code></pre></figure>
+<h3>Сравнение результатов бенчмарков</h3>
+<p>В Benchfella имеется инструмент, который позволяет сравнить результаты двух последних запусков. Он показывает, как изменилась производительность между двумя запусками теста.</p>
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash"><span class="nv">$ MIX_ENV</span><span class="o">=</span>bench mix bench.cmp
+bench/snapshots/2016-10-28_12-33-28.snapshot vs
+bench/snapshots/2016-10-28_12-34-12.snapshot
+
+<span class="c">## AppendEventsBench</span>
+append events, 100 concurrent writers    0.75
+append events, single writer             0.78
+append events, 10 concurrent writers     0.79
+
+<span class="c">## ReadEventsBench</span>
+<span class="nb">read </span>events, single reader               0.9
+<span class="nb">read </span>events, 100 concurrent readers      0.99
+<span class="nb">read </span>events, 10 concurrent readers       1.0</code></pre></figure>
+<p>Можно видеть, что благодаря использованию списков ввода-вывода производительность возросла. После рефакторинга кода события добавляются в базу данных на 20-25% быстрее. Чтение событий происходит с прежней скоростью.</p>
+<h3>Сравнительный график</h3>
+<p>С помощью Benchfella построить <noindex><a href="https://10consulting.com/assets/2016-10-28-bench.html" rel="noreferrer nofollow">график сравнения результатов</a></noindex> не составит труда.</p>
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash"><span class="nv">$ MIX_ENV</span><span class="o">=</span>bench mix bench.graph
+Wrote bench/graphs/index.html</code></pre></figure>
+<h4>Линейная шкала</h4>
+<p><img src="https://10consulting.com/assets/2016-10-28-bench-linear.png" alt=""></p>
+<h4>Логарифмическая шкала</h4>
+<p><img src="https://10consulting.com/assets/2016-10-28-bench-log10.png" alt=""></p>
+<h2>Выводы</h2>
+<p>Использование списка ввода-вывода положительно сказывается на производительности. Если вы планируете организовать вывод данных и записать их в файл, то вот небольшой совет: забудьте о конкатенации. Воспользуйтесь списком ввода-вывода.</p>
+
+  </div>
+
+  <!-- uSocial -->
+  <div class="post__share_block share_block">
+    <script async src="https://usocial.pro/usocial/usocial.js?v=6.1.4" data-script="usocial" charset="utf-8"></script>
+    <div class="uSocial-Share" data-pid="2fd19544e551bce292425ee8adaa31be" data-type="share" data-options="round,style2,default,absolute,horizontal,size32,counter1,counter-before,upArrow-right,nomobile" data-social="telegram,fb,vk,gPlus,twi,bookmarks"></div>
+  </div>
+  <!-- /uSocial -->
+</article>
+
+
+        <footer class="footer">
+    &copy; 2020
+    / Россия
+
+    <span class="pull-right">Любые мысли и вопросы пишите на <a href="mailto:elixir@wunsh.ru">elixir@wunsh.ru</a>.</span>
+</footer>
+
+        <div id="subscribeModal" class="modal">
+    <div class="modal__content">
+        <a href="#close" title="Close" class="modal__close">x</a>
+
+        <h2 class="modal__title">Ламповая рассылка про&nbsp;Эликсир</h2>
+
+        <p>Один-два раза в&nbsp;неделю присылаем тёплые письма об&nbsp;Эликсире: переводы самых интересных статей до&nbsp;их&nbsp;появления в&nbsp;открытом доступе, анонсы событий и&nbsp;вкусные бонусы.</p>
+
+        <form action="//wunsh.us14.list-manage.com/subscribe/post?u=c81ca3d4693f62db7f7f67c71&amp;id=a192e2dfef" method="post" id="mc-embedded-subscribe-form" name="mc-embedded-subscribe-form" class="pure-form h-tc validate" target="_blank" novalidate>
+            <input type="email" value="" name="EMAIL" class="modal__input pure-input-rounded large" id="mce-EMAIL" placeholder="Твоя почта" required>
+            <div style="position: absolute; left: -5000px;" aria-hidden="true"><input type="text" name="b_c81ca3d4693f62db7f7f67c71_a192e2dfef" tabindex="-1" value=""></div>
+
+            <input type="submit" value="Присоединиться" name="subscribe" onClick="yaCounter39773490.reachGoal('SUBSCRIBED'); return true" id="mc-embedded-subscribe" class="pure-button button-success large">
+        </form>
+
+        <p>Обязательно подтверди почту, перейдя по&nbsp;ссылке в&nbsp;письме, иначе мы&nbsp;не&nbsp;сможем делиться с&nbsp;тобой полезностями.</p>
+
+        <p>Надоедать точно не&nbsp;будем :)</p>
+    </div>
+</div>
+
+        <script src="/assets/js/vendors/zepto.min.js"></script>
+
+<script>
+    if ($(".post--docs").length) {
+        $(".footer").addClass("footer--docs")
+    }
+
+    $(".modal--close_backdrop").click(function(){
+        window.location.hash = "";
+    });
+</script>
+
+        <!-- Yandex.Metrika counter -->
+<script type="text/javascript">
+    (function (d, w, c) {
+        (w[c] = w[c] || []).push(function() {
+            try {
+                w.yaCounter39773490 = new Ya.Metrika({
+                    id:39773490,
+                    clickmap:true,
+                    trackLinks:true,
+                    accurateTrackBounce:true,
+                    webvisor:true,
+                    ut:"noindex"
+                });
+            } catch(e) { }
+        });
+
+        var n = d.getElementsByTagName("script")[0],
+            s = d.createElement("script"),
+            f = function () { n.parentNode.insertBefore(s, n); };
+        s.type = "text/javascript";
+        s.async = true;
+        s.src = "https://mc.yandex.ru/metrika/watch.js";
+
+        if (w.opera == "[object Opera]") {
+            d.addEventListener("DOMContentLoaded", f, false);
+        } else { f(); }
+    })(document, window, "yandex_metrika_callbacks");
+</script>
+<noscript><div><img src="https://mc.yandex.ru/watch/39773490?ut=noindex" style="position:absolute; left:-9999px;" alt="" /></div></noscript>
+<!-- /Yandex.Metrika counter -->
+
+      </div>
+    </div>
+  </body>
+</html>

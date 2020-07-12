@@ -1,0 +1,711 @@
+<!DOCTYPE html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Доктесты, паттерны и оператор `with` |> Сообщество Elixir и Phoenix Framework</title>
+    <meta name="description" content="Русскоязычное сообщество Elixir и Phoenix Framework
+">
+
+    <link rel="alternate" type="application/rss+xml" title="Сообщество Elixir и Phoenix Framework" href="/feed.xml" />
+    <link rel="canonical" href="https://wunsh.ru/docs/mix-otp/docs-tests-and-with">
+
+    <style type="text/css">@import url("//fonts.googleapis.com/css?family=Source+Sans+Pro:400,700&subset=cyrillic");</style>
+    <link rel="stylesheet" href="/assets/css/vendors/pure.min.css">
+    <link rel="stylesheet" href="/assets/css/vendors/pure-grids-responsive.min.css">
+    <link rel="stylesheet" href="/assets/css/style.css?1594516983">
+
+    <link rel="shortcut icon" type="image/png" href="/assets/favicon.png" >
+</head>
+
+
+  <body>
+    <div class="wunsh pure-g">
+      
+
+
+
+
+<div class="menu pure-u-1 pure-u-md-1-4">
+  <div class="header">
+    <h2 class="header__title">
+      
+        <a href="https://wunsh.ru" class="header__title_link" title="На главную">Эликсир и&nbsp;Вунш</a>
+      
+    </h2>
+    <h3 class="header__tagline">Erlang + Ruby = &#10084;</h3>
+
+    <nav class="nav">
+      <ul class="nav_list">
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/elixir" class="nav_list__item_link pure-button">О языке</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/install/linux-asdf" class="nav_list__item_link pure-button">Установка</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/docs/" class="nav_list__item_link pure-button">Документация</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/guides" class="nav_list__item_link pure-button">Гайды</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/news" class="nav_list__item_link pure-button">Новости</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/articles" class="nav_list__item_link pure-button">Статьи</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/videos" class="nav_list__item_link pure-button">Видео</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/vacancies" class="nav_list__item_link pure-button">Вакансии</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/faq" class="nav_list__item_link pure-button">FAQ</a>
+            </li>
+          
+        
+      </ul>
+    </nav>
+
+    <a href="#subscribeModal" class="pure-button header__subscribe_link">Подписаться на рассылку</a>
+  </div>
+</div>
+
+
+      <div class="content pure-u-1 pure-u-md-3-4">
+        <article class="post post--docs" itemscope itemtype="http://schema.org/BlogPosting">
+    <header class="post__header">
+        <h1 class="post__title" itemprop="name headline">
+            <p>Доктесты, паттерны и оператор <code class="highlighter-rouge">with</code></p>
+
+        </h1>
+    </header>
+
+    <div class="post__content" itemprop="articleBody">
+        <p>В этой главе мы напишем код, который парсит команды, описанные в первой главе:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>CREATE shopping
+OK
+
+PUT shopping milk 1
+OK
+
+PUT shopping eggs 3
+OK
+
+GET shopping milk
+1
+OK
+
+DELETE shopping eggs
+OK
+</code></pre></div></div>
+
+<p>Когда парсинг будет закончен, мы обновим сервер для отправки распарсенных команд в приложение <code class="highlighter-rouge">:kv</code>, созданное ранее.</p>
+
+<h2 id="доктесты">Доктесты</h2>
+
+<p>В самом начале мы упомянули, что документация в Эликсире является сущностью первого класса. Мы подходили к этому с разных сторон по ходу этого руководство, будь то команда <code class="highlighter-rouge">mix help</code>, или функция <code class="highlighter-rouge">h Enum</code>, или справка по другим модулям в консоли.</p>
+
+<p>В этом разделе мы реализуем парсинг с использованием доктестов, которые позволяют нам писать тесты прямо в нашей документации. Это помогает предоставлять документацию сразу с примерами кода.</p>
+
+<p>Давайте создадим модуль <code class="highlighter-rouge">lib/kv_server/command.ex</code> с парсером, и начнём с доктеста к нему:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">defmodule</span> <span class="no">KVServer</span><span class="o">.</span><span class="no">Command</span> <span class="k">do</span>
+  <span class="nv">@doc</span> <span class="sx">~S""</span><span class="sd">"</span><span class="s2">
+  Преобразует данную строку `line` в команду.
+
+  </span><span class="err">##</span><span class="s2"> Примеры
+
+      iex&gt; KVServer.Command.parse "</span><span class="no">CREATE</span> <span class="n">shopping</span><span class="p">\</span><span class="n">r</span><span class="p">\</span><span class="n">n</span><span class="sd">"</span><span class="s2">
+      {:ok, {:create, "</span><span class="n">shopping</span><span class="sd">"</span><span class="s2">}}
+
+  "</span><span class="sd">"</span><span class="s2">"</span>
+  <span class="k">def</span> <span class="n">parse</span><span class="p">(</span><span class="n">_line</span><span class="p">)</span> <span class="k">do</span>
+    <span class="ss">:not_implemented</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<p>Доктесты задаются с помощью отступа в четыре пробела перед <code class="highlighter-rouge">iex&gt;</code>. Если команда занимает несколько строк, можно использовать <code class="highlighter-rouge">...&gt;</code>, также как в IEx. Ожидаемый результат должен начинаться на следующей строке после строки <code class="highlighter-rouge">iex&gt;</code> или <code class="highlighter-rouge">...&gt;</code>, и заканчиваться новой строкой или новым префиксом <code class="highlighter-rouge">iex&gt;</code>.</p>
+
+<p>Также обратите внимание, что мы начале строку документации с помощью <code class="highlighter-rouge">@doc ~S"""</code>. Ключ <code class="highlighter-rouge">~S</code> предотвращает конвертацию символов <code class="highlighter-rouge">\r\n</code> в возврат каретки при разборе документации, пока они не будут достигнуты в тесте.</p>
+
+<p>Для запуска нашего доктеста мы создадим файл <code class="highlighter-rouge">test/kv_server/command_test.exs</code> и вызовем <code class="highlighter-rouge">doctest KVServer.Command</code>:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">defmodule</span> <span class="no">KVServer</span><span class="o">.</span><span class="no">CommandTest</span> <span class="k">do</span>
+  <span class="kn">use</span> <span class="no">ExUnit</span><span class="o">.</span><span class="no">Case</span><span class="p">,</span> <span class="ss">async:</span> <span class="no">true</span>
+  <span class="n">doctest</span> <span class="no">KVServer</span><span class="o">.</span><span class="no">Command</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<p>Запустим тесты, доктест должен упасть:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>  1) test doc at KVServer.Command.parse/1 (1) (KVServer.CommandTest)
+     test/kv_server/command_test.exs:3
+     Doctest failed
+     code: KVServer.Command.parse "CREATE shopping\r\n" === {:ok, {:create, "shopping"}}
+     lhs:  :not_implemented
+     stacktrace:
+       lib/kv_server/command.ex:7: KVServer.Command (module)
+</code></pre></div></div>
+
+<p>Прекрасно!</p>
+
+<p>Теперь сделаем так, чтобы доктест проходил успешно. Реализуем функцию <code class="highlighter-rouge">parse/1</code>:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">def</span> <span class="n">parse</span><span class="p">(</span><span class="n">line</span><span class="p">)</span> <span class="k">do</span>
+  <span class="k">case</span> <span class="no">String</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">line</span><span class="p">)</span> <span class="k">do</span>
+    <span class="p">[</span><span class="sd">"</span><span class="s2">CREATE"</span><span class="p">,</span> <span class="n">bucket</span><span class="p">]</span> <span class="o">-&gt;</span> <span class="p">{</span><span class="ss">:ok</span><span class="p">,</span> <span class="p">{</span><span class="ss">:create</span><span class="p">,</span> <span class="n">bucket</span><span class="p">}}</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<p>Наша реализация разбивает строку по пробелам, затем ищет команду в списке. Использование <code class="highlighter-rouge">String.split/1</code> означает, что команды будут нечувствительны к пробелам. Пробелы в начале и конце будут проигнорированы, как и множественные пробелы между словами. Давайте добавим несколько новых доктестов, чтобы протестировать это поведение вместе с остальными командами:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">@doc</span> <span class="sx">~S""</span><span class="sd">"</span><span class="s2">
+Преобразует данную строку `line` в команду.
+
+</span><span class="err">##</span><span class="s2"> Примеры
+
+    iex&gt; KVServer.Command.parse "</span><span class="no">CREATE</span> <span class="n">shopping</span><span class="p">\</span><span class="n">r</span><span class="p">\</span><span class="n">n</span><span class="sd">"</span><span class="s2">
+    {:ok, {:create, "</span><span class="n">shopping</span><span class="sd">"</span><span class="s2">}}
+
+    iex&gt; KVServer.Command.parse "</span><span class="no">CREATE</span>  <span class="n">shopping</span>  <span class="p">\</span><span class="n">r</span><span class="p">\</span><span class="n">n</span><span class="sd">"</span><span class="s2">
+    {:ok, {:create, "</span><span class="n">shopping</span><span class="sd">"</span><span class="s2">}}
+
+    iex&gt; KVServer.Command.parse "</span><span class="no">PUT</span> <span class="n">shopping</span> <span class="n">milk</span> <span class="m">1</span><span class="p">\</span><span class="n">r</span><span class="p">\</span><span class="n">n</span><span class="sd">"</span><span class="s2">
+    {:ok, {:put, "</span><span class="n">shopping</span><span class="sd">"</span><span class="s2">, "</span><span class="n">milk</span><span class="sd">"</span><span class="s2">, "</span><span class="m">1</span><span class="sd">"</span><span class="s2">}}
+
+    iex&gt; KVServer.Command.parse "</span><span class="no">GET</span> <span class="n">shopping</span> <span class="n">milk</span><span class="p">\</span><span class="n">r</span><span class="p">\</span><span class="n">n</span><span class="sd">"</span><span class="s2">
+    {:ok, {:get, "</span><span class="n">shopping</span><span class="sd">"</span><span class="s2">, "</span><span class="n">milk</span><span class="sd">"</span><span class="s2">}}
+
+    iex&gt; KVServer.Command.parse "</span><span class="no">DELETE</span> <span class="n">shopping</span> <span class="n">eggs</span><span class="p">\</span><span class="n">r</span><span class="p">\</span><span class="n">n</span><span class="sd">"</span><span class="s2">
+    {:ok, {:delete, "</span><span class="n">shopping</span><span class="sd">"</span><span class="s2">, "</span><span class="n">eggs</span><span class="sd">"</span><span class="s2">}}
+
+Неизвестные команды или команды с неправильным числом аргументов
+возвращают ошибки:
+
+    iex&gt; KVServer.Command.parse "</span><span class="no">UNKNOWN</span> <span class="n">shopping</span> <span class="n">eggs</span><span class="p">\</span><span class="n">r</span><span class="p">\</span><span class="n">n</span><span class="sd">"</span><span class="s2">
+    {:error, :unknown_command}
+
+    iex&gt; KVServer.Command.parse "</span><span class="no">GET</span> <span class="n">shopping</span><span class="p">\</span><span class="n">r</span><span class="p">\</span><span class="n">n</span><span class="sd">"</span><span class="s2">
+    {:error, :unknown_command}
+
+"</span><span class="sd">"</span><span class="s2">"</span>
+</code></pre></div></div>
+
+<p>Когда доктесты написаны, ваша задача самостоятельно сделать так, чтобы они проходили! Когда закончите, можете сравнить вашу работу с нашим решением ниже:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">def</span> <span class="n">parse</span><span class="p">(</span><span class="n">line</span><span class="p">)</span> <span class="k">do</span>
+  <span class="k">case</span> <span class="no">String</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">line</span><span class="p">)</span> <span class="k">do</span>
+    <span class="p">[</span><span class="sd">"</span><span class="s2">CREATE"</span><span class="p">,</span> <span class="n">bucket</span><span class="p">]</span> <span class="o">-&gt;</span> <span class="p">{</span><span class="ss">:ok</span><span class="p">,</span> <span class="p">{</span><span class="ss">:create</span><span class="p">,</span> <span class="n">bucket</span><span class="p">}}</span>
+    <span class="p">[</span><span class="sd">"</span><span class="s2">GET"</span><span class="p">,</span> <span class="n">bucket</span><span class="p">,</span> <span class="n">key</span><span class="p">]</span> <span class="o">-&gt;</span> <span class="p">{</span><span class="ss">:ok</span><span class="p">,</span> <span class="p">{</span><span class="ss">:get</span><span class="p">,</span> <span class="n">bucket</span><span class="p">,</span> <span class="n">key</span><span class="p">}}</span>
+    <span class="p">[</span><span class="sd">"</span><span class="s2">PUT"</span><span class="p">,</span> <span class="n">bucket</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">]</span> <span class="o">-&gt;</span> <span class="p">{</span><span class="ss">:ok</span><span class="p">,</span> <span class="p">{</span><span class="ss">:put</span><span class="p">,</span> <span class="n">bucket</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">}}</span>
+    <span class="p">[</span><span class="sd">"</span><span class="s2">DELETE"</span><span class="p">,</span> <span class="n">bucket</span><span class="p">,</span> <span class="n">key</span><span class="p">]</span> <span class="o">-&gt;</span> <span class="p">{</span><span class="ss">:ok</span><span class="p">,</span> <span class="p">{</span><span class="ss">:delete</span><span class="p">,</span> <span class="n">bucket</span><span class="p">,</span> <span class="n">key</span><span class="p">}}</span>
+    <span class="n">_</span> <span class="o">-&gt;</span> <span class="p">{</span><span class="ss">:error</span><span class="p">,</span> <span class="ss">:unknown_command</span><span class="p">}</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<p>Посмотрите, как мы смогли элегантно парсить команды без добавления кучи <code class="highlighter-rouge">if/else</code>, которые проверяют имя команды и количество аргументов!</p>
+
+<p>Наконец, вы можете увидеть, что каждый доктест воспринимается как отдельный тест, наш тестовый набор теперь сообщает о том, что всего их семь. Это происходит, потому что <code class="highlighter-rouge">ExUnit</code> воспринимает следующее как два разных теста:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">iex</span><span class="o">&gt;</span> <span class="no">KVServer</span><span class="o">.</span><span class="no">Command</span><span class="o">.</span><span class="n">parse</span> <span class="sd">"</span><span class="s2">UNKNOWN shopping eggs\r\n"</span>
+<span class="p">{</span><span class="ss">:error</span><span class="p">,</span> <span class="ss">:unknown_command</span><span class="p">}</span>
+
+<span class="n">iex</span><span class="o">&gt;</span> <span class="no">KVServer</span><span class="o">.</span><span class="no">Command</span><span class="o">.</span><span class="n">parse</span> <span class="sd">"</span><span class="s2">GET shopping\r\n"</span>
+<span class="p">{</span><span class="ss">:error</span><span class="p">,</span> <span class="ss">:unknown_command</span><span class="p">}</span>
+</code></pre></div></div>
+
+<p>Без добавления пустых строк <code class="highlighter-rouge">ExUnit</code> скомпилирует их в один тест:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">iex</span><span class="o">&gt;</span> <span class="no">KVServer</span><span class="o">.</span><span class="no">Command</span><span class="o">.</span><span class="n">parse</span> <span class="sd">"</span><span class="s2">UNKNOWN shopping eggs\r\n"</span>
+<span class="p">{</span><span class="ss">:error</span><span class="p">,</span> <span class="ss">:unknown_command</span><span class="p">}</span>
+<span class="n">iex</span><span class="o">&gt;</span> <span class="no">KVServer</span><span class="o">.</span><span class="no">Command</span><span class="o">.</span><span class="n">parse</span> <span class="sd">"</span><span class="s2">GET shopping\r\n"</span>
+<span class="p">{</span><span class="ss">:error</span><span class="p">,</span> <span class="ss">:unknown_command</span><span class="p">}</span>
+</code></pre></div></div>
+
+<p>Вы можете прочитать больше о доктестах в <a href="https://hexdocs.pm/ex_unit/ExUnit.DocTest.html">документации модуля <code class="highlighter-rouge">ExUnit.DocTest</code></a>.</p>
+
+<h2 id="оператор-with">Оператор <code class="highlighter-rouge">with</code></h2>
+
+<p>Так как теперь мы можем парсить команды, мы наконец приступаем к реализации логики, которая будет запускать их. Давайте пока добавим определение-заглушку для этой функции:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">defmodule</span> <span class="no">KVServer</span><span class="o">.</span><span class="no">Command</span> <span class="k">do</span>
+  <span class="nv">@doc</span> <span class="sd">"""
+  Выполняет данную команду.
+  """</span>
+  <span class="k">def</span> <span class="n">run</span><span class="p">(</span><span class="n">command</span><span class="p">)</span> <span class="k">do</span>
+    <span class="p">{</span><span class="ss">:ok</span><span class="p">,</span> <span class="sd">"</span><span class="s2">OK\r\n"</span><span class="p">}</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<p>До того, как мы реализуем эту функцию, давайте изменим наш сервер, чтобы он использовал новые функции <code class="highlighter-rouge">parse/1</code> и <code class="highlighter-rouge">run/1</code>. Вспомните,  функция <code class="highlighter-rouge">read_line/1</code> также падала, когда клиент закрывал сокет, так что давайте попробуем заодно решить и эту проблему. Откройте файл <code class="highlighter-rouge">lib/kv_server.ex</code> и замените существующее определение сервера:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">defp</span> <span class="n">serve</span><span class="p">(</span><span class="n">socket</span><span class="p">)</span> <span class="k">do</span>
+  <span class="n">socket</span>
+  <span class="o">|&gt;</span> <span class="n">read_line</span><span class="p">()</span>
+  <span class="o">|&gt;</span> <span class="n">write_line</span><span class="p">(</span><span class="n">socket</span><span class="p">)</span>
+
+  <span class="n">serve</span><span class="p">(</span><span class="n">socket</span><span class="p">)</span>
+<span class="k">end</span>
+
+<span class="k">defp</span> <span class="n">read_line</span><span class="p">(</span><span class="n">socket</span><span class="p">)</span> <span class="k">do</span>
+  <span class="p">{</span><span class="ss">:ok</span><span class="p">,</span> <span class="n">data</span><span class="p">}</span> <span class="o">=</span> <span class="ss">:gen_tcp</span><span class="o">.</span><span class="n">recv</span><span class="p">(</span><span class="n">socket</span><span class="p">,</span> <span class="m">0</span><span class="p">)</span>
+  <span class="n">data</span>
+<span class="k">end</span>
+
+<span class="k">defp</span> <span class="n">write_line</span><span class="p">(</span><span class="n">line</span><span class="p">,</span> <span class="n">socket</span><span class="p">)</span> <span class="k">do</span>
+  <span class="ss">:gen_tcp</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="n">socket</span><span class="p">,</span> <span class="n">line</span><span class="p">)</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<p>на следующее:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">defp</span> <span class="n">serve</span><span class="p">(</span><span class="n">socket</span><span class="p">)</span> <span class="k">do</span>
+  <span class="n">msg</span> <span class="o">=</span>
+    <span class="k">case</span> <span class="n">read_line</span><span class="p">(</span><span class="n">socket</span><span class="p">)</span> <span class="k">do</span>
+      <span class="p">{</span><span class="ss">:ok</span><span class="p">,</span> <span class="n">data</span><span class="p">}</span> <span class="o">-&gt;</span>
+        <span class="k">case</span> <span class="no">KVServer</span><span class="o">.</span><span class="no">Command</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="k">do</span>
+          <span class="p">{</span><span class="ss">:ok</span><span class="p">,</span> <span class="n">command</span><span class="p">}</span> <span class="o">-&gt;</span>
+            <span class="no">KVServer</span><span class="o">.</span><span class="no">Command</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">command</span><span class="p">)</span>
+          <span class="p">{</span><span class="ss">:error</span><span class="p">,</span> <span class="n">_</span><span class="p">}</span> <span class="o">=</span> <span class="n">err</span> <span class="o">-&gt;</span>
+            <span class="n">err</span>
+        <span class="k">end</span>
+      <span class="p">{</span><span class="ss">:error</span><span class="p">,</span> <span class="n">_</span><span class="p">}</span> <span class="o">=</span> <span class="n">err</span> <span class="o">-&gt;</span>
+        <span class="n">err</span>
+    <span class="k">end</span>
+
+  <span class="n">write_line</span><span class="p">(</span><span class="n">socket</span><span class="p">,</span> <span class="n">msg</span><span class="p">)</span>
+  <span class="n">serve</span><span class="p">(</span><span class="n">socket</span><span class="p">)</span>
+<span class="k">end</span>
+
+<span class="k">defp</span> <span class="n">read_line</span><span class="p">(</span><span class="n">socket</span><span class="p">)</span> <span class="k">do</span>
+  <span class="ss">:gen_tcp</span><span class="o">.</span><span class="n">recv</span><span class="p">(</span><span class="n">socket</span><span class="p">,</span> <span class="m">0</span><span class="p">)</span>
+<span class="k">end</span>
+
+<span class="k">defp</span> <span class="n">write_line</span><span class="p">(</span><span class="n">socket</span><span class="p">,</span> <span class="p">{</span><span class="ss">:ok</span><span class="p">,</span> <span class="n">text</span><span class="p">})</span> <span class="k">do</span>
+  <span class="ss">:gen_tcp</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="n">socket</span><span class="p">,</span> <span class="n">text</span><span class="p">)</span>
+<span class="k">end</span>
+
+<span class="k">defp</span> <span class="n">write_line</span><span class="p">(</span><span class="n">socket</span><span class="p">,</span> <span class="p">{</span><span class="ss">:error</span><span class="p">,</span> <span class="ss">:unknown_command</span><span class="p">})</span> <span class="k">do</span>
+  <span class="c1"># Известная ошибка. Пишем клиенту.</span>
+  <span class="ss">:gen_tcp</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="n">socket</span><span class="p">,</span> <span class="sd">"</span><span class="s2">UNKNOWN COMMAND\r\n"</span><span class="p">)</span>
+<span class="k">end</span>
+
+<span class="k">defp</span> <span class="n">write_line</span><span class="p">(</span><span class="n">_socket</span><span class="p">,</span> <span class="p">{</span><span class="ss">:error</span><span class="p">,</span> <span class="ss">:closed</span><span class="p">})</span> <span class="k">do</span>
+  <span class="c1"># Соединение было закрыто, вежливо выходим.</span>
+  <span class="k">exit</span><span class="p">(</span><span class="ss">:shutdown</span><span class="p">)</span>
+<span class="k">end</span>
+
+<span class="k">defp</span> <span class="n">write_line</span><span class="p">(</span><span class="n">socket</span><span class="p">,</span> <span class="p">{</span><span class="ss">:error</span><span class="p">,</span> <span class="n">error</span><span class="p">})</span> <span class="k">do</span>
+  <span class="c1"># Неизвестная ошибка. Пишем клиенту и выходим.</span>
+  <span class="ss">:gen_tcp</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="n">socket</span><span class="p">,</span> <span class="sd">"</span><span class="s2">ERROR\r\n"</span><span class="p">)</span>
+  <span class="k">exit</span><span class="p">(</span><span class="n">error</span><span class="p">)</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<p>Если мы запустим наш сервер, то сможем отправлять в него команды. Пока мы будем получать два разных ответа: «OK» когда команда известна и «UNKNOWN COMMAND» в ином случае:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span>telnet 127.0.0.1 4040
+Trying 127.0.0.1...
+Connected to localhost.
+Escape character is <span class="s1">'^]'</span><span class="nb">.</span>
+CREATE shopping
+OK
+HELLO
+UNKNOWN COMMAND
+</code></pre></div></div>
+
+<p>Это значит, что наш вариант идёт в верном направлении, но это не выглядит достаточно элегантно, не так ли?</p>
+
+<p>Предыдущая реализация использовала пайплайны, которые делали логику прямолинейной. Однако, теперь нам нужно обрабатывать разные коды ошибок, а логика нашего сервера вложена во много вызовов <code class="highlighter-rouge">case</code>.</p>
+
+<p>К счастью, Эликсир версии 1.2 представил оператор <code class="highlighter-rouge">with</code>, который позволяет упростить код вроде примера выше, заменив вложенные вызовы <code class="highlighter-rouge">case</code> на цепочку условий сравнения. Давайте перепишем функцию <code class="highlighter-rouge">serve/1</code>, используя оператор <code class="highlighter-rouge">with</code>:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">defp</span> <span class="n">serve</span><span class="p">(</span><span class="n">socket</span><span class="p">)</span> <span class="k">do</span>
+  <span class="n">msg</span> <span class="o">=</span>
+    <span class="n">with</span> <span class="p">{</span><span class="ss">:ok</span><span class="p">,</span> <span class="n">data</span><span class="p">}</span> <span class="o">&lt;-</span> <span class="n">read_line</span><span class="p">(</span><span class="n">socket</span><span class="p">),</span>
+         <span class="p">{</span><span class="ss">:ok</span><span class="p">,</span> <span class="n">command</span><span class="p">}</span> <span class="o">&lt;-</span> <span class="no">KVServer</span><span class="o">.</span><span class="no">Command</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="n">data</span><span class="p">),</span>
+         <span class="k">do</span><span class="p">:</span> <span class="no">KVServer</span><span class="o">.</span><span class="no">Command</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">command</span><span class="p">)</span>
+
+  <span class="n">write_line</span><span class="p">(</span><span class="n">socket</span><span class="p">,</span> <span class="n">msg</span><span class="p">)</span>
+  <span class="n">serve</span><span class="p">(</span><span class="n">socket</span><span class="p">)</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<p>Намного лучше! Оператор <code class="highlighter-rouge">with</code> получит значение, возвращённое правой стороной <code class="highlighter-rouge">&lt;-</code> и сравнит его с образцом слева. Если значение подходит под образец, оператор <code class="highlighter-rouge">with</code> перейдёт к следующему выражению. Если совпадения нет, результат, не прошедший сравнение, будет возвращён.</p>
+
+<p>Другими словами, мы преобразовали каждое выражение, переданное в опервтор <code class="highlighter-rouge">case/2</code> в шаг внутри оператора <code class="highlighter-rouge">with</code>. Как только любой из шагов возвращает что-то отличное от кортежа <code class="highlighter-rouge">{:ok, x}</code>, оператор <code class="highlighter-rouge">with</code> прерывается и возвращает это не прошедшее сравнение значение.</p>
+
+<p>Вы можете прочитать больше об <a href="https://hexdocs.pm/elixir/Kernel.SpecialForms.html#with/1">операторе <code class="highlighter-rouge">with</code> в документации</a>.</p>
+
+<h2 id="запуск-команд">Запуск команд</h2>
+
+<p>Последний шаг – написать функцию <code class="highlighter-rouge">KVServer.Command.run/1</code> для запуска команд после парсинга в приложении <code class="highlighter-rouge">:kv</code>. Реализация представлена ниже:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">@doc</span> <span class="sd">"""
+Выполняет данную команду.
+"""</span>
+<span class="k">def</span> <span class="n">run</span><span class="p">(</span><span class="n">command</span><span class="p">)</span>
+
+<span class="k">def</span> <span class="n">run</span><span class="p">({</span><span class="ss">:create</span><span class="p">,</span> <span class="n">bucket</span><span class="p">})</span> <span class="k">do</span>
+  <span class="no">KV</span><span class="o">.</span><span class="no">Registry</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="no">KV</span><span class="o">.</span><span class="no">Registry</span><span class="p">,</span> <span class="n">bucket</span><span class="p">)</span>
+  <span class="p">{</span><span class="ss">:ok</span><span class="p">,</span> <span class="sd">"</span><span class="s2">OK\r\n"</span><span class="p">}</span>
+<span class="k">end</span>
+
+<span class="k">def</span> <span class="n">run</span><span class="p">({</span><span class="ss">:get</span><span class="p">,</span> <span class="n">bucket</span><span class="p">,</span> <span class="n">key</span><span class="p">})</span> <span class="k">do</span>
+  <span class="n">lookup</span> <span class="n">bucket</span><span class="p">,</span> <span class="k">fn</span> <span class="n">pid</span> <span class="o">-&gt;</span>
+    <span class="n">value</span> <span class="o">=</span> <span class="no">KV</span><span class="o">.</span><span class="no">Bucket</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">pid</span><span class="p">,</span> <span class="n">key</span><span class="p">)</span>
+    <span class="p">{</span><span class="ss">:ok</span><span class="p">,</span> <span class="sd">"</span><span class="si">#{</span><span class="n">value</span><span class="si">}</span><span class="s2">\r\nOK\r\n"</span><span class="p">}</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+
+<span class="k">def</span> <span class="n">run</span><span class="p">({</span><span class="ss">:put</span><span class="p">,</span> <span class="n">bucket</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">})</span> <span class="k">do</span>
+  <span class="n">lookup</span> <span class="n">bucket</span><span class="p">,</span> <span class="k">fn</span> <span class="n">pid</span> <span class="o">-&gt;</span>
+    <span class="no">KV</span><span class="o">.</span><span class="no">Bucket</span><span class="o">.</span><span class="n">put</span><span class="p">(</span><span class="n">pid</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+    <span class="p">{</span><span class="ss">:ok</span><span class="p">,</span> <span class="sd">"</span><span class="s2">OK\r\n"</span><span class="p">}</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+
+<span class="k">def</span> <span class="n">run</span><span class="p">({</span><span class="ss">:delete</span><span class="p">,</span> <span class="n">bucket</span><span class="p">,</span> <span class="n">key</span><span class="p">})</span> <span class="k">do</span>
+  <span class="n">lookup</span> <span class="n">bucket</span><span class="p">,</span> <span class="k">fn</span> <span class="n">pid</span> <span class="o">-&gt;</span>
+    <span class="no">KV</span><span class="o">.</span><span class="no">Bucket</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="n">pid</span><span class="p">,</span> <span class="n">key</span><span class="p">)</span>
+    <span class="p">{</span><span class="ss">:ok</span><span class="p">,</span> <span class="sd">"</span><span class="s2">OK\r\n"</span><span class="p">}</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+
+<span class="k">defp</span> <span class="n">lookup</span><span class="p">(</span><span class="n">bucket</span><span class="p">,</span> <span class="n">callback</span><span class="p">)</span> <span class="k">do</span>
+  <span class="k">case</span> <span class="no">KV</span><span class="o">.</span><span class="no">Registry</span><span class="o">.</span><span class="n">lookup</span><span class="p">(</span><span class="no">KV</span><span class="o">.</span><span class="no">Registry</span><span class="p">,</span> <span class="n">bucket</span><span class="p">)</span> <span class="k">do</span>
+    <span class="p">{</span><span class="ss">:ok</span><span class="p">,</span> <span class="n">pid</span><span class="p">}</span> <span class="o">-&gt;</span> <span class="n">callback</span><span class="o">.</span><span class="p">(</span><span class="n">pid</span><span class="p">)</span>
+    <span class="ss">:error</span> <span class="o">-&gt;</span> <span class="p">{</span><span class="ss">:error</span><span class="p">,</span> <span class="ss">:not_found</span><span class="p">}</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<p>Каждый вариант функции отправляет нужную команду на сервер <code class="highlighter-rouge">KV.Registry</code>, который мы зарегистрировали при запуске приложения <code class="highlighter-rouge">:kv</code>. Т. к. сервер <code class="highlighter-rouge">:kv_server</code> зависит от приложения <code class="highlighter-rouge">:kv</code>, он также зависит от предоставляемых последним сервисов.</p>
+
+<p>Обратите внимание, что мы также определили приватную функцию <code class="highlighter-rouge">lookup/2</code>, чтобы повторно использовать общую функциональность по поиску корзины и возврату её <code class="highlighter-rouge">pid</code>, если она существует, или <code class="highlighter-rouge">{:error, :not_found}</code> в ином случае.</p>
+
+<p>Кстати, т. к. теперь мы возвращаем <code class="highlighter-rouge">{:error, :not_found}</code>, следует изменить функцию <code class="highlighter-rouge">write_line/2</code> в модуле <code class="highlighter-rouge">KVServer</code>, чтобы она выводила эту ошибку:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">defp</span> <span class="n">write_line</span><span class="p">(</span><span class="n">socket</span><span class="p">,</span> <span class="p">{</span><span class="ss">:error</span><span class="p">,</span> <span class="ss">:not_found</span><span class="p">})</span> <span class="k">do</span>
+  <span class="ss">:gen_tcp</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="n">socket</span><span class="p">,</span> <span class="sd">"</span><span class="s2">NOT FOUND\r\n"</span><span class="p">)</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<p>Функциональность нашего сервера почти закончена. Остались только тесты. Сейчас мы оставим тесты на самый конец, потому что есть несколько важных вещей, которым стоит уделить внимание.</p>
+
+<p>Функция <code class="highlighter-rouge">KVServer.Command.run/1</code> отправляет команды напрямую в сервер <code class="highlighter-rouge">KV.Registry</code>, который зарегистрирован приложением <code class="highlighter-rouge">:kv</code>. Это значит, что сервер доступен глобально и если у нас будет два теста, отправляющих сообщения в одно время, тесты будут конфликтовать друг с другом (и скорее всего упадут). Нам нужно решить, использовать юнит-тесты, которые изолированы и могут быть запущены асинхронно, или писать интеграционные тесты, которые используют глобальное состояние, но испытывают наше приложение полностью, как оно будет работать в продакшне.</p>
+
+<p>До сих пор мы писали только юнит-тесты, обычно тестировали отдельно взятый модуль. Однако, чтобы сделать функцию <code class="highlighter-rouge">KVServer.Command.run/1</code>, тестируемой отдельно, нам придётся изменить её реализацию, не посылать команды в процесс <code class="highlighter-rouge">KV.Registry</code> напрямую, а передавать сервер как аргумент. Например, нам бы пришлось изменить сигнатуру <code class="highlighter-rouge">run</code> на <code class="highlighter-rouge">def run(command, pid)</code> и затем изменить все варианты функции:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">def</span> <span class="n">run</span><span class="p">({</span><span class="ss">:create</span><span class="p">,</span> <span class="n">bucket</span><span class="p">},</span> <span class="n">pid</span><span class="p">)</span> <span class="k">do</span>
+  <span class="no">KV</span><span class="o">.</span><span class="no">Registry</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">pid</span><span class="p">,</span> <span class="n">bucket</span><span class="p">)</span>
+  <span class="p">{</span><span class="ss">:ok</span><span class="p">,</span> <span class="sd">"</span><span class="s2">OK\r\n"</span><span class="p">}</span>
+<span class="k">end</span>
+
+<span class="c1"># ... другие варианты функции `run` ...</span>
+</code></pre></div></div>
+
+<p>Можете попробовать продолжить, сделать изменения, описанные выше, и написать юнит-тесты. Идея в том, что наши тесты будут стартовать экземпляр <code class="highlighter-rouge">KV.Registry</code> и передавать его аргументом в <code class="highlighter-rouge">run/2</code> вместо обращений к глобальному <code class="highlighter-rouge">KV.Registry</code>. Это позволит сохранить тесты асинхронными, т. к. у них не будет общего состояния.</p>
+
+<p>Но также давайте попробуем кое-что иное. Напишем интеграционные тесты, которые основаны на глобальном сервере, чтобы испытать весь стек от TCP-сервера до корзин. Наши интеграционные тесты будут полагаться на глобальное состояние и должны быть синхронными. С интеграционными тестами мы будем знать, как компоненты нашего приложения работают друг с другом. Обычно так тестируют основные сценарии работы вашего приложения. Например, нет смысла писать интеграционные тесты для реализации парсинга.</p>
+
+<p>Наш интеграционный тест будет использовать TCP-клиент, который будет отправлять команды нашему серверу и утверждать, какой ответ мы хотим получить.</p>
+
+<p>Давайте реализуем интеграционный тест <code class="highlighter-rouge">test/kv_server_test.exs</code> как показано ниже:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">defmodule</span> <span class="no">KVServerTest</span> <span class="k">do</span>
+  <span class="kn">use</span> <span class="no">ExUnit</span><span class="o">.</span><span class="no">Case</span>
+
+  <span class="n">setup</span> <span class="k">do</span>
+    <span class="no">Application</span><span class="o">.</span><span class="n">stop</span><span class="p">(</span><span class="ss">:kv</span><span class="p">)</span>
+    <span class="ss">:ok</span> <span class="o">=</span> <span class="no">Application</span><span class="o">.</span><span class="n">start</span><span class="p">(</span><span class="ss">:kv</span><span class="p">)</span>
+  <span class="k">end</span>
+
+  <span class="n">setup</span> <span class="k">do</span>
+    <span class="n">opts</span> <span class="o">=</span> <span class="p">[</span><span class="ss">:binary</span><span class="p">,</span> <span class="ss">packet:</span> <span class="ss">:line</span><span class="p">,</span> <span class="ss">active:</span> <span class="no">false</span><span class="p">]</span>
+    <span class="p">{</span><span class="ss">:ok</span><span class="p">,</span> <span class="n">socket</span><span class="p">}</span> <span class="o">=</span> <span class="ss">:gen_tcp</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="s1">'localhost'</span><span class="p">,</span> <span class="m">4040</span><span class="p">,</span> <span class="n">opts</span><span class="p">)</span>
+    <span class="p">%{</span><span class="ss">socket:</span> <span class="n">socket</span><span class="p">}</span>
+  <span class="k">end</span>
+
+  <span class="n">test</span> <span class="sd">"</span><span class="s2">server interaction"</span><span class="p">,</span> <span class="p">%{</span><span class="ss">socket:</span> <span class="n">socket</span><span class="p">}</span> <span class="k">do</span>
+    <span class="n">assert</span> <span class="n">send_and_recv</span><span class="p">(</span><span class="n">socket</span><span class="p">,</span> <span class="sd">"</span><span class="s2">UNKNOWN shopping\r\n"</span><span class="p">)</span> <span class="o">==</span>
+           <span class="sd">"</span><span class="s2">UNKNOWN COMMAND\r\n"</span>
+
+    <span class="n">assert</span> <span class="n">send_and_recv</span><span class="p">(</span><span class="n">socket</span><span class="p">,</span> <span class="sd">"</span><span class="s2">GET shopping eggs\r\n"</span><span class="p">)</span> <span class="o">==</span>
+           <span class="sd">"</span><span class="s2">NOT FOUND\r\n"</span>
+
+    <span class="n">assert</span> <span class="n">send_and_recv</span><span class="p">(</span><span class="n">socket</span><span class="p">,</span> <span class="sd">"</span><span class="s2">CREATE shopping\r\n"</span><span class="p">)</span> <span class="o">==</span>
+           <span class="sd">"</span><span class="s2">OK\r\n"</span>
+
+    <span class="n">assert</span> <span class="n">send_and_recv</span><span class="p">(</span><span class="n">socket</span><span class="p">,</span> <span class="sd">"</span><span class="s2">PUT shopping eggs 3\r\n"</span><span class="p">)</span> <span class="o">==</span>
+           <span class="sd">"</span><span class="s2">OK\r\n"</span>
+
+    <span class="c1"># GET возвращает две строки</span>
+    <span class="n">assert</span> <span class="n">send_and_recv</span><span class="p">(</span><span class="n">socket</span><span class="p">,</span> <span class="sd">"</span><span class="s2">GET shopping eggs\r\n"</span><span class="p">)</span> <span class="o">==</span> <span class="sd">"</span><span class="s2">3\r\n"</span>
+    <span class="n">assert</span> <span class="n">send_and_recv</span><span class="p">(</span><span class="n">socket</span><span class="p">,</span> <span class="sd">"</span><span class="s2">"</span><span class="p">)</span> <span class="o">==</span> <span class="sd">"</span><span class="s2">OK\r\n"</span>
+
+    <span class="n">assert</span> <span class="n">send_and_recv</span><span class="p">(</span><span class="n">socket</span><span class="p">,</span> <span class="sd">"</span><span class="s2">DELETE shopping eggs\r\n"</span><span class="p">)</span> <span class="o">==</span>
+           <span class="sd">"</span><span class="s2">OK\r\n"</span>
+
+    <span class="c1"># GET возвращает две строки</span>
+    <span class="n">assert</span> <span class="n">send_and_recv</span><span class="p">(</span><span class="n">socket</span><span class="p">,</span> <span class="sd">"</span><span class="s2">GET shopping eggs\r\n"</span><span class="p">)</span> <span class="o">==</span> <span class="sd">"</span><span class="s2">\r\n"</span>
+    <span class="n">assert</span> <span class="n">send_and_recv</span><span class="p">(</span><span class="n">socket</span><span class="p">,</span> <span class="sd">"</span><span class="s2">"</span><span class="p">)</span> <span class="o">==</span> <span class="sd">"</span><span class="s2">OK\r\n"</span>
+  <span class="k">end</span>
+
+  <span class="k">defp</span> <span class="n">send_and_recv</span><span class="p">(</span><span class="n">socket</span><span class="p">,</span> <span class="n">command</span><span class="p">)</span> <span class="k">do</span>
+    <span class="ss">:ok</span> <span class="o">=</span> <span class="ss">:gen_tcp</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="n">socket</span><span class="p">,</span> <span class="n">command</span><span class="p">)</span>
+    <span class="p">{</span><span class="ss">:ok</span><span class="p">,</span> <span class="n">data</span><span class="p">}</span> <span class="o">=</span> <span class="ss">:gen_tcp</span><span class="o">.</span><span class="n">recv</span><span class="p">(</span><span class="n">socket</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">1000</span><span class="p">)</span>
+    <span class="n">data</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<p>Наш интеграционный тест проверяет все взаимодействия с сервером, учитывая неизвестные команды и ошибки «not found». Мы используем таблицы <abbr title="ERLANG TERM STORAGE">ETS</abbr> и связанные процессы, поэтому даже нет необходимости закрывать сокет. Как только тестовый процесс закончится, сокет закроется автоматически.</p>
+
+<p>Т. к. теперь наш тест основан на глобальном состоянии, мы не передаём <code class="highlighter-rouge">async: true</code> в <code class="highlighter-rouge">use ExUnit.Case</code>. Более того, чтобы гарантировать нашим тестам одинаковое чистое исходное состояние, мы останавливаем и запускаем приложение <code class="highlighter-rouge">:kv</code> перед каждым тестом. Остановка <code class="highlighter-rouge">:kv</code> пишет предупреждение в терминал:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>18:12:10.698 [info] Application kv exited: :stopped
+</code></pre></div></div>
+
+<p>Чтобы избежать печати логов во время тестов, в <code class="highlighter-rouge">ExUnit</code> есть изящное решение <code class="highlighter-rouge">:capture_log</code>. Если установить <code class="highlighter-rouge">@tag :capture_log</code> перед каждым тестом или <code class="highlighter-rouge">@moduletag :capture_log</code> перед всем набором тестов, <code class="highlighter-rouge">ExUnit</code> будет автоматически отлавливать весь лог во время работы тестов. Если тест провалится, отловленный лог будет выведен в отчёте <code class="highlighter-rouge">ExUnit</code>.</p>
+
+<p>Между <code class="highlighter-rouge">use ExUnit.Case</code> и запуском добавьте следующую строку:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">@moduletag</span> <span class="ss">:capture_log</span>
+</code></pre></div></div>
+
+<p>Если тест упадёт, вы увидете отчёт вроде этого:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>  1) test server interaction (KVServerTest)
+     test/kv_server_test.exs:17
+     ** (RuntimeError) oops
+     stacktrace:
+       test/kv_server_test.exs:29
+
+     The following output was logged:
+
+     13:44:10.035 [info]  Application kv exited: :stopped
+</code></pre></div></div>
+
+<p>С этим простым интеграционным тестом мы можем увидеть, почему интеграционные тесты могут быть медленными. Не только потому, что такой тест не может работать асинхронно, он также предусматривает дорогой установку запуска и старта приложения <code class="highlighter-rouge">:kv</code>.</p>
+
+<p>В конце концов, ваша задача и задача вашей команды понять, какая стратегия тестирования будет лучшей для вашего приложения. Вам нужно найти баланс между качеством кода, уверенностью в его корректной работе и временем выполнения тестов. Например, мы можем выполнять только интеграционные тесты, но если сервер продолжает расти в следующих релизах, или становится часть приложения с частыми багами, важно иметь возможность разделить его на части и написать более быстрые и дешевые юнит-тесты.</p>
+
+<p>В следующей главе мы наконец сделаем нашу систему распределяемой, добавив механизм маршрутизации корзин. А также поговорим о конфигурации приложений.</p>
+
+    </div>
+</article>
+
+<nav class="docs_nav pure-g">
+    <div class="docs_nav__inner pure-u-1 pure-u-md-3-4">
+        <div class="pure-g">
+            <div class="docs_nav__column docs_nav__column--prev pure-u-1-3">
+                
+                    <a href="/docs/mix-otp/task-and-gen-tcp.html" class="docs_nav__link pure-button">
+                        &larr;<span class="h-hidden_mobile"> Назад</span></a>
+                
+            </div>
+
+            <div class="docs_nav__column docs_nav__column--contents pure-u-1-3">
+                <a href="#docsContents" class="docs_nav__link docs_nav__link--contents pure-button">☰</a>
+            </div>
+
+            <div class="docs_nav__column docs_nav__column--next pure-u-1-3">
+                
+                    <a href="/docs/mix-otp/distributed-tasks-and-configuration.html" class="docs_nav__link pure-button">
+                        <span class="h-hidden_mobile">Вперёд </span>&rarr;
+                    </a>
+                
+            </div>
+        </div>
+    </div>
+</nav>
+
+<div id="docsContents" class="modal modal--docs_contents modal--close_backdrop">
+    <div class="modal__content">
+        <a href="#close" title="Закрыть" class="modal__close">x</a>
+
+        <h2 class="modal__title">Содержание</h2>
+
+        
+        <h3 id="руководство-для-начинающих">Руководство для начинающих</h3>
+<ul>
+  <li><a href="/docs">Введение</a></li>
+  <li><a href="/docs/basic-types.html">Базовые типы</a></li>
+  <li><a href="/docs/basic-operators.html">Базовые операторы</a></li>
+  <li><a href="/docs/pattern-matching.html">Сопоставление с образцом</a></li>
+  <li><a href="/docs/case-cond-and-if.html">Конструкции ветвления</a></li>
+  <li><a href="/docs/binaries-strings-and-char-lists.html">Двоичные данные, строки и списки символов</a></li>
+  <li><a href="/docs/keywords-and-maps.html">Ключевые списки и словари</a></li>
+  <li><a href="/docs/modules-and-functions.html">Модули и функции</a></li>
+  <li><a href="/docs/recursion.html">Рекурсия</a></li>
+  <li><a href="/docs/enumerables-and-streams.html">Перечисления и потоки</a></li>
+  <li><a href="/docs/processes.html">Процессы</a></li>
+  <li><a href="/docs/io-and-the-file-system.html">Ввод/вывод и файловая система</a></li>
+  <li><a href="/docs/alias-require-and-import.html">Директивы <code class="highlighter-rouge">alias</code>, <code class="highlighter-rouge">require</code> и <code class="highlighter-rouge">import</code></a></li>
+  <li><a href="/docs/module-attributes.html">Атрибуты модулей</a></li>
+  <li><a href="/docs/structs.html">Структуры</a></li>
+  <li><a href="/docs/protocols.html">Протоколы</a></li>
+  <li><a href="/docs/comprehensions.html">Списковые выражения</a></li>
+  <li><a href="/docs/sigils.html">Сигилы</a></li>
+  <li><a href="/docs/try-catch-and-rescue.html">Конструкция <code class="highlighter-rouge">try</code>, <code class="highlighter-rouge">catch</code> и <code class="highlighter-rouge">rescue</code></a></li>
+  <li><a href="/docs/typespecs-and-behaviours.html">Спецификации типов и поведения</a></li>
+  <li><a href="/docs/erlang-libraries.html">Библиотеки Эрланга</a></li>
+  <li><a href="/docs/where-to-go-next.html">Куда двигаться дальше</a></li>
+</ul>
+
+<h3 id="микс-и-otp">Микс и <code class="highlighter-rouge">OTP</code></h3>
+<ul>
+  <li><a href="/docs/mix-otp/introduction-to-mix.html">Введение в Микс</a></li>
+  <li><a href="/docs/mix-otp/agent.html">Агент</a></li>
+  <li><a href="/docs/mix-otp/genserver.html">GenServer</a></li>
+  <li><a href="/docs/mix-otp/supervisor-and-application.html">Супервизор и приложение</a></li>
+  <li><a href="/docs/mix-otp/dynamic-supervisor.html">Динамический супервизор</a></li>
+  <li><a href="/docs/mix-otp/ets.html">ETS</a></li>
+  <li><a href="/docs/mix-otp/dependencies-and-umbrella-apps.html">Зависимости и зонтичные проекты</a></li>
+  <li><a href="/docs/mix-otp/task-and-gen-tcp.html">Модули <code class="highlighter-rouge">Task</code> и <code class="highlighter-rouge">:gen_tcp</code></a></li>
+  <li><a href="/docs/mix-otp/docs-tests-and-with.html">Доктесты, паттерны и оператор <code class="highlighter-rouge">with</code></a></li>
+  <li><a href="/docs/mix-otp/distributed-tasks-and-configuration.html">Распределенные задачи и конфигурация</a></li>
+</ul>
+
+<h3 id="метапрограммирование">Метапрограммирование</h3>
+<ul>
+  <li><a href="/docs/meta/quote-and-unquote.html">Конструкции <code class="highlighter-rouge">quote</code> и <code class="highlighter-rouge">unquote</code></a></li>
+  <li><a href="/docs/meta/macros.html">Макросы</a></li>
+  <li><a href="/docs/meta/domain-specific-languages.html">Предметно-ориентированные языки</a></li>
+</ul>
+
+    </div>
+</div>
+
+
+
+        <footer class="footer">
+    &copy; 2020
+    / Россия
+
+    <span class="pull-right">Любые мысли и вопросы пишите на <a href="mailto:elixir@wunsh.ru">elixir@wunsh.ru</a>.</span>
+</footer>
+
+        <div id="subscribeModal" class="modal">
+    <div class="modal__content">
+        <a href="#close" title="Close" class="modal__close">x</a>
+
+        <h2 class="modal__title">Ламповая рассылка про&nbsp;Эликсир</h2>
+
+        <p>Один-два раза в&nbsp;неделю присылаем тёплые письма об&nbsp;Эликсире: переводы самых интересных статей до&nbsp;их&nbsp;появления в&nbsp;открытом доступе, анонсы событий и&nbsp;вкусные бонусы.</p>
+
+        <form action="//wunsh.us14.list-manage.com/subscribe/post?u=c81ca3d4693f62db7f7f67c71&amp;id=a192e2dfef" method="post" id="mc-embedded-subscribe-form" name="mc-embedded-subscribe-form" class="pure-form h-tc validate" target="_blank" novalidate>
+            <input type="email" value="" name="EMAIL" class="modal__input pure-input-rounded large" id="mce-EMAIL" placeholder="Твоя почта" required>
+            <div style="position: absolute; left: -5000px;" aria-hidden="true"><input type="text" name="b_c81ca3d4693f62db7f7f67c71_a192e2dfef" tabindex="-1" value=""></div>
+
+            <input type="submit" value="Присоединиться" name="subscribe" onClick="yaCounter39773490.reachGoal('SUBSCRIBED'); return true" id="mc-embedded-subscribe" class="pure-button button-success large">
+        </form>
+
+        <p>Обязательно подтверди почту, перейдя по&nbsp;ссылке в&nbsp;письме, иначе мы&nbsp;не&nbsp;сможем делиться с&nbsp;тобой полезностями.</p>
+
+        <p>Надоедать точно не&nbsp;будем :)</p>
+    </div>
+</div>
+
+        <script src="/assets/js/vendors/zepto.min.js"></script>
+
+<script>
+    if ($(".post--docs").length) {
+        $(".footer").addClass("footer--docs")
+    }
+
+    $(".modal--close_backdrop").click(function(){
+        window.location.hash = "";
+    });
+</script>
+
+        <!-- Yandex.Metrika counter -->
+<script type="text/javascript">
+    (function (d, w, c) {
+        (w[c] = w[c] || []).push(function() {
+            try {
+                w.yaCounter39773490 = new Ya.Metrika({
+                    id:39773490,
+                    clickmap:true,
+                    trackLinks:true,
+                    accurateTrackBounce:true,
+                    webvisor:true,
+                    ut:"noindex"
+                });
+            } catch(e) { }
+        });
+
+        var n = d.getElementsByTagName("script")[0],
+            s = d.createElement("script"),
+            f = function () { n.parentNode.insertBefore(s, n); };
+        s.type = "text/javascript";
+        s.async = true;
+        s.src = "https://mc.yandex.ru/metrika/watch.js";
+
+        if (w.opera == "[object Opera]") {
+            d.addEventListener("DOMContentLoaded", f, false);
+        } else { f(); }
+    })(document, window, "yandex_metrika_callbacks");
+</script>
+<noscript><div><img src="https://mc.yandex.ru/watch/39773490?ut=noindex" style="position:absolute; left:-9999px;" alt="" /></div></noscript>
+<!-- /Yandex.Metrika counter -->
+
+      </div>
+    </div>
+  </body>
+</html>

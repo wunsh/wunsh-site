@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Создание консольных приложений на Elixir |> Сообщество Elixir и Phoenix Framework</title>
+    <meta name="description" content="В этой статье рассказывается, как создавать свои консольные приложения, для чего Elixir подходит как нельзя лучше.">
+
+    <link rel="alternate" type="application/rss+xml" title="Сообщество Elixir и Phoenix Framework" href="/feed.xml" />
+    <link rel="canonical" href="https://wunsh.ru/articles/command-line-tools.html">
+
+    <style type="text/css">@import url("//fonts.googleapis.com/css?family=Source+Sans+Pro:400,700&subset=cyrillic");</style>
+    <link rel="stylesheet" href="/assets/css/vendors/pure.min.css">
+    <link rel="stylesheet" href="/assets/css/vendors/pure-grids-responsive.min.css">
+    <link rel="stylesheet" href="/assets/css/style.css?1594516983">
+
+    <link rel="shortcut icon" type="image/png" href="/assets/favicon.png" >
+</head>
+
+
+  <body>
+    <div class="wunsh pure-g">
+      
+
+
+
+
+<div class="menu pure-u-1 pure-u-md-1-4">
+  <div class="header">
+    <h2 class="header__title">
+      
+        <a href="https://wunsh.ru" class="header__title_link" title="На главную">Эликсир и&nbsp;Вунш</a>
+      
+    </h2>
+    <h3 class="header__tagline">Erlang + Ruby = &#10084;</h3>
+
+    <nav class="nav">
+      <ul class="nav_list">
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/elixir" class="nav_list__item_link pure-button">О языке</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/install/linux-asdf" class="nav_list__item_link pure-button">Установка</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/docs/" class="nav_list__item_link pure-button">Документация</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/guides" class="nav_list__item_link pure-button">Гайды</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/news" class="nav_list__item_link pure-button">Новости</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/articles" class="nav_list__item_link pure-button">Статьи</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/videos" class="nav_list__item_link pure-button">Видео</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/vacancies" class="nav_list__item_link pure-button">Вакансии</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/faq" class="nav_list__item_link pure-button">FAQ</a>
+            </li>
+          
+        
+      </ul>
+    </nav>
+
+    <a href="#subscribeModal" class="pure-button header__subscribe_link">Подписаться на рассылку</a>
+  </div>
+</div>
+
+
+      <div class="content pure-u-1 pure-u-md-3-4">
+        
+
+<article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+  <header class="post__header">
+    
+    <h1 class="post__title" itemprop="name headline">Создание консольных приложений на Elixir</h1>
+
+    <div class="post__meta post_meta">
+      <ul class="meta_list">
+        <li class="meta_list__item">
+          
+          <span class="">
+            <small class="meta_list__item_name">Дата</small>
+            <time class="h-bold" datetime="2016-12-09T00:00:00+00:00" itemprop="datePublished">
+              
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+09 декабря 2016
+
+            </time>
+          </span>
+          
+
+          
+        </li>
+        
+        <li class="meta_list__item">
+            <span class="tag_cloud tags_cloud--inline h-no_margin">
+              <small class="meta_list__item_name">Теги</small> 
+
+
+<ul class="tags_cloud__list">
+  
+    <a href="/tags/#beginner" class="tags_cloud__link tag tag--beginner">beginner</a>
+  
+    <a href="/tags/#practical" class="tags_cloud__link tag tag--practical">practical</a>
+  
+</ul>
+
+            </span>
+        </li>
+        
+        <li class="meta_list__item">
+          <span itemprop="author" itemscope itemtype="http://schema.org/Person">
+            <small class="meta_list__item_name">
+              
+                Перевод
+              
+            </small>
+            <span itemprop="name" class="h-bold">Надежда Нестерова</span>
+          </span>
+        </li>
+
+        <li class="meta_list__item">
+          
+            <div >
+              <small>Оригинал</small>
+              <strong>
+                &laquo;<a href="http://elixirdose.com/post/create_command_line_tools" style="text-transform: none; text-decoration: underline; color: #4b2e39;">Create Command Line Tools</a>&raquo;
+              </strong>
+              <small>&copy;</small>
+              <strong>ElixirDose</strong>
+            </div>
+          
+        </li>
+      </ul>
+    </div>
+  </header>
+
+  <div class="post__content" itemprop="articleBody">
+    <p>Разработчики&nbsp;ПО, как правило, не&nbsp;представляют себе жизни без командной строки, а&nbsp;консольные приложения используются везде, где только можно. Python, Ruby, Erlang и&nbsp;Elixir дают разработчикам замечательные инструменты командной строки, называемые как раз консольными приложениями.</p>
+
+<p>В&nbsp;этой статье рассказывается, как создавать свои консольные приложения, для чего Elixir подходит как нельзя лучше.</p>
+
+<h2>Создание приложения</h2>
+
+<p>Создадим новый проект с&nbsp;помощью <code>mix</code>.</p>
+
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash"><span class="nv">$&gt;</span> mix new awesome_cli
+<span class="nv">$&gt;</span> <span class="nb">cd </span>awesome_cli</code></pre></figure>
+
+<p>Откройте файл <code>lib/awesome_cli.ex</code>, где вы&nbsp;увидите нечто подобное:</p>
+
+<figure class="highlight"><pre><code class="language-elixir" data-lang="elixir"><span class="k">defmodule</span> <span class="no">AwesomeCli</span> <span class="k">do</span>
+  <span class="kn">use</span> <span class="no">Application</span><span class="o">.</span><span class="no">Behaviour</span>
+
+  <span class="c1"># See http://elixir-lang.org/docs/stable/elixir/Application.html</span>
+  <span class="c1"># for more information on OTP Applications</span>
+  <span class="k">def</span> <span class="n">start</span><span class="p">(</span><span class="n">_type</span><span class="p">,</span> <span class="n">_args</span><span class="p">)</span> <span class="k">do</span>
+    <span class="no">AwesomeCli</span><span class="o">.</span><span class="no">Supervisor</span><span class="o">.</span><span class="n">start_link</span>
+  <span class="k">end</span>
+<span class="k">end</span></code></pre></figure>
+
+<p>Покажите, кто тут крутой программист: добавьте в&nbsp;проект вывод сообщения &laquo;Hello World&raquo;.</p>
+
+<figure class="highlight"><pre><code class="language-elixir" data-lang="elixir"><span class="k">defmodule</span> <span class="no">AwesomeCli</span> <span class="k">do</span>
+  <span class="kn">use</span> <span class="no">Application</span><span class="o">.</span><span class="no">Behaviour</span>
+
+  <span class="c1"># See http://elixir-lang.org/docs/stable/elixir/Application.html</span>
+  <span class="c1"># for more information on OTP Applications</span>
+  <span class="k">def</span> <span class="n">start</span><span class="p">(</span><span class="n">_type</span><span class="p">,</span> <span class="n">_args</span><span class="p">)</span> <span class="k">do</span>
+    <span class="no">AwesomeCli</span><span class="o">.</span><span class="no">Supervisor</span><span class="o">.</span><span class="n">start_link</span>
+  <span class="k">end</span>
+
+  <span class="k">def</span> <span class="n">main</span><span class="p">(</span><span class="n">args</span><span class="p">)</span> <span class="k">do</span>
+    <span class="no">IO</span><span class="o">.</span><span class="n">puts</span> <span class="sd">"</span><span class="s2">Hello, world!"</span>
+  <span class="k">end</span>
+<span class="k">end</span></code></pre></figure>
+
+<p>После этого запустите <code>mix escript.build</code> для сборки проекта.</p>
+
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash"><span class="nv">$&gt;</span> mix escript.build</code></pre></figure>
+
+<p>Возможно, возникнет такая ошибка:</p>
+
+<figure class="highlight"><pre><code class="language-shellsession" data-lang="shellsession">** (Mix) Could not generate escript, please set :escript in your project configuration
+to a function that returns the escript configuration for our application.
+So let's do that by openingmix.exs` file.</code></pre></figure>
+
+<p>Попробуем пойти другим путём&nbsp;&mdash; откроем файл <code>mix.exs</code>.</p>
+
+<figure class="highlight"><pre><code class="language-elixir" data-lang="elixir"><span class="k">defmodule</span> <span class="no">AwesomeCli</span><span class="o">.</span><span class="no">Mixfile</span> <span class="k">do</span>
+  <span class="kn">use</span> <span class="no">Mix</span><span class="o">.</span><span class="no">Project</span>
+
+  <span class="k">def</span> <span class="n">project</span> <span class="k">do</span>
+    <span class="p">[</span><span class="ss">app:</span> <span class="ss">:awesome_cli</span><span class="p">,</span>
+    <span class="ss">version:</span> <span class="sd">"</span><span class="s2">0.0.1"</span><span class="p">,</span>
+    <span class="ss">elixir:</span> <span class="sd">"</span><span class="s2">~&gt; 1.0.4"</span><span class="p">,</span>
+    <span class="ss">escript:</span> <span class="n">escript</span><span class="p">,</span>
+    <span class="ss">deps:</span> <span class="n">deps</span><span class="p">]</span>
+  <span class="k">end</span>
+
+  <span class="k">def</span> <span class="n">escript</span> <span class="k">do</span>
+    <span class="p">[</span><span class="ss">main_module:</span> <span class="no">AwesomeCli</span><span class="p">]</span>
+  <span class="k">end</span>
+
+
+  <span class="k">def</span> <span class="n">application</span> <span class="k">do</span>
+    <span class="p">[</span> <span class="ss">applications:</span> <span class="p">[],</span>
+      <span class="ss">mod:</span> <span class="p">{</span> <span class="no">AwesomeCli</span><span class="p">,</span> <span class="p">[]</span> <span class="p">}</span> <span class="p">]</span>
+  <span class="k">end</span>
+
+  <span class="k">defp</span> <span class="n">deps</span> <span class="k">do</span>
+    <span class="p">[]</span>
+  <span class="k">end</span>
+<span class="k">end</span></code></pre></figure>
+
+<p>Перезапустим <code>mix escript.build</code>, после чего <code>mix</code> выполнит компиляцию файла <code>awesome_cli.ex</code> и&nbsp;создаст файл <code>Elixir.AwesomeCli.beam</code> и&nbsp;исполняемый файл <code>awesome_cli</code> в&nbsp;директории <code>_build/dev/lib/awesome_cli/ebin</code>. Откроем исполняемый файл.</p>
+
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash"><span class="nv">$&gt;</span> ./awesome_cli
+Hello, world!</code></pre></figure>
+
+<p>Вот вы&nbsp;и&nbsp;создали своё первое работающее приложение на&nbsp;Elixir!</p>
+
+<h2>Парсинг аргументов</h2>
+
+<p>Нам повезло, что для парсинга аргументов интерфейса командной строки в&nbsp;Elixir имеется <noindex><a href="http://elixir-lang.org/docs/stable/elixir/OptionParser.html" rel="nofollow">модуль OptionParser</a></noindex>. Воспользуемся&nbsp;им, чтобы создать хитроумный инструмент командной строки, который&nbsp;бы получал один или два аргумента от&nbsp;пользователя.</p>
+
+<p>Первым делом научим инструмент приветствовать пользователя с&nbsp;заданным именем. Вот что мы&nbsp;сделаем:</p>
+
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash">./awesome_cli <span class="nt">--name</span> ElixirFriend</code></pre></figure>
+
+<p>Откройте файл <code>lib/awesome_cli.ex</code> и&nbsp;добавьте в&nbsp;него следующий код:</p>
+
+<figure class="highlight"><pre><code class="language-elixir" data-lang="elixir"><span class="k">def</span> <span class="n">main</span><span class="p">(</span><span class="n">args</span><span class="p">)</span> <span class="k">do</span>
+  <span class="n">args</span> <span class="o">|&gt;</span> <span class="n">parse_args</span>
+<span class="k">end</span>
+
+<span class="k">def</span> <span class="n">parse_args</span><span class="p">(</span><span class="n">args</span><span class="p">)</span> <span class="k">do</span>
+  <span class="p">{[</span><span class="ss">name:</span> <span class="n">name</span><span class="p">],</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span><span class="p">}</span> <span class="o">=</span> <span class="no">OptionParser</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="n">args</span><span class="p">)</span>
+
+  <span class="no">IO</span><span class="o">.</span><span class="n">puts</span> <span class="sd">"</span><span class="s2">Hello, </span><span class="si">#{</span><span class="n">name</span><span class="si">}</span><span class="s2">! You're awesome!!"</span>
+<span class="k">end</span></code></pre></figure>
+
+<p>Оператор <code>|&gt;</code> используется для передачи аргумента в&nbsp;функцию <code>parse_args</code>, а&nbsp;парсинг аргументов проводится с&nbsp;помощью <code>OptionParser.parse</code>. Вывод осуществлён для одного из&nbsp;аргументов. Если сейчас снова запустить <code>mix escript.build</code>, то&nbsp;получится следующее:</p>
+
+<figure class="highlight"><pre><code class="language-shellsession" data-lang="shellsession">$&gt; mix escript.build
+$&gt; ./awesome_cli --name ElixirFriend
+Hello, ElixirFriend! You're awesome!!</code></pre></figure>
+
+<p>Здорово, правда? Теперь, чтобы сделать CLI ещё круче, добавим в&nbsp;него справочное сообщение. Так пользователь поймёт, как с&nbsp;ним обращаться. Для этого воспользуемся конструкцией <code>case</code> и&nbsp;проведём сопоставление с&nbsp;образцом.</p>
+
+<figure class="highlight"><pre><code class="language-elixir" data-lang="elixir"><span class="k">def</span> <span class="n">parse_args</span><span class="p">(</span><span class="n">args</span><span class="p">)</span> <span class="k">do</span>
+  <span class="n">options</span> <span class="o">=</span> <span class="no">OptionParser</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="n">args</span><span class="p">)</span>
+
+  <span class="k">case</span> <span class="n">options</span> <span class="k">do</span>
+    <span class="p">{[</span><span class="ss">name:</span> <span class="n">name</span><span class="p">],</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span><span class="p">}</span> <span class="o">-&gt;</span> <span class="no">IO</span><span class="o">.</span><span class="n">puts</span> <span class="sd">"</span><span class="s2">Hello, </span><span class="si">#{</span><span class="n">name</span><span class="si">}</span><span class="s2">! You're awesome!!"</span>
+    <span class="p">{[</span><span class="ss">help:</span> <span class="no">true</span><span class="p">],</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span><span class="p">}</span> <span class="o">-&gt;</span> <span class="no">IO</span><span class="o">.</span><span class="n">puts</span> <span class="sd">"</span><span class="s2">This is help message"</span>
+
+  <span class="k">end</span>
+<span class="k">end</span></code></pre></figure>
+
+<p>Перезапустим <code>mix escript.build</code> ещё раз и&nbsp;выполним файл с&nbsp;помощью <code>--help</code>.</p>
+
+<figure class="highlight"><pre><code class="language-shellsession" data-lang="shellsession">$&gt; ./awesome_cli --name ElixirFriend
+Hello, ElixirFriend! You're awesome!!
+$&gt; ./awesome_cli --help
+This is help message</code></pre></figure>
+
+<h2>Последний штрих</h2>
+
+<p>Давайте немного перестроим код. Сначала, сделаем так, чтобы функция <code>parse_args</code> выполняла только парсинг аргументов и&nbsp;возвращаемый ею&nbsp;результат можно было&nbsp;бы использовать в&nbsp;другой функции.</p>
+
+<figure class="highlight"><pre><code class="language-elixir" data-lang="elixir"><span class="k">def</span> <span class="n">main</span><span class="p">(</span><span class="n">args</span><span class="p">)</span> <span class="k">do</span>
+  <span class="n">args</span> <span class="o">|&gt;</span> <span class="n">parse_args</span> <span class="o">|&gt;</span> <span class="n">do_process</span>
+<span class="k">end</span>
+
+<span class="k">def</span> <span class="n">parse_args</span><span class="p">(</span><span class="n">args</span><span class="p">)</span> <span class="k">do</span>
+  <span class="n">options</span> <span class="o">=</span> <span class="no">OptionParser</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="n">args</span><span class="p">)</span>
+
+  <span class="k">case</span> <span class="n">options</span> <span class="k">do</span>
+    <span class="p">{[</span><span class="ss">name:</span> <span class="n">name</span><span class="p">],</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span><span class="p">}</span> <span class="o">-&gt;</span> <span class="p">[</span><span class="n">name</span><span class="p">]</span>
+    <span class="p">{[</span><span class="ss">help:</span> <span class="no">true</span><span class="p">],</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span><span class="p">}</span> <span class="o">-&gt;</span> <span class="ss">:help</span>
+    <span class="n">_</span> <span class="o">-&gt;</span> <span class="ss">:help</span>
+
+  <span class="k">end</span>
+<span class="k">end</span>
+
+<span class="k">def</span> <span class="n">do_process</span><span class="p">([</span><span class="n">name</span><span class="p">])</span> <span class="k">do</span>
+  <span class="no">IO</span><span class="o">.</span><span class="n">puts</span> <span class="sd">"</span><span class="s2">Hello, </span><span class="si">#{</span><span class="n">name</span><span class="si">}</span><span class="s2">! You're awesome!!"</span>
+<span class="k">end</span>
+
+<span class="k">def</span> <span class="n">do_process</span><span class="p">(</span><span class="ss">:help</span><span class="p">)</span> <span class="k">do</span>
+  <span class="no">IO</span><span class="o">.</span><span class="n">puts</span> <span class="sd">"""
+    Usage:
+    ./awesome_cli --name [your name]
+
+    Options:
+    --help  Show this help message.
+
+    Description:
+    Prints out an awesome message.
+  """</span>
+
+  <span class="no">System</span><span class="o">.</span><span class="n">halt</span><span class="p">(</span><span class="m">0</span><span class="p">)</span>
+<span class="k">end</span></code></pre></figure>
+
+<p>Перезапустите <code>mix escript.build</code> и&nbsp;попробуйте его выполнить.</p>
+
+<figure class="highlight"><pre><code class="language-shellsession" data-lang="shellsession">$&gt; mix escript.build
+$&gt; ./awesome_cli --name ElixirFriend
+Hello, ElixirFriend! You're awesome!!
+$&gt; ./awesome_cli --help
+Usage:
+./awesome_cli --name [your name]
+
+Options:
+--help  Show this help message.
+
+Description:
+Prints out an awesome message.
+$&gt; ./awesome_cli
+Usage:
+./awesome_cli --name [your name]
+
+Options:
+--help  Show this help message.
+
+Description:
+Prints out an awesome message.</code></pre></figure>
+
+<h2>Заключение</h2>
+
+<p>Мы&nbsp;рассмотрели, как создавать простые консольные приложения посредством <code>OptionParser</code> и&nbsp;как заставить код работать с&nbsp;помощью <code>mix escript.build</code>. И&nbsp;пусть приведённый пример не&nbsp;изобилует сложными конструкциями, но&nbsp;даже на&nbsp;нём видно, что создавать консольные приложения в&nbsp;Elixir&nbsp;&mdash; просто и&nbsp;очень удобно.</p>
+  </div>
+
+  <!-- uSocial -->
+  <div class="post__share_block share_block">
+    <script async src="https://usocial.pro/usocial/usocial.js?v=6.1.4" data-script="usocial" charset="utf-8"></script>
+    <div class="uSocial-Share" data-pid="2fd19544e551bce292425ee8adaa31be" data-type="share" data-options="round,style2,default,absolute,horizontal,size32,counter1,counter-before,upArrow-right,nomobile" data-social="telegram,fb,vk,gPlus,twi,bookmarks"></div>
+  </div>
+  <!-- /uSocial -->
+</article>
+
+
+        <footer class="footer">
+    &copy; 2020
+    / Россия
+
+    <span class="pull-right">Любые мысли и вопросы пишите на <a href="mailto:elixir@wunsh.ru">elixir@wunsh.ru</a>.</span>
+</footer>
+
+        <div id="subscribeModal" class="modal">
+    <div class="modal__content">
+        <a href="#close" title="Close" class="modal__close">x</a>
+
+        <h2 class="modal__title">Ламповая рассылка про&nbsp;Эликсир</h2>
+
+        <p>Один-два раза в&nbsp;неделю присылаем тёплые письма об&nbsp;Эликсире: переводы самых интересных статей до&nbsp;их&nbsp;появления в&nbsp;открытом доступе, анонсы событий и&nbsp;вкусные бонусы.</p>
+
+        <form action="//wunsh.us14.list-manage.com/subscribe/post?u=c81ca3d4693f62db7f7f67c71&amp;id=a192e2dfef" method="post" id="mc-embedded-subscribe-form" name="mc-embedded-subscribe-form" class="pure-form h-tc validate" target="_blank" novalidate>
+            <input type="email" value="" name="EMAIL" class="modal__input pure-input-rounded large" id="mce-EMAIL" placeholder="Твоя почта" required>
+            <div style="position: absolute; left: -5000px;" aria-hidden="true"><input type="text" name="b_c81ca3d4693f62db7f7f67c71_a192e2dfef" tabindex="-1" value=""></div>
+
+            <input type="submit" value="Присоединиться" name="subscribe" onClick="yaCounter39773490.reachGoal('SUBSCRIBED'); return true" id="mc-embedded-subscribe" class="pure-button button-success large">
+        </form>
+
+        <p>Обязательно подтверди почту, перейдя по&nbsp;ссылке в&nbsp;письме, иначе мы&nbsp;не&nbsp;сможем делиться с&nbsp;тобой полезностями.</p>
+
+        <p>Надоедать точно не&nbsp;будем :)</p>
+    </div>
+</div>
+
+        <script src="/assets/js/vendors/zepto.min.js"></script>
+
+<script>
+    if ($(".post--docs").length) {
+        $(".footer").addClass("footer--docs")
+    }
+
+    $(".modal--close_backdrop").click(function(){
+        window.location.hash = "";
+    });
+</script>
+
+        <!-- Yandex.Metrika counter -->
+<script type="text/javascript">
+    (function (d, w, c) {
+        (w[c] = w[c] || []).push(function() {
+            try {
+                w.yaCounter39773490 = new Ya.Metrika({
+                    id:39773490,
+                    clickmap:true,
+                    trackLinks:true,
+                    accurateTrackBounce:true,
+                    webvisor:true,
+                    ut:"noindex"
+                });
+            } catch(e) { }
+        });
+
+        var n = d.getElementsByTagName("script")[0],
+            s = d.createElement("script"),
+            f = function () { n.parentNode.insertBefore(s, n); };
+        s.type = "text/javascript";
+        s.async = true;
+        s.src = "https://mc.yandex.ru/metrika/watch.js";
+
+        if (w.opera == "[object Opera]") {
+            d.addEventListener("DOMContentLoaded", f, false);
+        } else { f(); }
+    })(document, window, "yandex_metrika_callbacks");
+</script>
+<noscript><div><img src="https://mc.yandex.ru/watch/39773490?ut=noindex" style="position:absolute; left:-9999px;" alt="" /></div></noscript>
+<!-- /Yandex.Metrika counter -->
+
+      </div>
+    </div>
+  </body>
+</html>

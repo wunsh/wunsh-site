@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Как работают супервизоры в Elixir |> Сообщество Elixir и Phoenix Framework</title>
+    <meta name="description" content="В этой статье рассказывается о том, как работают супервизоры в языке Elixir.">
+
+    <link rel="alternate" type="application/rss+xml" title="Сообщество Elixir и Phoenix Framework" href="/feed.xml" />
+    <link rel="canonical" href="https://wunsh.ru/articles/how-supervisors-work-in-elixir.html">
+
+    <style type="text/css">@import url("//fonts.googleapis.com/css?family=Source+Sans+Pro:400,700&subset=cyrillic");</style>
+    <link rel="stylesheet" href="/assets/css/vendors/pure.min.css">
+    <link rel="stylesheet" href="/assets/css/vendors/pure-grids-responsive.min.css">
+    <link rel="stylesheet" href="/assets/css/style.css?1594516983">
+
+    <link rel="shortcut icon" type="image/png" href="/assets/favicon.png" >
+</head>
+
+
+  <body>
+    <div class="wunsh pure-g">
+      
+
+
+
+
+<div class="menu pure-u-1 pure-u-md-1-4">
+  <div class="header">
+    <h2 class="header__title">
+      
+        <a href="https://wunsh.ru" class="header__title_link" title="На главную">Эликсир и&nbsp;Вунш</a>
+      
+    </h2>
+    <h3 class="header__tagline">Erlang + Ruby = &#10084;</h3>
+
+    <nav class="nav">
+      <ul class="nav_list">
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/elixir" class="nav_list__item_link pure-button">О языке</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/install/linux-asdf" class="nav_list__item_link pure-button">Установка</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/docs/" class="nav_list__item_link pure-button">Документация</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/guides" class="nav_list__item_link pure-button">Гайды</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/news" class="nav_list__item_link pure-button">Новости</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/articles" class="nav_list__item_link pure-button">Статьи</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/videos" class="nav_list__item_link pure-button">Видео</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/vacancies" class="nav_list__item_link pure-button">Вакансии</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/faq" class="nav_list__item_link pure-button">FAQ</a>
+            </li>
+          
+        
+      </ul>
+    </nav>
+
+    <a href="#subscribeModal" class="pure-button header__subscribe_link">Подписаться на рассылку</a>
+  </div>
+</div>
+
+
+      <div class="content pure-u-1 pure-u-md-3-4">
+        
+
+<article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+  <header class="post__header">
+    
+    <h1 class="post__title" itemprop="name headline">Как работают супервизоры в Elixir</h1>
+
+    <div class="post__meta post_meta">
+      <ul class="meta_list">
+        <li class="meta_list__item">
+          
+          <span class="">
+            <small class="meta_list__item_name">Дата</small>
+            <time class="h-bold" datetime="2016-12-17T00:00:00+00:00" itemprop="datePublished">
+              
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+17 декабря 2016
+
+            </time>
+          </span>
+          
+
+          
+        </li>
+        
+        <li class="meta_list__item">
+            <span class="tag_cloud tags_cloud--inline h-no_margin">
+              <small class="meta_list__item_name">Теги</small> 
+
+
+<ul class="tags_cloud__list">
+  
+    <a href="/tags/#beginner" class="tags_cloud__link tag tag--beginner">beginner</a>
+  
+</ul>
+
+            </span>
+        </li>
+        
+        <li class="meta_list__item">
+          <span itemprop="author" itemscope itemtype="http://schema.org/Person">
+            <small class="meta_list__item_name">
+              
+                Перевод
+              
+            </small>
+            <span itemprop="name" class="h-bold">Надежда Нестерова</span>
+          </span>
+        </li>
+
+        <li class="meta_list__item">
+          
+            <div >
+              <small>Оригинал</small>
+              <strong>
+                &laquo;<a href="https://jbodah.github.io/blog/2016/11/18/supervisors-work/" style="text-transform: none; text-decoration: underline; color: #4b2e39;">How Supervisors Work</a>&raquo;
+              </strong>
+              <small>&copy;</small>
+              <strong>Josh Bodah</strong>
+            </div>
+          
+        </li>
+      </ul>
+    </div>
+  </header>
+
+  <div class="post__content" itemprop="articleBody">
+    <p>В&nbsp;Erlang и&nbsp;Elixir супервизоры&nbsp;&mdash; это процессы, управляющие дочерними процессами и&nbsp;перезапускающие их&nbsp;в&nbsp;случае возникновения ошибок. В&nbsp;этой статье подробно рассматривается реализация супервизоров в&nbsp;Elixir.</p>
+<p>Но&nbsp;прежде чем перейти к&nbsp;самим супервизорам, неплохо было&nbsp;бы как следует ознакомиться с&nbsp;модулями <code>gen_server</code> и&nbsp;<code>supervisor</code>. Можно обойтись и&nbsp;без этого, если вам уже доводилось работать с&nbsp;эквивалентными модулями Elixir, так как они просто передают вызовы модулям Erlang, не&nbsp;меняя своего поведения.</p>
+<p>Начнём, пожалуй, с&nbsp;примера из&nbsp;самой документации Elixir:</p>
+<figure class="highlight"><pre><code class="language-elixir" data-lang="elixir"><span class="k">defmodule</span> <span class="no">MyApp</span><span class="o">.</span><span class="no">Supervisor</span> <span class="k">do</span>
+  <span class="kn">use</span> <span class="no">Supervisor</span>
+
+  <span class="k">def</span> <span class="n">start_link</span> <span class="k">do</span>
+    <span class="no">Supervisor</span><span class="o">.</span><span class="n">start_link</span><span class="p">(</span><span class="bp">__MODULE__</span><span class="p">,</span> <span class="p">[])</span>
+  <span class="k">end</span>
+
+  <span class="k">def</span> <span class="n">init</span><span class="p">([])</span> <span class="k">do</span>
+    <span class="n">children</span> <span class="o">=</span> <span class="p">[</span>
+      <span class="n">worker</span><span class="p">(</span><span class="no">Stack</span><span class="p">,</span> <span class="p">[[</span><span class="ss">:hello</span><span class="p">]])</span>
+    <span class="p">]</span>
+
+    <span class="c1"># supervise/2 is imported from Supervisor.Spec</span>
+    <span class="n">supervise</span><span class="p">(</span><span class="n">children</span><span class="p">,</span> <span class="ss">strategy:</span> <span class="ss">:one_for_one</span><span class="p">)</span>
+  <span class="k">end</span>
+<span class="k">end</span></code></pre></figure>
+<p>В&nbsp;приведённом примере метод <code>start_link</code> создаёт супервизор, а&nbsp;метод <code>init</code> реализует обратный вызов, используемый поведением из&nbsp;<code>Supervisor</code>. Рассмотрим <code>Supervisor</code> подробнее.</p>
+<p>Пробежимся по&nbsp;поведениям. Инструкция <code>use Supervisor</code> разворачивается во&nbsp;время компиляции в&nbsp;поведение, указанное в&nbsp;макросе <code>__using__</code>. Посмотрим на&nbsp;код макроса <code>__using__</code> из&nbsp;модуля <code>Supervisor</code> <noindex><a href="https://github.com/elixir-lang/elixir" rel="nofollow">в&nbsp;исходниках Elixir</a></noindex>.</p>
+<p>На&nbsp;момент написания статьи макрос <code>__using__</code> выглядел так:</p>
+<figure class="highlight"><pre><code class="language-elixir" data-lang="elixir"><span class="k">defmacro</span> <span class="n">__using__</span><span class="p">(</span><span class="n">_</span><span class="p">)</span> <span class="k">do</span>
+  <span class="kn">quote</span> <span class="ss">location:</span> <span class="ss">:keep</span> <span class="k">do</span>
+    <span class="nv">@behaviour</span> <span class="no">Supervisor</span>
+    <span class="kn">import</span> <span class="no">Supervisor</span><span class="o">.</span><span class="no">Spec</span>
+  <span class="k">end</span>
+<span class="k">end</span></code></pre></figure>
+<p>С&nbsp;помощью <code>@behaviour</code> в&nbsp;супервизоре проверяется наличие необходимых функций обратного вызова, а&nbsp;оператор <code>import</code> подгружает в&nbsp;<code>MyApp.Supervisor</code> дополнительные функции из&nbsp;модуля <code>Supervisor.Spec</code>. Именно в&nbsp;нём определены функции <code>worker</code> и&nbsp;<code>supervise</code>.</p>
+<p>Если в&nbsp;двух словах, то&nbsp;инструкция <code>use Supervisor</code> добавляет в&nbsp;проект несколько новых функций и&nbsp;следит за&nbsp;наличием нужных функций обратного вызова.</p>
+<p>Работа супервизора начинается с&nbsp;вызова <code>MyApp.Supervisor.start_link</code>. Он&nbsp;делегируется функции <code>Supervisor.start_link</code>, передавая ссылку на&nbsp;себя (с&nbsp;помощью макроса <code>__MODULE__</code>).</p>
+<p>Посмотрим на&nbsp;реализацию <code>Supervisor.start_link</code>:</p>
+<figure class="highlight"><pre><code class="language-elixir" data-lang="elixir"><span class="k">def</span> <span class="n">start_link</span><span class="p">(</span><span class="n">module</span><span class="p">,</span> <span class="n">arg</span><span class="p">,</span> <span class="n">options</span> <span class="p">\\</span> <span class="p">[])</span> <span class="ow">when</span> <span class="n">is_list</span><span class="p">(</span><span class="n">options</span><span class="p">)</span> <span class="k">do</span>
+  <span class="k">case</span> <span class="no">Keyword</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">options</span><span class="p">,</span> <span class="ss">:name</span><span class="p">)</span> <span class="k">do</span>
+    <span class="no">nil</span> <span class="o">-&gt;</span>
+      <span class="ss">:supervisor</span><span class="o">.</span><span class="n">start_link</span><span class="p">(</span><span class="n">module</span><span class="p">,</span> <span class="n">arg</span><span class="p">)</span>
+    <span class="n">atom</span> <span class="ow">when</span> <span class="n">is_atom</span><span class="p">(</span><span class="n">atom</span><span class="p">)</span> <span class="o">-&gt;</span>
+      <span class="ss">:supervisor</span><span class="o">.</span><span class="n">start_link</span><span class="p">({</span><span class="ss">:local</span><span class="p">,</span> <span class="n">atom</span><span class="p">},</span> <span class="n">module</span><span class="p">,</span> <span class="n">arg</span><span class="p">)</span>
+    <span class="p">{</span><span class="ss">:global</span><span class="p">,</span> <span class="n">_term</span><span class="p">}</span> <span class="o">=</span> <span class="n">tuple</span> <span class="o">-&gt;</span>
+      <span class="ss">:supervisor</span><span class="o">.</span><span class="n">start_link</span><span class="p">(</span><span class="n">tuple</span><span class="p">,</span> <span class="n">module</span><span class="p">,</span> <span class="n">arg</span><span class="p">)</span>
+    <span class="p">{</span><span class="ss">:via</span><span class="p">,</span> <span class="n">via_module</span><span class="p">,</span> <span class="n">_term</span><span class="p">}</span> <span class="o">=</span> <span class="n">tuple</span> <span class="ow">when</span> <span class="n">is_atom</span><span class="p">(</span><span class="n">via_module</span><span class="p">)</span> <span class="o">-&gt;</span>
+      <span class="ss">:supervisor</span><span class="o">.</span><span class="n">start_link</span><span class="p">(</span><span class="n">tuple</span><span class="p">,</span> <span class="n">module</span><span class="p">,</span> <span class="n">arg</span><span class="p">)</span>
+    <span class="n">other</span> <span class="o">-&gt;</span>
+      <span class="k">raise</span> <span class="no">ArgumentError</span><span class="p">,</span> <span class="sd">"""
+      expected :name option to be one of:
+        * nil
+        * atom
+        * {:global, term}
+        * {:via, module, term}
+      Got: #{inspect(other)}
+      """</span>
+  <span class="k">end</span>
+<span class="k">end</span></code></pre></figure>
+<p>Обратите внимание, что модуль Elixir делегирует вызовы модулю Erlang <code>:supervisor</code>. Но&nbsp;это не&nbsp;повод для паники! Доверьтесь мне и&nbsp;загляните <noindex><a href="https://github.com/erlang/otp" rel="nofollow">в&nbsp;исходники Erlang</a></noindex>.</p>
+<p>Введя в&nbsp;поиске <code>start_link</code>, вы&nbsp;наткнётесь на&nbsp;инструкцию <code>export</code>, позволяющую использовать функцию за&nbsp;пределами модуля, спецификацию, описывающую доступные для функции типы данных, и, собственно, саму её&nbsp;реализацию:</p>
+<figure class="highlight"><pre><code class="language-elixir" data-lang="elixir"><span class="n">start_link</span><span class="p">(</span><span class="no">Mod</span><span class="p">,</span> <span class="no">Args</span><span class="p">)</span> <span class="o">-&gt;</span>
+    <span class="ss">gen_server:</span><span class="n">start_link</span><span class="p">(</span><span class="n">supervisor</span><span class="p">,</span> <span class="p">{</span><span class="n">self</span><span class="p">,</span> <span class="no">Mod</span><span class="p">,</span> <span class="no">Args</span><span class="p">},</span> <span class="p">[])</span><span class="o">.</span></code></pre></figure>
+<p>Видите? Уже что-то знакомое. Просто запускаем <code>gen_server</code>, не&nbsp;вдаваясь <noindex><a href="http://erlang.org/doc/design_principles/gen_server_concepts.html" rel="nofollow">в&nbsp;подробности его работы</a></noindex>. Главное, что здесь нужно усвоить,&nbsp;&mdash; это&nbsp;то, что супервизоры построены на&nbsp;основе модуля <code>gen_server</code>, который ожидает увидеть реализацию нескольких функций обратного вызова.</p>
+<p>Гораздо больший интерес представляет метод <code>init</code>. Обратите внимание, что хоть <code>MyApp.Supervisor</code> и&nbsp;содержит реализацию функции <code>init</code>, но&nbsp;это <em>не</em>&nbsp;функция обратного вызова, которая будет вызвана далее. Если вернуться к&nbsp;реализации функции <code>start_link</code> в&nbsp;модуле <code>:supervisor</code> из&nbsp;Erlang, можно заметить, что в&nbsp;неё передаётся параметр <code>self</code>. Это означает, что <code>:supervisor.init</code>&nbsp;&mdash; та&nbsp;самая искомая функция.</p>
+<p>Посмотрите на&nbsp;её&nbsp;исходный код:</p>
+<figure class="highlight"><pre><code class="language-elixir" data-lang="elixir"><span class="n">init</span><span class="p">({</span><span class="no">SupName</span><span class="p">,</span> <span class="no">Mod</span><span class="p">,</span> <span class="no">Args</span><span class="p">})</span> <span class="o">-&gt;</span>
+    <span class="n">process_flag</span><span class="p">(</span><span class="n">trap_exit</span><span class="p">,</span> <span class="no">true</span><span class="p">),</span>
+    <span class="k">case</span> <span class="ss">Mod:</span><span class="n">init</span><span class="p">(</span><span class="no">Args</span><span class="p">)</span> <span class="n">of</span>
+        <span class="p">{</span><span class="n">ok</span><span class="p">,</span> <span class="p">{</span><span class="no">SupFlags</span><span class="p">,</span> <span class="no">StartSpec</span><span class="p">}}</span> <span class="o">-&gt;</span>
+            <span class="k">case</span> <span class="n">init_state</span><span class="p">(</span><span class="no">SupName</span><span class="p">,</span> <span class="no">SupFlags</span><span class="p">,</span> <span class="no">Mod</span><span class="p">,</span> <span class="no">Args</span><span class="p">)</span> <span class="n">of</span>
+                <span class="p">{</span><span class="n">ok</span><span class="p">,</span> <span class="no">State</span><span class="p">}</span> <span class="ow">when</span> <span class="sx">?i</span><span class="n">s_simple</span><span class="p">(</span><span class="no">State</span><span class="p">)</span> <span class="o">-&gt;</span>
+                    <span class="n">init_dynamic</span><span class="p">(</span><span class="no">State</span><span class="p">,</span> <span class="no">StartSpec</span><span class="p">);</span>
+                <span class="p">{</span><span class="n">ok</span><span class="p">,</span> <span class="no">State</span><span class="p">}</span> <span class="o">-&gt;</span>
+                    <span class="n">init_children</span><span class="p">(</span><span class="no">State</span><span class="p">,</span> <span class="no">StartSpec</span><span class="p">);</span>
+                <span class="no">Error</span> <span class="o">-&gt;</span>
+                    <span class="p">{</span><span class="n">stop</span><span class="p">,</span> <span class="p">{</span><span class="n">supervisor_data</span><span class="p">,</span> <span class="no">Error</span><span class="p">}}</span>
+                  <span class="k">end</span><span class="p">;</span>
+        <span class="n">ignore</span> <span class="o">-&gt;</span>
+            <span class="n">ignore</span><span class="p">;</span>
+        <span class="no">Error</span> <span class="o">-&gt;</span>
+            <span class="p">{</span><span class="n">stop</span><span class="p">,</span> <span class="p">{</span><span class="n">bad_return</span><span class="p">,</span> <span class="p">{</span><span class="no">Mod</span><span class="p">,</span> <span class="n">init</span><span class="p">,</span> <span class="no">Error</span><span class="p">}}}</span>
+<span class="k">end</span><span class="o">.</span></code></pre></figure>
+<p>Во-первых, вызывается функция <code>Mod:init(Args)</code>, которая в&nbsp;свою очередь вызывает функцию <code>MyApp.Supervisor.init</code>. Ещё раз взглянем на&nbsp;код:</p>
+<figure class="highlight"><pre><code class="language-elixir" data-lang="elixir"><span class="k">def</span> <span class="n">init</span><span class="p">([])</span> <span class="k">do</span>
+  <span class="n">children</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="n">worker</span><span class="p">(</span><span class="no">Stack</span><span class="p">,</span> <span class="p">[[</span><span class="ss">:hello</span><span class="p">]])</span>
+  <span class="p">]</span>
+
+  <span class="c1"># supervise/2 is imported from Supervisor.Spec</span>
+  <span class="n">supervise</span><span class="p">(</span><span class="n">children</span><span class="p">,</span> <span class="ss">strategy:</span> <span class="ss">:one_for_one</span><span class="p">)</span>
+<span class="k">end</span></code></pre></figure>
+<p>Не&nbsp;стоит забывать, что <code>worker</code> и&nbsp;<code>supervise</code>&nbsp;&mdash; хелперы из&nbsp;<code>Supervisor.Spec</code>. Не&nbsp;будем ходить вокруг да&nbsp;около, а&nbsp;перейдём к&nbsp;самому главному, то&nbsp;есть рассмотрим подробнее, как всё это реализуется в&nbsp;Erlang. <code>worker</code> возвращает <code><a href="http://erlang.org/doc/man/supervisor.html#type-child_spec" rel="nofollow">child_spec</a></code>, а&nbsp;<code>supervise</code>&nbsp;&mdash; такой кортеж: <code>{:ok, { {strategy, max_retries, max_seconds}, child_specs} }</code>.</p>
+<p>Во-вторых, <code>:supervisor.init</code> вызывает <code>process_flag</code>, после чего происходит перехват <noindex><a href="http://erlang.org/doc/reference_manual/processes.html#errors" rel="nofollow">сигнала выхода</a></noindex>. Это&nbsp;&mdash; ключевой момент, демонстрирующий, как и&nbsp;когда супервизор принимает решение о&nbsp;перезапуске процесса. Если коротко, то&nbsp;перед уничтожением процесс посылает сигнал выхода всем связанным с&nbsp;ним процессам. Вызов <code>process_flag</code> перехватывает сигнал и&nbsp;вместо этого посылает процессу сообщение <code>{&rsquo;EXIT&rsquo;, from_pid, reason}</code>. Далее будет показано, каким образом процесс-супервизор использует значение <code>from_pid</code> для выявления уничтоженного процесса и&nbsp;его перезапуска.</p>
+<p>Итак, мы&nbsp;рассмотрели функцию <code>:supervisor.init</code> и&nbsp;узнали про перехват сигналов выхода. Теперь перейдём к&nbsp;инициализации состояния и&nbsp;дочерних процессов. Так как в&nbsp;данном примере супервизоры <code>:simple_one_for_one</code> не&nbsp;используются, то&nbsp;обратим внимание лишь на&nbsp;инициализацию дочерних процессов <code>init_children</code>.</p>
+<figure class="highlight"><pre><code class="language-elixir" data-lang="elixir"><span class="n">init_children</span><span class="p">(</span><span class="no">State</span><span class="p">,</span> <span class="no">StartSpec</span><span class="p">)</span> <span class="o">-&gt;</span>
+    <span class="no">SupName</span> <span class="o">=</span> <span class="no">State</span><span class="c1">#state.name,</span>
+    <span class="k">case</span> <span class="n">check_startspec</span><span class="p">(</span><span class="no">StartSpec</span><span class="p">)</span> <span class="n">of</span>
+        <span class="p">{</span><span class="n">ok</span><span class="p">,</span> <span class="no">Children</span><span class="p">}</span> <span class="o">-&gt;</span>
+            <span class="k">case</span> <span class="n">start_children</span><span class="p">(</span><span class="no">Children</span><span class="p">,</span> <span class="no">SupName</span><span class="p">)</span> <span class="n">of</span>
+                <span class="p">{</span><span class="n">ok</span><span class="p">,</span> <span class="no">NChildren</span><span class="p">}</span> <span class="o">-&gt;</span>
+                    <span class="p">{</span><span class="n">ok</span><span class="p">,</span> <span class="no">State</span><span class="c1">#state{children = NChildren}};</span>
+                <span class="p">{</span><span class="n">error</span><span class="p">,</span> <span class="no">NChildren</span><span class="p">,</span> <span class="no">Reason</span><span class="p">}</span> <span class="o">-&gt;</span>
+                    <span class="n">_</span> <span class="o">=</span> <span class="n">terminate_children</span><span class="p">(</span><span class="no">NChildren</span><span class="p">,</span> <span class="no">SupName</span><span class="p">),</span>
+                    <span class="p">{</span><span class="n">stop</span><span class="p">,</span> <span class="p">{</span><span class="n">shutdown</span><span class="p">,</span> <span class="no">Reason</span><span class="p">}}</span>
+            <span class="k">end</span><span class="p">;</span>
+        <span class="no">Error</span> <span class="o">-&gt;</span>
+            <span class="p">{</span><span class="n">stop</span><span class="p">,</span> <span class="p">{</span><span class="n">start_spec</span><span class="p">,</span> <span class="no">Error</span><span class="p">}}</span>
+<span class="k">end</span><span class="o">.</span></code></pre></figure>
+<p>Небольшое отступление: <code>State#state.name</code> обращается к&nbsp;переменной <code>State</code> как к&nbsp;записи <code>state</code> и&nbsp;&laquo;вытаскивает&raquo; из&nbsp;неё поле <code>name</code>. <noindex><a href="http://erlang.org/doc/reference_manual/records.html" rel="nofollow">Записи</a></noindex> представляют собой более или менее структурированный тип данных, так как они хранятся в&nbsp;виде кортежей типа <code>{:state, &laquo;josh&raquo;, [1, 2, 3]}</code> (подобно типу <code>enum</code> в&nbsp;других языках). Записи&nbsp;&mdash; это лишь способ отвязать позицию поля от&nbsp;его значения. Так выглядит исходный код записи <code>state</code>, прописанный в&nbsp;начале:</p>
+<figure class="highlight"><pre><code class="language-elixir" data-lang="elixir"><span class="o">-</span><span class="n">record</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="p">{</span><span class="n">name</span><span class="p">,</span>
+                <span class="n">strategy</span>               <span class="p">::</span> <span class="n">strategy</span><span class="p">()</span> <span class="o">|</span> <span class="s1">'undefined'</span><span class="p">,</span>
+                <span class="n">children</span> <span class="o">=</span> <span class="p">[]</span>          <span class="p">::</span> <span class="p">[</span><span class="n">child_rec</span><span class="p">()],</span>
+                <span class="n">dynamics</span>               <span class="p">::</span> <span class="p">{</span><span class="s1">'dict'</span><span class="p">,</span> <span class="sx">?D</span><span class="no">ICT</span><span class="p">(</span><span class="n">pid</span><span class="p">(),</span> <span class="n">list</span><span class="p">())}</span>
+                                        <span class="o">|</span> <span class="p">{</span><span class="s1">'set'</span><span class="p">,</span> <span class="sx">?S</span><span class="no">ET</span><span class="p">(</span><span class="n">pid</span><span class="p">())}</span>
+                                        <span class="o">|</span> <span class="s1">'undefined'</span><span class="p">,</span>
+                <span class="n">intensity</span>              <span class="p">::</span> <span class="n">non_neg_integer</span><span class="p">()</span> <span class="o">|</span> <span class="s1">'undefined'</span><span class="p">,</span>
+                <span class="n">period</span>                 <span class="p">::</span> <span class="n">pos_integer</span><span class="p">()</span> <span class="o">|</span> <span class="s1">'undefined'</span><span class="p">,</span>
+                <span class="n">restarts</span> <span class="o">=</span> <span class="p">[],</span>
+                <span class="n">dynamic_restarts</span> <span class="o">=</span> <span class="m">0</span>   <span class="p">::</span> <span class="n">non_neg_integer</span><span class="p">(),</span>
+                <span class="n">module</span><span class="p">,</span>
+                <span class="n">args</span><span class="p">})</span><span class="o">.</span></code></pre></figure>
+<p>Можно видеть, что запись <code>state</code> содержит поле name, а&nbsp;выражение <code>SupName = State#state.name</code> просто обращается к&nbsp;кортежу <code>State</code> как к&nbsp;записи <code>state</code>, вытаскивая и&nbsp;сохраняя в&nbsp;<code>SupName</code> поле, связанное с&nbsp;<code>name</code>.</p>
+<p>Что касается функции <code>check_startspec</code>, то&nbsp;она проверяет данные и&nbsp;помещает полученные от&nbsp;<code>MyApp.Supervisor.init</code> спецификации в&nbsp;запись (<noindex><a href="https://github.com/erlang/otp/blob/2a56d0ed91c1c5e18008d1cf37406f36b46b4e62/lib/stdlib/src/supervisor.erl#L1346" rel="nofollow">исходник</a></noindex>).</p>
+<p>Суть функции <code>:supervisor.init_children</code> заключается в&nbsp;вызове функции <code>start_children</code>:</p>
+<figure class="highlight"><pre><code class="language-elixir" data-lang="elixir"><span class="n">start_children</span><span class="p">(</span><span class="no">Children</span><span class="p">,</span> <span class="no">SupName</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">start_children</span><span class="p">(</span><span class="no">Children</span><span class="p">,</span> <span class="p">[],</span> <span class="no">SupName</span><span class="p">)</span><span class="o">.</span>
+
+<span class="n">start_children</span><span class="p">([</span><span class="no">Child</span><span class="o">|</span><span class="no">Chs</span><span class="p">],</span> <span class="no">NChildren</span><span class="p">,</span> <span class="no">SupName</span><span class="p">)</span> <span class="o">-&gt;</span>
+    <span class="k">case</span> <span class="n">do_start_child</span><span class="p">(</span><span class="no">SupName</span><span class="p">,</span> <span class="no">Child</span><span class="p">)</span> <span class="n">of</span>
+        <span class="p">{</span><span class="n">ok</span><span class="p">,</span> <span class="n">undefined</span><span class="p">}</span> <span class="ow">when</span> <span class="no">Child</span><span class="c1">#child.restart_type =:= temporary -&gt;</span>
+            <span class="n">start_children</span><span class="p">(</span><span class="no">Chs</span><span class="p">,</span> <span class="no">NChildren</span><span class="p">,</span> <span class="no">SupName</span><span class="p">);</span>
+        <span class="p">{</span><span class="n">ok</span><span class="p">,</span> <span class="no">Pid</span><span class="p">}</span> <span class="o">-&gt;</span>
+            <span class="n">start_children</span><span class="p">(</span><span class="no">Chs</span><span class="p">,</span> <span class="p">[</span><span class="no">Child</span><span class="c1">#child{pid = Pid}|NChildren], SupName);</span>
+        <span class="p">{</span><span class="n">ok</span><span class="p">,</span> <span class="no">Pid</span><span class="p">,</span> <span class="n">_Extra</span><span class="p">}</span> <span class="o">-&gt;</span>
+            <span class="n">start_children</span><span class="p">(</span><span class="no">Chs</span><span class="p">,</span> <span class="p">[</span><span class="no">Child</span><span class="c1">#child{pid = Pid}|NChildren], SupName);</span>
+        <span class="p">{</span><span class="n">error</span><span class="p">,</span> <span class="no">Reason</span><span class="p">}</span> <span class="o">-&gt;</span>
+            <span class="n">report_error</span><span class="p">(</span><span class="n">start_error</span><span class="p">,</span> <span class="no">Reason</span><span class="p">,</span> <span class="no">Child</span><span class="p">,</span> <span class="no">SupName</span><span class="p">),</span>
+            <span class="p">{</span><span class="n">error</span><span class="p">,</span> <span class="ss">lists:</span><span class="n">reverse</span><span class="p">(</span><span class="no">Chs</span><span class="p">)</span> <span class="o">++</span> <span class="p">[</span><span class="no">Child</span> <span class="o">|</span> <span class="no">NChildren</span><span class="p">],</span>
+            <span class="p">{</span><span class="n">failed_to_start_child</span><span class="p">,</span><span class="no">Child</span><span class="c1">#child.name,Reason}}</span>
+    <span class="k">end</span><span class="p">;</span>
+
+<span class="n">start_children</span><span class="p">([],</span> <span class="no">NChildren</span><span class="p">,</span> <span class="n">_SupName</span><span class="p">)</span> <span class="o">-&gt;</span>
+    <span class="p">{</span><span class="n">ok</span><span class="p">,</span> <span class="no">NChildren</span><span class="p">}</span><span class="o">.</span></code></pre></figure>
+<p>Наблюдается небольшая рекурсия: берётся каждый дочерний процесс и&nbsp;вызывается функция <code>do_start_child</code>:</p>
+<figure class="highlight"><pre><code class="language-elixir" data-lang="elixir"><span class="n">do_start_child</span><span class="p">(</span><span class="no">SupName</span><span class="p">,</span> <span class="no">Child</span><span class="p">)</span> <span class="o">-&gt;</span>
+    <span class="c1">#child{mfargs = {M, F, Args}} = Child,</span>
+    <span class="k">case</span> <span class="k">catch</span> <span class="n">apply</span><span class="p">(</span><span class="no">M</span><span class="p">,</span> <span class="no">F</span><span class="p">,</span> <span class="no">Args</span><span class="p">)</span> <span class="n">of</span>
+        <span class="p">{</span><span class="n">ok</span><span class="p">,</span> <span class="no">Pid</span><span class="p">}</span> <span class="ow">when</span> <span class="n">is_pid</span><span class="p">(</span><span class="no">Pid</span><span class="p">)</span> <span class="o">-&gt;</span>
+            <span class="no">NChild</span> <span class="o">=</span> <span class="no">Child</span><span class="c1">#child{pid = Pid},</span>
+            <span class="n">report_progress</span><span class="p">(</span><span class="no">NChild</span><span class="p">,</span> <span class="no">SupName</span><span class="p">),</span>
+            <span class="p">{</span><span class="n">ok</span><span class="p">,</span> <span class="no">Pid</span><span class="p">};</span>
+        <span class="p">{</span><span class="n">ok</span><span class="p">,</span> <span class="no">Pid</span><span class="p">,</span> <span class="no">Extra</span><span class="p">}</span> <span class="ow">when</span> <span class="n">is_pid</span><span class="p">(</span><span class="no">Pid</span><span class="p">)</span> <span class="o">-&gt;</span>
+            <span class="no">NChild</span> <span class="o">=</span> <span class="no">Child</span><span class="c1">#child{pid = Pid},</span>
+            <span class="n">report_progress</span><span class="p">(</span><span class="no">NChild</span><span class="p">,</span> <span class="no">SupName</span><span class="p">),</span>
+            <span class="p">{</span><span class="n">ok</span><span class="p">,</span> <span class="no">Pid</span><span class="p">,</span> <span class="no">Extra</span><span class="p">};</span>
+        <span class="n">ignore</span> <span class="o">-&gt;</span>
+            <span class="p">{</span><span class="n">ok</span><span class="p">,</span> <span class="n">undefined</span><span class="p">};</span>
+        <span class="p">{</span><span class="n">error</span><span class="p">,</span> <span class="no">What</span><span class="p">}</span> <span class="o">-&gt;</span> <span class="p">{</span><span class="n">error</span><span class="p">,</span> <span class="no">What</span><span class="p">};</span>
+        <span class="no">What</span> <span class="o">-&gt;</span> <span class="p">{</span><span class="n">error</span><span class="p">,</span> <span class="no">What</span><span class="p">}</span>
+<span class="k">end</span><span class="o">.</span></code></pre></figure>
+<p><code>apply</code> в&nbsp;Erlang&nbsp;&mdash; метод динамического вызова функций (подобно <code>send</code> в&nbsp;Ruby или <code>apply</code>/<code>call</code> в&nbsp;Javascript). Он&nbsp;динамически обращается к&nbsp;функции обратного вызова, определённой в&nbsp;<code>Supervisor.Spec.worker</code>: <noindex><a href="https://github.com/elixir-lang/elixir/blob/f8f4731f5ea32b6ee2896fcda5ed901b28fbaca7/lib/elixir/lib/supervisor/spec.ex#L240" rel="nofollow">по соглашению вызывается функция start_link</a></noindex> из&nbsp;модуля <code>worker</code>. И, наконец, он&nbsp;вызывает функцию <code>report_progress</code> и&nbsp;передаёт информационное событие о&nbsp;запуске супервизором нового процесса в&nbsp;менеджер событий Erlang <noindex><a href="http://erlang.org/doc/man/error_logger.html" rel="nofollow">под названием error_logger</a></noindex> (не&nbsp;самое удачное имя).</p>
+<p>Полдела сделано. Идём дальше.</p>
+<p>Резюмируя вышеизложенное: мы&nbsp;рассмотрели, как запускаются супервизоры, перехватываются сигналы выхода и&nbsp;создаются дочерние процессы. Но&nbsp;как&nbsp;же перезапускаются дочерние процессы? Помните, как <code>process_flag</code> отлавливает сигналы выхода, превращая их&nbsp;в&nbsp;кортежи <code>{&rsquo;EXIT&rsquo;, from_pid, reason}</code>? А&nbsp;то, что супервизоры построены на&nbsp;основе библиотеки <code>gen_server</code>? <code>gen_server</code> обрабатывает все сообщения, кроме типов <code>call</code>/<code>cast</code> с&nbsp;помощью функции <code>handle_info</code> (подробнее о&nbsp;ней <noindex><a href="http://erlang.org/doc/man/gen_server.html#Module:handle_info-2" rel="nofollow">здесь</a></noindex>). Именно так супервизор обрабатывает сигналы выхода из&nbsp;дочерних процессов.</p>
+<figure class="highlight"><pre><code class="language-elixir" data-lang="elixir"><span class="n">handle_info</span><span class="p">({</span><span class="s1">'EXIT'</span><span class="p">,</span> <span class="no">Pid</span><span class="p">,</span> <span class="no">Reason</span><span class="p">},</span> <span class="no">State</span><span class="p">)</span> <span class="o">-&gt;</span>
+    <span class="k">case</span> <span class="n">restart_child</span><span class="p">(</span><span class="no">Pid</span><span class="p">,</span> <span class="no">Reason</span><span class="p">,</span> <span class="no">State</span><span class="p">)</span> <span class="n">of</span>
+        <span class="p">{</span><span class="n">ok</span><span class="p">,</span> <span class="no">State1</span><span class="p">}</span> <span class="o">-&gt;</span>
+            <span class="p">{</span><span class="n">noreply</span><span class="p">,</span> <span class="no">State1</span><span class="p">};</span>
+        <span class="p">{</span><span class="n">shutdown</span><span class="p">,</span> <span class="no">State1</span><span class="p">}</span> <span class="o">-&gt;</span>
+            <span class="p">{</span><span class="n">stop</span><span class="p">,</span> <span class="n">shutdown</span><span class="p">,</span> <span class="no">State1</span><span class="p">}</span>
+    <span class="k">end</span><span class="p">;</span></code></pre></figure>
+<p>Отсюда видно, как он&nbsp;создаёт сообщение, содержащее идентификатор дочернего процесса (<code>pid</code>) и&nbsp;причину его завершения, и&nbsp;передаёт эти данные в&nbsp;метод <code>restart_child</code>! Победа! Функции <code>do_start_child</code> имеет много общего с&nbsp;ранее рассмотренной функцией <code>restart_child</code>, поэтому оставим вопрос её&nbsp;реализации на&nbsp;самостоятельное изучение. Если вам интересно узнать, как супервизоры реализуют стратегии своего завершения, взгляните <noindex><a href="http://erlang.org/doc/man/gen_server.html#stop-1" rel="nofollow">на&nbsp;функцию :gen_server.stop</a></noindex>, которая делегирует вызовы функции обратного вызова <noindex><a href="https://github.com/erlang/otp/blob/2a56d0ed91c1c5e18008d1cf37406f36b46b4e62/lib/stdlib/src/supervisor.erl#L644" rel="nofollow">под названием terminate</a></noindex>.</p>
+<p>Подведём итоги. Elixir использует общепринятую модель построения супервизоров, которая базируется на&nbsp;интерфейсе модуля <code>:supervisor</code> из&nbsp;Erlang, построенного на&nbsp;библиотеке <code>:gen_server</code>. Настройки из&nbsp;Elixir передаются в&nbsp;модуль <code>:supervisor</code>, который на&nbsp;их&nbsp;основе запускает дочерние процессы. Супервизор управляет дочерними процессами, перехватывая их&nbsp;сигналы выхода, и&nbsp;превращает эти сигналы в&nbsp;сообщения. В&nbsp;нём реализована функция обратного вызова <code>handle_info</code>, принимающая сообщения о&nbsp;выходе и&nbsp;перезапускающая необходимый воркер. И&nbsp;последнее, что стоит упомянуть,&nbsp;&mdash; отчёты выводятся в&nbsp;менеджер событий Erlang <code>:error_logger</code>.</p>
+
+  </div>
+
+  <!-- uSocial -->
+  <div class="post__share_block share_block">
+    <script async src="https://usocial.pro/usocial/usocial.js?v=6.1.4" data-script="usocial" charset="utf-8"></script>
+    <div class="uSocial-Share" data-pid="2fd19544e551bce292425ee8adaa31be" data-type="share" data-options="round,style2,default,absolute,horizontal,size32,counter1,counter-before,upArrow-right,nomobile" data-social="telegram,fb,vk,gPlus,twi,bookmarks"></div>
+  </div>
+  <!-- /uSocial -->
+</article>
+
+
+        <footer class="footer">
+    &copy; 2020
+    / Россия
+
+    <span class="pull-right">Любые мысли и вопросы пишите на <a href="mailto:elixir@wunsh.ru">elixir@wunsh.ru</a>.</span>
+</footer>
+
+        <div id="subscribeModal" class="modal">
+    <div class="modal__content">
+        <a href="#close" title="Close" class="modal__close">x</a>
+
+        <h2 class="modal__title">Ламповая рассылка про&nbsp;Эликсир</h2>
+
+        <p>Один-два раза в&nbsp;неделю присылаем тёплые письма об&nbsp;Эликсире: переводы самых интересных статей до&nbsp;их&nbsp;появления в&nbsp;открытом доступе, анонсы событий и&nbsp;вкусные бонусы.</p>
+
+        <form action="//wunsh.us14.list-manage.com/subscribe/post?u=c81ca3d4693f62db7f7f67c71&amp;id=a192e2dfef" method="post" id="mc-embedded-subscribe-form" name="mc-embedded-subscribe-form" class="pure-form h-tc validate" target="_blank" novalidate>
+            <input type="email" value="" name="EMAIL" class="modal__input pure-input-rounded large" id="mce-EMAIL" placeholder="Твоя почта" required>
+            <div style="position: absolute; left: -5000px;" aria-hidden="true"><input type="text" name="b_c81ca3d4693f62db7f7f67c71_a192e2dfef" tabindex="-1" value=""></div>
+
+            <input type="submit" value="Присоединиться" name="subscribe" onClick="yaCounter39773490.reachGoal('SUBSCRIBED'); return true" id="mc-embedded-subscribe" class="pure-button button-success large">
+        </form>
+
+        <p>Обязательно подтверди почту, перейдя по&nbsp;ссылке в&nbsp;письме, иначе мы&nbsp;не&nbsp;сможем делиться с&nbsp;тобой полезностями.</p>
+
+        <p>Надоедать точно не&nbsp;будем :)</p>
+    </div>
+</div>
+
+        <script src="/assets/js/vendors/zepto.min.js"></script>
+
+<script>
+    if ($(".post--docs").length) {
+        $(".footer").addClass("footer--docs")
+    }
+
+    $(".modal--close_backdrop").click(function(){
+        window.location.hash = "";
+    });
+</script>
+
+        <!-- Yandex.Metrika counter -->
+<script type="text/javascript">
+    (function (d, w, c) {
+        (w[c] = w[c] || []).push(function() {
+            try {
+                w.yaCounter39773490 = new Ya.Metrika({
+                    id:39773490,
+                    clickmap:true,
+                    trackLinks:true,
+                    accurateTrackBounce:true,
+                    webvisor:true,
+                    ut:"noindex"
+                });
+            } catch(e) { }
+        });
+
+        var n = d.getElementsByTagName("script")[0],
+            s = d.createElement("script"),
+            f = function () { n.parentNode.insertBefore(s, n); };
+        s.type = "text/javascript";
+        s.async = true;
+        s.src = "https://mc.yandex.ru/metrika/watch.js";
+
+        if (w.opera == "[object Opera]") {
+            d.addEventListener("DOMContentLoaded", f, false);
+        } else { f(); }
+    })(document, window, "yandex_metrika_callbacks");
+</script>
+<noscript><div><img src="https://mc.yandex.ru/watch/39773490?ut=noindex" style="position:absolute; left:-9999px;" alt="" /></div></noscript>
+<!-- /Yandex.Metrika counter -->
+
+      </div>
+    </div>
+  </body>
+</html>

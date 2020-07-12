@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Супервизор и приложение |> Сообщество Elixir и Phoenix Framework</title>
+    <meta name="description" content="Русскоязычное сообщество Elixir и Phoenix Framework
+">
+
+    <link rel="alternate" type="application/rss+xml" title="Сообщество Elixir и Phoenix Framework" href="/feed.xml" />
+    <link rel="canonical" href="https://wunsh.ru/docs/mix-otp/supervisor-and-application">
+
+    <style type="text/css">@import url("//fonts.googleapis.com/css?family=Source+Sans+Pro:400,700&subset=cyrillic");</style>
+    <link rel="stylesheet" href="/assets/css/vendors/pure.min.css">
+    <link rel="stylesheet" href="/assets/css/vendors/pure-grids-responsive.min.css">
+    <link rel="stylesheet" href="/assets/css/style.css?1594516983">
+
+    <link rel="shortcut icon" type="image/png" href="/assets/favicon.png" >
+</head>
+
+
+  <body>
+    <div class="wunsh pure-g">
+      
+
+
+
+
+<div class="menu pure-u-1 pure-u-md-1-4">
+  <div class="header">
+    <h2 class="header__title">
+      
+        <a href="https://wunsh.ru" class="header__title_link" title="На главную">Эликсир и&nbsp;Вунш</a>
+      
+    </h2>
+    <h3 class="header__tagline">Erlang + Ruby = &#10084;</h3>
+
+    <nav class="nav">
+      <ul class="nav_list">
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/elixir" class="nav_list__item_link pure-button">О языке</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/install/linux-asdf" class="nav_list__item_link pure-button">Установка</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/docs/" class="nav_list__item_link pure-button">Документация</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/guides" class="nav_list__item_link pure-button">Гайды</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/news" class="nav_list__item_link pure-button">Новости</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/articles" class="nav_list__item_link pure-button">Статьи</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/videos" class="nav_list__item_link pure-button">Видео</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/vacancies" class="nav_list__item_link pure-button">Вакансии</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/faq" class="nav_list__item_link pure-button">FAQ</a>
+            </li>
+          
+        
+      </ul>
+    </nav>
+
+    <a href="#subscribeModal" class="pure-button header__subscribe_link">Подписаться на рассылку</a>
+  </div>
+</div>
+
+
+      <div class="content pure-u-1 pure-u-md-3-4">
+        <article class="post post--docs" itemscope itemtype="http://schema.org/BlogPosting">
+    <header class="post__header">
+        <h1 class="post__title" itemprop="name headline">
+            <p>Супервизор и приложение</p>
+
+        </h1>
+    </header>
+
+    <div class="post__content" itemprop="articleBody">
+        <p>В нашем приложении теперь есть реестр, который может работать с дюжинами, если не с сотнями корзин. Можно подумать, что наша реализация достаточно хороша, но приложения никогда не бывают без багов, и падения будут случаться.</p>
+
+<p>Когда это происходит, ваша первая реакция может быть: «Добавлю-ка <code class="highlighter-rouge">rescue</code> для обработки ошибок». Но в Эликсире принято избегать «защитного» программирования с отловом ошибок. Напротив, «пускай падает». Если есть баг, который приводит к падению реестра, у нас нет повода волноваться, потому что мы сделаем супервизор, который запустит новую копию реестра.</p>
+
+<p>В этой главе мы изучим супервизоры и приложения. Для этого создадим не один, а два супревизора, и используем их для наблюдения за нашими процессами.</p>
+
+<h2 id="наш-первый-супервизор">Наш первый супервизор</h2>
+
+<p>Создание супервизора не слишком отличается от создания <code class="highlighter-rouge">GenServer</code>. Мы определим модуль с именем <code class="highlighter-rouge">KV.Supervisor</code>, который будет использовать <a href="https://hexdocs.pm/elixir/Supervisor.html">поведение <code class="highlighter-rouge">Supervisor</code></a> внутри файла <code class="highlighter-rouge">lib/kv/supervisor.ex</code>:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">defmodule</span> <span class="no">KV</span><span class="o">.</span><span class="no">Supervisor</span> <span class="k">do</span>
+  <span class="kn">use</span> <span class="no">Supervisor</span>
+
+  <span class="k">def</span> <span class="n">start_link</span><span class="p">(</span><span class="n">opts</span><span class="p">)</span> <span class="k">do</span>
+    <span class="no">Supervisor</span><span class="o">.</span><span class="n">start_link</span><span class="p">(</span><span class="bp">__MODULE__</span><span class="p">,</span> <span class="ss">:ok</span><span class="p">,</span> <span class="n">opts</span><span class="p">)</span>
+  <span class="k">end</span>
+
+  <span class="k">def</span> <span class="n">init</span><span class="p">(</span><span class="ss">:ok</span><span class="p">)</span> <span class="k">do</span>
+    <span class="n">children</span> <span class="o">=</span> <span class="p">[</span>
+      <span class="no">KV</span><span class="o">.</span><span class="no">Registry</span>
+    <span class="p">]</span>
+
+    <span class="no">Supervisor</span><span class="o">.</span><span class="n">init</span><span class="p">(</span><span class="n">children</span><span class="p">,</span> <span class="ss">strategy:</span> <span class="ss">:one_for_one</span><span class="p">)</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<p>Пока этот супервизор имеет единственного потомка: модуль <code class="highlighter-rouge">KV.Registry</code>. Когда мы определим несколько потомков, мы будем вызывать функцию <code class="highlighter-rouge">Supervisor.init/2</code>, передавая потомков и стратегию надзора за ними.</p>
+
+<p>Стратегия надзора задаёт поведение в случае падения одного из потомков. Стратегия <code class="highlighter-rouge">:one_for_one</code> означает, что при падении потомка, только он один будет перезапущен. Пока у нас только один потомок, это то, что нужно. Поведение <code class="highlighter-rouge">Supervisor</code> поддерживает много разных стратегий, и мы поговорим о них в этой главе.</p>
+
+<p>После старта супервизор пройдёт по списку потомков и выполнит функнцию <code class="highlighter-rouge">child_spec/1</code> для каждого модуля. Вы слышали о функции <code class="highlighter-rouge">child_spec/1</code> в главе <a href="/docs/mix-otp/agent.html">«Агенты»</a>, когда вызывали функцию <code class="highlighter-rouge">start_supervised(KV.Bucket)</code> без указания модуля.</p>
+
+<p>Функция <code class="highlighter-rouge">child_spec/1</code> возвращает спецификацию потомка, которая объясняет, как запустить процесс, является ли он воркером или супервизором, является ли он временным или постоянным и т. д. Функция <code class="highlighter-rouge">child_spec/1</code> автоматически определяется при использовании <code class="highlighter-rouge">use Agent</code>, <code class="highlighter-rouge">use GenServer</code>, <code class="highlighter-rouge">use Supervisor</code> и т. д. Давайте попробуем это на практике, выполнив команду <code class="highlighter-rouge">iex -S mix</code>:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">iex</span><span class="p">(</span><span class="m">1</span><span class="p">)</span><span class="o">&gt;</span> <span class="no">KV</span><span class="o">.</span><span class="no">Registry</span><span class="o">.</span><span class="n">child_spec</span><span class="p">([])</span>
+<span class="p">%{</span>
+  <span class="ss">id:</span> <span class="no">KV</span><span class="o">.</span><span class="no">Registry</span><span class="p">,</span>
+  <span class="ss">restart:</span> <span class="ss">:permanent</span><span class="p">,</span>
+  <span class="ss">shutdown:</span> <span class="m">5000</span><span class="p">,</span>
+  <span class="ss">start:</span> <span class="p">{</span><span class="no">KV</span><span class="o">.</span><span class="no">Registry</span><span class="p">,</span> <span class="ss">:start_link</span><span class="p">,</span> <span class="p">[[]]},</span>
+  <span class="ss">type:</span> <span class="ss">:worker</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>Мы изучим другие детали по ходу этого руководства. Если вы хотите понять больше, загляните в раздел документации <a href="https://hexdocs.pm/elixir/Supervisor.html">модуля <code class="highlighter-rouge">Supervisor</code></a>.</p>
+
+<p>Когда супервизор получит все спецификации потомков, он запустит их один за другим, в порядке, в котором они определены, используя информацию по ключу <code class="highlighter-rouge">:start</code> в их спецификациях. В текущей спецификации он вызовет <code class="highlighter-rouge">KV.Registry.start_link([])</code>.</p>
+
+<p>Пока <code class="highlighter-rouge">start_link/1</code> всегда получает пустой список опций. Самое время изменить это.</p>
+
+<h2 id="именование-процессов">Именование процессов</h2>
+
+<p>Наше приложение будет иметь много корзин, но только один реестр. Поэтому вместо передачи всюду идентификатора процесса реестра, мы можем дать ему имя и ссылаться на него по имени.</p>
+
+<p>Также, как вы помните, корзины создаются динамически основываясь на пользовательском вводе, поэтому не следует использовать атомы для управления корзинами. Но реестр будет один, запущенный супервизором после старта нашего приложения.</p>
+
+<p>Давайте реализуем это. Немного изменим определение потомков из списка атомов в список кортежей:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code>  <span class="k">def</span> <span class="n">init</span><span class="p">(</span><span class="ss">:ok</span><span class="p">)</span> <span class="k">do</span>
+    <span class="n">children</span> <span class="o">=</span> <span class="p">[</span>
+      <span class="p">{</span><span class="no">KV</span><span class="o">.</span><span class="no">Registry</span><span class="p">,</span> <span class="ss">name:</span> <span class="no">KV</span><span class="o">.</span><span class="no">Registry</span><span class="p">}</span>
+    <span class="p">]</span>
+
+    <span class="no">Supervisor</span><span class="o">.</span><span class="n">init</span><span class="p">(</span><span class="n">children</span><span class="p">,</span> <span class="ss">strategy:</span> <span class="ss">:one_for_one</span><span class="p">)</span>
+  <span class="k">end</span>
+</code></pre></div></div>
+
+<p>Разница в том, что вместо вызова функции <code class="highlighter-rouge">KV.Registry.start_link([])</code> супервизор будет вызывать функцию <code class="highlighter-rouge">KV.Registry.start_link([name: KV.Registry])</code>. Если вы вернётесь к реализации функции <code class="highlighter-rouge">KV.Registry.start_link/1</code>, вы вспомните, что при этом будут переданы опции в <code class="highlighter-rouge">GenServer</code>:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code>  <span class="k">def</span> <span class="n">start_link</span><span class="p">(</span><span class="n">opts</span><span class="p">)</span> <span class="k">do</span>
+    <span class="no">GenServer</span><span class="o">.</span><span class="n">start_link</span><span class="p">(</span><span class="bp">__MODULE__</span><span class="p">,</span> <span class="ss">:ok</span><span class="p">,</span> <span class="n">opts</span><span class="p">)</span>
+  <span class="k">end</span>
+</code></pre></div></div>
+
+<p><code class="highlighter-rouge">GenServer</code> зарегистрирует процесс с переданным именем.</p>
+
+<p>Давайте попробуем всё это в консоли <code class="highlighter-rouge">iex -S mix</code>:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">iex</span><span class="o">&gt;</span> <span class="no">KV</span><span class="o">.</span><span class="no">Supervisor</span><span class="o">.</span><span class="n">start_link</span><span class="p">([])</span>
+<span class="p">{</span><span class="ss">:ok</span><span class="p">,</span> <span class="c1">#PID&lt;0.66.0&gt;}</span>
+
+<span class="n">iex</span><span class="o">&gt;</span> <span class="no">KV</span><span class="o">.</span><span class="no">Registry</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="no">KV</span><span class="o">.</span><span class="no">Registry</span><span class="p">,</span> <span class="sd">"</span><span class="s2">shopping"</span><span class="p">)</span>
+<span class="ss">:ok</span>
+
+<span class="n">iex</span><span class="o">&gt;</span> <span class="no">KV</span><span class="o">.</span><span class="no">Registry</span><span class="o">.</span><span class="n">lookup</span><span class="p">(</span><span class="no">KV</span><span class="o">.</span><span class="no">Registry</span><span class="p">,</span> <span class="sd">"</span><span class="s2">shopping"</span><span class="p">)</span>
+<span class="p">{</span><span class="ss">:ok</span><span class="p">,</span> <span class="c1">#PID&lt;0.70.0&gt;}</span>
+</code></pre></div></div>
+
+<p>Когда мы запустили супервизор, реестр автоматически запустился с заданным именем, что позволило нам создавать сегменты без необходимости ручного запуска.</p>
+
+<p>На практике редко запускают супервизор приложения вручную. Напротив, он стартует как часть колбэка в приложении.</p>
+
+<h2 id="понимание-приложений">Понимание приложений</h2>
+
+<p>Мы всё время работали внутри приложения. Каждый раз, когда мы изменяли файл и запускали <code class="highlighter-rouge">mix compile</code>, мы могли увидеть сообщение <code class="highlighter-rouge">Generated kv app</code> в выводе компиляции.</p>
+
+<p>Мы можем найти сгенерированный файл <code class="highlighter-rouge">.app</code> в <code class="highlighter-rouge">_build/dev/lib/kv/ebin/kv.app</code>. Давайте посмотрим на его содержимое:</p>
+
+<div class="language-erlang highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">{</span><span class="n">application</span><span class="p">,</span><span class="n">kv</span><span class="p">,</span>
+             <span class="p">[{</span><span class="n">registered</span><span class="p">,[]},</span>
+              <span class="p">{</span><span class="n">description</span><span class="p">,</span><span class="s">"kv"</span><span class="p">},</span>
+              <span class="p">{</span><span class="n">applications</span><span class="p">,[</span><span class="n">kernel</span><span class="p">,</span><span class="n">stdlib</span><span class="p">,</span><span class="n">elixir</span><span class="p">,</span><span class="n">logger</span><span class="p">]},</span>
+              <span class="p">{</span><span class="n">vsn</span><span class="p">,</span><span class="s">"0.0.1"</span><span class="p">},</span>
+              <span class="p">{</span><span class="n">modules</span><span class="p">,[</span><span class="n">'Elixir.KV'</span><span class="p">,</span><span class="n">'Elixir.KV.Bucket'</span><span class="p">,</span>
+                        <span class="n">'Elixir.KV.Registry'</span><span class="p">,</span><span class="n">'Elixir.KV.Supervisor'</span><span class="p">]}]}.</span>
+</code></pre></div></div>
+
+<p>Этот файл содержит термы Эрланга (написан с использованием синтаксиса Эрланга). Даже если мы не знакомы с Эрлангом, достаточно просто предположить, что это определение приложения. Оно содержит версию нашего приложения (<code class="highlighter-rouge">version</code>), все определённые в нём модули, а также список приложений-зависимостей, например, <code class="highlighter-rouge">kernel</code> Эрланга, сам <code class="highlighter-rouge">elixir</code> и <code class="highlighter-rouge">logger</code>, который определён в списке <code class="highlighter-rouge">:extra_applications</code> внутри <code class="highlighter-rouge">mix.exs</code>.</p>
+
+<p>Было бы очень неудобно обновлять этот файл вручную каждый раз, когда мы добавляем новый модуль в наше приложение. Поэтому Микс генерирует и поддерживает его актуальным за нас.</p>
+
+<p>Мы также можем настроить генерируемый файл <code class="highlighter-rouge">.app</code>, изменив значения, возвращаемые <code class="highlighter-rouge">application/0</code> внутри нашего файла проекта <code class="highlighter-rouge">mix.exs</code>. Мы скоро сделаем наши первые изменения.</p>
+
+<h3 id="запуск-приложений">Запуск приложений</h3>
+
+<p>Когда мы определяем файл <code class="highlighter-rouge">.app</code>, который является спецификацией приложения, мы можем запускать и останавливать приложение целиком. До сих пор мы не думали об этом по двум причинам:</p>
+
+<ol>
+  <li>
+    <p>Микс автоматически запускал приложение за нас;</p>
+  </li>
+  <li>
+    <p>Даже если Микс не запускал наше приложение за нас, оно ничего не делало при запуске.</p>
+  </li>
+</ol>
+
+<p>В любом случае, давайте посмотрим, как Микс запускает приложение за нас. Откройте консоль проекта с помощью команды <code class="highlighter-rouge">iex -S mix</code> и попробуйте:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">iex</span><span class="o">&gt;</span> <span class="no">Application</span><span class="o">.</span><span class="n">start</span><span class="p">(</span><span class="ss">:kv</span><span class="p">)</span>
+<span class="p">{</span><span class="ss">:error</span><span class="p">,</span> <span class="p">{</span><span class="ss">:already_started</span><span class="p">,</span> <span class="ss">:kv</span><span class="p">}}</span>
+</code></pre></div></div>
+
+<p>Упс, оно уже запущено. Микс по умолчанию запускает всю иерархию приложений, объявленную в файле проекта <code class="highlighter-rouge">mix.exs</code> и то же происходит со всеми зависимостями, если они зависят от других приложений.</p>
+
+<p>Мы можем с помощью опций запустить Микс с указанием не запускать приложение. Попробуйте ввести в консоль команду <code class="highlighter-rouge">iex -S mix run --no-start</code>:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">iex</span><span class="o">&gt;</span> <span class="no">Application</span><span class="o">.</span><span class="n">start</span><span class="p">(</span><span class="ss">:kv</span><span class="p">)</span>
+<span class="ss">:ok</span>
+</code></pre></div></div>
+
+<p>Мы можем остановить наше приложение <code class="highlighter-rouge">:kv</code> и, точно так же, приложение <code class="highlighter-rouge">:logger</code>, которое запустилось по умолчанию вместе с Эликсиром:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">iex</span><span class="o">&gt;</span> <span class="no">Application</span><span class="o">.</span><span class="n">stop</span><span class="p">(</span><span class="ss">:kv</span><span class="p">)</span>
+<span class="ss">:ok</span>
+
+<span class="n">iex</span><span class="o">&gt;</span> <span class="no">Application</span><span class="o">.</span><span class="n">stop</span><span class="p">(</span><span class="ss">:logger</span><span class="p">)</span>
+<span class="ss">:ok</span>
+</code></pre></div></div>
+
+<p>И давайте попробуем запустить наше приложение снова:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">iex</span><span class="o">&gt;</span> <span class="no">Application</span><span class="o">.</span><span class="n">start</span><span class="p">(</span><span class="ss">:kv</span><span class="p">)</span>
+<span class="p">{</span><span class="ss">:error</span><span class="p">,</span> <span class="p">{</span><span class="ss">:not_started</span><span class="p">,</span> <span class="ss">:logger</span><span class="p">}}</span>
+</code></pre></div></div>
+
+<p>Сейчас мы получаем ошибку, потому что какая-то из зависимостей <code class="highlighter-rouge">:kv</code> (в данном случае <code class="highlighter-rouge">:logger</code>) не запущена. Нам нужно также запустить каждое приложение вручную в правильном порядке или вызвать функцию <code class="highlighter-rouge">Application.ensure_all_started</code> как показано ниже:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">iex</span><span class="o">&gt;</span> <span class="no">Application</span><span class="o">.</span><span class="n">ensure_all_started</span><span class="p">(</span><span class="ss">:kv</span><span class="p">)</span>
+<span class="p">{</span><span class="ss">:ok</span><span class="p">,</span> <span class="p">[</span><span class="ss">:logger</span><span class="p">,</span> <span class="ss">:kv</span><span class="p">]}</span>
+</code></pre></div></div>
+
+<p>Ничего удивительного не произошло, но мы увидели, как можем контроллировать наше приложение.</p>
+
+<blockquote>
+  <p>Запуск команды <code class="highlighter-rouge">iex -S mix</code> эквивалентен запуску команды <code class="highlighter-rouge">iex -S mix run</code>. Когда вам нужно передать больше опций в Микс при запуске <code class="highlighter-rouge">IEx</code>, важно написать именно <code class="highlighter-rouge">iex -S mix run</code> и затем передать любые опции, которые принимает команда <code class="highlighter-rouge">run</code>. Вы можете получить больше информации о <code class="highlighter-rouge">run</code> с помощью <code class="highlighter-rouge">mix help run</code> в вашей консоли.</p>
+</blockquote>
+
+<h2 id="колбэк-приложения">Колбэк приложения</h2>
+
+<p>Мы всё время говорим о том, как приложения запускаются и останавливаются, а значит должен быть способ сделать что-нибудь полезное, когда приложение стартует. И, разумеется, он есть!</p>
+
+<p>Мы можем определить колбэк приложения. Это функция, которая будет выполнена, когда приложение запустится. Функция должна возвращать результатом <code class="highlighter-rouge">{:ok, pid}</code>, где <code class="highlighter-rouge">pid</code> – идентификатор процесса в процессе-супервизоре.</p>
+
+<p>Мы можем создать обратный вызов в два шага. Первый: откройте файл <code class="highlighter-rouge">mix.exs</code> и измените <code class="highlighter-rouge">def application</code> как показано ниже:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code>  <span class="k">def</span> <span class="n">application</span> <span class="k">do</span>
+    <span class="p">[</span>
+      <span class="ss">extra_applications:</span> <span class="p">[</span><span class="ss">:logger</span><span class="p">],</span>
+      <span class="ss">mod:</span> <span class="p">{</span><span class="no">KV</span><span class="p">,</span> <span class="p">[]}</span>
+    <span class="p">]</span>
+  <span class="k">end</span>
+</code></pre></div></div>
+
+<p>Опция <code class="highlighter-rouge">:mod</code> определяет «модуль колбэка приложения», и аргументы, передаваемые туда при запуске приложения. Модулем колбэка приложения может быть любой модуль, который реализует <a href="https://hexdocs.pm/elixir/Application.html">поведение <code class="highlighter-rouge">Application</code></a>.</p>
+
+<p>Т. к. теперь мы задали значение <code class="highlighter-rouge">KV</code> в качестве модуля колбэка, нам нужно изменить модуль <code class="highlighter-rouge">KV</code>, определённый в файле <code class="highlighter-rouge">lib/kv.ex</code>:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">defmodule</span> <span class="no">KV</span> <span class="k">do</span>
+  <span class="kn">use</span> <span class="no">Application</span>
+
+  <span class="k">def</span> <span class="n">start</span><span class="p">(</span><span class="n">_type</span><span class="p">,</span> <span class="n">_args</span><span class="p">)</span> <span class="k">do</span>
+    <span class="no">KV</span><span class="o">.</span><span class="no">Supervisor</span><span class="o">.</span><span class="n">start_link</span><span class="p">(</span><span class="ss">name:</span> <span class="no">KV</span><span class="o">.</span><span class="no">Supervisor</span><span class="p">)</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<p>После добавления <code class="highlighter-rouge">use Application</code>, нужно определить пару функций, по аналогии с использованием <code class="highlighter-rouge">Supervisor</code> или <code class="highlighter-rouge">GenServer</code>. Сейчас нам достаточно определить только функцию <code class="highlighter-rouge">start/2</code>. Если бы мы хотели задать своё поведение для остановки приложения, мы могли бы определить функцию <code class="highlighter-rouge">stop/1</code>.</p>
+
+<p>Давайте запустим консоль нашего проекта снова с помощью команды <code class="highlighter-rouge">iex -S mix</code>. Мы увидим, что процесс с именем <code class="highlighter-rouge">KV.Registry</code> уже запущен:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">iex</span><span class="o">&gt;</span> <span class="no">KV</span><span class="o">.</span><span class="no">Registry</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="no">KV</span><span class="o">.</span><span class="no">Registry</span><span class="p">,</span> <span class="sd">"</span><span class="s2">shopping"</span><span class="p">)</span>
+<span class="ss">:ok</span>
+
+<span class="n">iex</span><span class="o">&gt;</span> <span class="no">KV</span><span class="o">.</span><span class="no">Registry</span><span class="o">.</span><span class="n">lookup</span><span class="p">(</span><span class="no">KV</span><span class="o">.</span><span class="no">Registry</span><span class="p">,</span> <span class="sd">"</span><span class="s2">shopping"</span><span class="p">)</span>
+<span class="p">{</span><span class="ss">:ok</span><span class="p">,</span> <span class="c1">#PID&lt;0.88.0&gt;}</span>
+</code></pre></div></div>
+
+<p>Как мы поняли, что это работает? Мы создали корзину и нашли её; это должно работать, так? Хорошо, вспомним, что функция <code class="highlighter-rouge">KV.Registry.create/2</code> использует функцию <code class="highlighter-rouge">GenServer.cast/2</code>, и возвращает атом <code class="highlighter-rouge">:ok</code> независимо от того, нашло сообщение получателя или нет. В этот момент мы не знаем, запущены ли супервизор и сервер, и создана ли корзина. Однако, функция <code class="highlighter-rouge">KV.Registry.lookup/2</code> использует функцию <code class="highlighter-rouge">GenServer.call/3</code>, и будет обязательно ждать ответа от сервера. Мы получаем положительный ответ, поэтому мы знаем, что всё запущено и работает.</p>
+
+<p>Ради эксперимента попробуйте переделать функцию <code class="highlighter-rouge">KV.Registry.create/2</code> на использованием функции <code class="highlighter-rouge">GenServer.call/3</code> и тут же отключите колбэк приложения. Запустите код выше в консоли снова и вы увидите, что шаг с созданием сразу же будет падать.</p>
+
+<p>Не забудьте вернуть код в нормальное состояние перед тем, как продолжить!</p>
+
+<h2 id="проекты-или-приложения">Проекты или приложения?</h2>
+
+<p>Для Микса есть разница между проектами и приложениями. Основываясь на содержимом файла <code class="highlighter-rouge">mix.exs</code>, мы могли бы сказать, что у нас Микс-проект, который определяет приложение <code class="highlighter-rouge">:kv</code>. Как мы увидим в дальнейших главах, существуют проекты, которые не определяют ни одного приложения.</p>
+
+<p>Когда мы говорим «проект», вы должны думать о Миксе. Микс – это инструмент управления вашим проектом. Он знает, как компилировать ваш проект, как его тестировать и прочее. Он также знает, как компилировать и запускать приложение, относящееся к вашему проекту.</p>
+
+<p>Когда мы говорим о приложениях, мы говорим об OTP. Приложения – это сущности, которые запускаются и останавливаются целиком во время выполнения. Вы можете узнать больше о приложениях и том, как они относятся к запуску и завершению работы вашей системы в <a href="https://hexdocs.pm/elixir/Application.html">документации к модулю <code class="highlighter-rouge">Application</code></a>.</p>
+
+<p>Далее давайте познакомимся с одним особым типом супервизора, который разработан для запуска и отключения потомков динамически, вызывая их один за другим.</p>
+
+    </div>
+</article>
+
+<nav class="docs_nav pure-g">
+    <div class="docs_nav__inner pure-u-1 pure-u-md-3-4">
+        <div class="pure-g">
+            <div class="docs_nav__column docs_nav__column--prev pure-u-1-3">
+                
+                    <a href="/docs/mix-otp/genserver.html" class="docs_nav__link pure-button">
+                        &larr;<span class="h-hidden_mobile"> Назад</span></a>
+                
+            </div>
+
+            <div class="docs_nav__column docs_nav__column--contents pure-u-1-3">
+                <a href="#docsContents" class="docs_nav__link docs_nav__link--contents pure-button">☰</a>
+            </div>
+
+            <div class="docs_nav__column docs_nav__column--next pure-u-1-3">
+                
+                    <a href="/docs/mix-otp/dynamic-supervisor.html" class="docs_nav__link pure-button">
+                        <span class="h-hidden_mobile">Вперёд </span>&rarr;
+                    </a>
+                
+            </div>
+        </div>
+    </div>
+</nav>
+
+<div id="docsContents" class="modal modal--docs_contents modal--close_backdrop">
+    <div class="modal__content">
+        <a href="#close" title="Закрыть" class="modal__close">x</a>
+
+        <h2 class="modal__title">Содержание</h2>
+
+        
+        <h3 id="руководство-для-начинающих">Руководство для начинающих</h3>
+<ul>
+  <li><a href="/docs">Введение</a></li>
+  <li><a href="/docs/basic-types.html">Базовые типы</a></li>
+  <li><a href="/docs/basic-operators.html">Базовые операторы</a></li>
+  <li><a href="/docs/pattern-matching.html">Сопоставление с образцом</a></li>
+  <li><a href="/docs/case-cond-and-if.html">Конструкции ветвления</a></li>
+  <li><a href="/docs/binaries-strings-and-char-lists.html">Двоичные данные, строки и списки символов</a></li>
+  <li><a href="/docs/keywords-and-maps.html">Ключевые списки и словари</a></li>
+  <li><a href="/docs/modules-and-functions.html">Модули и функции</a></li>
+  <li><a href="/docs/recursion.html">Рекурсия</a></li>
+  <li><a href="/docs/enumerables-and-streams.html">Перечисления и потоки</a></li>
+  <li><a href="/docs/processes.html">Процессы</a></li>
+  <li><a href="/docs/io-and-the-file-system.html">Ввод/вывод и файловая система</a></li>
+  <li><a href="/docs/alias-require-and-import.html">Директивы <code class="highlighter-rouge">alias</code>, <code class="highlighter-rouge">require</code> и <code class="highlighter-rouge">import</code></a></li>
+  <li><a href="/docs/module-attributes.html">Атрибуты модулей</a></li>
+  <li><a href="/docs/structs.html">Структуры</a></li>
+  <li><a href="/docs/protocols.html">Протоколы</a></li>
+  <li><a href="/docs/comprehensions.html">Списковые выражения</a></li>
+  <li><a href="/docs/sigils.html">Сигилы</a></li>
+  <li><a href="/docs/try-catch-and-rescue.html">Конструкция <code class="highlighter-rouge">try</code>, <code class="highlighter-rouge">catch</code> и <code class="highlighter-rouge">rescue</code></a></li>
+  <li><a href="/docs/typespecs-and-behaviours.html">Спецификации типов и поведения</a></li>
+  <li><a href="/docs/erlang-libraries.html">Библиотеки Эрланга</a></li>
+  <li><a href="/docs/where-to-go-next.html">Куда двигаться дальше</a></li>
+</ul>
+
+<h3 id="микс-и-otp">Микс и <code class="highlighter-rouge">OTP</code></h3>
+<ul>
+  <li><a href="/docs/mix-otp/introduction-to-mix.html">Введение в Микс</a></li>
+  <li><a href="/docs/mix-otp/agent.html">Агент</a></li>
+  <li><a href="/docs/mix-otp/genserver.html">GenServer</a></li>
+  <li><a href="/docs/mix-otp/supervisor-and-application.html">Супервизор и приложение</a></li>
+  <li><a href="/docs/mix-otp/dynamic-supervisor.html">Динамический супервизор</a></li>
+  <li><a href="/docs/mix-otp/ets.html">ETS</a></li>
+  <li><a href="/docs/mix-otp/dependencies-and-umbrella-apps.html">Зависимости и зонтичные проекты</a></li>
+  <li><a href="/docs/mix-otp/task-and-gen-tcp.html">Модули <code class="highlighter-rouge">Task</code> и <code class="highlighter-rouge">:gen_tcp</code></a></li>
+  <li><a href="/docs/mix-otp/docs-tests-and-with.html">Доктесты, паттерны и оператор <code class="highlighter-rouge">with</code></a></li>
+  <li><a href="/docs/mix-otp/distributed-tasks-and-configuration.html">Распределенные задачи и конфигурация</a></li>
+</ul>
+
+<h3 id="метапрограммирование">Метапрограммирование</h3>
+<ul>
+  <li><a href="/docs/meta/quote-and-unquote.html">Конструкции <code class="highlighter-rouge">quote</code> и <code class="highlighter-rouge">unquote</code></a></li>
+  <li><a href="/docs/meta/macros.html">Макросы</a></li>
+  <li><a href="/docs/meta/domain-specific-languages.html">Предметно-ориентированные языки</a></li>
+</ul>
+
+    </div>
+</div>
+
+
+
+        <footer class="footer">
+    &copy; 2020
+    / Россия
+
+    <span class="pull-right">Любые мысли и вопросы пишите на <a href="mailto:elixir@wunsh.ru">elixir@wunsh.ru</a>.</span>
+</footer>
+
+        <div id="subscribeModal" class="modal">
+    <div class="modal__content">
+        <a href="#close" title="Close" class="modal__close">x</a>
+
+        <h2 class="modal__title">Ламповая рассылка про&nbsp;Эликсир</h2>
+
+        <p>Один-два раза в&nbsp;неделю присылаем тёплые письма об&nbsp;Эликсире: переводы самых интересных статей до&nbsp;их&nbsp;появления в&nbsp;открытом доступе, анонсы событий и&nbsp;вкусные бонусы.</p>
+
+        <form action="//wunsh.us14.list-manage.com/subscribe/post?u=c81ca3d4693f62db7f7f67c71&amp;id=a192e2dfef" method="post" id="mc-embedded-subscribe-form" name="mc-embedded-subscribe-form" class="pure-form h-tc validate" target="_blank" novalidate>
+            <input type="email" value="" name="EMAIL" class="modal__input pure-input-rounded large" id="mce-EMAIL" placeholder="Твоя почта" required>
+            <div style="position: absolute; left: -5000px;" aria-hidden="true"><input type="text" name="b_c81ca3d4693f62db7f7f67c71_a192e2dfef" tabindex="-1" value=""></div>
+
+            <input type="submit" value="Присоединиться" name="subscribe" onClick="yaCounter39773490.reachGoal('SUBSCRIBED'); return true" id="mc-embedded-subscribe" class="pure-button button-success large">
+        </form>
+
+        <p>Обязательно подтверди почту, перейдя по&nbsp;ссылке в&nbsp;письме, иначе мы&nbsp;не&nbsp;сможем делиться с&nbsp;тобой полезностями.</p>
+
+        <p>Надоедать точно не&nbsp;будем :)</p>
+    </div>
+</div>
+
+        <script src="/assets/js/vendors/zepto.min.js"></script>
+
+<script>
+    if ($(".post--docs").length) {
+        $(".footer").addClass("footer--docs")
+    }
+
+    $(".modal--close_backdrop").click(function(){
+        window.location.hash = "";
+    });
+</script>
+
+        <!-- Yandex.Metrika counter -->
+<script type="text/javascript">
+    (function (d, w, c) {
+        (w[c] = w[c] || []).push(function() {
+            try {
+                w.yaCounter39773490 = new Ya.Metrika({
+                    id:39773490,
+                    clickmap:true,
+                    trackLinks:true,
+                    accurateTrackBounce:true,
+                    webvisor:true,
+                    ut:"noindex"
+                });
+            } catch(e) { }
+        });
+
+        var n = d.getElementsByTagName("script")[0],
+            s = d.createElement("script"),
+            f = function () { n.parentNode.insertBefore(s, n); };
+        s.type = "text/javascript";
+        s.async = true;
+        s.src = "https://mc.yandex.ru/metrika/watch.js";
+
+        if (w.opera == "[object Opera]") {
+            d.addEventListener("DOMContentLoaded", f, false);
+        } else { f(); }
+    })(document, window, "yandex_metrika_callbacks");
+</script>
+<noscript><div><img src="https://mc.yandex.ru/watch/39773490?ut=noindex" style="position:absolute; left:-9999px;" alt="" /></div></noscript>
+<!-- /Yandex.Metrika counter -->
+
+      </div>
+    </div>
+  </body>
+</html>

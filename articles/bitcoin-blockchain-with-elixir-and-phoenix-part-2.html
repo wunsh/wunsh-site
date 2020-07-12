@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Работаем с биткоином на Elixir. Часть 2 |> Сообщество Elixir и Phoenix Framework</title>
+    <meta name="description" content="В данной статье рассматривается создание простейшего обозревателя блокчейна с помощью Phoenix. Поехали!">
+
+    <link rel="alternate" type="application/rss+xml" title="Сообщество Elixir и Phoenix Framework" href="/feed.xml" />
+    <link rel="canonical" href="https://wunsh.ru/articles/bitcoin-blockchain-with-elixir-and-phoenix-part-2.html">
+
+    <style type="text/css">@import url("//fonts.googleapis.com/css?family=Source+Sans+Pro:400,700&subset=cyrillic");</style>
+    <link rel="stylesheet" href="/assets/css/vendors/pure.min.css">
+    <link rel="stylesheet" href="/assets/css/vendors/pure-grids-responsive.min.css">
+    <link rel="stylesheet" href="/assets/css/style.css?1594516983">
+
+    <link rel="shortcut icon" type="image/png" href="/assets/favicon.png" >
+</head>
+
+
+  <body>
+    <div class="wunsh pure-g">
+      
+
+
+
+
+<div class="menu pure-u-1 pure-u-md-1-4">
+  <div class="header">
+    <h2 class="header__title">
+      
+        <a href="https://wunsh.ru" class="header__title_link" title="На главную">Эликсир и&nbsp;Вунш</a>
+      
+    </h2>
+    <h3 class="header__tagline">Erlang + Ruby = &#10084;</h3>
+
+    <nav class="nav">
+      <ul class="nav_list">
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/elixir" class="nav_list__item_link pure-button">О языке</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/install/linux-asdf" class="nav_list__item_link pure-button">Установка</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/docs/" class="nav_list__item_link pure-button">Документация</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/guides" class="nav_list__item_link pure-button">Гайды</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/news" class="nav_list__item_link pure-button">Новости</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/articles" class="nav_list__item_link pure-button">Статьи</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/videos" class="nav_list__item_link pure-button">Видео</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/vacancies" class="nav_list__item_link pure-button">Вакансии</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/faq" class="nav_list__item_link pure-button">FAQ</a>
+            </li>
+          
+        
+      </ul>
+    </nav>
+
+    <a href="#subscribeModal" class="pure-button header__subscribe_link">Подписаться на рассылку</a>
+  </div>
+</div>
+
+
+      <div class="content pure-u-1 pure-u-md-3-4">
+        
+
+<article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+  <header class="post__header">
+    
+    <h1 class="post__title" itemprop="name headline">Работаем с биткоином на Elixir. Часть 2</h1>
+
+    <div class="post__meta post_meta">
+      <ul class="meta_list">
+        <li class="meta_list__item">
+          
+          <span class="">
+            <small class="meta_list__item_name">Дата</small>
+            <time class="h-bold" datetime="2017-10-19T00:00:00+00:00" itemprop="datePublished">
+              
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+19 октября 2017
+
+            </time>
+          </span>
+          
+
+          
+        </li>
+        
+        <li class="meta_list__item">
+            <span class="tag_cloud tags_cloud--inline h-no_margin">
+              <small class="meta_list__item_name">Теги</small> 
+
+
+<ul class="tags_cloud__list">
+  
+    <a href="/tags/#blockchain" class="tags_cloud__link tag tag--blockchain">blockchain</a>
+  
+    <a href="/tags/#overview" class="tags_cloud__link tag tag--overview">overview</a>
+  
+    <a href="/tags/#phoenix" class="tags_cloud__link tag tag--phoenix">phoenix</a>
+  
+</ul>
+
+            </span>
+        </li>
+        
+        <li class="meta_list__item">
+          <span itemprop="author" itemscope itemtype="http://schema.org/Person">
+            <small class="meta_list__item_name">
+              
+                Перевод
+              
+            </small>
+            <span itemprop="name" class="h-bold">Надежда Нестерова</span>
+          </span>
+        </li>
+
+        <li class="meta_list__item">
+          
+            <div >
+              <small>Оригинал</small>
+              <strong>
+                &laquo;<a href="http://www.east5th.co/blog/2017/09/18/exploring-the-bitcoin-blockchain-with-elixir-and-phoenix/" style="text-transform: none; text-decoration: underline; color: #4b2e39;">Exploring the Bitcoin Blockchain with Elixir and Phoenix</a>&raquo;
+              </strong>
+              <small>&copy;</small>
+              <strong>Pete Corey</strong>
+            </div>
+          
+        </li>
+      </ul>
+    </div>
+  </header>
+
+  <div class="post__content" itemprop="articleBody">
+    <p>В данной статье рассматривается создание простейшего обозревателя блокчейна с помощью Phoenix. Поехали!</p>
+
+<h2 id="кодогенерация-проекта">Кодогенерация проекта</h2>
+
+<p>Первым делом, создадим новый проект на Phoenix. Будем работать с <a href="https://habrahabr.ru/post/332898/">версией 1.3</a> и пользоваться новыми генераторами, появившимися в ней:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">mix</span> <span class="n">phx</span><span class="o">.</span><span class="n">new</span> <span class="n">hello_blockchain</span> <span class="o">--</span><span class="n">no</span><span class="o">-</span><span class="n">ecto</span>
+</code></pre></div></div>
+
+<p>После создания приложения, добавим в него парочку новых маршрутов: один для просмотра заголовков блоков, другой — для просмотра блоков целиком:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">mix</span> <span class="n">phx</span><span class="o">.</span><span class="n">gen</span><span class="o">.</span><span class="n">html</span> <span class="no">Blockchain</span> <span class="no">Header</span> <span class="n">headers</span> <span class="o">--</span><span class="n">no</span><span class="o">-</span><span class="n">schema</span>
+</code></pre></div></div>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">mix</span> <span class="n">phx</span><span class="o">.</span><span class="n">gen</span><span class="o">.</span><span class="n">html</span> <span class="no">Blockchain</span> <span class="no">Blocks</span> <span class="n">blocks</span> <span class="o">--</span><span class="n">no</span><span class="o">-</span><span class="n">schema</span>
+</code></pre></div></div>
+
+<p>Обратите внимание на опции <code class="highlighter-rouge">--no-ecto</code> при генерации нового проекта и <code class="highlighter-rouge">--no-schema</code> при генерации содержимого блока и заголовка. Для просмотра блокчейна <code class="highlighter-rouge">Ecto</code> не понадобится, так как все данные для рендеринга будут храниться на полной ноде!</p>
+
+<h2 id="контекст-блокчейна">Контекст блокчейна</h2>
+
+<p>Создавая заголовок и содержимое блоков, мы также сгенерировали модуль контекста блокчейна. Контекст будет выступать в качестве интерфейса для полной биткоин-ноды.</p>
+
+<p>Ничего не напоминает?</p>
+
+<p>Верно! Именно модуль контекста блокчейна был реализован в предыдущей статье. Удалим автоматически сгенерированное содержимое модуля <code class="highlighter-rouge">Blockchain</code> и скопируем функцию <code class="highlighter-rouge">bitcoin_rpc</code>.</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">def</span> <span class="n">bitcoin_rpc</span><span class="p">(</span><span class="n">method</span><span class="p">,</span> <span class="n">params</span> <span class="p">\\</span> <span class="p">[])</span> <span class="k">do</span>
+  <span class="n">with</span> <span class="n">url</span> <span class="o">&lt;-</span> <span class="no">Application</span><span class="o">.</span><span class="n">get_env</span><span class="p">(</span><span class="ss">:hello_bitcoin</span><span class="p">,</span> <span class="ss">:bitcoin_url</span><span class="p">),</span>
+       <span class="n">command</span> <span class="o">&lt;-</span> <span class="p">%{</span><span class="ss">jsonrpc:</span> <span class="sd">"</span><span class="s2">1.0"</span><span class="p">,</span> <span class="ss">method:</span> <span class="n">method</span><span class="p">,</span> <span class="ss">params:</span> <span class="n">params</span><span class="p">},</span>
+       <span class="p">{</span><span class="ss">:ok</span><span class="p">,</span> <span class="n">body</span><span class="p">}</span> <span class="o">&lt;-</span> <span class="no">Poison</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="n">command</span><span class="p">),</span>
+       <span class="p">{</span><span class="ss">:ok</span><span class="p">,</span> <span class="n">response</span><span class="p">}</span> <span class="o">&lt;-</span> <span class="no">HTTPoison</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">body</span><span class="p">),</span>
+       <span class="p">{</span><span class="ss">:ok</span><span class="p">,</span> <span class="n">metadata</span><span class="p">}</span> <span class="o">&lt;-</span> <span class="no">Poison</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">body</span><span class="p">),</span>
+       <span class="p">%{</span><span class="sd">"</span><span class="s2">error"</span> <span class="o">=&gt;</span> <span class="no">nil</span><span class="p">,</span> <span class="sd">"</span><span class="s2">result"</span> <span class="o">=&gt;</span> <span class="n">result</span><span class="p">}</span> <span class="o">&lt;-</span> <span class="n">metadata</span> <span class="k">do</span>
+    <span class="p">{</span><span class="ss">:ok</span><span class="p">,</span> <span class="n">result</span><span class="p">}</span>
+  <span class="k">else</span>
+    <span class="p">%{</span><span class="sd">"</span><span class="s2">error"</span> <span class="o">=&gt;</span> <span class="n">reason</span><span class="p">}</span> <span class="o">-&gt;</span> <span class="p">{</span><span class="ss">:error</span><span class="p">,</span> <span class="n">reason</span><span class="p">}</span>
+    <span class="n">error</span> <span class="o">-&gt;</span> <span class="n">error</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<p>Обязательно добавим в зависимости <code class="highlighter-rouge">:httpoison</code> и <code class="highlighter-rouge">:poison</code> и укажем путь <code class="highlighter-rouge">:bitcoin_url</code> в файле конфигурации.</p>
+
+<p>После этого добавим в модуль блокчейна четыре хелпера, которые будем использовать для выборки данных, необходимых для рендеринга обозревателя блокчейна:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">def</span> <span class="n">getbestblockhash</span><span class="p">,</span> <span class="k">do</span><span class="p">:</span> <span class="n">bitcoin_rpc</span><span class="p">(</span><span class="sd">"</span><span class="s2">getbestblockhash"</span><span class="p">)</span>
+</code></pre></div></div>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">def</span> <span class="n">getblockhash</span><span class="p">(</span><span class="n">height</span><span class="p">),</span> <span class="k">do</span><span class="p">:</span> <span class="n">bitcoin_rpc</span><span class="p">(</span><span class="sd">"</span><span class="s2">getblockhash"</span><span class="p">,</span> <span class="p">[</span><span class="n">height</span><span class="p">])</span>
+</code></pre></div></div>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">def</span> <span class="n">getblock</span><span class="p">(</span><span class="n">hash</span><span class="p">),</span> <span class="k">do</span><span class="p">:</span> <span class="n">bitcoin_rpc</span><span class="p">(</span><span class="sd">"</span><span class="s2">getblock"</span><span class="p">,</span> <span class="p">[</span><span class="n">hash</span><span class="p">])</span>
+</code></pre></div></div>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">def</span> <span class="n">getblockheader</span><span class="p">(</span><span class="n">hash</span><span class="p">),</span> <span class="k">do</span><span class="p">:</span> <span class="n">bitcoin_rpc</span><span class="p">(</span><span class="sd">"</span><span class="s2">getblockheader"</span><span class="p">,</span> <span class="p">[</span><span class="n">hash</span><span class="p">])</span>
+</code></pre></div></div>
+
+<p>Переходим к маршрутам.</p>
+
+<h2 id="маршрутизация">Маршрутизация</h2>
+
+<p>Получив свежесгенерированные блоки и заголовки, добавим новые маршруты в маршрутизатор:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">scope</span> <span class="sd">"</span><span class="s2">/"</span><span class="p">,</span> <span class="no">HelloBlockchainWeb</span> <span class="k">do</span>
+  <span class="n">pipe_through</span> <span class="ss">:browser</span>
+  <span class="n">resources</span> <span class="sd">"</span><span class="s2">/"</span><span class="p">,</span> <span class="no">PageController</span><span class="p">,</span> <span class="ss">only:</span> <span class="p">[</span><span class="ss">:index</span><span class="p">]</span>
+  <span class="n">resources</span> <span class="sd">"</span><span class="s2">/blocks"</span><span class="p">,</span> <span class="no">BlockController</span><span class="p">,</span> <span class="ss">only:</span> <span class="p">[</span><span class="ss">:index</span><span class="p">,</span> <span class="ss">:show</span><span class="p">]</span>
+  <span class="n">resources</span> <span class="sd">"</span><span class="s2">/headers"</span><span class="p">,</span> <span class="no">HeaderController</span><span class="p">,</span> <span class="ss">only:</span> <span class="p">[</span><span class="ss">:index</span><span class="p">,</span> <span class="ss">:show</span><span class="p">]</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<p>В данном случае будем работать с маршрутами <code class="highlighter-rouge">:index</code> и <code class="highlighter-rouge">:show</code> для блоков и заголовков.</p>
+
+<p>Указав маршруты, переходим к рефакторингу модулей контроллера. Начнём с <code class="highlighter-rouge">BlockController</code>.</p>
+
+<p>Нам предстоит удалить все функции контроллера, за исключением <code class="highlighter-rouge">index</code> и <code class="highlighter-rouge">show</code>, которые мы почти полностью перепишем.</p>
+
+<p>Маршрут <code class="highlighter-rouge">/blocks/</code> начинается с функции контроллера <code class="highlighter-rouge">index</code>. Сделаем так, чтобы она перенаправляла на последние созданные блоки в цепочке:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">def</span> <span class="n">index</span><span class="p">(</span><span class="n">conn</span><span class="p">,</span> <span class="n">_params</span><span class="p">)</span> <span class="k">do</span>
+  <span class="n">with</span> <span class="p">{</span><span class="ss">:ok</span><span class="p">,</span> <span class="n">hash</span><span class="p">}</span> <span class="o">&lt;-</span> <span class="no">Blockchain</span><span class="o">.</span><span class="n">getbestblockhash</span><span class="p">()</span> <span class="k">do</span>
+    <span class="n">redirect</span><span class="p">(</span><span class="n">conn</span><span class="p">,</span> <span class="ss">to:</span> <span class="n">block_path</span><span class="p">(</span><span class="n">conn</span><span class="p">,</span> <span class="ss">:show</span><span class="p">,</span> <span class="n">hash</span><span class="p">))</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<p>Воспользуемся <code class="highlighter-rouge">getbestblockhash</code>, чтобы получить хеш последнего подтверждённого блока, и перенаправим пользователя на маршрут <code class="highlighter-rouge">:show </code>вместе с итоговым хешем.</p>
+
+<p>Функция контроллера <code class="highlighter-rouge">show</code> принимает полученный хеш в качестве аргумента, достаёт дополнительную информацию о блоке с полной ноды и рендерит блок, используя шаблон <code class="highlighter-rouge">show.html</code>:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">def</span> <span class="n">show</span><span class="p">(</span><span class="n">conn</span><span class="p">,</span> <span class="p">%{</span><span class="sd">"</span><span class="s2">id"</span> <span class="o">=&gt;</span> <span class="n">hash</span><span class="p">})</span> <span class="k">do</span>
+  <span class="n">with</span> <span class="p">{</span><span class="ss">:ok</span><span class="p">,</span> <span class="n">block</span><span class="p">}</span> <span class="o">&lt;-</span> <span class="no">Blockchain</span><span class="o">.</span><span class="n">getblock</span><span class="p">(</span><span class="n">hash</span><span class="p">)</span> <span class="k">do</span>
+    <span class="n">render</span><span class="p">(</span><span class="n">conn</span><span class="p">,</span> <span class="sd">"</span><span class="s2">show.html"</span><span class="p">,</span> <span class="ss">block:</span> <span class="n">block</span><span class="p">)</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<p>Функция <code class="highlighter-rouge">index</code> контроллера <code class="highlighter-rouge">HeaderController</code> похожим образом перенаправляет пользователя на маршрут <code class="highlighter-rouge">:show</code> только что проверенного блока:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">def</span> <span class="n">index</span><span class="p">(</span><span class="n">conn</span><span class="p">,</span> <span class="n">_params</span><span class="p">)</span> <span class="k">do</span>
+  <span class="n">with</span> <span class="p">{</span><span class="ss">:ok</span><span class="p">,</span> <span class="n">hash</span><span class="p">}</span> <span class="o">&lt;-</span> <span class="no">Blockchain</span><span class="o">.</span><span class="n">getbestblockhash</span><span class="p">()</span> <span class="k">do</span>
+    <span class="n">redirect</span><span class="p">(</span><span class="n">conn</span><span class="p">,</span> <span class="ss">to:</span> <span class="n">header_path</span><span class="p">(</span><span class="n">conn</span><span class="p">,</span> <span class="ss">:show</span><span class="p">,</span> <span class="n">hash</span><span class="p">))</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<p>Функция <code class="highlighter-rouge">show</code> получает необходимую информацию с помощью <code class="highlighter-rouge">Blockchain.getblockheader</code> и передаёт её в шаблон <code class="highlighter-rouge">show.html</code>:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">def</span> <span class="n">show</span><span class="p">(</span><span class="n">conn</span><span class="p">,</span> <span class="p">%{</span><span class="sd">"</span><span class="s2">id"</span> <span class="o">=&gt;</span> <span class="n">hash</span><span class="p">})</span> <span class="k">do</span>
+  <span class="n">with</span> <span class="p">{</span><span class="ss">:ok</span><span class="p">,</span> <span class="n">block</span><span class="p">}</span> <span class="o">&lt;-</span> <span class="no">Blockchain</span><span class="o">.</span><span class="n">getblockheader</span><span class="p">(</span><span class="n">hash</span><span class="p">)</span> <span class="k">do</span>
+    <span class="n">render</span><span class="p">(</span><span class="n">conn</span><span class="p">,</span> <span class="sd">"</span><span class="s2">show.html"</span><span class="p">,</span> <span class="ss">block:</span> <span class="n">block</span><span class="p">)</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<p>Осталось реализовать ещё один маршрут. Когда пользователь запускает наше приложение впервые, он попадает на целевую страницу Phoenix. Сделаем так, чтобы вместо этого на экране появлялся заголовок последнего блока:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">def</span> <span class="n">index</span><span class="p">(</span><span class="n">conn</span><span class="p">,</span> <span class="n">_params</span><span class="p">)</span> <span class="k">do</span>
+  <span class="n">with</span> <span class="p">{</span><span class="ss">:ok</span><span class="p">,</span> <span class="n">hash</span><span class="p">}</span> <span class="o">&lt;-</span> <span class="no">Blockchain</span><span class="o">.</span><span class="n">getbestblockhash</span><span class="p">()</span> <span class="k">do</span>
+    <span class="n">redirect</span><span class="p">(</span><span class="n">conn</span><span class="p">,</span> <span class="ss">to:</span> <span class="n">header_path</span><span class="p">(</span><span class="n">conn</span><span class="p">,</span> <span class="ss">:show</span><span class="p">,</span> <span class="n">hash</span><span class="p">))</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<p>Для получения хеша только что верифицированного блока из полной биткоин-ноды снова используем <code class="highlighter-rouge">Blockchain.getbestblockhash</code>. Хеш нужен для того, чтобы перенаправить пользователя на маршрут <code class="highlighter-rouge">:show</code> заголовка.</p>
+
+<p>Прописав маршруты должным образом, можно получить данные о любом полном блоке или его заголовке, зная лишь его хеш.</p>
+
+<p>А теперь перейдём к последней части головоломки: рендерингу полученных данных.</p>
+
+<h2 id="шаблоны">Шаблоны</h2>
+
+<p>Реализованный выше обозреватель блокчейна безошибочно направляет пользователя к соответствующему маршруту <code class="highlighter-rouge">:show</code> запрашиваемого им блока или заголовка и передаёт все связанные с ним данные в шаблон для последующего рендеринга.</p>
+
+<p>Всё, что осталось сделать, — это чуть-чуть перекроить шаблоны!</p>
+
+<p>Чтобы не выходить за рамки данной статьи, интерфейс пользователя оставим настолько простым, насколько это возможно. Наиболее примитивный, но достаточный способ рендеринга блоков и заголовков — это рендеринг данных, полученных от контроллеров в виде блоков кода в формате JSON.</p>
+
+<p>Это проще всего сделать, поместив результат <code class="highlighter-rouge">Poison.encode!</code> в DOM:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">&lt;</span><span class="n">code</span><span class="err">&gt;</span><span class="o">&lt;%=</span> <span class="no">Poison</span><span class="o">.</span><span class="n">encode!</span><span class="p">(</span><span class="nv">@block</span><span class="p">,</span> <span class="ss">pretty:</span> <span class="no">true</span><span class="p">)</span> <span class="p">%</span><span class="err">&gt;</span><span class="o">&lt;/</span><span class="n">code</span><span class="o">&gt;</span>
+</code></pre></div></div>
+
+<p>Опция <code class="highlighter-rouge">pretty: true</code>, передаваемая в <code class="highlighter-rouge">Poison.encode!</code>, отвечает за надлежащее форматирование JSON-строки. В файле <code class="highlighter-rouge">app.css</code> необходимо определить свойство <code class="highlighter-rouge">white-space</code> для блоков <code class="highlighter-rouge">&lt;code&gt;</code>, чтобы сохранить форматирование:</p>
+
+<div class="language-css highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nt">code</span> <span class="p">{</span>
+  <span class="nl">white-space</span><span class="p">:</span> <span class="n">pre</span> <span class="cp">!important</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>Прекрасно.</p>
+
+<p><img src="https://s3-us-west-1.amazonaws.com/www.east5th.co/img/blockchain-viewer-01.png" alt="" /></p>
+
+<h2 id="стандартный-заголовок-блока">Стандартный заголовок блока</h2>
+
+<p>Простенько, но со вкусом.</p>
+
+<p>Вставив неструктурированные данные в формате JSON в DOM, мы добились высокой информативности результата, но не особо удобного в использовании интерфейса. Добавим нашему обозревателю блокчейна немного интерактивности.</p>
+
+<p>Получаемые от полной биткоин-ноды блоки и заголовки содержат поля <code class="highlighter-rouge">previousblockhash</code> и <code class="highlighter-rouge">nextblockhash</code> (в большинстве случаев). Очевидно, данные хеши указывают на предыдущие и последующие блоки в цепочке соответственно. Превратим эти хеши в ссылки, чтобы пользователям было удобно переключаться с одного блока на другой.</p>
+
+<p>Первое, что нужно сделать, – это создать функцию в соответствующем файле представления, конвертирующую хеши в ссылки. Функция <code class="highlighter-rouge">hash_link</code> в модуле <code class="highlighter-rouge">HeaderView</code> выглядит следующим образом:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">defp</span> <span class="n">hash_link</span><span class="p">(</span><span class="n">hash</span><span class="p">),</span> <span class="k">do</span><span class="p">:</span> <span class="sd">"</span><span class="s2">&lt;a href='/headers/</span><span class="si">#{</span><span class="n">hash</span><span class="si">}</span><span class="s2">'&gt;</span><span class="si">#{</span><span class="n">hash</span><span class="si">}</span><span class="s2">&lt;/a&gt;"</span>
+</code></pre></div></div>
+
+<p>Используя эту функцию, создадим функцию для изменения заголовков блоков.  Сделаем так, чтобы она заменяла хеши в полях <code class="highlighter-rouge">previousblockhash</code> и <code class="highlighter-rouge">nextblockhash</code> на ссылки на блоки и записывала результат в формате JSON:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">def</span> <span class="n">mark_up_block</span><span class="p">(</span><span class="n">block</span><span class="p">)</span> <span class="k">do</span>
+  <span class="n">block</span>
+  <span class="o">|&gt;</span> <span class="no">Map</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="sd">"</span><span class="s2">previousblockhash"</span><span class="p">,</span> <span class="n">hash_link</span><span class="p">(</span><span class="n">block</span><span class="p">[</span><span class="sd">"</span><span class="s2">previousblockhash"</span><span class="p">]))</span>
+  <span class="o">|&gt;</span> <span class="no">Map</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="sd">"</span><span class="s2">nextblockhash"</span><span class="p">,</span> <span class="n">hash_link</span><span class="p">(</span><span class="n">block</span><span class="p">[</span><span class="sd">"</span><span class="s2">nextblockhash"</span><span class="p">]))</span>
+  <span class="o">|&gt;</span> <span class="no">Poison</span><span class="o">.</span><span class="n">encode!</span><span class="p">(</span><span class="ss">pretty:</span> <span class="no">true</span><span class="p">)</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<p>В HTML-шаблоне заменим содержимое блока <code class="highlighter-rouge">&lt;code&gt;</code> на результат функции <code class="highlighter-rouge">mark_up_block</code>:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">&lt;</span><span class="n">code</span><span class="err">&gt;</span><span class="o">&lt;%=</span> <span class="n">raw</span><span class="p">(</span><span class="n">mark_up_block</span><span class="p">(</span><span class="nv">@block</span><span class="p">))</span> <span class="p">%</span><span class="err">&gt;</span><span class="o">&lt;/</span><span class="n">code</span><span class="o">&gt;</span>
+</code></pre></div></div>
+
+<p>Обратите внимание, что <code class="highlighter-rouge">mark_up_block</code> необходимо обернуть в <code class="highlighter-rouge">raw</code>, чтобы HTML-код вставился в JSON в виде сырого кода, а не кодировался специальными символами.</p>
+
+<p>Аналогично изменяем шаблоны <code class="highlighter-rouge">BlockView</code> и HTML, зачищаем шаблон макета и вносим последние штрихи в оформление страницы.</p>
+
+<p><img src="https://s3-us-west-1.amazonaws.com/www.east5th.co/img/blockchain-viewer-02.png" alt="" /></p>
+
+<p>Готово. Вот мы и получили простейший обозреватель блокчейна!</p>
+
+<h2 id="инапоследок">И напоследок</h2>
+
+<p>Приведённый в статье пример, безусловно, лишь поверхностно иллюстрирует работу обозревателя блоков биткоина.</p>
+
+<p>Проекты, связанные с биткоином, на данный момент представляют огромный интерес для многих разработчиков. При желании копнуть глубже на тему биткоин-разработки обратитесь к книге <a href="https://www.amazon.com/gp/product/1491954388">«Mastering Bitcoin»</a> Андреаса Антонопулоса, отлично описывающей данный процесс.</p>
+
+<p>Реализованный в данной статье обозреватель блокчейна будет обновляться и пополняться, а также вас ожидают другие проекты, связанные с биткоин. А пока мы этим занимаемся, вы можете подробнее ознакомиться с <a href="https://github.com/wunsh/el_blocko">нашим проектом на Github</a>.</p>
+
+<p>Предыдущая часть серии статей о работе с биткоином на Эликсире <a href="https://wunsh.ru/articles/bitcoin-blockchain-with-elixir-and-phoenix-part-1.html">по ссылке</a>.</p>
+
+  </div>
+
+  <!-- uSocial -->
+  <div class="post__share_block share_block">
+    <script async src="https://usocial.pro/usocial/usocial.js?v=6.1.4" data-script="usocial" charset="utf-8"></script>
+    <div class="uSocial-Share" data-pid="2fd19544e551bce292425ee8adaa31be" data-type="share" data-options="round,style2,default,absolute,horizontal,size32,counter1,counter-before,upArrow-right,nomobile" data-social="telegram,fb,vk,gPlus,twi,bookmarks"></div>
+  </div>
+  <!-- /uSocial -->
+</article>
+
+
+        <footer class="footer">
+    &copy; 2020
+    / Россия
+
+    <span class="pull-right">Любые мысли и вопросы пишите на <a href="mailto:elixir@wunsh.ru">elixir@wunsh.ru</a>.</span>
+</footer>
+
+        <div id="subscribeModal" class="modal">
+    <div class="modal__content">
+        <a href="#close" title="Close" class="modal__close">x</a>
+
+        <h2 class="modal__title">Ламповая рассылка про&nbsp;Эликсир</h2>
+
+        <p>Один-два раза в&nbsp;неделю присылаем тёплые письма об&nbsp;Эликсире: переводы самых интересных статей до&nbsp;их&nbsp;появления в&nbsp;открытом доступе, анонсы событий и&nbsp;вкусные бонусы.</p>
+
+        <form action="//wunsh.us14.list-manage.com/subscribe/post?u=c81ca3d4693f62db7f7f67c71&amp;id=a192e2dfef" method="post" id="mc-embedded-subscribe-form" name="mc-embedded-subscribe-form" class="pure-form h-tc validate" target="_blank" novalidate>
+            <input type="email" value="" name="EMAIL" class="modal__input pure-input-rounded large" id="mce-EMAIL" placeholder="Твоя почта" required>
+            <div style="position: absolute; left: -5000px;" aria-hidden="true"><input type="text" name="b_c81ca3d4693f62db7f7f67c71_a192e2dfef" tabindex="-1" value=""></div>
+
+            <input type="submit" value="Присоединиться" name="subscribe" onClick="yaCounter39773490.reachGoal('SUBSCRIBED'); return true" id="mc-embedded-subscribe" class="pure-button button-success large">
+        </form>
+
+        <p>Обязательно подтверди почту, перейдя по&nbsp;ссылке в&nbsp;письме, иначе мы&nbsp;не&nbsp;сможем делиться с&nbsp;тобой полезностями.</p>
+
+        <p>Надоедать точно не&nbsp;будем :)</p>
+    </div>
+</div>
+
+        <script src="/assets/js/vendors/zepto.min.js"></script>
+
+<script>
+    if ($(".post--docs").length) {
+        $(".footer").addClass("footer--docs")
+    }
+
+    $(".modal--close_backdrop").click(function(){
+        window.location.hash = "";
+    });
+</script>
+
+        <!-- Yandex.Metrika counter -->
+<script type="text/javascript">
+    (function (d, w, c) {
+        (w[c] = w[c] || []).push(function() {
+            try {
+                w.yaCounter39773490 = new Ya.Metrika({
+                    id:39773490,
+                    clickmap:true,
+                    trackLinks:true,
+                    accurateTrackBounce:true,
+                    webvisor:true,
+                    ut:"noindex"
+                });
+            } catch(e) { }
+        });
+
+        var n = d.getElementsByTagName("script")[0],
+            s = d.createElement("script"),
+            f = function () { n.parentNode.insertBefore(s, n); };
+        s.type = "text/javascript";
+        s.async = true;
+        s.src = "https://mc.yandex.ru/metrika/watch.js";
+
+        if (w.opera == "[object Opera]") {
+            d.addEventListener("DOMContentLoaded", f, false);
+        } else { f(); }
+    })(document, window, "yandex_metrika_callbacks");
+</script>
+<noscript><div><img src="https://mc.yandex.ru/watch/39773490?ut=noindex" style="position:absolute; left:-9999px;" alt="" /></div></noscript>
+<!-- /Yandex.Metrika counter -->
+
+      </div>
+    </div>
+  </body>
+</html>

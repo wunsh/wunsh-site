@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Организация функционального кода |> Сообщество Elixir и Phoenix Framework</title>
+    <meta name="description" content="Переходя на функциональные языки, разработчики часто задаются вопросом, как организовать код, если модули представляют собой набор функций.">
+
+    <link rel="alternate" type="application/rss+xml" title="Сообщество Elixir и Phoenix Framework" href="/feed.xml" />
+    <link rel="canonical" href="https://wunsh.ru/articles/organize-your-functional-code.html">
+
+    <style type="text/css">@import url("//fonts.googleapis.com/css?family=Source+Sans+Pro:400,700&subset=cyrillic");</style>
+    <link rel="stylesheet" href="/assets/css/vendors/pure.min.css">
+    <link rel="stylesheet" href="/assets/css/vendors/pure-grids-responsive.min.css">
+    <link rel="stylesheet" href="/assets/css/style.css?1594516983">
+
+    <link rel="shortcut icon" type="image/png" href="/assets/favicon.png" >
+</head>
+
+
+  <body>
+    <div class="wunsh pure-g">
+      
+
+
+
+
+<div class="menu pure-u-1 pure-u-md-1-4">
+  <div class="header">
+    <h2 class="header__title">
+      
+        <a href="https://wunsh.ru" class="header__title_link" title="На главную">Эликсир и&nbsp;Вунш</a>
+      
+    </h2>
+    <h3 class="header__tagline">Erlang + Ruby = &#10084;</h3>
+
+    <nav class="nav">
+      <ul class="nav_list">
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/elixir" class="nav_list__item_link pure-button">О языке</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/install/linux-asdf" class="nav_list__item_link pure-button">Установка</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/docs/" class="nav_list__item_link pure-button">Документация</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/guides" class="nav_list__item_link pure-button">Гайды</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/news" class="nav_list__item_link pure-button">Новости</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/articles" class="nav_list__item_link pure-button">Статьи</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/videos" class="nav_list__item_link pure-button">Видео</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/vacancies" class="nav_list__item_link pure-button">Вакансии</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/faq" class="nav_list__item_link pure-button">FAQ</a>
+            </li>
+          
+        
+      </ul>
+    </nav>
+
+    <a href="#subscribeModal" class="pure-button header__subscribe_link">Подписаться на рассылку</a>
+  </div>
+</div>
+
+
+      <div class="content pure-u-1 pure-u-md-3-4">
+        
+
+<article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+  <header class="post__header">
+    
+    <h1 class="post__title" itemprop="name headline">Организация функционального кода</h1>
+
+    <div class="post__meta post_meta">
+      <ul class="meta_list">
+        <li class="meta_list__item">
+          
+          <span class="">
+            <small class="meta_list__item_name">Дата</small>
+            <time class="h-bold" datetime="2018-06-15T00:00:00+00:00" itemprop="datePublished">
+              
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+15 июня 2018
+
+            </time>
+          </span>
+          
+
+          
+        </li>
+        
+        <li class="meta_list__item">
+            <span class="tag_cloud tags_cloud--inline h-no_margin">
+              <small class="meta_list__item_name">Теги</small> 
+
+
+<ul class="tags_cloud__list">
+  
+    <a href="/tags/#howto" class="tags_cloud__link tag tag--howto">howto</a>
+  
+    <a href="/tags/#practical" class="tags_cloud__link tag tag--practical">practical</a>
+  
+    <a href="/tags/#refactoring" class="tags_cloud__link tag tag--refactoring">refactoring</a>
+  
+</ul>
+
+            </span>
+        </li>
+        
+        <li class="meta_list__item">
+          <span itemprop="author" itemscope itemtype="http://schema.org/Person">
+            <small class="meta_list__item_name">
+              
+                Перевод
+              
+            </small>
+            <span itemprop="name" class="h-bold">Надежда Нестерова</span>
+          </span>
+        </li>
+
+        <li class="meta_list__item">
+          
+            <div >
+              <small>Оригинал</small>
+              <strong>
+                &laquo;<a href="https://robots.thoughtbot.com/organize-your-functional-code" style="text-transform: none; text-decoration: underline; color: #4b2e39;">Organize your functional code</a>&raquo;
+              </strong>
+              <small>&copy;</small>
+              <strong>German Velasco</strong>
+            </div>
+          
+        </li>
+      </ul>
+    </div>
+  </header>
+
+  <div class="post__content" itemprop="articleBody">
+    <blockquote>
+  <p>Переведено в <a href="https://docdog.io"><strong>Докдоге</strong></a> – системе перевода технических текстов.</p>
+</blockquote>
+
+<p>Переходя на функциональные языки, разработчики часто задаются вопросом, как организовать код, если модули – всего лишь набор функций. Такой же вопрос беспокоил и автора, но поработав какое-то время на <a href="https://wunsh.ru/">Эликсире</a> и <a href="/tags/#elm">Элме</a>, он осознал, что всё время использует один принцип организации кода, который также можно встретить в общей практике. Назовём его <strong><em>принципом притяжения</em></strong>.</p>
+
+<h2 id="принцип-притяжения">Принцип притяжения</h2>
+
+<blockquote>
+  <p>Позвольте данным притягивать поведение.</p>
+</blockquote>
+
+<p>Идея, и вряд ли она новая, такова, что модули и функции (<strong>поведение</strong>) нужно выстраивать вокруг структур и абстракций (<strong>данных</strong>). В Эликсире этот принцип побуждает строить модули и функции вокруг <a href="https://wunsh.ru/docs/structs.html">структур</a>, <a href="https://wunsh.ru/docs/typespecs-and-behaviours.html">поведений</a>, и <a href="https://wunsh.ru/docs/protocols.html">протоколов</a>.</p>
+
+<p>Рассмотрим в качестве примера всем известную библиотеку <a href="https://hexdocs.pm/plug/readme.html"><code class="highlighter-rouge">Plug</code></a>. <code class="highlighter-rouge">Plug</code> – отличный помощник в создании веб-приложений. С помощью данной библиотеки можно с лёгкостью организовать работу с запросами. Рубистам она может чем-то напомнить <a href="https://rack.github.io/"><code class="highlighter-rouge">Rack</code></a>.</p>
+
+<p>В основе <code class="highlighter-rouge">Plug</code> лежат две вещи – структура соединения <a href="https://hexdocs.pm/plug/Plug.Conn.html"><code class="highlighter-rouge">Plug.Conn</code></a> и спецификация, объясняющая, что такое плаг. Познакомившись с ними, вы поймёте, что все модули и функции вращаются вокруг одной из них.</p>
+
+<h2 id="модуль-plugconn">Модуль <code class="highlighter-rouge">Plug.Conn</code></h2>
+
+<p>Во-первых, обратите внимание, что все функции в модуле <code class="highlighter-rouge">Plug.Conn</code> относятся к структуре соединения, определённой в этом же модуле. Но если присмотреться, то можно увидеть, что <em>каждая</em> функция принимает структуру соединения в качестве аргумента.</p>
+
+<p>Вот несколько функций, определённых в модуле <code class="highlighter-rouge">Plug.Conn</code>:</p>
+
+<ul>
+  <li><code class="highlighter-rouge">assign(conn, key, value)</code></li>
+  <li><code class="highlighter-rouge">clear_session(conn)</code></li>
+  <li><code class="highlighter-rouge">put_resp_content_type(conn, content_type, charset)</code></li>
+  <li><code class="highlighter-rouge">put_resp_header(conn, key, value)</code></li>
+  <li><code class="highlighter-rouge">put_session(conn, key, value)</code></li>
+  <li><code class="highlighter-rouge">send_resp(conn, status, body)</code></li>
+</ul>
+
+<p>Видите? Все они принимают структуру соединения <code class="highlighter-rouge">conn</code> первым аргументом и, хоть это и не очевидно, возвращают изменённую структуру соединения.</p>
+
+<p>А всё потому, что структура <code class="highlighter-rouge">Plug.Conn</code> является основой данного модуля, и, передавая её в качестве первого аргумента, можно строить пайплайны.</p>
+
+<p>Рассмотрим пример обработки запроса:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">conn</span>
+<span class="o">|&gt;</span> <span class="n">put_session</span><span class="p">(</span><span class="ss">:current_user</span><span class="p">,</span> <span class="n">user</span><span class="p">)</span>
+<span class="o">|&gt;</span> <span class="n">put_resp_header</span><span class="p">(</span><span class="n">location</span><span class="p">,</span> <span class="sd">"</span><span class="s2">/"</span><span class="p">)</span>
+<span class="o">|&gt;</span> <span class="n">put_resp_content_type</span><span class="p">(</span><span class="sd">"</span><span class="s2">text/html"</span><span class="p">)</span>
+<span class="o">|&gt;</span> <span class="n">send_resp</span><span class="p">(</span><span class="m">302</span><span class="p">,</span> <span class="sd">"</span><span class="s2">You are being redirected"</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p>Какой чистый код, не правда ли?</p>
+
+<p>Итак, первое, что нужно сделать в рамках принципа притяжения, – это построить функции и модули <em>вокруг</em> структуры, с которой они работают. Структура притягивает функции.</p>
+
+<h2 id="plug-в-качестве-спецификации"><code class="highlighter-rouge">Plug</code> в качестве спецификации</h2>
+
+<p>Во-вторых, модуль <code class="highlighter-rouge">Plug</code> базируется на концепции «плага». Звучит как масло масляное, но имеется в виду, что во многих модулях библиотеки <code class="highlighter-rouge">Plug</code> используются плаги или они сами являются плагами (а значит, придерживаются спецификации <code class="highlighter-rouge">Plug</code>).</p>
+
+<blockquote>
+  <p>– Что за спецификация <code class="highlighter-rouge">Plug</code> такая?</p>
+</blockquote>
+
+<p>Хороший вопрос.</p>
+
+<p>Чтобы превратить модуль в работающий плаг, необходимо определить в нём функцию <code class="highlighter-rouge">init/1</code>, которая будет принимать и возвращать набор параметров, а также функцию <code class="highlighter-rouge">call/2</code>, принимающую структуру соединения в качестве первого аргумента, набор параметров – в качестве второго и возвращающую структуру соединения. А плаг-функция попросту должна соблюдать ту же спецификацию, что и функция <code class="highlighter-rouge">call/2</code> в модуле, принимая структуру соединения и параметры в качестве аргументов и возвращая структуру соединения.</p>
+
+<p>Пример работающего плага-модуля:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">defmodule</span> <span class="no">CustomPlug</span> <span class="k">do</span>
+  <span class="k">def</span> <span class="n">init</span><span class="p">(</span><span class="n">opts</span><span class="p">)</span> <span class="k">do</span>
+    <span class="n">opts</span>
+  <span class="k">end</span>
+
+  <span class="k">def</span> <span class="n">call</span><span class="p">(</span><span class="n">conn</span><span class="p">,</span> <span class="n">_opts</span><span class="p">)</span> <span class="k">do</span>
+    <span class="n">conn</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<p>А теперь давайте посмотрим, каким образом модули в библиотеке <code class="highlighter-rouge">Plug</code> строятся на концепции плагов.</p>
+
+<p><a href="https://hexdocs.pm/plug/Plug.Builder.html"><code class="highlighter-rouge">Plug.Builder</code></a> – модуль библиотеки <code class="highlighter-rouge">Plug</code>, позволяющий определять пайплайн плагов, которые будут выполняться последовательно в том порядке, в котором они были объявлены. Самое интересное здесь то, что многие модули библиотеки <code class="highlighter-rouge">Plug</code> сами являются плагами, поэтому их тоже можно объединить в похожий пайплайн.</p>
+
+<p>Рассмотрим пример:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">defmodule</span> <span class="no">MyPlugPipeline</span> <span class="k">do</span>
+  <span class="kn">use</span> <span class="no">Plug</span><span class="o">.</span><span class="no">Builder</span>
+  
+  <span class="n">plug</span> <span class="no">Plug</span><span class="o">.</span><span class="no">Logger</span>
+  <span class="n">plug</span> <span class="no">Plug</span><span class="o">.</span><span class="no">RequestId</span>
+  <span class="n">plug</span> <span class="no">Plug</span><span class="o">.</span><span class="no">Head</span>
+  <span class="n">plug</span> <span class="ss">:hello</span>
+  
+  <span class="k">def</span> <span class="n">hello</span><span class="p">(</span><span class="n">conn</span><span class="p">,</span> <span class="n">_</span><span class="p">)</span> <span class="k">do</span>
+    <span class="no">Plug</span><span class="o">.</span><span class="no">Conn</span><span class="o">.</span><span class="n">send_resp</span><span class="p">(</span><span class="n">conn</span><span class="p">,</span> <span class="m">200</span><span class="p">,</span> <span class="sd">"</span><span class="s2">Hello world!"</span><span class="p">)</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<p>Обратите внимание на то, что модули <a href="https://hexdocs.pm/plug/Plug.Logger.html"><code class="highlighter-rouge">Plug.Logger</code></a>, <a href="https://hexdocs.pm/plug/Plug.RequestId.html"><code class="highlighter-rouge">Plug.RequestId</code></a>, и <a href="https://hexdocs.pm/plug/Plug.Head.html"><code class="highlighter-rouge">Plug.Head</code></a> – это плаги, и их можно использовать в пайплайне в <code class="highlighter-rouge">Plug.Builder</code>. Объявив свою функцию-плаг в модуле (часть с <code class="highlighter-rouge">plug :hello</code>), можно также смешивать и сочетать её с другими плагами.</p>
+
+<p>Благодаря организации модулей и функций на абстракции плагов, <code class="highlighter-rouge">Plug.Builder</code> позволяет объединять объёмные пайплайны с другими модулями и функции, что не противоречит абстракции.</p>
+
+<h2 id="что-дальше">Что дальше?</h2>
+
+<p>Определённо существуют и другие принципы организации функционального кода, но попробуйте внедрить хотя бы этот. Это имеет смысл. Принцип работает даже при наличии вложенных друг в друга модулей. Например, модуль <code class="highlighter-rouge">Plug.Conn</code> не содержит в себе <em>всей</em> логики структуры соединения как таковой. Иногда он использует другие модули, содержащие в своём названии <code class="highlighter-rouge">Plug.Conn</code>, например, <a href="https://hexdocs.pm/plug/Plug.Conn.Status.html"><code class="highlighter-rouge">Plug.Conn.Status</code></a>. Но если разобраться, <code class="highlighter-rouge">Plug.Conn.Status</code> тоже использует принцип притяжения, так как функции  работают с одной и той же частью данных, а словарь статуса определён внутри модуля.</p>
+
+  </div>
+
+  <!-- uSocial -->
+  <div class="post__share_block share_block">
+    <script async src="https://usocial.pro/usocial/usocial.js?v=6.1.4" data-script="usocial" charset="utf-8"></script>
+    <div class="uSocial-Share" data-pid="2fd19544e551bce292425ee8adaa31be" data-type="share" data-options="round,style2,default,absolute,horizontal,size32,counter1,counter-before,upArrow-right,nomobile" data-social="telegram,fb,vk,gPlus,twi,bookmarks"></div>
+  </div>
+  <!-- /uSocial -->
+</article>
+
+
+        <footer class="footer">
+    &copy; 2020
+    / Россия
+
+    <span class="pull-right">Любые мысли и вопросы пишите на <a href="mailto:elixir@wunsh.ru">elixir@wunsh.ru</a>.</span>
+</footer>
+
+        <div id="subscribeModal" class="modal">
+    <div class="modal__content">
+        <a href="#close" title="Close" class="modal__close">x</a>
+
+        <h2 class="modal__title">Ламповая рассылка про&nbsp;Эликсир</h2>
+
+        <p>Один-два раза в&nbsp;неделю присылаем тёплые письма об&nbsp;Эликсире: переводы самых интересных статей до&nbsp;их&nbsp;появления в&nbsp;открытом доступе, анонсы событий и&nbsp;вкусные бонусы.</p>
+
+        <form action="//wunsh.us14.list-manage.com/subscribe/post?u=c81ca3d4693f62db7f7f67c71&amp;id=a192e2dfef" method="post" id="mc-embedded-subscribe-form" name="mc-embedded-subscribe-form" class="pure-form h-tc validate" target="_blank" novalidate>
+            <input type="email" value="" name="EMAIL" class="modal__input pure-input-rounded large" id="mce-EMAIL" placeholder="Твоя почта" required>
+            <div style="position: absolute; left: -5000px;" aria-hidden="true"><input type="text" name="b_c81ca3d4693f62db7f7f67c71_a192e2dfef" tabindex="-1" value=""></div>
+
+            <input type="submit" value="Присоединиться" name="subscribe" onClick="yaCounter39773490.reachGoal('SUBSCRIBED'); return true" id="mc-embedded-subscribe" class="pure-button button-success large">
+        </form>
+
+        <p>Обязательно подтверди почту, перейдя по&nbsp;ссылке в&nbsp;письме, иначе мы&nbsp;не&nbsp;сможем делиться с&nbsp;тобой полезностями.</p>
+
+        <p>Надоедать точно не&nbsp;будем :)</p>
+    </div>
+</div>
+
+        <script src="/assets/js/vendors/zepto.min.js"></script>
+
+<script>
+    if ($(".post--docs").length) {
+        $(".footer").addClass("footer--docs")
+    }
+
+    $(".modal--close_backdrop").click(function(){
+        window.location.hash = "";
+    });
+</script>
+
+        <!-- Yandex.Metrika counter -->
+<script type="text/javascript">
+    (function (d, w, c) {
+        (w[c] = w[c] || []).push(function() {
+            try {
+                w.yaCounter39773490 = new Ya.Metrika({
+                    id:39773490,
+                    clickmap:true,
+                    trackLinks:true,
+                    accurateTrackBounce:true,
+                    webvisor:true,
+                    ut:"noindex"
+                });
+            } catch(e) { }
+        });
+
+        var n = d.getElementsByTagName("script")[0],
+            s = d.createElement("script"),
+            f = function () { n.parentNode.insertBefore(s, n); };
+        s.type = "text/javascript";
+        s.async = true;
+        s.src = "https://mc.yandex.ru/metrika/watch.js";
+
+        if (w.opera == "[object Opera]") {
+            d.addEventListener("DOMContentLoaded", f, false);
+        } else { f(); }
+    })(document, window, "yandex_metrika_callbacks");
+</script>
+<noscript><div><img src="https://mc.yandex.ru/watch/39773490?ut=noindex" style="position:absolute; left:-9999px;" alt="" /></div></noscript>
+<!-- /Yandex.Metrika counter -->
+
+      </div>
+    </div>
+  </body>
+</html>

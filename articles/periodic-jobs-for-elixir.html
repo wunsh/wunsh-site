@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Периодические задачи в Эликсире |> Сообщество Elixir и Phoenix Framework</title>
+    <meta name="description" content="Большинство проектов, над которыми мы работаем, так или иначе включают в себя периодические задачи, будь то ежедневная рассылка, обработка данных в ночное вр...">
+
+    <link rel="alternate" type="application/rss+xml" title="Сообщество Elixir и Phoenix Framework" href="/feed.xml" />
+    <link rel="canonical" href="https://wunsh.ru/articles/periodic-jobs-for-elixir.html">
+
+    <style type="text/css">@import url("//fonts.googleapis.com/css?family=Source+Sans+Pro:400,700&subset=cyrillic");</style>
+    <link rel="stylesheet" href="/assets/css/vendors/pure.min.css">
+    <link rel="stylesheet" href="/assets/css/vendors/pure-grids-responsive.min.css">
+    <link rel="stylesheet" href="/assets/css/style.css?1594516983">
+
+    <link rel="shortcut icon" type="image/png" href="/assets/favicon.png" >
+</head>
+
+
+  <body>
+    <div class="wunsh pure-g">
+      
+
+
+
+
+<div class="menu pure-u-1 pure-u-md-1-4">
+  <div class="header">
+    <h2 class="header__title">
+      
+        <a href="https://wunsh.ru" class="header__title_link" title="На главную">Эликсир и&nbsp;Вунш</a>
+      
+    </h2>
+    <h3 class="header__tagline">Erlang + Ruby = &#10084;</h3>
+
+    <nav class="nav">
+      <ul class="nav_list">
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/elixir" class="nav_list__item_link pure-button">О языке</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/install/linux-asdf" class="nav_list__item_link pure-button">Установка</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/docs/" class="nav_list__item_link pure-button">Документация</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/guides" class="nav_list__item_link pure-button">Гайды</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/news" class="nav_list__item_link pure-button">Новости</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/articles" class="nav_list__item_link pure-button">Статьи</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/videos" class="nav_list__item_link pure-button">Видео</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/vacancies" class="nav_list__item_link pure-button">Вакансии</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/faq" class="nav_list__item_link pure-button">FAQ</a>
+            </li>
+          
+        
+      </ul>
+    </nav>
+
+    <a href="#subscribeModal" class="pure-button header__subscribe_link">Подписаться на рассылку</a>
+  </div>
+</div>
+
+
+      <div class="content pure-u-1 pure-u-md-3-4">
+        
+
+<article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+  <header class="post__header">
+    
+    <h1 class="post__title" itemprop="name headline">Периодические задачи в Эликсире</h1>
+
+    <div class="post__meta post_meta">
+      <ul class="meta_list">
+        <li class="meta_list__item">
+          
+          <span class="">
+            <small class="meta_list__item_name">Дата</small>
+            <time class="h-bold" datetime="2018-02-09T00:00:00+00:00" itemprop="datePublished">
+              
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+09 февраля 2018
+
+            </time>
+          </span>
+          
+
+          
+        </li>
+        
+        <li class="meta_list__item">
+            <span class="tag_cloud tags_cloud--inline h-no_margin">
+              <small class="meta_list__item_name">Теги</small> 
+
+
+<ul class="tags_cloud__list">
+  
+    <a href="/tags/#beginner" class="tags_cloud__link tag tag--beginner">beginner</a>
+  
+    <a href="/tags/#practical" class="tags_cloud__link tag tag--practical">practical</a>
+  
+</ul>
+
+            </span>
+        </li>
+        
+        <li class="meta_list__item">
+          <span itemprop="author" itemscope itemtype="http://schema.org/Person">
+            <small class="meta_list__item_name">
+              
+                Перевод
+              
+            </small>
+            <span itemprop="name" class="h-bold">Надежда Нестерова</span>
+          </span>
+        </li>
+
+        <li class="meta_list__item">
+          
+            <div >
+              <small>Оригинал</small>
+              <strong>
+                &laquo;<a href="https://medium.com/@efexen/periodic-tasks-with-elixir-5d9050bcbdb3" style="text-transform: none; text-decoration: underline; color: #4b2e39;">Periodic tasks with Elixir. Part 1 / Part 2</a>&raquo;
+              </strong>
+              <small>&copy;</small>
+              <strong>Ville</strong>
+            </div>
+          
+        </li>
+      </ul>
+    </div>
+  </header>
+
+  <div class="post__content" itemprop="articleBody">
+    <p>Большинство проектов, над которыми мы работаем, так или иначе включают в себя периодические задачи, будь то ежедневная рассылка, обработка данных в ночное время, периодические запросы на API без веб-хуков и т.п.</p>
+
+<p>На Руби проблема решается всегда одинаково: создаётся задача в <code class="highlighter-rouge">cron</code>, вызывающая выполнение основного действия. Здесь может возникнуть пару проблем. Первая – с форматом <code class="highlighter-rouge">crontab</code> не всегда удаётся совладать, вторая – где хранить конфигурацию и как убедиться, что она актуальна.</p>
+
+<p>Гемы вроде <a href="https://github.com/javan/whenever"><code class="highlighter-rouge">Whenever</code></a> помогали привести код в порядок, но с Эликсиром всё можно сделать гораздо симпатичнее.</p>
+
+<h2 id="использование-receive1-для-тайм-аутов">Использование <code class="highlighter-rouge">receive/1</code> для тайм-аутов</h2>
+
+<p>Функция Эликсира <code class="highlighter-rouge">receive/1</code> определена в модуле <code class="highlighter-rouge">Kernel.SpecialForms</code> и доступна в любом месте кода без указания префикса модуля.</p>
+
+<p>Она обрабатывает дополнительное условие <code class="highlighter-rouge">after</code>, которое содержит значение тайм-аута и выполняется в случае, если процесс не получил соответствующее сообщение в определённый период времени. Сочетая эту функцию с рекурсивным вызовом, можно добиться выполнения кода в заданные промежутки времени.</p>
+
+<p>Поясню свои слова небольшим примером:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">defmodule</span> <span class="no">Example</span> <span class="k">do</span>
+  <span class="k">def</span> <span class="n">process</span><span class="p">()</span> <span class="k">do</span>
+    <span class="k">receive</span> <span class="k">do</span>
+      <span class="k">after</span>
+        <span class="m">5_000</span> <span class="o">-&gt;</span>
+          <span class="no">IO</span><span class="o">.</span><span class="n">puts</span> <span class="sd">"</span><span class="s2">5 seconds elapsed"</span>
+          <span class="n">process</span><span class="p">()</span>
+      <span class="k">end</span>
+    <span class="k">end</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<p>Если в этом примере вызвать функцию <code class="highlighter-rouge">process/0</code>, каждые пять секунд на экран будет выводиться надпись «прошло 5 секунд».</p>
+
+<h2 id="создание-периодического-модуля-task">Создание периодического модуля <code class="highlighter-rouge">Task</code></h2>
+
+<p>Вышеупомянутая функция сама по себе не особо практична, так как она ничего не возвращает и не начинает работу сразу при запуске приложения.</p>
+
+<p>Можно создать модуль для запуска процесса в <code class="highlighter-rouge">Task</code>, который может быть добавлен в дерево супервизоров:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">defmodule</span> <span class="no">Example</span><span class="o">.</span><span class="no">BitcoinPriceUpdater</span> <span class="k">do</span>
+  <span class="kn">use</span> <span class="no">Task</span>
+  
+  <span class="k">def</span> <span class="n">start_link</span><span class="p">(</span><span class="n">_arg</span><span class="p">)</span> <span class="k">do</span>
+    <span class="no">Task</span><span class="o">.</span><span class="n">start_link</span><span class="p">(</span><span class="o">&amp;</span><span class="n">poll</span><span class="o">/</span><span class="m">0</span><span class="p">)</span>
+  <span class="k">end</span>
+  
+  <span class="k">def</span> <span class="n">poll</span><span class="p">()</span> <span class="k">do</span>
+    <span class="k">receive</span> <span class="k">do</span>
+    <span class="k">after</span>
+      <span class="m">60_000</span> <span class="o">-&gt;</span>
+        <span class="n">get_price</span><span class="p">()</span>
+        <span class="n">poll</span><span class="p">()</span>
+    <span class="k">end</span>
+  <span class="k">end</span>
+  
+  <span class="k">defp</span> <span class="n">get_price</span><span class="p">()</span> <span class="k">do</span>
+    <span class="c1"># Call API &amp; Persist</span>
+    <span class="no">IO</span><span class="o">.</span><span class="n">puts</span> <span class="sd">"</span><span class="s2">To the moon!"</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<p>При использовании <code class="highlighter-rouge">use Task</code> в шапке модуля в Эликсире версии 1.5 и выше можно задействовать супервизор следующим образом:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">defmodule</span> <span class="no">Example</span><span class="o">.</span><span class="no">Application</span> <span class="k">do</span>
+  <span class="nv">@moduledoc</span> <span class="no">false</span>
+  
+  <span class="kn">use</span> <span class="no">Application</span>
+  
+  <span class="k">def</span> <span class="n">start</span><span class="p">(</span><span class="n">_type</span><span class="p">,</span> <span class="n">_args</span><span class="p">)</span> <span class="k">do</span>
+    <span class="n">children</span> <span class="o">=</span> <span class="p">[</span>
+      <span class="no">Example</span><span class="o">.</span><span class="no">BitcoinPriceUpdater</span>
+    <span class="p">]</span>
+  
+    <span class="n">opts</span> <span class="o">=</span> <span class="p">[</span><span class="ss">strategy:</span> <span class="ss">:one_for_one</span><span class="p">,</span> <span class="ss">name:</span> <span class="no">Example</span><span class="o">.</span><span class="no">Supervisor</span><span class="p">]</span>
+    <span class="no">Supervisor</span><span class="o">.</span><span class="n">start_link</span><span class="p">(</span><span class="n">children</span><span class="p">,</span> <span class="n">opts</span><span class="p">)</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+
+</code></pre></div></div>
+
+<p>В более ранних версиях Эликсира придётся указать всех потомков, например, вот так:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">children</span> <span class="o">=</span> <span class="p">[</span>
+  <span class="n">worker</span><span class="p">(</span><span class="no">Example</span><span class="o">.</span><span class="no">BitcoinPriceUpdater</span><span class="p">,</span> <span class="p">[])</span>
+<span class="p">]</span>
+</code></pre></div></div>
+
+<p>И в том, и в другом случае модуль является частью дерева супервизоров, которое запускается вместе с приложением и периодически выполняет заданный участок кода.</p>
+
+<p>Таким образом, мы получили небольшой и простой модуль, с помощью которого в проект с лёгкостью можно добавлять периодические задачи, не беспокоясь о постоянном обновлении <code class="highlighter-rouge">crontab</code>.</p>
+
+<p>Можно сказать, что тайм-аут достаточно точный для большинства периодических задач, даже при использовании в продакшне.</p>
+
+<p>Однако не стоит полностью полагаться на приведённое решение в тех случаях, когда точность стоит на первом месте. Также не забывайте, что если процесс упадёт или приложение будет перезапущено, таймер начинается с нуля.</p>
+
+<h2 id="часть-2-разбираем-проблемы-и-двигаемся-дальше">Часть 2. Разбираем проблемы и двигаемся дальше</h2>
+
+<p>Двумя наиболее обсуждаемыми проблемами вышеприведённых примеров являются использование функции <code class="highlighter-rouge">Process.send_after</code> и возникающий сдвиг времени начала выполнения задачи. Давайте с ними разберёмся.</p>
+
+<h2 id="processsend_after3"><code class="highlighter-rouge">Process.send_after/3</code></h2>
+
+<p>Воспроизведём в новых условиях скелет модуля, аналогичный предыдущему примеру:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">defmodule</span> <span class="no">Periodic</span><span class="o">.</span><span class="no">Safter</span> <span class="k">do</span>
+  <span class="kn">use</span> <span class="no">GenServer</span>
+  
+  <span class="k">def</span> <span class="n">start_link</span><span class="p">()</span> <span class="k">do</span>
+    <span class="no">GenServer</span><span class="o">.</span><span class="n">start_link</span><span class="p">(</span><span class="bp">__MODULE__</span><span class="p">,</span> <span class="p">%{})</span>
+  <span class="k">end</span>
+  
+  <span class="k">def</span> <span class="n">init</span><span class="p">(</span><span class="n">state</span><span class="p">)</span> <span class="k">do</span>
+    <span class="n">schedule_work</span><span class="p">()</span>
+    <span class="p">{</span><span class="ss">:ok</span><span class="p">,</span> <span class="n">state</span><span class="p">}</span>
+  <span class="k">end</span>
+  
+  <span class="k">def</span> <span class="n">handle_info</span><span class="p">(</span><span class="ss">:work</span><span class="p">,</span> <span class="n">state</span><span class="p">)</span> <span class="k">do</span>
+    <span class="c1"># do important stuff</span>
+    <span class="no">IO</span><span class="o">.</span><span class="n">puts</span> <span class="sd">"</span><span class="s2">Important stuff in progress..."</span>
+    <span class="n">schedule_work</span><span class="p">()</span>
+    <span class="p">{</span><span class="ss">:noreply</span><span class="p">,</span> <span class="n">state</span><span class="p">}</span>
+  <span class="k">end</span>
+  
+  <span class="k">defp</span> <span class="n">schedule_work</span><span class="p">()</span> <span class="k">do</span>
+    <span class="no">Process</span><span class="o">.</span><span class="n">send_after</span><span class="p">(</span><span class="n">self</span><span class="p">(),</span> <span class="ss">:work</span><span class="p">,</span> <span class="m">1_000</span><span class="p">)</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<p>Изначально функция была представлена <a href="https://stackoverflow.com/a/32097971">в ответе Жозе Валима</a> на StackOverflow в 2015 году, но также её можно найти в документации модуля <code class="highlighter-rouge">GenServer</code> в разделе <a href="https://hexdocs.pm/elixir/GenServer.html#module-receiving-regular-messages">«Receive regular messages»</a>.</p>
+
+<p>На первый взгляд можно заключить, что обе функции работают одинаково, поэтому основное различие сводится к семантике.</p>
+
+<p>Для простейших случаев и там, где нет необходимости отслеживать состояние, я всё же советовал бы следовать оригинальному решению, работая с состоянием традиционным, свойственным для <code class="highlighter-rouge">GenServer</code> методом с помощью пустого блока <code class="highlighter-rouge">receive</code>.</p>
+
+<h2 id="сдвиг-начала-выполнения-задач">Сдвиг начала выполнения задач</h2>
+
+<p>Оба описанных способа подвержены сдвигу во времени, когда время завершения определённой задачи смещает начало выполнения следующей.</p>
+
+<p>Скажем, нам бы хотелось выполнять определённое действие каждую секунду, но его завершение занимает 100 миллисекунд. По прошествии 10 секунд будет завершено только 9 действий, потому что время начала выполнения каждого из них было смещено.</p>
+
+<p>В большинстве случаев самое простое, что можно сделать, – это породить новый процесс для выполнения заданного действия и поручить текущему процессу планирование следующего действия.</p>
+
+<p>Возьмём предыдущий пример с <code class="highlighter-rouge">GenServer</code>:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">def</span> <span class="n">handle_info</span><span class="p">(</span><span class="ss">:work</span><span class="p">,</span> <span class="n">state</span><span class="p">)</span> <span class="k">do</span>
+  <span class="c1"># do important stuff</span>
+  <span class="no">IO</span><span class="o">.</span><span class="n">puts</span> <span class="sd">"</span><span class="s2">Important stuff in progress..."</span>
+  <span class="n">schedule_work</span><span class="p">()</span>
+  <span class="p">{</span><span class="ss">:noreply</span><span class="p">,</span> <span class="n">state</span><span class="p">}</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<p>Вместо этого можно просто сделать следующее:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">def</span> <span class="n">handle_info</span><span class="p">(</span><span class="ss">:work</span><span class="p">,</span> <span class="n">state</span><span class="p">)</span> <span class="k">do</span>
+  <span class="n">spawn_link</span><span class="p">(</span><span class="o">&amp;</span><span class="n">do_work</span><span class="o">/</span><span class="m">0</span><span class="p">)</span>
+  <span class="n">schedule_work</span><span class="p">()</span>
+  <span class="p">{</span><span class="ss">:noreply</span><span class="p">,</span> <span class="n">state</span><span class="p">}</span>
+<span class="k">end</span>
+
+<span class="k">defp</span> <span class="n">do_work</span><span class="p">()</span> <span class="k">do</span>
+  <span class="c1"># do important stuff</span>
+  <span class="no">IO</span><span class="o">.</span><span class="n">puts</span> <span class="sd">"</span><span class="s2">Important stuff in progress..."</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<p>Используя <code class="highlighter-rouge">spawn_link/1</code>, можно добиться того же поведения по отношению к обработке выходного сигнала и тому, что мы получаем, когда выполняющий задачу процесс падает.</p>
+
+<p>В Эликсире новые процессы порождаются супербыстро, что практически устраняет сдвиг. Забавы ради я решил проверить, сколько по времени занимает работа spawn_link/1, и в среднем получилось 10 микросекунд 😍 Путём простейших математических вычислений получаем сдвиг в 1 секунду при выполнении 100 000 задач.</p>
+
+<p>Более сложное и более точное решение – поместить время выполнения в состоянии <code class="highlighter-rouge">GenServer</code>, вычислить значение сдвига, после чего использовать это значение в качестве аргумента для функции <code class="highlighter-rouge">schedule_work</code>, чтобы потом вычесть его из времени ожидания и компенсировтаь сдвиг.</p>
+
+<h2 id="библиотеки">Библиотеки</h2>
+
+<p>Напоследок упомянем о нескольких библиотеках, которые помогут в решении поставленной в начале статьи задачи.</p>
+
+<ul>
+  <li>
+    <p><a href="https://github.com/erlware/erlcron"><strong><code class="highlighter-rouge">Erlcron</code></strong></a> – популярная библиотека Эрланга, предоставляющая неплохой функционал для читабельного описания задач.</p>
+  </li>
+  <li>
+    <p><a href="https://github.com/c-rack/quantum-elixir"><strong><code class="highlighter-rouge">Quantum</code></strong></a> – хорошо поддерживаемая и часто используемая библиотека для Эликсира. <code class="highlighter-rouge">Quantum</code> описывает задачи в файле конфигурации, используя синтаксис <code class="highlighter-rouge">cron</code>:</p>
+  </li>
+</ul>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># Каждую минуту</span>
+<span class="p">{</span><span class="sd">"</span><span class="s2">* * * * *"</span><span class="p">,</span> <span class="p">{</span><span class="no">Heartbeat</span><span class="p">,</span> <span class="ss">:send</span><span class="p">,</span> <span class="p">[]}}</span>
+
+<span class="c1"># Каждую полночь</span>
+<span class="p">{</span><span class="sd">"</span><span class="s2">@daily"</span><span class="p">,</span> <span class="p">{</span><span class="no">Backup</span><span class="p">,</span> <span class="ss">:backup</span><span class="p">,</span> <span class="p">[]}}</span>
+</code></pre></div></div>
+
+  </div>
+
+  <!-- uSocial -->
+  <div class="post__share_block share_block">
+    <script async src="https://usocial.pro/usocial/usocial.js?v=6.1.4" data-script="usocial" charset="utf-8"></script>
+    <div class="uSocial-Share" data-pid="2fd19544e551bce292425ee8adaa31be" data-type="share" data-options="round,style2,default,absolute,horizontal,size32,counter1,counter-before,upArrow-right,nomobile" data-social="telegram,fb,vk,gPlus,twi,bookmarks"></div>
+  </div>
+  <!-- /uSocial -->
+</article>
+
+
+        <footer class="footer">
+    &copy; 2020
+    / Россия
+
+    <span class="pull-right">Любые мысли и вопросы пишите на <a href="mailto:elixir@wunsh.ru">elixir@wunsh.ru</a>.</span>
+</footer>
+
+        <div id="subscribeModal" class="modal">
+    <div class="modal__content">
+        <a href="#close" title="Close" class="modal__close">x</a>
+
+        <h2 class="modal__title">Ламповая рассылка про&nbsp;Эликсир</h2>
+
+        <p>Один-два раза в&nbsp;неделю присылаем тёплые письма об&nbsp;Эликсире: переводы самых интересных статей до&nbsp;их&nbsp;появления в&nbsp;открытом доступе, анонсы событий и&nbsp;вкусные бонусы.</p>
+
+        <form action="//wunsh.us14.list-manage.com/subscribe/post?u=c81ca3d4693f62db7f7f67c71&amp;id=a192e2dfef" method="post" id="mc-embedded-subscribe-form" name="mc-embedded-subscribe-form" class="pure-form h-tc validate" target="_blank" novalidate>
+            <input type="email" value="" name="EMAIL" class="modal__input pure-input-rounded large" id="mce-EMAIL" placeholder="Твоя почта" required>
+            <div style="position: absolute; left: -5000px;" aria-hidden="true"><input type="text" name="b_c81ca3d4693f62db7f7f67c71_a192e2dfef" tabindex="-1" value=""></div>
+
+            <input type="submit" value="Присоединиться" name="subscribe" onClick="yaCounter39773490.reachGoal('SUBSCRIBED'); return true" id="mc-embedded-subscribe" class="pure-button button-success large">
+        </form>
+
+        <p>Обязательно подтверди почту, перейдя по&nbsp;ссылке в&nbsp;письме, иначе мы&nbsp;не&nbsp;сможем делиться с&nbsp;тобой полезностями.</p>
+
+        <p>Надоедать точно не&nbsp;будем :)</p>
+    </div>
+</div>
+
+        <script src="/assets/js/vendors/zepto.min.js"></script>
+
+<script>
+    if ($(".post--docs").length) {
+        $(".footer").addClass("footer--docs")
+    }
+
+    $(".modal--close_backdrop").click(function(){
+        window.location.hash = "";
+    });
+</script>
+
+        <!-- Yandex.Metrika counter -->
+<script type="text/javascript">
+    (function (d, w, c) {
+        (w[c] = w[c] || []).push(function() {
+            try {
+                w.yaCounter39773490 = new Ya.Metrika({
+                    id:39773490,
+                    clickmap:true,
+                    trackLinks:true,
+                    accurateTrackBounce:true,
+                    webvisor:true,
+                    ut:"noindex"
+                });
+            } catch(e) { }
+        });
+
+        var n = d.getElementsByTagName("script")[0],
+            s = d.createElement("script"),
+            f = function () { n.parentNode.insertBefore(s, n); };
+        s.type = "text/javascript";
+        s.async = true;
+        s.src = "https://mc.yandex.ru/metrika/watch.js";
+
+        if (w.opera == "[object Opera]") {
+            d.addEventListener("DOMContentLoaded", f, false);
+        } else { f(); }
+    })(document, window, "yandex_metrika_callbacks");
+</script>
+<noscript><div><img src="https://mc.yandex.ru/watch/39773490?ut=noindex" style="position:absolute; left:-9999px;" alt="" /></div></noscript>
+<!-- /Yandex.Metrika counter -->
+
+      </div>
+    </div>
+  </body>
+</html>

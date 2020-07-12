@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Списки ввода-вывода в&nbsp;Elixir. Часть&nbsp;1: повышение производительности вывода данных |> Сообщество Elixir и Phoenix Framework</title>
+    <meta name="description" content="В этой статье рассказывается о повышении производительности вывода текстовых данных с помощью структуры под названием списки ввода-вывода.">
+
+    <link rel="alternate" type="application/rss+xml" title="Сообщество Elixir и Phoenix Framework" href="/feed.xml" />
+    <link rel="canonical" href="https://wunsh.ru/articles/elixir-io-lists-part-1.html">
+
+    <style type="text/css">@import url("//fonts.googleapis.com/css?family=Source+Sans+Pro:400,700&subset=cyrillic");</style>
+    <link rel="stylesheet" href="/assets/css/vendors/pure.min.css">
+    <link rel="stylesheet" href="/assets/css/vendors/pure-grids-responsive.min.css">
+    <link rel="stylesheet" href="/assets/css/style.css?1594516983">
+
+    <link rel="shortcut icon" type="image/png" href="/assets/favicon.png" >
+</head>
+
+
+  <body>
+    <div class="wunsh pure-g">
+      
+
+
+
+
+<div class="menu pure-u-1 pure-u-md-1-4">
+  <div class="header">
+    <h2 class="header__title">
+      
+        <a href="https://wunsh.ru" class="header__title_link" title="На главную">Эликсир и&nbsp;Вунш</a>
+      
+    </h2>
+    <h3 class="header__tagline">Erlang + Ruby = &#10084;</h3>
+
+    <nav class="nav">
+      <ul class="nav_list">
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/elixir" class="nav_list__item_link pure-button">О языке</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/install/linux-asdf" class="nav_list__item_link pure-button">Установка</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/docs/" class="nav_list__item_link pure-button">Документация</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/guides" class="nav_list__item_link pure-button">Гайды</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/news" class="nav_list__item_link pure-button">Новости</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/articles" class="nav_list__item_link pure-button">Статьи</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/videos" class="nav_list__item_link pure-button">Видео</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/vacancies" class="nav_list__item_link pure-button">Вакансии</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/faq" class="nav_list__item_link pure-button">FAQ</a>
+            </li>
+          
+        
+      </ul>
+    </nav>
+
+    <a href="#subscribeModal" class="pure-button header__subscribe_link">Подписаться на рассылку</a>
+  </div>
+</div>
+
+
+      <div class="content pure-u-1 pure-u-md-3-4">
+        
+
+<article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+  <header class="post__header">
+    
+    <h1 class="post__title" itemprop="name headline">Списки ввода-вывода в&nbsp;Elixir. Часть&nbsp;1: повышение производительности вывода данных</h1>
+
+    <div class="post__meta post_meta">
+      <ul class="meta_list">
+        <li class="meta_list__item">
+          
+          <span class="">
+            <small class="meta_list__item_name">Дата</small>
+            <time class="h-bold" datetime="2017-03-06T00:00:00+00:00" itemprop="datePublished">
+              
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+06 марта 2017
+
+            </time>
+          </span>
+          
+
+          
+        </li>
+        
+        <li class="meta_list__item">
+            <span class="tag_cloud tags_cloud--inline h-no_margin">
+              <small class="meta_list__item_name">Теги</small> 
+
+
+<ul class="tags_cloud__list">
+  
+    <a href="/tags/#advanced" class="tags_cloud__link tag tag--advanced">advanced</a>
+  
+</ul>
+
+            </span>
+        </li>
+        
+        <li class="meta_list__item">
+          <span itemprop="author" itemscope itemtype="http://schema.org/Person">
+            <small class="meta_list__item_name">
+              
+                Перевод
+              
+            </small>
+            <span itemprop="name" class="h-bold">Надежда Нестерова</span>
+          </span>
+        </li>
+
+        <li class="meta_list__item">
+          
+            <div >
+              <small>Оригинал</small>
+              <strong>
+                &laquo;<a href="https://www.bignerdranch.com/blog/elixir-and-io-lists-part-1-building-output-efficiently/" style="text-transform: none; text-decoration: underline; color: #4b2e39;">Elixir and IO Lists, Part 1. Building Output Efficiently</a>&raquo;
+              </strong>
+              <small>&copy;</small>
+              <strong>Nathan Long</strong>
+            </div>
+          
+        </li>
+      </ul>
+    </div>
+  </header>
+
+  <div class="post__content" itemprop="articleBody">
+    <p>Чтобы программа работала быстрее, она должна делать как можно меньше.</p>
+<p>Предположим, нужно записать данные в&nbsp;файл или послать ответ браузеру. Каким в&nbsp;этом случае будет <i>минимальный набор действий</i>?</p>
+<p>Ответ: <i>скопировать каждый байт данных в&nbsp;файл или сокет</i>.</p>
+<p>Чтобы получить мгновенное время отклика, как у&nbsp;фреймворка Phoenix, это действие должно быть единственным. С&nbsp;Phoenix это возможно благодаря одной любопытной структуре данных под названием <b>&laquo;список ввода-вывода&raquo;</b>.</p>
+<p>Используя такую структуру, можно повысить эффективность кода. Чтобы понять, как это работает, рассмотрим&nbsp;то, с&nbsp;чем разработчики сталкиваются каждый день,&nbsp;&mdash; операцию конкатенации строк.</p>
+<h2>Строки и&nbsp;списки ввода-вывода</h2>
+<p>Конкатенация в&nbsp;Elixir выглядит примерно так:</p>
+<figure class="highlight"><pre><code class="language-elixir" data-lang="elixir"><span class="n">name</span> <span class="o">=</span> <span class="sd">"</span><span class="s2">James"</span>
+<span class="no">IO</span><span class="o">.</span><span class="n">puts</span> <span class="sd">"</span><span class="s2">Hi, "</span> <span class="o">&lt;&gt;</span> <span class="n">name</span>  <span class="c1"># =&gt; "Hi, James"</span></code></pre></figure>
+<p>Интерполяция, в&nbsp;общем-то, делает то&nbsp;же самое, но&nbsp;немного красивее:</p>
+<figure class="highlight"><pre><code class="language-elixir" data-lang="elixir"><span class="n">name</span> <span class="o">=</span> <span class="sd">"</span><span class="s2">James"</span>
+<span class="no">IO</span><span class="o">.</span><span class="n">puts</span> <span class="sd">"</span><span class="s2">Hi, </span><span class="si">#{</span><span class="n">name</span><span class="si">}</span><span class="s2">"</span>  <span class="c1"># =&gt; "Hi, James"</span></code></pre></figure>
+<p>Чтобы исполнить этот код, виртуальная машина BEAM должна:</p>
+<ul>
+<li>
+<p>выделить память под строку &laquo;James&raquo;;</p>
+</li>
+<li>
+<p>выделить память под строку &laquo;Hi,&raquo;;</p>
+</li>
+<li>
+<p>выделить память под третью строку и&nbsp;скопировать две другие в&nbsp;неё, чтобы получилось &laquo;Hi, James&raquo;.</p>
+</li>
+</ul>
+<p>Копирование&nbsp;&mdash; это уже лишние действия. Кроме того, чем больше строк, тем больше используется памяти и&nbsp;тем больше будет работы для сборщика мусора.</p>
+<p>В&nbsp;Elixir сцепление строк можно реализовать гораздо более эффективно с&nbsp;помощью списка ввода-вывода.</p>
+<p>Список ввода-вывода&nbsp;&mdash; это список данных (например, строк или <noindex><a href="https://www.bignerdranch.com/blog/unicode-and-utf-8-explained/" rel="noreferrer nofollow">кодовых точек</a></noindex>), подходящих для операций ввода/вывода. Функции вроде <code>IO.puts/1</code> и&nbsp;<code>File.write/2</code> работают с&nbsp;определёнными данными, в&nbsp;качестве которых может выступать либо простая строка, либо список ввода-вывода.</p>
+<figure class="highlight"><pre><code class="language-elixir" data-lang="elixir"><span class="n">name</span> <span class="o">=</span> <span class="sd">"</span><span class="s2">James"</span>
+<span class="no">IO</span><span class="o">.</span><span class="n">puts</span> <span class="p">[</span><span class="sd">"</span><span class="s2">Hi, "</span><span class="p">,</span> <span class="n">name</span><span class="p">]</span>                            <span class="c1"># =&gt; "Hi, James"</span>
+<span class="no">IO</span><span class="o">.</span><span class="n">puts</span> <span class="p">[</span><span class="sd">"</span><span class="s2">Hi, "</span><span class="p">,</span> <span class="m">74</span><span class="p">,</span> <span class="m">97</span><span class="p">,</span> <span class="m">109</span><span class="p">,</span> <span class="m">101</span><span class="p">,</span> <span class="m">115</span><span class="p">]</span>           <span class="c1"># =&gt; "Hi, James"</span></code></pre></figure>
+<p>Списки ввода-вывода могут быть вложенными, но&nbsp;функции ввода-вывода всё равно будут воспринимать их&nbsp;как плоские.</p>
+<figure class="highlight"><pre><code class="language-elixir" data-lang="elixir"><span class="no">IO</span><span class="o">.</span><span class="n">puts</span> <span class="p">[</span><span class="sd">"</span><span class="s2">Hi, "</span><span class="p">,</span> <span class="p">[</span><span class="m">74</span><span class="p">,</span> <span class="p">[</span><span class="m">97</span><span class="p">,</span> <span class="p">[</span><span class="m">109</span><span class="p">,</span> <span class="p">[</span><span class="m">101</span><span class="p">,</span> <span class="p">[</span><span class="m">115</span><span class="p">]]]]]]</span> <span class="c1"># =&gt; "Hi, James"</span></code></pre></figure>
+<p>На&nbsp;первый взгляд может показаться, что ничего не&nbsp;изменилось, ведь результат остался прежним. Однако подобная структуризация выходных данных положительно сказывается на&nbsp;производительности.</p>
+<p>Во-первых, списки позволяют реализовать повторения более грамотно.</p>
+<figure class="highlight"><pre><code class="language-elixir" data-lang="elixir"><span class="n">users</span> <span class="o">=</span> <span class="p">[%{</span><span class="ss">name:</span> <span class="sd">"</span><span class="s2">Amy"</span><span class="p">},</span> <span class="p">%{</span><span class="ss">name:</span> <span class="sd">"</span><span class="s2">Joe"</span><span class="p">}]</span>
+
+<span class="n">response</span> <span class="o">=</span> <span class="no">Enum</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="n">users</span><span class="p">,</span> <span class="k">fn</span> <span class="p">(</span><span class="n">user</span><span class="p">)</span> <span class="o">-&gt;</span>
+<span class="p">[</span><span class="sd">"</span><span class="s2">&lt;li&gt;"</span><span class="p">,</span> <span class="n">user</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="sd">"</span><span class="s2">&lt;/li&gt;"</span><span class="p">]</span>
+<span class="k">end</span><span class="p">)</span>
+
+<span class="no">IO</span><span class="o">.</span><span class="n">puts</span> <span class="n">response</span></code></pre></figure>
+<p>В&nbsp;приведённом примере строка <code>&lt;li&gt;</code> создаётся только один раз, а&nbsp;для её&nbsp;дублирования в&nbsp;списке используются указатели. Таким образом, чем больше в&nbsp;содержимом вывода повторов, тем лучше, ведь теперь не&nbsp;потребуется выделять память под каждую строку.</p>
+<p>Списки ввода-вывода можно вкладывать друг в&nbsp;друга, что позволяет создавать их&nbsp;намного быстрее. Обычно, добавление элемента к&nbsp;связному списку выполняется за&nbsp;<i>O(N)</i>: перебрать все элементы списка, дойти до&nbsp;последнего и&nbsp;поместить в&nbsp;него указатель на&nbsp;новый элемент. Иммутабельность данных усложняет всё ещё больше: последний элемент изменять нельзя, его можно только копировать. А&nbsp;это означает, что копировать придётся и&nbsp;предыдущий элемент, и&nbsp;тот, что стоит перед ним, и&nbsp;так до&nbsp;самого начала списка.</p>
+<p>При этом, используя вложения, можно добавить элемент в&nbsp;список, просто обернув этот список в&nbsp;другой.</p>
+<figure class="highlight"><pre><code class="language-elixir" data-lang="elixir"><span class="n">names</span> <span class="o">=</span> <span class="p">[</span><span class="sd">"</span><span class="s2">A"</span><span class="p">,</span> <span class="sd">"</span><span class="s2">B"</span><span class="p">]</span>    <span class="c1"># =&gt; ["A", "B"]</span>
+<span class="n">names</span> <span class="o">=</span> <span class="p">[</span><span class="n">names</span><span class="p">,</span> <span class="sd">"</span><span class="s2">C"</span><span class="p">]</span>  <span class="c1"># =&gt; [["A", "B"], "C"]</span></code></pre></figure>
+<p>Эта операция выполнится за&nbsp;время <i>O(1)</i> и&nbsp;не&nbsp;потребует копирования данных.</p>
+<p>Списки ввода-вывода также оказывают значительное влияние на&nbsp;системные вызовы.</p>
+<h2>Системные вызовы</h2>
+<p>Большинство приложений не&nbsp;способны напрямую взаимодействовать с&nbsp;файлами и&nbsp;сокетами. Чтобы предписать операционной системе какие-либо действия от&nbsp;своего имени, они используют системные вызовы. В&nbsp;свою очередь, ОС&nbsp;осуществляет контроль доступа к&nbsp;файлам и&nbsp;учитывает нюансы работы с&nbsp;тем или иным железом.</p>
+<p>Рассмотрим такой пример, написанный на&nbsp;Elixir:</p>
+<figure class="highlight"><pre><code class="language-elixir" data-lang="elixir"><span class="c1"># Here I'm calling an Erlang function. I'll explain why later.</span>
+<span class="p">{</span><span class="ss">:ok</span><span class="p">,</span> <span class="n">file</span><span class="p">}</span> <span class="o">=</span> <span class="ss">:file</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="sd">"</span><span class="s2">/tmp/tmp.txt"</span><span class="p">,</span> <span class="p">[</span><span class="ss">:write</span><span class="p">,</span> <span class="ss">:raw</span><span class="p">])</span>
+
+<span class="n">foo</span> <span class="o">=</span> <span class="sd">"</span><span class="s2">foo"</span>
+<span class="n">bar</span> <span class="o">=</span> <span class="sd">"</span><span class="s2">bar"</span>
+
+<span class="n">output</span> <span class="o">=</span> <span class="p">[</span><span class="n">foo</span><span class="p">,</span> <span class="n">bar</span><span class="p">,</span> <span class="n">foo</span><span class="p">]</span>
+<span class="n">output</span> <span class="o">=</span> <span class="no">Enum</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">output</span><span class="p">)</span>
+
+<span class="c1"># Another Erlang function call</span>
+<span class="ss">:file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="n">output</span><span class="p">)</span></code></pre></figure>
+<p>Всё достаточно просто: открываем файл, создаём несколько строк, связываем их&nbsp;друг с&nbsp;другом и&nbsp;выводим результат в&nbsp;файл.</p>
+<p>Исполняя последнюю строчку кода, виртуальная машина BEAM инициирует системный вызов для записи в&nbsp;файл. Воспользовавшись <noindex><a href="https://github.com/evanmiller/tracewrite" rel="noreferrer nofollow">скриптом DTrace от&nbsp;Эвана Миллера</a></noindex>, который упоминается <noindex><a href="http://www.evanmiller.org/elixir-ram-and-the-template-of-doom.html" rel="nofollow noreferrer">в&nbsp;этой замечательной статье</a></noindex>, получим следующее:</p>
+<figure class="highlight"><pre><code class="language-elixir" data-lang="elixir"><span class="ss">write:</span><span class="n">return</span> <span class="no">Write</span> <span class="n">data</span> <span class="p">(</span><span class="m">9</span> <span class="n">bytes</span><span class="p">):</span> <span class="m">0x00000000146007e2</span></code></pre></figure>
+<p>BEAM осуществляет системный вызов <code>write</code> и&nbsp;даёт команду: переписать 9&nbsp;байт из&nbsp;ячейки памяти по&nbsp;адресу <code>0&times;00000000146007e2</code>. Эта строка длиной 9&nbsp;байт состоит из&nbsp;трёх частей: <code>foo</code> (3&nbsp;байта), <code>bar</code> (3&nbsp;байта) и <code>foo</code> (3&nbsp;байта).</p>
+<p>Теперь посмотрим, что получится, если строку кода, в&nbsp;которой эти три части объединяются в&nbsp;единое целое, превратить в&nbsp;комментарий:</p>
+<figure class="highlight"><pre><code class="language-elixir" data-lang="elixir"><span class="p">{</span><span class="ss">:ok</span><span class="p">,</span> <span class="n">file</span><span class="p">}</span> <span class="o">=</span> <span class="ss">:file</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="sd">"</span><span class="s2">/tmp/tmp.txt"</span><span class="p">,</span> <span class="p">[</span><span class="ss">:write</span><span class="p">,</span> <span class="ss">:raw</span><span class="p">])</span>
+
+<span class="n">foo</span> <span class="o">=</span> <span class="sd">"</span><span class="s2">foo"</span>
+<span class="n">bar</span> <span class="o">=</span> <span class="sd">"</span><span class="s2">bar"</span>
+
+<span class="n">output</span> <span class="o">=</span> <span class="p">[</span><span class="n">foo</span><span class="p">,</span> <span class="n">bar</span><span class="p">,</span> <span class="n">foo</span><span class="p">]</span>
+<span class="c1"># output = Enum.join(output)</span>
+
+<span class="ss">:file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="n">output</span><span class="p">)</span></code></pre></figure>
+<p>На&nbsp;этот раз передаём в&nbsp;функцию <code>:file.write/2</code> список ввода-вывода. Казалось&nbsp;бы, не&nbsp;такое уж&nbsp;большое изменение, но&nbsp;взгляните на&nbsp;системный вызов:</p>
+<figure class="highlight"><pre><code class="language-elixir" data-lang="elixir"><span class="ss">writev:</span><span class="n">return</span> <span class="no">Writev</span> <span class="n">data</span> <span class="m">1</span><span class="o">/</span><span class="m">3</span><span class="p">:</span> <span class="p">(</span><span class="m">3</span> <span class="n">bytes</span><span class="p">):</span> <span class="m">0x0000000014600430</span>
+<span class="ss">writev:</span><span class="n">return</span> <span class="no">Writev</span> <span class="n">data</span> <span class="m">2</span><span class="o">/</span><span class="m">3</span><span class="p">:</span> <span class="p">(</span><span class="m">3</span> <span class="n">bytes</span><span class="p">):</span> <span class="m">0x0000000014600120</span>
+<span class="ss">writev:</span><span class="n">return</span> <span class="no">Writev</span> <span class="n">data</span> <span class="m">3</span><span class="o">/</span><span class="m">3</span><span class="p">:</span> <span class="p">(</span><span class="m">3</span> <span class="n">bytes</span><span class="p">):</span> <span class="m">0x0000000014600430</span></code></pre></figure>
+<p>Получаем один вызов функции <code>writev</code> для вывода трёх фрагментов данных: <code>foo</code> с&nbsp;одного адреса памяти, <code>bar</code>&nbsp;&mdash; с&nbsp;другого, а&nbsp;<code>foo</code> с&nbsp;того&nbsp;же адреса, что и&nbsp;первый фрагмент.</p>
+<p>Интересно, не&nbsp;правда&nbsp;ли? Конечная строка <code>foobarfoo</code> в&nbsp;самой программе не&nbsp;создаётся. <strong>Три фрагмента собираются воедино непосредственно в&nbsp;файле.</strong></p>
+<p>Когда конкатенация осуществляется программно, две строки помещаются в&nbsp;память виртуальной машины, их&nbsp;содержимое копируется в&nbsp;третью строку, которую операционная система выводит в&nbsp;файл.</p>
+<p>В&nbsp;случае со&nbsp;списком ввода-вывода можно забыть о&nbsp;реализации конкатенации строк и&nbsp;выделении памяти для девятибайтовой строки и&nbsp;избавить сборщик мусора от&nbsp;работы по&nbsp;её&nbsp;удалению.</p>
+<p><strong>Всё, что останется сделать виртуальной машине,&nbsp;&mdash; это обратиться к&nbsp;ОС, и&nbsp;она скопирует данные в&nbsp;файл</strong>.</p>
+<h2>Особенности работы с&nbsp;writev</h2>
+<p>Как было сказано ранее, виртуальная машина не&nbsp;осуществляет конкатенацию строк в&nbsp;списке при реализации операций ввода-вывода. Если запустить этот код в&nbsp;IEx и&nbsp;отследить системные вызовы, то&nbsp;каждый элемент списка окажется отдельным аргументом <code>writev</code>.</p>
+<figure class="highlight"><pre><code class="language-elixir" data-lang="elixir"><span class="p">{</span><span class="ss">:ok</span><span class="p">,</span> <span class="n">file</span><span class="p">}</span> <span class="o">=</span> <span class="ss">:file</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="sd">"</span><span class="s2">/tmp/tmp.txt"</span><span class="p">,</span> <span class="p">[</span><span class="ss">:write</span><span class="p">,</span> <span class="ss">:raw</span><span class="p">])</span>
+<span class="ss">:file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="n">some_iolist_of_your_own</span><span class="p">)</span></code></pre></figure>
+<p>И&nbsp;всё&nbsp;же, чтобы убедиться, что <code>writev</code> действительно используется в&nbsp;приведённом фрагменте кода, я&nbsp;принял пару важных решений.</p>
+<p>Во-первых, я&nbsp;сделал так, чтобы файл <strong>открывался</strong> <strong>в&nbsp;режиме</strong> <strong>raw</strong>. Так, BEAM не&nbsp;будет создавать отдельный процесс для работы с&nbsp;файлом, как это происходит по&nbsp;умолчанию. Об&nbsp;этом подробно написано в&nbsp;<a href="http://erlang.org/doc/man/file.html#open-2">документации Erlang </a> для функции <a href="http://erlang.org/doc/man/file.html#open-2"><code>file:open/2</code></a> и&nbsp;в&nbsp;разделе &laquo;Performance&raquo; внизу страницы.</p>
+<p>Во-вторых<strong>, я&nbsp;использовал два вызова функций Erlang, а&nbsp;не&nbsp;Elixir, как может показаться</strong>:</p>
+<figure class="highlight"><pre><code class="language-elixir" data-lang="elixir"><span class="no">File</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="sd">"</span><span class="s2">/tmp/tmp.txt"</span><span class="p">,</span> <span class="n">some_iodata</span><span class="p">,</span> <span class="p">[</span><span class="ss">:raw</span><span class="p">])</span></code></pre></figure>
+<p>Эта функция Elixir&nbsp;&mdash; <noindex><a href="https://github.com/elixir-lang/elixir/blob/v1.3.2/lib/elixir/lib/file.ex#L701-L705" rel="noreferrer nofollow">делегирует вызов похожей функции Erlang</a></noindex> <noindex><a href="https://github.com/elixir-lang/elixir/blob/v1.3.2/lib/elixir/lib/file.ex#L701-L705" rel="noreferrer nofollow">file:write_file/3</a></noindex>, которую можно вызвать следующим образом:</p>
+<figure class="highlight"><pre><code class="language-elixir" data-lang="elixir"><span class="ss">:file</span><span class="o">.</span><span class="n">write_file</span><span class="p">(</span><span class="sd">"</span><span class="s2">/tmp/tmp.txt"</span><span class="p">,</span> <span class="n">some_iodata</span><span class="p">,</span> <span class="p">[</span><span class="ss">:raw</span><span class="p">])</span></code></pre></figure>
+<p>Данная функция открывает и&nbsp;закрывает дескриптор файлов. В&nbsp;текущей версии Erlang/OTP (19.1.2) в&nbsp;функции <code>:file:write_file/3</code> есть баг: <noindex><a href="https://github.com/erlang/otp/blob/OTP-19.1.2/lib/kernel/src/file.erl#L401" rel="nofollow noreferrer">она всегда помещает данные вывода в&nbsp;одну строку</a></noindex>, даже при использовании режима <code>raw</code>.</p>
+<p>Ещё одна особенность работы с&nbsp;writev заключается в&nbsp;том, что можно объединять только строки длиной до&nbsp;64&nbsp;байт. Причиной этому служит специфика работы BEAM с&nbsp;поиском строк в&nbsp;памяти и&nbsp;копированием данных между процессами. Если список ввода-вывода содержит строки длиннее 64&nbsp;байт (<noindex><a href="http://erlang.org/doc/efficiency_guide/binaryhandling.html" rel="nofollow">&laquo;refc&raquo; строки</a></noindex>), они появятся в&nbsp;векторе функции writev отдельными записями.</p>
+<h2>Используйте списки ввода-вывода</h2>
+<p>Если вы&nbsp;планируете организовать вывод данных и&nbsp;записать их&nbsp;в&nbsp;файл, то&nbsp;вот небольшой совет: забудьте о&nbsp;конкатенации. <strong>Воспользуйтесь списком ввода-вывода</strong>.</p>
+<p>С&nbsp;их&nbsp;помощью вывод можно будет реализовать гораздо проще, расход памяти сократится, а&nbsp;BEAM вместо копирования данных будет вызывать writev.</p>
+
+  </div>
+
+  <!-- uSocial -->
+  <div class="post__share_block share_block">
+    <script async src="https://usocial.pro/usocial/usocial.js?v=6.1.4" data-script="usocial" charset="utf-8"></script>
+    <div class="uSocial-Share" data-pid="2fd19544e551bce292425ee8adaa31be" data-type="share" data-options="round,style2,default,absolute,horizontal,size32,counter1,counter-before,upArrow-right,nomobile" data-social="telegram,fb,vk,gPlus,twi,bookmarks"></div>
+  </div>
+  <!-- /uSocial -->
+</article>
+
+
+        <footer class="footer">
+    &copy; 2020
+    / Россия
+
+    <span class="pull-right">Любые мысли и вопросы пишите на <a href="mailto:elixir@wunsh.ru">elixir@wunsh.ru</a>.</span>
+</footer>
+
+        <div id="subscribeModal" class="modal">
+    <div class="modal__content">
+        <a href="#close" title="Close" class="modal__close">x</a>
+
+        <h2 class="modal__title">Ламповая рассылка про&nbsp;Эликсир</h2>
+
+        <p>Один-два раза в&nbsp;неделю присылаем тёплые письма об&nbsp;Эликсире: переводы самых интересных статей до&nbsp;их&nbsp;появления в&nbsp;открытом доступе, анонсы событий и&nbsp;вкусные бонусы.</p>
+
+        <form action="//wunsh.us14.list-manage.com/subscribe/post?u=c81ca3d4693f62db7f7f67c71&amp;id=a192e2dfef" method="post" id="mc-embedded-subscribe-form" name="mc-embedded-subscribe-form" class="pure-form h-tc validate" target="_blank" novalidate>
+            <input type="email" value="" name="EMAIL" class="modal__input pure-input-rounded large" id="mce-EMAIL" placeholder="Твоя почта" required>
+            <div style="position: absolute; left: -5000px;" aria-hidden="true"><input type="text" name="b_c81ca3d4693f62db7f7f67c71_a192e2dfef" tabindex="-1" value=""></div>
+
+            <input type="submit" value="Присоединиться" name="subscribe" onClick="yaCounter39773490.reachGoal('SUBSCRIBED'); return true" id="mc-embedded-subscribe" class="pure-button button-success large">
+        </form>
+
+        <p>Обязательно подтверди почту, перейдя по&nbsp;ссылке в&nbsp;письме, иначе мы&nbsp;не&nbsp;сможем делиться с&nbsp;тобой полезностями.</p>
+
+        <p>Надоедать точно не&nbsp;будем :)</p>
+    </div>
+</div>
+
+        <script src="/assets/js/vendors/zepto.min.js"></script>
+
+<script>
+    if ($(".post--docs").length) {
+        $(".footer").addClass("footer--docs")
+    }
+
+    $(".modal--close_backdrop").click(function(){
+        window.location.hash = "";
+    });
+</script>
+
+        <!-- Yandex.Metrika counter -->
+<script type="text/javascript">
+    (function (d, w, c) {
+        (w[c] = w[c] || []).push(function() {
+            try {
+                w.yaCounter39773490 = new Ya.Metrika({
+                    id:39773490,
+                    clickmap:true,
+                    trackLinks:true,
+                    accurateTrackBounce:true,
+                    webvisor:true,
+                    ut:"noindex"
+                });
+            } catch(e) { }
+        });
+
+        var n = d.getElementsByTagName("script")[0],
+            s = d.createElement("script"),
+            f = function () { n.parentNode.insertBefore(s, n); };
+        s.type = "text/javascript";
+        s.async = true;
+        s.src = "https://mc.yandex.ru/metrika/watch.js";
+
+        if (w.opera == "[object Opera]") {
+            d.addEventListener("DOMContentLoaded", f, false);
+        } else { f(); }
+    })(document, window, "yandex_metrika_callbacks");
+</script>
+<noscript><div><img src="https://mc.yandex.ru/watch/39773490?ut=noindex" style="position:absolute; left:-9999px;" alt="" /></div></noscript>
+<!-- /Yandex.Metrika counter -->
+
+      </div>
+    </div>
+  </body>
+</html>

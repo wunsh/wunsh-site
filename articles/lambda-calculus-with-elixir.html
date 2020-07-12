@@ -1,0 +1,675 @@
+<!DOCTYPE html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Постигаем Y-комбинатор с помощью Elixir |> Сообщество Elixir и Phoenix Framework</title>
+    <meta name="description" content="В данной статье в общем смысле рассматривается само понятие Y-комбинатора и его получение на Elixir с помощью анонимных функций. Статья определённо не из лёг...">
+
+    <link rel="alternate" type="application/rss+xml" title="Сообщество Elixir и Phoenix Framework" href="/feed.xml" />
+    <link rel="canonical" href="https://wunsh.ru/articles/lambda-calculus-with-elixir.html">
+
+    <style type="text/css">@import url("//fonts.googleapis.com/css?family=Source+Sans+Pro:400,700&subset=cyrillic");</style>
+    <link rel="stylesheet" href="/assets/css/vendors/pure.min.css">
+    <link rel="stylesheet" href="/assets/css/vendors/pure-grids-responsive.min.css">
+    <link rel="stylesheet" href="/assets/css/style.css?1594516983">
+
+    <link rel="shortcut icon" type="image/png" href="/assets/favicon.png" >
+</head>
+
+
+  <body>
+    <div class="wunsh pure-g">
+      
+
+
+
+
+<div class="menu pure-u-1 pure-u-md-1-4">
+  <div class="header">
+    <h2 class="header__title">
+      
+        <a href="https://wunsh.ru" class="header__title_link" title="На главную">Эликсир и&nbsp;Вунш</a>
+      
+    </h2>
+    <h3 class="header__tagline">Erlang + Ruby = &#10084;</h3>
+
+    <nav class="nav">
+      <ul class="nav_list">
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/elixir" class="nav_list__item_link pure-button">О языке</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/install/linux-asdf" class="nav_list__item_link pure-button">Установка</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/docs/" class="nav_list__item_link pure-button">Документация</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/guides" class="nav_list__item_link pure-button">Гайды</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/news" class="nav_list__item_link pure-button">Новости</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/articles" class="nav_list__item_link pure-button">Статьи</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/videos" class="nav_list__item_link pure-button">Видео</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/vacancies" class="nav_list__item_link pure-button">Вакансии</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/faq" class="nav_list__item_link pure-button">FAQ</a>
+            </li>
+          
+        
+      </ul>
+    </nav>
+
+    <a href="#subscribeModal" class="pure-button header__subscribe_link">Подписаться на рассылку</a>
+  </div>
+</div>
+
+
+      <div class="content pure-u-1 pure-u-md-3-4">
+        
+
+<article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+  <header class="post__header">
+    
+    <h1 class="post__title" itemprop="name headline">Постигаем Y-комбинатор с помощью Elixir</h1>
+
+    <div class="post__meta post_meta">
+      <ul class="meta_list">
+        <li class="meta_list__item">
+          
+          <span class="">
+            <small class="meta_list__item_name">Дата</small>
+            <time class="h-bold" datetime="2017-11-24T00:00:00+00:00" itemprop="datePublished">
+              
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+24 ноября 2017
+
+            </time>
+          </span>
+          
+
+          
+        </li>
+        
+        <li class="meta_list__item">
+            <span class="tag_cloud tags_cloud--inline h-no_margin">
+              <small class="meta_list__item_name">Теги</small> 
+
+
+<ul class="tags_cloud__list">
+  
+    <a href="/tags/#advanced" class="tags_cloud__link tag tag--advanced">advanced</a>
+  
+    <a href="/tags/#overview" class="tags_cloud__link tag tag--overview">overview</a>
+  
+    <a href="/tags/#practical" class="tags_cloud__link tag tag--practical">practical</a>
+  
+</ul>
+
+            </span>
+        </li>
+        
+        <li class="meta_list__item">
+          <span itemprop="author" itemscope itemtype="http://schema.org/Person">
+            <small class="meta_list__item_name">
+              
+                Перевод
+              
+            </small>
+            <span itemprop="name" class="h-bold">Надежда Нестерова</span>
+          </span>
+        </li>
+
+        <li class="meta_list__item">
+          
+            <div >
+              <small>Оригинал</small>
+              <strong>
+                &laquo;<a href="http://www.east5th.co/blog/2017/10/30/grokking-the-y-combinator-with-elixir/" style="text-transform: none; text-decoration: underline; color: #4b2e39;">Grokking the Y Combinator with Elixir</a>&raquo;
+              </strong>
+              <small>&copy;</small>
+              <strong>Pete Corey</strong>
+            </div>
+          
+        </li>
+      </ul>
+    </div>
+  </header>
+
+  <div class="post__content" itemprop="articleBody">
+    <p>В данной статье в общем смысле рассматривается само понятие Y-комбинатора и его получение на Elixir с помощью анонимных функций. Статья определённо не из лёгких, но, надеюсь, это никак не отразится на её интересности.</p>
+
+<h2 id="зачем-вам-всё-это">Зачем вам всё это?</h2>
+
+<p>Почему так важно знать о Y-комбинаторе? Честно говоря, это имеет значение лишь для продвинутых разработчиков. Преимущества от умения работать с Y-комбинатором в обычной веб-разработке практически незаметны.</p>
+
+<p>Как бы то ни было, Y-комбинатор — интереснейшее явление IT-мира.</p>
+
+<p>В самом простом понимании Y-комбинатор позволяет определять рекурсивные функции в <a href="https://ru.wikipedia.org/wiki/%D0%9B%D1%8F%D0%BC%D0%B1%D0%B4%D0%B0-%D0%B8%D1%81%D1%87%D0%B8%D1%81%D0%BB%D0%B5%D0%BD%D0%B8%D0%B5">лямбда-исчислении</a> — там, где они изначально не поддерживаются. То, как он справляется со своей задачей, — невероятно красивое и самое разумное из всех решений, которые я когда-либо встречал.</p>
+
+<p>Для меня Y-комбинатор — нечто сродни <a href="https://ru.wikipedia.org/wiki/%D0%9C%D0%BD%D0%BE%D0%B6%D0%B5%D1%81%D1%82%D0%B2%D0%BE_%D0%9C%D0%B0%D0%BD%D0%B4%D0%B5%D0%BB%D1%8C%D0%B1%D1%80%D0%BE%D1%82%D0%B0">множеству Мандельброта</a> или <a href="http://www.east5th.co/blog/2017/02/06/playing-the-game-of-life-with-elixir-processes/">игре «Жизнь»</a>. Нечто, чем можно любоваться и восхищаться.</p>
+
+<h2 id="y-комбинатор-начало">Y-комбинатор: начало</h2>
+
+<p>Начнём знакомство с Y-комбинатором с создания рекурсивной функции <em>без использования рекурсии</em>.</p>
+
+<p>Воспользуемся классическим подходом:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">def</span> <span class="n">length</span><span class="p">([]),</span>    <span class="k">do</span><span class="p">:</span> <span class="m">0</span>
+<span class="k">def</span> <span class="n">length</span><span class="p">([</span><span class="n">h</span><span class="o">|</span><span class="n">t</span><span class="p">]),</span> <span class="k">do</span><span class="p">:</span> <span class="m">1</span> <span class="o">+</span> <span class="n">length</span><span class="p">(</span><span class="n">t</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p>Функция <code class="highlighter-rouge">length</code>, объявленная как анонимная, вычисляет длину списка:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">length</span><span class="p">([])</span>     <span class="c1"># 0</span>
+<span class="n">length</span><span class="p">([</span><span class="m">1</span><span class="p">])</span>    <span class="c1"># 1</span>
+<span class="n">length</span><span class="p">([</span><span class="m">1</span><span class="p">,</span> <span class="m">1</span><span class="p">])</span> <span class="c1"># 2 и т. д. ...</span>
+</code></pre></div></div>
+
+<p>Если функции передать пустой список, то она возвратит нулевое значение. В противном случае возвращается <code class="highlighter-rouge">1</code> плюс длина хвоста списка. Такой тип <a href="https://ru.wikipedia.org/wiki/%D0%A0%D0%B5%D0%BA%D1%83%D1%80%D1%81%D0%B8%D1%8F">рекурсивного определения</a> возможен благодаря использованию <code class="highlighter-rouge">def</code> и <code class="highlighter-rouge">defp</code> при задании функций, вследствие чего Elixir «разрешает» функциям осуществлять прямые вызовы самих себя.</p>
+
+<p>Но что если попробовать задать рекурсивную анонимную функцию?</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">length</span> <span class="o">=</span> <span class="k">fn</span>
+  <span class="p">[]</span>    <span class="o">-&gt;</span> <span class="m">0</span>
+  <span class="p">[</span><span class="n">h</span><span class="o">|</span><span class="n">t</span><span class="p">]</span> <span class="o">-&gt;</span> <span class="m">1</span> <span class="o">+</span> <span class="n">length</span><span class="o">.</span><span class="p">(</span><span class="n">t</span><span class="p">)</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<p>Привязываем <code class="highlighter-rouge">length</code> к анонимной функции, в которой вызываем ту же <code class="highlighter-rouge">length</code>, создавая рекурсию. Поскольку функция <code class="highlighter-rouge">length</code> не находится <a href="http://elixir-lang.readthedocs.io/en/latest/technical/scoping.html">в скоупе</a>, возникает следующая ошибка компиляции:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>** (CompileError) iex:9: undefined function length/0
+       (stdlib) lists.erl:1354: :lists.mapfoldl/3
+       (stdlib) lists.erl:1355: :lists.mapfoldl/3
+</code></pre></div></div>
+
+<p>Возможно ли вообще создать рекурсивную анонимную функцию? Создать рекурсивную функцию, при том, что ссылаться прямо на неё нельзя?</p>
+
+<p>Да! Вот она, мощь Y-комбинатора!</p>
+
+<h2 id="навстречу-неизведанному">Навстречу неизведанному</h2>
+
+<p>Прежде чем перейти к самому интересному, сделаем небольшое отступление и кое-что проясним. Несмотря на то, что рекурсивный вызов анонимной функции <code class="highlighter-rouge">length</code> не работает, часть функции всё же написана корректно.</p>
+
+<p>Для наглядности вышесказанного уберём рекурсию из тела функции:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">length</span> <span class="o">=</span> <span class="k">fn</span>
+  <span class="p">[]</span>    <span class="o">-&gt;</span> <span class="m">0</span>
+  <span class="p">[</span><span class="n">h</span><span class="o">|</span><span class="n">t</span><span class="p">]</span> <span class="o">-&gt;</span> <span class="m">1</span> <span class="o">+</span> <span class="p">(</span><span class="k">fn</span> <span class="n">_</span> <span class="o">-&gt;</span> <span class="k">raise</span> <span class="sd">"</span><span class="s2">oops"</span> <span class="k">end</span><span class="p">)</span><span class="o">.</span><span class="p">(</span><span class="n">t</span><span class="p">)</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<p>Очевидно, можно вычислить длину пустого списка и без использования рекурсии:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">length</span><span class="o">.</span><span class="p">([])</span>   <span class="c1"># 0</span>
+<span class="n">length</span><span class="o">.</span><span class="p">([</span><span class="m">1</span><span class="p">])</span>  <span class="c1"># упс...</span>
+</code></pre></div></div>
+
+<p>Можно обработать и список единичной длины, заменив функцию обработки исключений на точную копию функции <code class="highlighter-rouge">length</code>:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">length</span> <span class="o">=</span> <span class="k">fn</span>
+  <span class="p">[]</span>    <span class="o">-&gt;</span> <span class="m">0</span>
+  <span class="p">[</span><span class="n">h</span><span class="o">|</span><span class="n">t</span><span class="p">]</span> <span class="o">-&gt;</span> <span class="m">1</span> <span class="o">+</span> <span class="p">(</span><span class="k">fn</span>
+                  <span class="p">[]</span>    <span class="o">-&gt;</span> <span class="m">0</span>
+                  <span class="p">[</span><span class="n">h</span><span class="o">|</span><span class="n">t</span><span class="p">]</span> <span class="o">-&gt;</span> <span class="m">1</span> <span class="o">+</span> <span class="p">(</span><span class="k">fn</span> <span class="n">_</span> <span class="o">-&gt;</span> <span class="k">raise</span> <span class="sd">"</span><span class="s2">oops"</span> <span class="k">end</span><span class="p">)</span><span class="o">.</span><span class="p">(</span><span class="n">t</span><span class="p">)</span>
+                <span class="k">end</span><span class="p">)</span><span class="o">.</span><span class="p">(</span><span class="n">t</span><span class="p">)</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<p>Теперь мы можем вычислить длину пустого списка и списка с одним элементом, но при большем количестве элементов возникает коллапс:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">length</span><span class="o">.</span><span class="p">([])</span>     <span class="c1"># 0</span>
+<span class="n">length</span><span class="o">.</span><span class="p">([</span><span class="m">1</span><span class="p">])</span>    <span class="c1"># 1</span>
+<span class="n">length</span><span class="o">.</span><span class="p">([</span><span class="m">1</span><span class="p">,</span> <span class="m">2</span><span class="p">])</span> <span class="c1"># упс...</span>
+</code></pre></div></div>
+
+<p>Можно до бесконечности продолжать «обучать» функцию находить длину более объемных списков, прописывая одни и те же строки для каждого отдельного случая:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">length</span> <span class="o">=</span> <span class="k">fn</span>
+  <span class="p">[]</span>    <span class="o">-&gt;</span> <span class="m">0</span>
+  <span class="p">[</span><span class="n">h</span><span class="o">|</span><span class="n">t</span><span class="p">]</span> <span class="o">-&gt;</span> <span class="m">1</span> <span class="o">+</span> <span class="p">(</span><span class="k">fn</span>
+                  <span class="p">[]</span>    <span class="o">-&gt;</span> <span class="m">0</span>
+                  <span class="p">[</span><span class="n">h</span><span class="o">|</span><span class="n">t</span><span class="p">]</span> <span class="o">-&gt;</span> <span class="m">1</span> <span class="o">+</span> <span class="p">(</span><span class="k">fn</span>
+                                  <span class="p">[]</span>    <span class="o">-&gt;</span> <span class="m">0</span>
+                                  <span class="p">[</span><span class="n">h</span><span class="o">|</span><span class="n">t</span><span class="p">]</span> <span class="o">-&gt;</span> <span class="m">1</span> <span class="o">+</span> <span class="p">(</span>
+                                                  <span class="o">...</span>
+                                               <span class="p">)</span><span class="o">.</span><span class="p">(</span><span class="n">t</span><span class="p">)</span>
+                                <span class="k">end</span><span class="p">)</span><span class="o">.</span><span class="p">(</span><span class="n">t</span><span class="p">)</span>
+                <span class="k">end</span><span class="p">)</span><span class="o">.</span><span class="p">(</span><span class="n">t</span><span class="p">)</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<p>Схема рабочая, но совершенно безграмотная. А что если список будет состоять из 1000 элементов? Строить цепочку из огромного количества одинаковых функций?</p>
+
+<p>Кроме того, при таком способе реализации функция всегда будет иметь верхнюю границу, и при её нарушении неизбежно возникнет ошибка.</p>
+
+<p>Нужно другое решение.</p>
+
+<h2 id="dont-repeat-yourself">Don’t Repeat Yourself</h2>
+
+<p>Если присмотреться, то можно заметить, что предыдущий пример пестрит повторами. На каждом уровне такой рекурсии происходит задание анонимной функции, очень похожей на изначальную функцию <code class="highlighter-rouge">length</code>.</p>
+
+<p>Каждый уровень идентичен предыдущему, за исключением вызываемой функции: ещё одна функция типа <code class="highlighter-rouge">length</code>, либо функция обработки исключений в самом конце.</p>
+
+<p>Но ведь можно избежать повторений в коде, определив функцию, которая сама бы создавала каждый новый уровень стека <code class="highlighter-rouge">length</code>. Новая функция <code class="highlighter-rouge">make_length</code> принимает в качестве аргумента изменяющийся на каждом уровне фрагмент кода и следующую по очереди функцию:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">make_length</span> <span class="o">=</span> <span class="k">fn</span>
+  <span class="n">length</span> <span class="o">-&gt;</span>
+    <span class="k">fn</span>
+      <span class="p">[]</span>    <span class="o">-&gt;</span> <span class="m">0</span>
+      <span class="p">[</span><span class="n">h</span><span class="o">|</span><span class="n">t</span><span class="p">]</span> <span class="o">-&gt;</span> <span class="m">1</span> <span class="o">+</span> <span class="n">length</span><span class="o">.</span><span class="p">(</span><span class="n">t</span><span class="p">)</span>
+    <span class="k">end</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<p>Теперь можем воспользоваться функцией <code class="highlighter-rouge">make_length</code>, чтобы вычислить длину пустого списка:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">make_length</span><span class="o">.</span><span class="p">(</span><span class="k">fn</span> <span class="n">_</span> <span class="o">-&gt;</span> <span class="k">raise</span> <span class="sd">"</span><span class="s2">oops"</span> <span class="k">end</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p>Аналогично для списков нулевой и единичной длины:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">make_length</span><span class="o">.</span><span class="p">(</span><span class="n">make_length</span><span class="o">.</span><span class="p">(</span><span class="k">fn</span> <span class="n">_</span> <span class="o">-&gt;</span> <span class="k">raise</span> <span class="sd">"</span><span class="s2">oops"</span> <span class="k">end</span><span class="p">))</span>
+</code></pre></div></div>
+
+<p>Это работает, ведь мы создаём функцию для пустого списка и передаём функции <code class="highlighter-rouge">make_length</code>, которая оборачивает всё это в ещё одну <code class="highlighter-rouge">length</code>-подобную функцию <code class="highlighter-rouge">make_length</code>.</p>
+
+<p>Можно сделать код чуть приятнее с помощью <a href="https://wunsh.ru/docs/enumerables-and-streams.html#пайп-оператор">пайп-операторов</a>:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">(</span><span class="k">fn</span> <span class="n">_</span> <span class="o">-&gt;</span> <span class="k">raise</span> <span class="sd">"</span><span class="s2">oops"</span> <span class="k">end</span><span class="p">)</span>
+<span class="o">|&gt;</span> <span class="p">(</span><span class="n">make_length</span><span class="p">)</span><span class="o">.</span><span class="p">()</span>
+<span class="o">|&gt;</span> <span class="p">(</span><span class="n">make_length</span><span class="p">)</span><span class="o">.</span><span class="p">()</span>
+</code></pre></div></div>
+
+<p>Получается, теперь можно без привязок задать функцию <code class="highlighter-rouge">length</code> анонимно и вычислить длину списков, содержащих до трех элементов:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">(</span><span class="k">fn</span>
+  <span class="n">make_length</span> <span class="o">-&gt;</span>
+    <span class="p">(</span><span class="k">fn</span> <span class="n">_</span> <span class="o">-&gt;</span> <span class="k">raise</span> <span class="sd">"</span><span class="s2">oops"</span> <span class="k">end</span><span class="p">)</span>
+    <span class="o">|&gt;</span> <span class="p">(</span><span class="n">make_length</span><span class="p">)</span><span class="o">.</span><span class="p">()</span> <span class="c1"># support for length 1</span>
+    <span class="o">|&gt;</span> <span class="p">(</span><span class="n">make_length</span><span class="p">)</span><span class="o">.</span><span class="p">()</span> <span class="c1"># support for length 2</span>
+    <span class="o">|&gt;</span> <span class="p">(</span><span class="n">make_length</span><span class="p">)</span><span class="o">.</span><span class="p">()</span> <span class="c1"># support for length 3</span>
+<span class="k">end</span><span class="p">)</span><span class="o">.</span><span class="p">(</span><span class="k">fn</span>
+  <span class="n">length</span> <span class="o">-&gt;</span>
+    <span class="k">fn</span>
+      <span class="p">[]</span>    <span class="o">-&gt;</span> <span class="m">0</span>
+      <span class="p">[</span><span class="n">h</span><span class="o">|</span><span class="n">t</span><span class="p">]</span> <span class="o">-&gt;</span> <span class="m">1</span> <span class="o">+</span> <span class="n">length</span><span class="o">.</span><span class="p">(</span><span class="n">t</span><span class="p">)</span>
+    <span class="k">end</span> 
+<span class="k">end</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p>Вот это уже интересно!</p>
+
+<p>По сравнению с первой реализацией мы смогли избавиться от большей части повторений, но проблема ограниченного числа рекурсий осталась нерешённой.</p>
+
+<h2 id="покирпичику-зараз">По кирпичику за раз</h2>
+
+<p>На данный момент существует необходимость заранее определять максимально возможную длину списка.</p>
+
+<p>Каждый новый вызов функции <code class="highlighter-rouge">make_length</code> добавляет новый слой в растущий стек. Но если список окажется слишком длинным, произойдет вызов функции обработки исключений, и подсчёт длины списка застопорится.</p>
+
+<p>Чтобы довести дело до ума, нужно хорошенько поразмыслить о том, что вообще происходит в коде…</p>
+
+<p>При каждом вызове нашей <code class="highlighter-rouge">length</code>-подобной функции принимается решение: нужна ли рекурсия. Если да, то вызывается функция <code class="highlighter-rouge">length</code>, привязанная к её замыканию, если нет, то возвращается значение, которое затем помещается в стек вызовов.</p>
+
+<p>Проблема в том, что функция <code class="highlighter-rouge">length</code> может указывать на функцию обработки исключений.</p>
+
+<p>Вместо возникновения ошибки при достижении последней функции в стеке хорошо бы добавить ещё один слой функции <code class="highlighter-rouge">make_length</code> и вызвать её. На деле, в стеке нам нужны лишь две функции: текущая и следующая.</p>
+
+<p>Каждый слой рекурсии создаётся передачей функции <code class="highlighter-rouge">make_length</code> самой себе. Упростим создание стека: убрерём функцию обработки ошибок и просто добавим следующий слой:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">(</span><span class="k">fn</span>
+  <span class="n">make_length</span> <span class="o">-&gt;</span>
+    <span class="n">make_length</span><span class="o">.</span><span class="p">(</span><span class="n">make_length</span><span class="p">)</span> <span class="c1"># Add another layer</span>
+<span class="k">end</span><span class="p">)</span><span class="o">.</span><span class="p">(</span><span class="k">fn</span>
+  <span class="n">length</span> <span class="o">-&gt;</span>
+    <span class="k">fn</span>
+      <span class="p">[]</span>    <span class="o">-&gt;</span> <span class="m">0</span>
+      <span class="p">[</span><span class="n">h</span><span class="o">|</span><span class="n">t</span><span class="p">]</span> <span class="o">-&gt;</span> <span class="m">1</span> <span class="o">+</span> <span class="n">length</span><span class="o">.</span><span class="p">(</span><span class="n">t</span><span class="p">)</span>
+    <span class="k">end</span> 
+<span class="k">end</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p>Теперь можно даже переименовать аргумент <code class="highlighter-rouge">length</code> во второй анонимной функции, чтобы <code class="highlighter-rouge">make_length</code> сообщала нам, что именно в неё передаётся:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">(</span><span class="k">fn</span>
+  <span class="n">make_length</span> <span class="o">-&gt;</span>
+    <span class="n">make_length</span><span class="o">.</span><span class="p">(</span><span class="n">make_length</span><span class="p">)</span>
+<span class="k">end</span><span class="p">)</span><span class="o">.</span><span class="p">(</span><span class="k">fn</span>
+  <span class="n">make_length</span> <span class="o">-&gt;</span> <span class="c1"># We're being passed make_length</span>
+    <span class="k">fn</span>
+      <span class="p">[]</span>    <span class="o">-&gt;</span> <span class="m">0</span>
+      <span class="p">[</span><span class="n">h</span><span class="o">|</span><span class="n">t</span><span class="p">]</span> <span class="o">-&gt;</span> <span class="m">1</span> <span class="o">+</span> <span class="n">make_length</span><span class="o">.</span><span class="p">(</span><span class="n">t</span><span class="p">)</span>
+    <span class="k">end</span> 
+<span class="k">end</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p>Но всё не так просто.</p>
+
+<p>Попытки передать хвост списка <code class="highlighter-rouge">t</code> функции <code class="highlighter-rouge">make_length</code> не имеют никакого смысла. Функция <code class="highlighter-rouge">make_length</code> в качестве аргумента ожидает получить функцию, а возвращает функцию, которая на входе ожидает получить список.</p>
+
+<p>Что же можно передать <code class="highlighter-rouge">make_length</code>, чтобы на выходе получить ещё один слой? Подождите, помнится, <code class="highlighter-rouge">make_length</code> полностью дублирует тело нашей второй анонимной функции:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">(</span><span class="k">fn</span>
+  <span class="n">make_length</span> <span class="o">-&gt;</span>
+    <span class="k">fn</span>
+      <span class="p">[]</span>    <span class="o">-&gt;</span> <span class="m">0</span>
+      <span class="p">[</span><span class="n">h</span><span class="o">|</span><span class="n">t</span><span class="p">]</span> <span class="o">-&gt;</span> <span class="m">1</span> <span class="o">+</span> <span class="n">make_length</span><span class="o">.</span><span class="p">(</span><span class="n">t</span><span class="p">)</span>
+    <span class="k">end</span> 
+<span class="k">end</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p>Так может, передать <code class="highlighter-rouge">make_length</code> саму себя? Точно!</p>
+
+<p>Передавая <code class="highlighter-rouge">make_length</code> самой <code class="highlighter-rouge">make_length</code>, мы получим новый слой <code class="highlighter-rouge">length</code>-подобной функции, которая в качестве аргумента принимает список:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">(</span><span class="k">fn</span>
+  <span class="n">make_length</span> <span class="o">-&gt;</span>
+    <span class="n">make_length</span><span class="o">.</span><span class="p">(</span><span class="n">make_length</span><span class="p">)</span>
+<span class="k">end</span><span class="p">)</span><span class="o">.</span><span class="p">(</span><span class="k">fn</span>
+  <span class="n">make_length</span> <span class="o">-&gt;</span>
+    <span class="k">fn</span>
+      <span class="p">[]</span>    <span class="o">-&gt;</span> <span class="m">0</span>
+      <span class="p">[</span><span class="n">h</span><span class="o">|</span><span class="n">t</span><span class="p">]</span> <span class="o">-&gt;</span> <span class="m">1</span> <span class="o">+</span> <span class="p">(</span><span class="n">make_length</span><span class="o">.</span><span class="p">(</span><span class="n">make_length</span><span class="p">))</span><span class="o">.</span><span class="p">(</span><span class="n">t</span><span class="p">)</span>
+    <span class="k">end</span> 
+<span class="k">end</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p>Полученный слой имеет доступ к <code class="highlighter-rouge">make_length</code>, и, если понадобится рекурсия, ничего больше не препятствует создать и привести в действие новый слой <code class="highlighter-rouge">length</code>. Теперь не нужно заранее продумывать, какой высоты будет наша башня из функций <code class="highlighter-rouge">length</code>. Мы можем строить её постепенно, по одному кирпичику!</p>
+
+<p>Как это прекрасно… Вы ещё не устали?</p>
+
+<blockquote>
+  <p>«Каждое поколение будет и сосудом, и его содержимым — эхом самовоспроизводящейся реверберации». — Тед Чан, «История твоей жизни»</p>
+</blockquote>
+
+<h2 id="возвращаемся-кфункции-length">Возвращаемся к функции length</h2>
+
+<p>Теперь наша реализация полностью функциональна. Мы можем вычислить длину списка любого размера:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">(</span><span class="k">fn</span>
+  <span class="n">make_length</span> <span class="o">-&gt;</span>
+    <span class="n">make_length</span><span class="o">.</span><span class="p">(</span><span class="n">make_length</span><span class="p">)</span>
+<span class="k">end</span><span class="p">)</span><span class="o">.</span><span class="p">(</span><span class="k">fn</span>
+  <span class="n">make_length</span> <span class="o">-&gt;</span>
+    <span class="k">fn</span>
+      <span class="p">[]</span>    <span class="o">-&gt;</span> <span class="m">0</span>
+      <span class="p">[</span><span class="n">h</span><span class="o">|</span><span class="n">t</span><span class="p">]</span> <span class="o">-&gt;</span> <span class="m">1</span> <span class="o">+</span> <span class="p">(</span><span class="n">make_length</span><span class="o">.</span><span class="p">(</span><span class="n">make_length</span><span class="p">))</span><span class="o">.</span><span class="p">(</span><span class="n">t</span><span class="p">)</span>
+    <span class="k">end</span> 
+<span class="k">end</span><span class="p">)</span><span class="o">.</span><span class="p">([</span><span class="m">1</span><span class="p">,</span> <span class="m">2</span><span class="p">,</span> <span class="m">3</span><span class="p">,</span> <span class="m">4</span><span class="p">,</span> <span class="m">5</span><span class="p">,</span> <span class="m">6</span><span class="p">,</span> <span class="m">7</span><span class="p">,</span> <span class="m">8</span><span class="p">,</span> <span class="m">9</span><span class="p">,</span> <span class="m">10</span><span class="p">,</span> <span class="o">...</span><span class="p">])</span>
+</code></pre></div></div>
+
+<p>Единственная проблема — это то, что мы отошли от изначального представления функции:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">fn</span>
+  <span class="p">[]</span>    <span class="o">-&gt;</span> <span class="m">0</span>
+  <span class="p">[</span><span class="n">h</span><span class="o">|</span><span class="n">t</span><span class="p">]</span> <span class="o">-&gt;</span> <span class="m">1</span> <span class="o">+</span> <span class="n">length</span><span class="o">.</span><span class="p">(</span><span class="n">t</span><span class="p">)</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<p>Мы модифицировали её таким образом, чтобы она содержала некие специфические для реализации вызовы <code class="highlighter-rouge">make_length</code>:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">fn</span>
+  <span class="p">[]</span>    <span class="o">-&gt;</span> <span class="m">0</span>
+  <span class="p">[</span><span class="n">h</span><span class="o">|</span><span class="n">t</span><span class="p">]</span> <span class="o">-&gt;</span> <span class="m">1</span> <span class="o">+</span> <span class="p">(</span><span class="n">make_length</span><span class="o">.</span><span class="p">(</span><span class="n">make_length</span><span class="p">))</span><span class="o">.</span><span class="p">(</span><span class="n">t</span><span class="p">)</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<p>Если бы можно было вернуть функции <code class="highlighter-rouge">length</code> прежний вид, теоретически, мы могли бы «вынести её за скобки» и создать общую формулу, которая позволяла бы превращать любую функцию в рекурсивную без лишних движений.</p>
+
+<p>Начнём с того фрагмента кода, где <code class="highlighter-rouge">length((make_length.(make_length)))</code> превращается в отдельную функцию:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">fn</span>
+  <span class="n">t</span> <span class="o">-&gt;</span>
+    <span class="p">(</span><span class="n">make_length</span><span class="o">.</span><span class="p">(</span><span class="n">make_length</span><span class="p">))</span><span class="o">.</span><span class="p">(</span><span class="n">t</span><span class="p">)</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<p>Данная функция получает <code class="highlighter-rouge">t</code> в качестве аргумента и передаёт его следующему слою <code class="highlighter-rouge">length</code>, как только он создаётся.</p>
+
+<p>Результат этой функции — сама <code class="highlighter-rouge">length</code>! Можно прописать ещё одно замыкание, которое принимало бы <code class="highlighter-rouge">length</code> в качестве аргумента и передавало бы в неё нашу новую функцию. Новая реализация получилась немного длиннее, но зато мы вернулись к изначальной функции <code class="highlighter-rouge">length</code>:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">(</span><span class="k">fn</span>
+  <span class="n">make_length</span> <span class="o">-&gt;</span>
+    <span class="n">make_length</span><span class="o">.</span><span class="p">(</span><span class="n">make_length</span><span class="p">)</span>
+<span class="k">end</span><span class="p">)</span><span class="o">.</span><span class="p">(</span><span class="k">fn</span>
+  <span class="n">make_length</span> <span class="o">-&gt;</span>
+    <span class="p">(</span><span class="k">fn</span>
+      <span class="n">length</span> <span class="o">-&gt;</span>
+        <span class="k">fn</span>
+          <span class="p">[]</span>    <span class="o">-&gt;</span> <span class="m">0</span>
+          <span class="p">[</span><span class="n">h</span><span class="o">|</span><span class="n">t</span><span class="p">]</span> <span class="o">-&gt;</span> <span class="m">1</span> <span class="o">+</span> <span class="n">length</span><span class="o">.</span><span class="p">(</span><span class="n">t</span><span class="p">)</span>
+        <span class="k">end</span>
+    <span class="k">end</span><span class="p">)</span><span class="o">.</span><span class="p">(</span><span class="k">fn</span>
+      <span class="n">t</span> <span class="o">-&gt;</span>
+        <span class="p">(</span><span class="n">make_length</span><span class="o">.</span><span class="p">(</span><span class="n">make_length</span><span class="p">))</span><span class="o">.</span><span class="p">(</span><span class="n">t</span><span class="p">)</span>
+    <span class="k">end</span><span class="p">)</span>
+<span class="k">end</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p>Возрождённая функция <code class="highlighter-rouge">length</code> нигде не ссылается на <code class="highlighter-rouge">make_length</code>, а значит, ничего не мешает выпутать её из этого клубка анонимных функций.</p>
+
+<p>Обернём весь блок в ещё одно замыкание, принимающее функцию <code class="highlighter-rouge">length</code> как аргумент:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">(</span><span class="k">fn</span>
+  <span class="n">length</span> <span class="o">-&gt;</span>
+    <span class="p">(</span><span class="k">fn</span>
+      <span class="n">make_length</span> <span class="o">-&gt;</span>
+        <span class="n">make_length</span><span class="o">.</span><span class="p">(</span><span class="n">make_length</span><span class="p">)</span>
+    <span class="k">end</span><span class="p">)</span><span class="o">.</span><span class="p">(</span><span class="k">fn</span>
+      <span class="n">make_length</span> <span class="o">-&gt;</span>
+        <span class="n">length</span><span class="o">.</span><span class="p">(</span><span class="k">fn</span>
+          <span class="n">t</span> <span class="o">-&gt;</span>
+            <span class="p">(</span><span class="n">make_length</span><span class="o">.</span><span class="p">(</span><span class="n">make_length</span><span class="p">))</span><span class="o">.</span><span class="p">(</span><span class="n">t</span><span class="p">)</span>
+        <span class="k">end</span><span class="p">)</span>
+    <span class="k">end</span><span class="p">)</span>
+<span class="k">end</span><span class="p">)</span><span class="o">.</span><span class="p">(</span><span class="k">fn</span>
+  <span class="n">length</span> <span class="o">-&gt;</span>
+    <span class="k">fn</span>
+      <span class="p">[]</span>    <span class="o">-&gt;</span> <span class="m">0</span>
+      <span class="p">[</span><span class="n">h</span><span class="o">|</span><span class="n">t</span><span class="p">]</span> <span class="o">-&gt;</span> <span class="m">1</span> <span class="o">+</span> <span class="n">length</span><span class="o">.</span><span class="p">(</span><span class="n">t</span><span class="p">)</span>
+    <span class="k">end</span> 
+<span class="k">end</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p>Вынесем «общий множитель» <code class="highlighter-rouge">length</code> и приведём код в более традиционный, хотя и гораздо менее читабельный, вид:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">y</span> <span class="o">=</span> <span class="k">fn</span>
+  <span class="n">f</span> <span class="o">-&gt;</span>
+    <span class="p">(</span><span class="k">fn</span>
+      <span class="n">x</span> <span class="o">-&gt;</span>
+        <span class="n">x</span><span class="o">.</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+    <span class="k">end</span><span class="p">)</span><span class="o">.</span><span class="p">(</span><span class="k">fn</span>
+      <span class="n">x</span> <span class="o">-&gt;</span>
+        <span class="n">f</span><span class="o">.</span><span class="p">(</span><span class="k">fn</span>
+          <span class="n">t</span> <span class="o">-&gt;</span>
+            <span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="p">(</span><span class="n">x</span><span class="p">))</span><span class="o">.</span><span class="p">(</span><span class="n">t</span><span class="p">)</span>
+        <span class="k">end</span><span class="p">)</span>
+    <span class="k">end</span><span class="p">)</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<p>Самое интересное здесь то, что полученная функция <code class="highlighter-rouge">y</code> сможет сделать абсолютно любую функцию рекурсивной! Вот, к примеру, рекурсивная функция для нахождения n-ого члена <a href="https://ru.wikipedia.org/wiki/%D0%A7%D0%B8%D1%81%D0%BB%D0%B0_%D0%A4%D0%B8%D0%B1%D0%BE%D0%BD%D0%B0%D1%87%D1%87%D0%B8">последовательности Фибоначчи</a>:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">y</span><span class="o">.</span><span class="p">(</span><span class="k">fn</span>
+  <span class="n">fib</span> <span class="o">-&gt;</span>
+    <span class="k">fn</span>
+      <span class="m">0</span> <span class="o">-&gt;</span> <span class="m">0</span>
+      <span class="m">1</span> <span class="o">-&gt;</span> <span class="m">1</span>
+      <span class="n">n</span> <span class="o">-&gt;</span> <span class="n">fib</span><span class="o">.</span><span class="p">(</span><span class="n">n</span><span class="o">-</span><span class="m">1</span><span class="p">)</span> <span class="o">+</span> <span class="n">fib</span><span class="o">.</span><span class="p">(</span><span class="n">n</span> <span class="o">-</span> <span class="m">2</span><span class="p">)</span>
+    <span class="k">end</span> 
+<span class="k">end</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p>Как вы, наверное, уже догадались, то, что у нас получилось, имеет название. <strong>И это тот самый Y-комбинатор</strong>! С моей точки зрения, Y-комбинатор — одна из самых красивых структур во всей IT-вселенной.</p>
+
+<h2 id="выводы-идополнительные-материалы">Выводы и дополнительные материалы</h2>
+
+<p>Надеюсь, данная статья помогла вам разобраться с Y-комбинатором и показала всю его рекурсивную мощь.</p>
+
+<p>Честно говоря, мне самому до сих пор не удаётся до конца в нём разобраться. Мне понятен порядок действий для его создания, но как только я сталкиваюсь лицом к лицу c присущей ему системой лямбда-исчисления, я не способен коротко и ясно объяснить, что он из себя представляет:</p>
+
+<blockquote>
+  <p>λf. (λx. f (x x))(λx. f (x x))</p>
+</blockquote>
+
+<p>По-моему, это греческий.</p>
+
+<p>Если у вас есть желание копнуть глубже по этой теме, я настоятельно рекомендую обратить внимание на книгу <a href="http://amzn.to/2y4nsWS">«The Little Schemer»</a> Даниэля Фридмана и Мэттиаса Феллейсена. Это то, что позволило мне увидеть всю красоту Y-комбинатора и поразмыслить над другими не менее занимательными идеями. Рекомендую. Настоятельно.</p>
+
+<p>Если книги не по вашей части, то можете обогатить свои знания при помощи <a href="https://www.youtube.com/watch?v=9T8A89jgeTI">вот этого краткого видео-введения в мир Y-комбинатора</a> от Computerphile и <a href="http://mvanier.livejournal.com/2897.html">этой</a> довольно-таки исчерпывающей статьи.</p>
+
+  </div>
+
+  <!-- uSocial -->
+  <div class="post__share_block share_block">
+    <script async src="https://usocial.pro/usocial/usocial.js?v=6.1.4" data-script="usocial" charset="utf-8"></script>
+    <div class="uSocial-Share" data-pid="2fd19544e551bce292425ee8adaa31be" data-type="share" data-options="round,style2,default,absolute,horizontal,size32,counter1,counter-before,upArrow-right,nomobile" data-social="telegram,fb,vk,gPlus,twi,bookmarks"></div>
+  </div>
+  <!-- /uSocial -->
+</article>
+
+
+        <footer class="footer">
+    &copy; 2020
+    / Россия
+
+    <span class="pull-right">Любые мысли и вопросы пишите на <a href="mailto:elixir@wunsh.ru">elixir@wunsh.ru</a>.</span>
+</footer>
+
+        <div id="subscribeModal" class="modal">
+    <div class="modal__content">
+        <a href="#close" title="Close" class="modal__close">x</a>
+
+        <h2 class="modal__title">Ламповая рассылка про&nbsp;Эликсир</h2>
+
+        <p>Один-два раза в&nbsp;неделю присылаем тёплые письма об&nbsp;Эликсире: переводы самых интересных статей до&nbsp;их&nbsp;появления в&nbsp;открытом доступе, анонсы событий и&nbsp;вкусные бонусы.</p>
+
+        <form action="//wunsh.us14.list-manage.com/subscribe/post?u=c81ca3d4693f62db7f7f67c71&amp;id=a192e2dfef" method="post" id="mc-embedded-subscribe-form" name="mc-embedded-subscribe-form" class="pure-form h-tc validate" target="_blank" novalidate>
+            <input type="email" value="" name="EMAIL" class="modal__input pure-input-rounded large" id="mce-EMAIL" placeholder="Твоя почта" required>
+            <div style="position: absolute; left: -5000px;" aria-hidden="true"><input type="text" name="b_c81ca3d4693f62db7f7f67c71_a192e2dfef" tabindex="-1" value=""></div>
+
+            <input type="submit" value="Присоединиться" name="subscribe" onClick="yaCounter39773490.reachGoal('SUBSCRIBED'); return true" id="mc-embedded-subscribe" class="pure-button button-success large">
+        </form>
+
+        <p>Обязательно подтверди почту, перейдя по&nbsp;ссылке в&nbsp;письме, иначе мы&nbsp;не&nbsp;сможем делиться с&nbsp;тобой полезностями.</p>
+
+        <p>Надоедать точно не&nbsp;будем :)</p>
+    </div>
+</div>
+
+        <script src="/assets/js/vendors/zepto.min.js"></script>
+
+<script>
+    if ($(".post--docs").length) {
+        $(".footer").addClass("footer--docs")
+    }
+
+    $(".modal--close_backdrop").click(function(){
+        window.location.hash = "";
+    });
+</script>
+
+        <!-- Yandex.Metrika counter -->
+<script type="text/javascript">
+    (function (d, w, c) {
+        (w[c] = w[c] || []).push(function() {
+            try {
+                w.yaCounter39773490 = new Ya.Metrika({
+                    id:39773490,
+                    clickmap:true,
+                    trackLinks:true,
+                    accurateTrackBounce:true,
+                    webvisor:true,
+                    ut:"noindex"
+                });
+            } catch(e) { }
+        });
+
+        var n = d.getElementsByTagName("script")[0],
+            s = d.createElement("script"),
+            f = function () { n.parentNode.insertBefore(s, n); };
+        s.type = "text/javascript";
+        s.async = true;
+        s.src = "https://mc.yandex.ru/metrika/watch.js";
+
+        if (w.opera == "[object Opera]") {
+            d.addEventListener("DOMContentLoaded", f, false);
+        } else { f(); }
+    })(document, window, "yandex_metrika_callbacks");
+</script>
+<noscript><div><img src="https://mc.yandex.ru/watch/39773490?ut=noindex" style="position:absolute; left:-9999px;" alt="" /></div></noscript>
+<!-- /Yandex.Metrika counter -->
+
+      </div>
+    </div>
+  </body>
+</html>

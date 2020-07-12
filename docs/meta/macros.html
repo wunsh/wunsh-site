@@ -1,0 +1,575 @@
+<!DOCTYPE html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Макросы |> Сообщество Elixir и Phoenix Framework</title>
+    <meta name="description" content="Русскоязычное сообщество Elixir и Phoenix Framework
+">
+
+    <link rel="alternate" type="application/rss+xml" title="Сообщество Elixir и Phoenix Framework" href="/feed.xml" />
+    <link rel="canonical" href="https://wunsh.ru/docs/meta/macros">
+
+    <style type="text/css">@import url("//fonts.googleapis.com/css?family=Source+Sans+Pro:400,700&subset=cyrillic");</style>
+    <link rel="stylesheet" href="/assets/css/vendors/pure.min.css">
+    <link rel="stylesheet" href="/assets/css/vendors/pure-grids-responsive.min.css">
+    <link rel="stylesheet" href="/assets/css/style.css?1594516983">
+
+    <link rel="shortcut icon" type="image/png" href="/assets/favicon.png" >
+</head>
+
+
+  <body>
+    <div class="wunsh pure-g">
+      
+
+
+
+
+<div class="menu pure-u-1 pure-u-md-1-4">
+  <div class="header">
+    <h2 class="header__title">
+      
+        <a href="https://wunsh.ru" class="header__title_link" title="На главную">Эликсир и&nbsp;Вунш</a>
+      
+    </h2>
+    <h3 class="header__tagline">Erlang + Ruby = &#10084;</h3>
+
+    <nav class="nav">
+      <ul class="nav_list">
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/elixir" class="nav_list__item_link pure-button">О языке</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/install/linux-asdf" class="nav_list__item_link pure-button">Установка</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/docs/" class="nav_list__item_link pure-button">Документация</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/guides" class="nav_list__item_link pure-button">Гайды</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/news" class="nav_list__item_link pure-button">Новости</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/articles" class="nav_list__item_link pure-button">Статьи</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/videos" class="nav_list__item_link pure-button">Видео</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/vacancies" class="nav_list__item_link pure-button">Вакансии</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/faq" class="nav_list__item_link pure-button">FAQ</a>
+            </li>
+          
+        
+      </ul>
+    </nav>
+
+    <a href="#subscribeModal" class="pure-button header__subscribe_link">Подписаться на рассылку</a>
+  </div>
+</div>
+
+
+      <div class="content pure-u-1 pure-u-md-3-4">
+        <article class="post post--docs" itemscope itemtype="http://schema.org/BlogPosting">
+    <header class="post__header">
+        <h1 class="post__title" itemprop="name headline">
+            <p>Макросы</p>
+
+        </h1>
+    </header>
+
+    <div class="post__content" itemprop="articleBody">
+        <h2 id="введение">Введение</h2>
+
+<p>Несмотря на то, что Эликсир пытается обеспечить безопасную среду для макросов, основная ответственность за написание чистого кода с помощью макросов ложится на разработчиков. Писать макросы сложнее, чем обычные функции на Эликсире, и соответственно их не стоит использовать, когда в них нет нужды. Так что пишите и применяйте макросы со всей ответственностью.</p>
+
+<p>Эликсир и так предоставляет механизмы для написания обычного кода простым и понятным способом, используя встроенные структуры данных и функции. Следовательно, макросы должны использоваться исключительно в крайнем случае. Помните, что <strong>явное лучше, чем неявное. Чистый код лучше, чем сокращённый.</strong></p>
+
+<h2 id="наш-первый-макрос">Наш первый макрос</h2>
+
+<p>Макросы в Эликсире определяются через <code class="highlighter-rouge">defmacro/2</code>.</p>
+
+<blockquote>
+  <p>В этой главе мы будет использовать файлы вместо запуска примеров кода в IEx. Всё потому, что эти примеры будут в несколько строк кода, поэтому их ввод в IEx будет непродуктивным. Следовательно, вы должны иметь возможность проверять эти примеры, записывая их в файл <code class="highlighter-rouge">macros.exs</code>, и запускать с помощью команд <code class="highlighter-rouge">elixir macros.exs</code> или <code class="highlighter-rouge">iex macros.exs</code>.</p>
+</blockquote>
+
+<p>Чтобы лучше понять, как работают макросы, давайте сперва создадим новый модуль, в котором реализуем условный оператор <code class="highlighter-rouge">unless</code>, который делает противоположный <code class="highlighter-rouge">if</code>, как макросом, так и функцией:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">defmodule</span> <span class="no">Unless</span> <span class="k">do</span>
+  <span class="k">def</span> <span class="n">fun_unless</span><span class="p">(</span><span class="n">clause</span><span class="p">,</span> <span class="k">do</span><span class="p">:</span> <span class="n">expression</span><span class="p">)</span> <span class="k">do</span>
+    <span class="k">if</span><span class="p">(</span><span class="n">!clause</span><span class="p">,</span> <span class="k">do</span><span class="p">:</span> <span class="n">expression</span><span class="p">)</span>
+  <span class="k">end</span>
+
+  <span class="k">defmacro</span> <span class="n">macro_unless</span><span class="p">(</span><span class="n">clause</span><span class="p">,</span> <span class="k">do</span><span class="p">:</span> <span class="n">expression</span><span class="p">)</span> <span class="k">do</span>
+    <span class="kn">quote</span> <span class="k">do</span>
+      <span class="k">if</span><span class="p">(</span><span class="n">!unquote</span><span class="p">(</span><span class="n">clause</span><span class="p">),</span> <span class="k">do</span><span class="p">:</span> <span class="kn">unquote</span><span class="p">(</span><span class="n">expression</span><span class="p">))</span>
+    <span class="k">end</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<p>Функция получает аргументы и передаёт их в <code class="highlighter-rouge">if</code>. Однако, как мы узнали в <a href="/docs/meta/quote-and-unquote.html">предыдущей главе</a>, макрос будет получать маскирующие выражения, вводить их в конструкцию <code class="highlighter-rouge">quote</code> и, в конце, возвращать другое маскирующее выражение.</p>
+
+<p>Давайте начнём с <code class="highlighter-rouge">iex</code>, используя модуль выше:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span>iex macros.exs
+</code></pre></div></div>
+
+<p>И поиграем с теми определениями:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">iex</span><span class="o">&gt;</span> <span class="kn">require</span> <span class="no">Unless</span>
+
+<span class="n">iex</span><span class="o">&gt;</span> <span class="no">Unless</span><span class="o">.</span><span class="n">macro_unless</span> <span class="no">true</span><span class="p">,</span> <span class="k">do</span><span class="p">:</span> <span class="no">IO</span><span class="o">.</span><span class="n">puts</span> <span class="sd">"</span><span class="s2">this should never be printed"</span>
+<span class="no">nil</span>
+
+<span class="n">iex</span><span class="o">&gt;</span> <span class="no">Unless</span><span class="o">.</span><span class="n">fun_unless</span> <span class="no">true</span><span class="p">,</span> <span class="k">do</span><span class="p">:</span> <span class="no">IO</span><span class="o">.</span><span class="n">puts</span> <span class="sd">"</span><span class="s2">this should never be printed"</span>
+<span class="sd">"</span><span class="s2">this should never be printed"</span>
+<span class="no">nil</span>
+</code></pre></div></div>
+
+<p>Обратите внимание на то, что в нашей реализации макроса предложение не было возвращено, несмотря на то, что оно вывелось при реализации нашей функции. Это обусловлено тем, что аргументы вызова функции вычисляются непосредственно перед вызовом самой функции. Однако макросы не обращают внимание на свои отдельно взятые аргументы. Вместо этого, они получают аргументы в виде маскирующих выражений, которые затем преобразуются в другие маскирующие выражения. Таким образом, нам придётся переписать наш оператор <code class="highlighter-rouge">unless</code> в макросе на скрытый <code class="highlighter-rouge">if</code>.</p>
+
+<p>Другими словами, при вызове:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="no">Unless</span><span class="o">.</span><span class="n">macro_unless</span> <span class="no">true</span><span class="p">,</span> <span class="k">do</span><span class="p">:</span> <span class="no">IO</span><span class="o">.</span><span class="n">puts</span> <span class="sd">"</span><span class="s2">this should never be printed"</span>
+</code></pre></div></div>
+
+<p>Наш макрос <code class="highlighter-rouge">macro_unless</code> получил следующее:</p>
+
+<div class="language-erlang highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nf">macro_unless</span><span class="p">(</span><span class="n">true</span><span class="p">,</span> <span class="p">[</span><span class="nn">do</span><span class="p">:</span> <span class="p">{{:.,</span> <span class="p">[],</span> <span class="p">[{:__</span><span class="n">aliases__</span><span class="p">,</span> <span class="p">[</span><span class="nn">alias</span><span class="p">:</span> <span class="n">false</span><span class="p">],</span> <span class="p">[:</span><span class="nv">IO</span><span class="p">]},</span> <span class="p">:</span><span class="n">puts</span><span class="p">]},</span> <span class="p">[],</span> <span class="p">[</span><span class="s">"this should never be printed"</span><span class="p">]}])</span>
+</code></pre></div></div>
+
+<p>И затем он вернул маскирующее выражение следующим образом:</p>
+
+<div class="language-erlang highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">{:</span><span class="k">if</span><span class="p">,</span> <span class="p">[],</span>
+ <span class="p">[{:</span><span class="o">!</span><span class="p">,</span> <span class="p">[],</span> <span class="p">[</span><span class="n">true</span><span class="p">]},</span>
+  <span class="p">[</span><span class="nn">do</span><span class="p">:</span> <span class="p">{{:.,</span> <span class="p">[],</span>
+     <span class="p">[{:__</span><span class="n">aliases__</span><span class="p">,</span>
+       <span class="p">[],</span> <span class="p">[:</span><span class="nv">IO</span><span class="p">]},</span>
+      <span class="p">:</span><span class="n">puts</span><span class="p">]},</span> <span class="p">[],</span> <span class="p">[</span><span class="s">"this should never be printed"</span><span class="p">]}]]}</span>
+</code></pre></div></div>
+
+<p>На самом деле, мы можем проверить это, используя функцию <code class="highlighter-rouge">Macro.expand_once/2</code>:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">iex</span><span class="o">&gt;</span> <span class="n">expr</span> <span class="o">=</span> <span class="kn">quote</span> <span class="k">do</span><span class="p">:</span> <span class="no">Unless</span><span class="o">.</span><span class="n">macro_unless</span><span class="p">(</span><span class="no">true</span><span class="p">,</span> <span class="k">do</span><span class="p">:</span> <span class="no">IO</span><span class="o">.</span><span class="n">puts</span> <span class="sd">"</span><span class="s2">this should never be printed"</span><span class="p">)</span>
+<span class="n">iex</span><span class="o">&gt;</span> <span class="n">res</span>  <span class="o">=</span> <span class="no">Macro</span><span class="o">.</span><span class="n">expand_once</span><span class="p">(</span><span class="n">expr</span><span class="p">,</span> <span class="n">__ENV__</span><span class="p">)</span>
+
+<span class="n">iex</span><span class="o">&gt;</span> <span class="no">IO</span><span class="o">.</span><span class="n">puts</span> <span class="no">Macro</span><span class="o">.</span><span class="n">to_string</span><span class="p">(</span><span class="n">res</span><span class="p">)</span>
+<span class="k">if</span><span class="p">(</span><span class="n">!true</span><span class="p">)</span> <span class="k">do</span>
+  <span class="no">IO</span><span class="o">.</span><span class="n">puts</span><span class="p">(</span><span class="sd">"</span><span class="s2">this should never be printed"</span><span class="p">)</span>
+<span class="k">end</span>
+<span class="ss">:ok</span>
+</code></pre></div></div>
+
+<p>Функция <code class="highlighter-rouge">Macro.expand_once/2</code> получает маскирующее выражение и расширяет его в соответствии с текущей средой. В этом случае он расширил/вызвал макрос <code class="highlighter-rouge">Unless.macro_unless/2</code> и вернул его результат. Затем мы перешли к преобразованию возвращаемого маскирующего выражения в строку и напечатали его (мы затронем <code class="highlighter-rouge">__ENV__</code> чуть позже в этой главе).</p>
+
+<p>Вот что такое макросы. Они про получение маскирующих выражений и преобразование их во что-то иное. Фактически, конструкция <code class="highlighter-rouge">unless/2</code> в Эликсире реализуется как макрос:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">defmacro</span> <span class="k">unless</span><span class="p">(</span><span class="n">clause</span><span class="p">,</span> <span class="k">do</span><span class="p">:</span> <span class="n">expression</span><span class="p">)</span> <span class="k">do</span>
+  <span class="kn">quote</span> <span class="k">do</span>
+    <span class="k">if</span><span class="p">(</span><span class="n">!unquote</span><span class="p">(</span><span class="n">clause</span><span class="p">),</span> <span class="k">do</span><span class="p">:</span> <span class="kn">unquote</span><span class="p">(</span><span class="n">expression</span><span class="p">))</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<p>Конструкции, вроде <code class="highlighter-rouge">unless/2</code>, <code class="highlighter-rouge">defmacro/2</code>, <code class="highlighter-rouge">def/2</code>, <code class="highlighter-rouge">defprotocol/2</code> и многие другие, использующиеся в этом руководстве с самого начала, реализованы на чистом Эликсире, часто в качестве макроса. Это означает, что конструкторы, использующиеся для создания языка, могут использоваться разработчиками для расширения предметно-ориентированного языка, над которым они работают.</p>
+
+<p>Мы может определить любые необходимые нам функции и макросы, в том числе и те, которые переопределяют встроенные определения, предоставляемые самим Эликсиром. Единственным исключением являются специальные формы Эликсира, которые не реализованы в нём и поэтому не могут быть переопределёнными априори <a href="https://hexdocs.pm/elixir/">полный список специальных форм доступен в модуле <code class="highlighter-rouge">Kernel.SpecialForms</code></a>.</p>
+
+<h2 id="гигиена-макросов">Гигиена макросов</h2>
+
+<p>Макросы в Эликсире выполняются в последнюю очередь. Это гарантирует переменным, определённым внутри quote то, что они не будут конфликтовать с переменными, определёнными в контексте, где этот макрос расширяется. Например:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">defmodule</span> <span class="no">Hygiene</span> <span class="k">do</span>
+  <span class="k">defmacro</span> <span class="n">no_interference</span> <span class="k">do</span>
+    <span class="kn">quote</span> <span class="k">do</span><span class="p">:</span> <span class="n">a</span> <span class="o">=</span> <span class="m">1</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+
+<span class="k">defmodule</span> <span class="no">HygieneTest</span> <span class="k">do</span>
+  <span class="k">def</span> <span class="n">go</span> <span class="k">do</span>
+    <span class="kn">require</span> <span class="no">Hygiene</span>
+    <span class="n">a</span> <span class="o">=</span> <span class="m">13</span>
+    <span class="no">Hygiene</span><span class="o">.</span><span class="n">no_interference</span>
+    <span class="n">a</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+
+<span class="no">HygieneTest</span><span class="o">.</span><span class="n">go</span>
+<span class="c1"># =&gt; 13</span>
+</code></pre></div></div>
+
+<p>В приведенном выше примере, несмотря на то, что макрос вводит переменной значение <code class="highlighter-rouge">a = 1</code>, он никаким образом не влияет на переменную <code class="highlighter-rouge">a</code>, определённую функцией <code class="highlighter-rouge">go</code>. Если макрос хочет явно повлиять на контекст, он может воспользоваться <code class="highlighter-rouge">var!</code>:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">defmodule</span> <span class="no">Hygiene</span> <span class="k">do</span>
+  <span class="k">defmacro</span> <span class="n">interference</span> <span class="k">do</span>
+    <span class="kn">quote</span> <span class="k">do</span><span class="p">:</span> <span class="n">var!</span><span class="p">(</span><span class="n">a</span><span class="p">)</span> <span class="o">=</span> <span class="m">1</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+
+<span class="k">defmodule</span> <span class="no">HygieneTest</span> <span class="k">do</span>
+  <span class="k">def</span> <span class="n">go</span> <span class="k">do</span>
+    <span class="kn">require</span> <span class="no">Hygiene</span>
+    <span class="n">a</span> <span class="o">=</span> <span class="m">13</span>
+    <span class="no">Hygiene</span><span class="o">.</span><span class="n">interference</span>
+    <span class="n">a</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+
+<span class="no">HygieneTest</span><span class="o">.</span><span class="n">go</span>
+<span class="c1"># =&gt; 1</span>
+</code></pre></div></div>
+
+<p>Переменная гигиена работает только лишь потому, что Эликсир комментирует переменные с их контекстом. Например, переменная <code class="highlighter-rouge">x</code>, определённая на 3 строке модуля, будет представлена как:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">{</span><span class="ss">:x</span><span class="p">,</span> <span class="p">[</span><span class="ss">line:</span> <span class="m">3</span><span class="p">],</span> <span class="no">nil</span><span class="p">}</span>
+</code></pre></div></div>
+
+<p>Несмотря на это, маскирующая переменная представлена как:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">defmodule</span> <span class="no">Sample</span> <span class="k">do</span>
+  <span class="k">def</span> <span class="n">quoted</span> <span class="k">do</span>
+    <span class="kn">quote</span> <span class="k">do</span><span class="p">:</span> <span class="n">x</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+
+<span class="no">Sample</span><span class="o">.</span><span class="n">quoted</span> <span class="c1">#=&gt; {:x, [line: 3], Sample}</span>
+</code></pre></div></div>
+
+<p>Обратите внимание, что третьим элементом в маскирующей переменной является атом <code class="highlighter-rouge">Sample</code>, вместо <code class="highlighter-rouge">nil</code>, который отмечает переменную как поступающую из модуля <code class="highlighter-rouge">Sample</code>. Именно поэтому Эликсир рассматривает эти две переменные как исходящие из разных контекстов и, следовательно, обрабатывает их соответственно.</p>
+
+<p>Эликсир предоставляет аналогичные механизмы для импортов и псевдонимов. Это гарантирует, что макрос будет вести себя так, как указано в его исходном модуле, не противореча заданному модулю, в котором макрос расширяется. При этом, гигиена может быть обойдена в определённых ситуациях, если использовать макросы, такие как <code class="highlighter-rouge">var!/2</code> и <code class="highlighter-rouge">alias!/2</code>, несмотря на то, что при их использовании необходимо соблюдать осторожность при явном изменении пользовательской среды.</p>
+
+<p>Иногда имена переменных могут быть созданы динамически. В таких случаях <code class="highlighter-rouge">Macro.var/2</code> может использоваться для определения новых переменных:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">defmodule</span> <span class="no">Sample</span> <span class="k">do</span>
+  <span class="k">defmacro</span> <span class="n">initialize_to_char_count</span><span class="p">(</span><span class="n">variables</span><span class="p">)</span> <span class="k">do</span>
+    <span class="no">Enum</span><span class="o">.</span><span class="n">map</span> <span class="n">variables</span><span class="p">,</span> <span class="k">fn</span><span class="p">(</span><span class="n">name</span><span class="p">)</span> <span class="o">-&gt;</span>
+      <span class="n">var</span> <span class="o">=</span> <span class="no">Macro</span><span class="o">.</span><span class="n">var</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="no">nil</span><span class="p">)</span>
+      <span class="n">length</span> <span class="o">=</span> <span class="n">name</span> <span class="o">|&gt;</span> <span class="no">Atom</span><span class="o">.</span><span class="n">to_string</span> <span class="o">|&gt;</span> <span class="no">String</span><span class="o">.</span><span class="n">length</span>
+      <span class="kn">quote</span> <span class="k">do</span>
+        <span class="kn">unquote</span><span class="p">(</span><span class="n">var</span><span class="p">)</span> <span class="o">=</span> <span class="kn">unquote</span><span class="p">(</span><span class="n">length</span><span class="p">)</span>
+      <span class="k">end</span>
+    <span class="k">end</span>
+  <span class="k">end</span>
+
+  <span class="k">def</span> <span class="n">run</span> <span class="k">do</span>
+    <span class="n">initialize_to_char_count</span> <span class="p">[</span><span class="ss">:red</span><span class="p">,</span> <span class="ss">:green</span><span class="p">,</span> <span class="ss">:yellow</span><span class="p">]</span>
+    <span class="p">[</span><span class="n">red</span><span class="p">,</span> <span class="n">green</span><span class="p">,</span> <span class="n">yellow</span><span class="p">]</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+
+<span class="o">&gt;</span> <span class="no">Sample</span><span class="o">.</span><span class="n">run</span> <span class="c1">#=&gt; [3, 5, 6]</span>
+</code></pre></div></div>
+
+<p>Обратите внимание на второй аргумент <code class="highlighter-rouge">Macro.var/2</code>. Эта ситуация использует и определяет гигиену, что описывается в следующем разделе.</p>
+
+<h2 id="окружающая-среда">Окружающая среда</h2>
+
+<p>При вызове <code class="highlighter-rouge">Macro.expand_once/2</code> ранее в этой главе, мы использовали специальную форму <code class="highlighter-rouge">__ENV__</code>.</p>
+
+<p><code class="highlighter-rouge">__ENV__</code> возвращает экземпляр структуры <code class="highlighter-rouge">Macro.Env</code>, который содержит полезную информацию о среде компиляции, включая текущий модуль, файл и строку, все переменные, определённые в текущей области, а также импорты, требования и т. д.:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">iex</span><span class="o">&gt;</span> <span class="n">__ENV__</span><span class="o">.</span><span class="n">module</span>
+<span class="no">nil</span>
+
+<span class="n">iex</span><span class="o">&gt;</span> <span class="n">__ENV__</span><span class="o">.</span><span class="n">file</span>
+<span class="sd">"</span><span class="s2">iex"</span>
+
+<span class="n">iex</span><span class="o">&gt;</span> <span class="n">__ENV__</span><span class="o">.</span><span class="n">requires</span>
+<span class="p">[</span><span class="no">IEx</span><span class="o">.</span><span class="no">Helpers</span><span class="p">,</span> <span class="no">Kernel</span><span class="p">,</span> <span class="no">Kernel</span><span class="o">.</span><span class="no">Typespec</span><span class="p">]</span>
+
+<span class="n">iex</span><span class="o">&gt;</span> <span class="kn">require</span> <span class="no">Integer</span>
+<span class="no">nil</span>
+
+<span class="n">iex</span><span class="o">&gt;</span> <span class="n">__ENV__</span><span class="o">.</span><span class="n">requires</span>
+<span class="p">[</span><span class="no">IEx</span><span class="o">.</span><span class="no">Helpers</span><span class="p">,</span> <span class="no">Integer</span><span class="p">,</span> <span class="no">Kernel</span><span class="p">,</span> <span class="no">Kernel</span><span class="o">.</span><span class="no">Typespec</span><span class="p">]</span>
+</code></pre></div></div>
+
+<p>Многие функции в модуле <code class="highlighter-rouge">Macro</code> расчитывают на среду. Подробнее об этих функциях вы можете узнать в <a href="https://hexdocs.pm/elixir/">документации модуля <code class="highlighter-rouge">Macro</code></a>, а также узнать больше о среде компиляции в <a href="https://hexdocs.pm/elixir/">документации для <code class="highlighter-rouge">Macro.Env</code></a>.</p>
+
+<h2 id="приватные-макросы">Приватные макросы</h2>
+
+<p>Эликсир также поддерживает приватные макросы через <code class="highlighter-rouge">defmacrop</code>. В качестве приватных функций эти макросы доступны только в модуле, который их определяет, и только во время компиляции.</p>
+
+<p>Важно, чтобы такой макрос был определён до его непосредственного использования. Невозможность определить макрос до его вызова вызовет ошибку во время выполнения, поскольку макрос не будет расширяться и будет переведен в вызов функции:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">iex</span><span class="o">&gt;</span> <span class="k">defmodule</span> <span class="no">Sample</span> <span class="k">do</span>
+<span class="o">...&gt;</span>  <span class="k">def</span> <span class="n">four</span><span class="p">,</span> <span class="k">do</span><span class="p">:</span> <span class="n">two</span> <span class="o">+</span> <span class="n">two</span>
+<span class="o">...&gt;</span>  <span class="k">defmacrop</span> <span class="n">two</span><span class="p">,</span> <span class="k">do</span><span class="p">:</span> <span class="m">2</span>
+<span class="o">...&gt;</span> <span class="k">end</span>
+<span class="o">**</span> <span class="p">(</span><span class="no">CompileError</span><span class="p">)</span> <span class="ss">iex:</span><span class="m">2</span><span class="p">:</span> <span class="n">function</span> <span class="n">two</span><span class="o">/</span><span class="m">0</span> <span class="n">undefined</span>
+</code></pre></div></div>
+
+<h2 id="пишите-макросы-ответственно">Пишите макросы ответственно</h2>
+
+<p>Макросы являются мощной конструкцией, и Эликсир предоставляет множество механизмов для их ответственного использования.</p>
+
+<ul>
+  <li>
+    <p>Макросы гигиеничны: по умолчанию, переменные, определённые внутри макроса, не будут влиять на код пользователя. Кроме того, вызовы функций и псевдонимы, доступные в контексте макросов, не будут протекать в контексте пользователя.</p>
+  </li>
+  <li>
+    <p>Макросы лексические: невозможно вводить код или макросы глобально. Чтобы использовать макрос, вам необходимо явно задать <code class="highlighter-rouge">require</code> или <code class="highlighter-rouge">import</code> модулю, который определяет макрос.</p>
+  </li>
+  <li>
+    <p>Макросы явны: невозможно запустить макрос без его явного вызова. Например, некоторые языки позволяют разработчикам полностью переписывать функции скрыто, часто с помощью синтаксических преобразований или с помощью некоторых механизмов рефлексии. В Эликсире макрос должен быть явно вызван в вызывающем макросе во время компиляции.</p>
+  </li>
+  <li>
+    <p>Язык макросов ясен: многие языки предоставляют синтаксический сахар для <code class="highlighter-rouge">quote</code> и <code class="highlighter-rouge">unquote</code>. В Эликсире же мы предпочли, чтобы они были изложены явным образом, дабы чётко разграничить определение макроса и его маскирующие выражения.</p>
+  </li>
+</ul>
+
+<p>Даже при таких гарантиях, разработчик играет весомую роль при написании макросов ответственно. Если вы уверены, что вам нужно прибегнуть к макросам, всегда помните, что они не являются вашим API. Держите свои определения макросов короткими, включая их маскирующее содержание. Например, вместо написания макроса, сделайте что-нибудь похожее:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">defmodule</span> <span class="no">MyModule</span> <span class="k">do</span>
+  <span class="k">defmacro</span> <span class="n">my_macro</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">c</span><span class="p">)</span> <span class="k">do</span>
+    <span class="kn">quote</span> <span class="k">do</span>
+      <span class="n">do_this</span><span class="p">(</span><span class="kn">unquote</span><span class="p">(</span><span class="n">a</span><span class="p">))</span>
+      <span class="o">...</span>
+      <span class="n">do_that</span><span class="p">(</span><span class="kn">unquote</span><span class="p">(</span><span class="n">b</span><span class="p">))</span>
+      <span class="o">...</span>
+      <span class="n">and_that</span><span class="p">(</span><span class="kn">unquote</span><span class="p">(</span><span class="n">c</span><span class="p">))</span>
+    <span class="k">end</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<p>пишите:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">defmodule</span> <span class="no">MyModule</span> <span class="k">do</span>
+  <span class="k">defmacro</span> <span class="n">my_macro</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">c</span><span class="p">)</span> <span class="k">do</span>
+    <span class="kn">quote</span> <span class="k">do</span>
+      <span class="c1"># Оставьте необходимый минимум,</span>
+      <span class="c1"># а остальное перенесите в функции</span>
+      <span class="n">do_this_that_and_that</span><span class="p">(</span><span class="kn">unquote</span><span class="p">(</span><span class="n">a</span><span class="p">),</span> <span class="kn">unquote</span><span class="p">(</span><span class="n">b</span><span class="p">),</span> <span class="kn">unquote</span><span class="p">(</span><span class="n">c</span><span class="p">))</span>
+    <span class="k">end</span>
+  <span class="k">end</span>
+
+  <span class="k">def</span> <span class="n">do_this_that_and_that</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">c</span><span class="p">)</span> <span class="k">do</span>
+    <span class="n">do_this</span><span class="p">(</span><span class="n">a</span><span class="p">)</span>
+    <span class="o">...</span>
+    <span class="n">do_that</span><span class="p">(</span><span class="n">b</span><span class="p">)</span>
+    <span class="o">...</span>
+    <span class="n">and_that</span><span class="p">(</span><span class="n">c</span><span class="p">)</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<p>Это делает ваш код более понятным и простым в тестировании и обслуживании, так как вы можете напрямую вызывать и выполнять проверку <code class="highlighter-rouge">do_this_that_and_that/3</code>. Это также помогает вам разрабатывать API для разработчиков, которые не хотят полагаться на макросы.</p>
+
+<p>Завершая этот урок, мы заканчиваем наше знакомство с макросами. Следующая глава представляет собой краткое обсуждение DSL, в котором показано, как мы можем смешивать макросы и атрибуты модуля воедино для аннотации и расширения модулей и функций.</p>
+
+    </div>
+</article>
+
+<nav class="docs_nav pure-g">
+    <div class="docs_nav__inner pure-u-1 pure-u-md-3-4">
+        <div class="pure-g">
+            <div class="docs_nav__column docs_nav__column--prev pure-u-1-3">
+                
+                    <a href="/docs/meta/quote-and-unquote.html" class="docs_nav__link pure-button">
+                        &larr;<span class="h-hidden_mobile"> Назад</span></a>
+                
+            </div>
+
+            <div class="docs_nav__column docs_nav__column--contents pure-u-1-3">
+                <a href="#docsContents" class="docs_nav__link docs_nav__link--contents pure-button">☰</a>
+            </div>
+
+            <div class="docs_nav__column docs_nav__column--next pure-u-1-3">
+                
+                    <a href="/docs/meta/domain-specific-languages.html" class="docs_nav__link pure-button">
+                        <span class="h-hidden_mobile">Вперёд </span>&rarr;
+                    </a>
+                
+            </div>
+        </div>
+    </div>
+</nav>
+
+<div id="docsContents" class="modal modal--docs_contents modal--close_backdrop">
+    <div class="modal__content">
+        <a href="#close" title="Закрыть" class="modal__close">x</a>
+
+        <h2 class="modal__title">Содержание</h2>
+
+        
+        <h3 id="руководство-для-начинающих">Руководство для начинающих</h3>
+<ul>
+  <li><a href="/docs">Введение</a></li>
+  <li><a href="/docs/basic-types.html">Базовые типы</a></li>
+  <li><a href="/docs/basic-operators.html">Базовые операторы</a></li>
+  <li><a href="/docs/pattern-matching.html">Сопоставление с образцом</a></li>
+  <li><a href="/docs/case-cond-and-if.html">Конструкции ветвления</a></li>
+  <li><a href="/docs/binaries-strings-and-char-lists.html">Двоичные данные, строки и списки символов</a></li>
+  <li><a href="/docs/keywords-and-maps.html">Ключевые списки и словари</a></li>
+  <li><a href="/docs/modules-and-functions.html">Модули и функции</a></li>
+  <li><a href="/docs/recursion.html">Рекурсия</a></li>
+  <li><a href="/docs/enumerables-and-streams.html">Перечисления и потоки</a></li>
+  <li><a href="/docs/processes.html">Процессы</a></li>
+  <li><a href="/docs/io-and-the-file-system.html">Ввод/вывод и файловая система</a></li>
+  <li><a href="/docs/alias-require-and-import.html">Директивы <code class="highlighter-rouge">alias</code>, <code class="highlighter-rouge">require</code> и <code class="highlighter-rouge">import</code></a></li>
+  <li><a href="/docs/module-attributes.html">Атрибуты модулей</a></li>
+  <li><a href="/docs/structs.html">Структуры</a></li>
+  <li><a href="/docs/protocols.html">Протоколы</a></li>
+  <li><a href="/docs/comprehensions.html">Списковые выражения</a></li>
+  <li><a href="/docs/sigils.html">Сигилы</a></li>
+  <li><a href="/docs/try-catch-and-rescue.html">Конструкция <code class="highlighter-rouge">try</code>, <code class="highlighter-rouge">catch</code> и <code class="highlighter-rouge">rescue</code></a></li>
+  <li><a href="/docs/typespecs-and-behaviours.html">Спецификации типов и поведения</a></li>
+  <li><a href="/docs/erlang-libraries.html">Библиотеки Эрланга</a></li>
+  <li><a href="/docs/where-to-go-next.html">Куда двигаться дальше</a></li>
+</ul>
+
+<h3 id="микс-и-otp">Микс и <code class="highlighter-rouge">OTP</code></h3>
+<ul>
+  <li><a href="/docs/mix-otp/introduction-to-mix.html">Введение в Микс</a></li>
+  <li><a href="/docs/mix-otp/agent.html">Агент</a></li>
+  <li><a href="/docs/mix-otp/genserver.html">GenServer</a></li>
+  <li><a href="/docs/mix-otp/supervisor-and-application.html">Супервизор и приложение</a></li>
+  <li><a href="/docs/mix-otp/dynamic-supervisor.html">Динамический супервизор</a></li>
+  <li><a href="/docs/mix-otp/ets.html">ETS</a></li>
+  <li><a href="/docs/mix-otp/dependencies-and-umbrella-apps.html">Зависимости и зонтичные проекты</a></li>
+  <li><a href="/docs/mix-otp/task-and-gen-tcp.html">Модули <code class="highlighter-rouge">Task</code> и <code class="highlighter-rouge">:gen_tcp</code></a></li>
+  <li><a href="/docs/mix-otp/docs-tests-and-with.html">Доктесты, паттерны и оператор <code class="highlighter-rouge">with</code></a></li>
+  <li><a href="/docs/mix-otp/distributed-tasks-and-configuration.html">Распределенные задачи и конфигурация</a></li>
+</ul>
+
+<h3 id="метапрограммирование">Метапрограммирование</h3>
+<ul>
+  <li><a href="/docs/meta/quote-and-unquote.html">Конструкции <code class="highlighter-rouge">quote</code> и <code class="highlighter-rouge">unquote</code></a></li>
+  <li><a href="/docs/meta/macros.html">Макросы</a></li>
+  <li><a href="/docs/meta/domain-specific-languages.html">Предметно-ориентированные языки</a></li>
+</ul>
+
+    </div>
+</div>
+
+
+
+        <footer class="footer">
+    &copy; 2020
+    / Россия
+
+    <span class="pull-right">Любые мысли и вопросы пишите на <a href="mailto:elixir@wunsh.ru">elixir@wunsh.ru</a>.</span>
+</footer>
+
+        <div id="subscribeModal" class="modal">
+    <div class="modal__content">
+        <a href="#close" title="Close" class="modal__close">x</a>
+
+        <h2 class="modal__title">Ламповая рассылка про&nbsp;Эликсир</h2>
+
+        <p>Один-два раза в&nbsp;неделю присылаем тёплые письма об&nbsp;Эликсире: переводы самых интересных статей до&nbsp;их&nbsp;появления в&nbsp;открытом доступе, анонсы событий и&nbsp;вкусные бонусы.</p>
+
+        <form action="//wunsh.us14.list-manage.com/subscribe/post?u=c81ca3d4693f62db7f7f67c71&amp;id=a192e2dfef" method="post" id="mc-embedded-subscribe-form" name="mc-embedded-subscribe-form" class="pure-form h-tc validate" target="_blank" novalidate>
+            <input type="email" value="" name="EMAIL" class="modal__input pure-input-rounded large" id="mce-EMAIL" placeholder="Твоя почта" required>
+            <div style="position: absolute; left: -5000px;" aria-hidden="true"><input type="text" name="b_c81ca3d4693f62db7f7f67c71_a192e2dfef" tabindex="-1" value=""></div>
+
+            <input type="submit" value="Присоединиться" name="subscribe" onClick="yaCounter39773490.reachGoal('SUBSCRIBED'); return true" id="mc-embedded-subscribe" class="pure-button button-success large">
+        </form>
+
+        <p>Обязательно подтверди почту, перейдя по&nbsp;ссылке в&nbsp;письме, иначе мы&nbsp;не&nbsp;сможем делиться с&nbsp;тобой полезностями.</p>
+
+        <p>Надоедать точно не&nbsp;будем :)</p>
+    </div>
+</div>
+
+        <script src="/assets/js/vendors/zepto.min.js"></script>
+
+<script>
+    if ($(".post--docs").length) {
+        $(".footer").addClass("footer--docs")
+    }
+
+    $(".modal--close_backdrop").click(function(){
+        window.location.hash = "";
+    });
+</script>
+
+        <!-- Yandex.Metrika counter -->
+<script type="text/javascript">
+    (function (d, w, c) {
+        (w[c] = w[c] || []).push(function() {
+            try {
+                w.yaCounter39773490 = new Ya.Metrika({
+                    id:39773490,
+                    clickmap:true,
+                    trackLinks:true,
+                    accurateTrackBounce:true,
+                    webvisor:true,
+                    ut:"noindex"
+                });
+            } catch(e) { }
+        });
+
+        var n = d.getElementsByTagName("script")[0],
+            s = d.createElement("script"),
+            f = function () { n.parentNode.insertBefore(s, n); };
+        s.type = "text/javascript";
+        s.async = true;
+        s.src = "https://mc.yandex.ru/metrika/watch.js";
+
+        if (w.opera == "[object Opera]") {
+            d.addEventListener("DOMContentLoaded", f, false);
+        } else { f(); }
+    })(document, window, "yandex_metrika_callbacks");
+</script>
+<noscript><div><img src="https://mc.yandex.ru/watch/39773490?ut=noindex" style="position:absolute; left:-9999px;" alt="" /></div></noscript>
+<!-- /Yandex.Metrika counter -->
+
+      </div>
+    </div>
+  </body>
+</html>

@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Балуемся с сокетами и процессами в Эликсире |> Сообщество Elixir и Phoenix Framework</title>
+    <meta name="description" content="Немного про создание демона с помощью модуля `:gen_tcp`.">
+
+    <link rel="alternate" type="application/rss+xml" title="Сообщество Elixir и Phoenix Framework" href="/feed.xml" />
+    <link rel="canonical" href="https://wunsh.ru/articles/playing-with-sockets-and-processes-in-elixir.html">
+
+    <style type="text/css">@import url("//fonts.googleapis.com/css?family=Source+Sans+Pro:400,700&subset=cyrillic");</style>
+    <link rel="stylesheet" href="/assets/css/vendors/pure.min.css">
+    <link rel="stylesheet" href="/assets/css/vendors/pure-grids-responsive.min.css">
+    <link rel="stylesheet" href="/assets/css/style.css?1594516983">
+
+    <link rel="shortcut icon" type="image/png" href="/assets/favicon.png" >
+</head>
+
+
+  <body>
+    <div class="wunsh pure-g">
+      
+
+
+
+
+<div class="menu pure-u-1 pure-u-md-1-4">
+  <div class="header">
+    <h2 class="header__title">
+      
+        <a href="https://wunsh.ru" class="header__title_link" title="На главную">Эликсир и&nbsp;Вунш</a>
+      
+    </h2>
+    <h3 class="header__tagline">Erlang + Ruby = &#10084;</h3>
+
+    <nav class="nav">
+      <ul class="nav_list">
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/elixir" class="nav_list__item_link pure-button">О языке</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/install/linux-asdf" class="nav_list__item_link pure-button">Установка</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/docs/" class="nav_list__item_link pure-button">Документация</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/guides" class="nav_list__item_link pure-button">Гайды</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/news" class="nav_list__item_link pure-button">Новости</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/articles" class="nav_list__item_link pure-button">Статьи</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/videos" class="nav_list__item_link pure-button">Видео</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/vacancies" class="nav_list__item_link pure-button">Вакансии</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/faq" class="nav_list__item_link pure-button">FAQ</a>
+            </li>
+          
+        
+      </ul>
+    </nav>
+
+    <a href="#subscribeModal" class="pure-button header__subscribe_link">Подписаться на рассылку</a>
+  </div>
+</div>
+
+
+      <div class="content pure-u-1 pure-u-md-3-4">
+        
+
+<article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+  <header class="post__header">
+    
+    <h1 class="post__title" itemprop="name headline">Балуемся с сокетами и процессами в Эликсире</h1>
+
+    <div class="post__meta post_meta">
+      <ul class="meta_list">
+        <li class="meta_list__item">
+          
+          <span class="">
+            <small class="meta_list__item_name">Дата</small>
+            <time class="h-bold" datetime="2017-12-20T00:00:00+00:00" itemprop="datePublished">
+              
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+20 декабря 2017
+
+            </time>
+          </span>
+          
+
+          
+        </li>
+        
+        <li class="meta_list__item">
+            <span class="tag_cloud tags_cloud--inline h-no_margin">
+              <small class="meta_list__item_name">Теги</small> 
+
+
+<ul class="tags_cloud__list">
+  
+    <a href="/tags/#beginner" class="tags_cloud__link tag tag--beginner">beginner</a>
+  
+    <a href="/tags/#practical" class="tags_cloud__link tag tag--practical">practical</a>
+  
+</ul>
+
+            </span>
+        </li>
+        
+        <li class="meta_list__item">
+          <span itemprop="author" itemscope itemtype="http://schema.org/Person">
+            <small class="meta_list__item_name">
+              
+                Перевод
+              
+            </small>
+            <span itemprop="name" class="h-bold">Надежда Нестерова</span>
+          </span>
+        </li>
+
+        <li class="meta_list__item">
+          
+            <div >
+              <small>Оригинал</small>
+              <strong>
+                &laquo;<a href="https://robots.thoughtbot.com/playing-with-sockets-and-processes-in-elixir#the-sum-total" style="text-transform: none; text-decoration: underline; color: #4b2e39;">Playing with Sockets and Processes in Elixir</a>&raquo;
+              </strong>
+              <small>&copy;</small>
+              <strong>Jon Yurek</strong>
+            </div>
+          
+        </li>
+      </ul>
+    </div>
+  </header>
+
+  <div class="post__content" itemprop="articleBody">
+    <p>Не так давно я работал над приложением-демоном без какой-либо веб-части. Оно функционировало в качестве хранилища поступающих в реальном времени данных местоположения транспортных средств. Данные передавались через обычный порт TCP. Конечно, мне доводилось реализовывать нечто подобное и раньше, но это было достаточно давно, и с Эликсиром я прежде не сталкивался.</p>
+
+<p>Механизм работы порта вполне стандартный:</p>
+
+<ol>
+  <li>Прослушивание порта.</li>
+  <li>Установление подключения.</li>
+  <li>Получение данных.</li>
+  <li>Передача данных.</li>
+</ol>
+
+<p>Это обычная схема действия TCP-протокола. Благодаря виртуальной машине BEAM, поверх которой работает Эликсир, можно не беспокоиться, что какие-либо из этих задач будут выполняться одновременно или наложатся друг на друга. Мы можем:</p>
+
+<ol>
+  <li>Создать один процесс для прослушивания порта.</li>
+  <li>Создать второй процесс для установления связи.</li>
+  <li>Поручить третьему процессу приём и обработку данных.</li>
+  <li>Передать данные четвёртому процессу.</li>
+</ol>
+
+<p>Теперь, когда каждый шаг помещён в отдельный процесс, наложения исключены, даже если использовать синхронные функции.</p>
+
+<h1 id="модуль-gen_tcp">Модуль <code class="highlighter-rouge">:gen_tcp</code></h1>
+
+<p>Для получения доступа к неструктурированным TCP-сокетам воспользуемся <a href="http://erlang.org/doc/man/gen_tcp.html"><code class="highlighter-rouge">gen_tcp</code></a>. Это модуль на Эрланге, потребность в функциональности которого всегда была актуальна. Вы можете говорить, что работаете с ним на Эликсире, потому что получаете доступ к функциям напрямую от атома.
+ Первый шаг – прослушивание порта – довольно просто реализуется с помощью функции <a href="http://erlang.org/doc/man/gen_tcp.html#listen-2"><code class="highlighter-rouge">listen/2</code></a>:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code> <span class="k">defmodule</span> <span class="no">Receiver</span> <span class="k">do</span>
+   <span class="kn">require</span> <span class="no">Logger</span>
+ 
+   <span class="k">def</span> <span class="n">start</span><span class="p">(</span><span class="n">port</span><span class="p">)</span> <span class="k">do</span>
+     <span class="n">spawn</span> <span class="k">fn</span> <span class="o">-&gt;</span>
+       <span class="k">case</span> <span class="ss">:gen_tcp</span><span class="o">.</span><span class="n">listen</span><span class="p">(</span><span class="n">port</span><span class="p">,</span> <span class="p">[</span><span class="ss">:binary</span><span class="p">,</span> <span class="ss">active:</span> <span class="no">false</span><span class="p">,</span> <span class="ss">reuseaddr:</span> <span class="no">true</span><span class="p">])</span> <span class="k">do</span>
+         <span class="p">{</span><span class="ss">:ok</span><span class="p">,</span> <span class="n">socket</span><span class="p">}</span> <span class="o">-&gt;</span>
+           <span class="no">Logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sd">"</span><span class="s2">Connected."</span><span class="p">)</span>
+           <span class="n">accept_connection</span><span class="p">(</span><span class="n">socket</span><span class="p">)</span> <span class="c1"># &lt;--- We'll handle this next.</span>
+         <span class="p">{</span><span class="ss">:error</span><span class="p">,</span> <span class="n">reason</span><span class="p">}</span> <span class="o">-&gt;</span>
+           <span class="no">Logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sd">"</span><span class="s2">Could not listen: </span><span class="si">#{</span><span class="n">reason</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+       <span class="k">end</span>
+     <span class="k">end</span>
+   <span class="k">end</span>
+ <span class="k">end</span>
+</code></pre></div></div>
+
+<p>Параметр <code class="highlighter-rouge">active: false</code> означает, что необходимо запросить данные у <code class="highlighter-rouge">:gen_tcp</code>. Если бы на том месте стояло <code class="highlighter-rouge">true</code>, то следующим действием был бы приём входящих данных в виде сообщений в почтовом ящике. Это, безусловно, полезная функция, но сейчас она только добавит приложению излишней сложности. Поэтому оставляем <code class="highlighter-rouge">active: false</code>.</p>
+
+<p>Обернём всё тело функции <code class="highlighter-rouge">:gen_tcp.listen/2</code> в <a href="https://hexdocs.pm/elixir/Kernel.html#spawn/1"><code class="highlighter-rouge">spawn/1</code></a>, чтобы вызвать её в отдельном процессе и не допустить блокировки других процессов. Понятно, что нужно остановить <code class="highlighter-rouge">listen/2</code>, но при этом всё остальное должно продолжать работать.</p>
+
+<h2 id="установление-соединения">Установление соединения</h2>
+
+<p>Итак, сокет прослушивается на наличие подключений. Как только появится хоть одно, необходимо будет считать данные. Но ведь хотелось бы обрабатывать больше одного подключения за раз… Не проблема, создадим ещё несколько процессов!</p>
+
+<p>Давайте пропишем функцию <code class="highlighter-rouge">accept_connection</code> для установления подключения и получения читабельных данных.</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">def</span> <span class="n">accept_connection</span><span class="p">(</span><span class="n">socket</span><span class="p">)</span> <span class="k">do</span>
+  <span class="p">{</span><span class="ss">:ok</span><span class="p">,</span> <span class="n">client</span><span class="p">}</span> <span class="o">=</span> <span class="ss">:gen_tcp</span><span class="o">.</span><span class="n">accept</span><span class="p">(</span><span class="n">socket</span><span class="p">)</span>
+  <span class="n">spawn</span> <span class="k">fn</span> <span class="o">-&gt;</span>
+    <span class="p">{</span><span class="ss">:ok</span><span class="p">,</span> <span class="n">buffer_pid</span><span class="p">}</span> <span class="o">=</span> <span class="no">Buffer</span><span class="o">.</span><span class="n">create</span><span class="p">()</span> <span class="c1"># &lt;--- this is next</span>
+    <span class="no">Process</span><span class="o">.</span><span class="n">flag</span><span class="p">(</span><span class="ss">:trap_exit</span><span class="p">,</span> <span class="no">true</span><span class="p">)</span>
+    <span class="n">serve</span><span class="p">(</span><span class="n">client</span><span class="p">,</span> <span class="n">buffer_pid</span><span class="p">)</span> <span class="c1"># &lt;--- and then we'll cover this</span>
+  <span class="k">end</span>
+  <span class="n">loop_accept</span><span class="p">(</span><span class="n">socket</span><span class="p">)</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<p>Функция <a href="http://erlang.org/doc/man/gen_tcp.html#accept-1"><code class="highlighter-rouge">:gen_tcp.accept/1</code></a> находится в ожидании подключения. Как только оно появляется, запускается новый процесс, который создаёт <code class="highlighter-rouge">Buffer</code> для данного подключения и находится в ожидании передачи данных (функция <code class="highlighter-rouge">serve</code>). Её мы реализуем позже.</p>
+
+<p>Вы спросите, что это ещё за <code class="highlighter-rouge">Buffer</code>? Это модуль, описывающий <a href="https://gist.github.com/jyurek/0c1aac357cbcc8f52007627e8658d724#file-buffer-ex">строковый буфер</a>, в задачи которого входит хранение полученных данных в оперативной памяти, их анализ и передача в приёмник. Подробно рассматривать его не будем, остановимся лишь на управлении его процессом.</p>
+
+<h2 id="продолжаем-разбираться">Продолжаем разбираться</h2>
+
+<p>Внутри функции <code class="highlighter-rouge">spawn</code> мы создаём <code class="highlighter-rouge">Buffer</code> для каждого подключения к сокету и отслеживаем этот процесс. Процессы Эрланга (и, соответственно, Эликсира) являются легковесными, и предполагается, что их очень просто создавать и перезапускать.</p>
+
+<p>Существует два основных способа наблюдения за процессами:</p>
+
+<ol>
+  <li><code class="highlighter-rouge">spawn</code> – порождает процесс и не отслеживает его статус.</li>
+  <li><a href="https://hexdocs.pm/elixir/Kernel.html#spawn_link/1"><code class="highlighter-rouge">spawn_link</code></a> – порождает новый процесс, привязанный к текущему. Связь между ними означает, что если один процесс упадёт, упадёт и другой. Полезная функция, помогающая убедиться в том, что состояния процессов не болтаются где-то в памяти без дела.</li>
+</ol>
+
+<p>Важно то, что обе функции никак не отслеживают жизненный цикл процесса. К счастью, у этой проблемы есть несколько доступных решений.</p>
+
+<ol>
+  <li>
+    <p>С помощью функции <a href="https://hexdocs.pm/elixir/Process.html#monitor/1"><code class="highlighter-rouge">Process.monitor/1</code></a> можно отслеживать абсолютно любой процесс, если известен его <code class="highlighter-rouge">pid</code>. Если процесс упадёт, мы получим сообщение <code class="highlighter-rouge">:DOWN</code>. Лучше всего работает с процессами, порождёнными через spawn.</p>
+  </li>
+  <li>
+    <p>Можно отлавливать сообщения о непреднамеренном завершении процессов с помощью функции <a href="https://hexdocs.pm/elixir/Process.html#flag/2"><code class="highlighter-rouge">Process.flag(:trap_exit, true)</code></a>, как в примере выше. Работает только с процессами, порождёнными через <code class="highlighter-rouge">spawn_link</code>. Если дочерний процесс упал, то его предок получит сообщение <code class="highlighter-rouge">:EXIT</code>.</p>
+  </li>
+</ol>
+
+<p>Как вы могли заметить, именно второй вариант был использован при порождении процесса-слушателя. Если процесс с модулем <code class="highlighter-rouge">Buffer</code> упадёт, то мы об этом узнаем.</p>
+
+<h2 id="связываемся-и-слушаем">Связываемся и слушаем</h2>
+
+<p>Итак, наше приложение уже умеет слушать сокет и устанавливать с ним связь, а также отслеживать падение дочерних процессов и складывать полученные данные в <code class="highlighter-rouge">Buffer</code>. Как же, собственно, получать эти данные? Раз уж мы выбрали вариант прослушки порта с <code class="highlighter-rouge">active: false</code>, то данные придётся запросить. Для этого воспользуемся функцией <a href="http://erlang.org/doc/man/gen_tcp.html#recv-2"><code class="highlighter-rouge">:gen_tcp.recv/2</code></a>.</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code> <span class="k">def</span> <span class="n">serve</span><span class="p">(</span><span class="n">socket</span><span class="p">,</span> <span class="n">buffer_pid</span><span class="p">)</span> <span class="k">do</span>
+    <span class="k">case</span> <span class="ss">:gen_tcp</span><span class="o">.</span><span class="n">recv</span><span class="p">(</span><span class="n">socket</span><span class="p">,</span> <span class="m">0</span><span class="p">)</span> <span class="k">do</span>
+      <span class="p">{</span><span class="ss">:ok</span><span class="p">,</span> <span class="n">data</span><span class="p">}</span> <span class="o">-&gt;</span>
+        <span class="n">buffer_pid</span> <span class="o">=</span> <span class="n">maybe_recreate_buffer</span><span class="p">(</span><span class="n">buffer_pid</span><span class="p">)</span> <span class="c1"># &lt;-- coming up next</span>
+        <span class="no">Buffer</span><span class="o">.</span><span class="k">receive</span><span class="p">(</span><span class="n">buffer_pid</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
+        <span class="n">serve</span><span class="p">(</span><span class="n">socket</span><span class="p">,</span> <span class="n">buffer_pid</span><span class="p">)</span>
+      <span class="p">{</span><span class="ss">:error</span><span class="p">,</span> <span class="n">reason</span><span class="p">}</span> <span class="o">-&gt;</span>
+        <span class="no">Logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sd">"</span><span class="s2">Socket terminating: </span><span class="si">#{</span><span class="n">inspect</span> <span class="n">reason</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+    <span class="k">end</span>
+  <span class="k">end</span>
+</code></pre></div></div>
+
+<p>Теперь процесс находится в вечном ожидании данных. Получив их, он убедится, что <code class="highlighter-rouge">Buffer</code> работает (или запустит новый), а затем передаст ему данные и продолжит ждать. Это единственный возможный сценарий, потому что получение данных происходит в отдельном процессе.</p>
+
+<p>И последняя часть головоломки – определить, запущен ли <code class="highlighter-rouge">Buffer</code>-процесс. Как было отмечено выше, если он упал, то будет получено сообщение <code class="highlighter-rouge">:EXIT</code>, а значит, нужно проверить почтовый ящик.</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code> <span class="k">defp</span> <span class="n">maybe_recreate_buffer</span><span class="p">(</span><span class="n">original_pid</span><span class="p">)</span> <span class="k">do</span>
+    <span class="k">receive</span> <span class="k">do</span>
+      <span class="p">{</span><span class="ss">:EXIT</span><span class="p">,</span> <span class="o">^</span><span class="n">original_pid</span><span class="p">,</span> <span class="n">_reason</span><span class="p">}</span> <span class="o">-&gt;</span>
+        <span class="p">{</span><span class="ss">:ok</span><span class="p">,</span> <span class="n">new_buffer_pid</span><span class="p">}</span> <span class="o">=</span> <span class="no">Buffer</span><span class="o">.</span><span class="n">create</span><span class="p">()</span>
+        <span class="n">new_buffer_pid</span>
+    <span class="k">after</span>
+      <span class="m">10</span> <span class="o">-&gt;</span>
+        <span class="n">original_pid</span>
+    <span class="k">end</span>
+ <span class="k">end</span>
+</code></pre></div></div>
+
+<p>Если там уже находится это сообщение (или оно будет получено в ближайшие 10 мс), следует создать новый <code class="highlighter-rouge">Buffer</code>. В противном случае никаких действий не требуется.</p>
+
+<p>Без <code class="highlighter-rouge">Buffer</code> невозможно создать работающий канал передачи данных функциям, которые проделывают с ними основную работу. Если <code class="highlighter-rouge">Buffer</code>-процесс вдруг упадёт, он будет немедленно создан заново. Функция <code class="highlighter-rouge">maybe_recreate_buffer/1</code> делает это максимально прозрачно для функции <code class="highlighter-rouge">serve/2</code>.</p>
+
+<h2 id="подводим-итоги">Подводим итоги</h2>
+
+<p>Мы создали простенький сервер на сокетах, работающий со строчно-ориентированными протоколами и передающий сформированные строки в парсер. <code class="highlighter-rouge">Buffer</code>-процесс – прост в реализации, а вероятность его непреднамеренного завершения стремится к нулю. Даже если это и произойдёт, проблема будет тут же решена. Мы рассмотрели, каким образом процессы связаны между собой и как они могут отслеживать состояние друг друга.</p>
+
+<p>Важно отметить, что статья представляет собой исследование взаимодействия с сокетами и процессами. Не исключено, что существует более устойчивое к сбоям решение с использование супервизоров, но в рамках данной статьи оно не представляет интереса.</p>
+
+
+  </div>
+
+  <!-- uSocial -->
+  <div class="post__share_block share_block">
+    <script async src="https://usocial.pro/usocial/usocial.js?v=6.1.4" data-script="usocial" charset="utf-8"></script>
+    <div class="uSocial-Share" data-pid="2fd19544e551bce292425ee8adaa31be" data-type="share" data-options="round,style2,default,absolute,horizontal,size32,counter1,counter-before,upArrow-right,nomobile" data-social="telegram,fb,vk,gPlus,twi,bookmarks"></div>
+  </div>
+  <!-- /uSocial -->
+</article>
+
+
+        <footer class="footer">
+    &copy; 2020
+    / Россия
+
+    <span class="pull-right">Любые мысли и вопросы пишите на <a href="mailto:elixir@wunsh.ru">elixir@wunsh.ru</a>.</span>
+</footer>
+
+        <div id="subscribeModal" class="modal">
+    <div class="modal__content">
+        <a href="#close" title="Close" class="modal__close">x</a>
+
+        <h2 class="modal__title">Ламповая рассылка про&nbsp;Эликсир</h2>
+
+        <p>Один-два раза в&nbsp;неделю присылаем тёплые письма об&nbsp;Эликсире: переводы самых интересных статей до&nbsp;их&nbsp;появления в&nbsp;открытом доступе, анонсы событий и&nbsp;вкусные бонусы.</p>
+
+        <form action="//wunsh.us14.list-manage.com/subscribe/post?u=c81ca3d4693f62db7f7f67c71&amp;id=a192e2dfef" method="post" id="mc-embedded-subscribe-form" name="mc-embedded-subscribe-form" class="pure-form h-tc validate" target="_blank" novalidate>
+            <input type="email" value="" name="EMAIL" class="modal__input pure-input-rounded large" id="mce-EMAIL" placeholder="Твоя почта" required>
+            <div style="position: absolute; left: -5000px;" aria-hidden="true"><input type="text" name="b_c81ca3d4693f62db7f7f67c71_a192e2dfef" tabindex="-1" value=""></div>
+
+            <input type="submit" value="Присоединиться" name="subscribe" onClick="yaCounter39773490.reachGoal('SUBSCRIBED'); return true" id="mc-embedded-subscribe" class="pure-button button-success large">
+        </form>
+
+        <p>Обязательно подтверди почту, перейдя по&nbsp;ссылке в&nbsp;письме, иначе мы&nbsp;не&nbsp;сможем делиться с&nbsp;тобой полезностями.</p>
+
+        <p>Надоедать точно не&nbsp;будем :)</p>
+    </div>
+</div>
+
+        <script src="/assets/js/vendors/zepto.min.js"></script>
+
+<script>
+    if ($(".post--docs").length) {
+        $(".footer").addClass("footer--docs")
+    }
+
+    $(".modal--close_backdrop").click(function(){
+        window.location.hash = "";
+    });
+</script>
+
+        <!-- Yandex.Metrika counter -->
+<script type="text/javascript">
+    (function (d, w, c) {
+        (w[c] = w[c] || []).push(function() {
+            try {
+                w.yaCounter39773490 = new Ya.Metrika({
+                    id:39773490,
+                    clickmap:true,
+                    trackLinks:true,
+                    accurateTrackBounce:true,
+                    webvisor:true,
+                    ut:"noindex"
+                });
+            } catch(e) { }
+        });
+
+        var n = d.getElementsByTagName("script")[0],
+            s = d.createElement("script"),
+            f = function () { n.parentNode.insertBefore(s, n); };
+        s.type = "text/javascript";
+        s.async = true;
+        s.src = "https://mc.yandex.ru/metrika/watch.js";
+
+        if (w.opera == "[object Opera]") {
+            d.addEventListener("DOMContentLoaded", f, false);
+        } else { f(); }
+    })(document, window, "yandex_metrika_callbacks");
+</script>
+<noscript><div><img src="https://mc.yandex.ru/watch/39773490?ut=noindex" style="position:absolute; left:-9999px;" alt="" /></div></noscript>
+<!-- /Yandex.Metrika counter -->
+
+      </div>
+    </div>
+  </body>
+</html>

@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Выбор хостинга под Эликсир |> Сообщество Elixir и Phoenix Framework</title>
+    <meta name="description" content="Эликсир предоставляет мощные встроенные инструменты вроде Редиса или Кубернейтса, которые в некоторых случаях могут заменить эти внешние зависимости. При это...">
+
+    <link rel="alternate" type="application/rss+xml" title="Сообщество Elixir и Phoenix Framework" href="/feed.xml" />
+    <link rel="canonical" href="https://wunsh.ru/articles/what-to-consider-when-hosting-elixir.html">
+
+    <style type="text/css">@import url("//fonts.googleapis.com/css?family=Source+Sans+Pro:400,700&subset=cyrillic");</style>
+    <link rel="stylesheet" href="/assets/css/vendors/pure.min.css">
+    <link rel="stylesheet" href="/assets/css/vendors/pure-grids-responsive.min.css">
+    <link rel="stylesheet" href="/assets/css/style.css?1594516983">
+
+    <link rel="shortcut icon" type="image/png" href="/assets/favicon.png" >
+</head>
+
+
+  <body>
+    <div class="wunsh pure-g">
+      
+
+
+
+
+<div class="menu pure-u-1 pure-u-md-1-4">
+  <div class="header">
+    <h2 class="header__title">
+      
+        <a href="https://wunsh.ru" class="header__title_link" title="На главную">Эликсир и&nbsp;Вунш</a>
+      
+    </h2>
+    <h3 class="header__tagline">Erlang + Ruby = &#10084;</h3>
+
+    <nav class="nav">
+      <ul class="nav_list">
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/elixir" class="nav_list__item_link pure-button">О языке</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/install/linux-asdf" class="nav_list__item_link pure-button">Установка</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/docs/" class="nav_list__item_link pure-button">Документация</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/guides" class="nav_list__item_link pure-button">Гайды</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/news" class="nav_list__item_link pure-button">Новости</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/articles" class="nav_list__item_link pure-button">Статьи</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/videos" class="nav_list__item_link pure-button">Видео</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/vacancies" class="nav_list__item_link pure-button">Вакансии</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/faq" class="nav_list__item_link pure-button">FAQ</a>
+            </li>
+          
+        
+      </ul>
+    </nav>
+
+    <a href="#subscribeModal" class="pure-button header__subscribe_link">Подписаться на рассылку</a>
+  </div>
+</div>
+
+
+      <div class="content pure-u-1 pure-u-md-3-4">
+        
+
+<article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+  <header class="post__header">
+    
+    <h1 class="post__title" itemprop="name headline">Выбор хостинга под Эликсир</h1>
+
+    <div class="post__meta post_meta">
+      <ul class="meta_list">
+        <li class="meta_list__item">
+          
+          <span class="">
+            <small class="meta_list__item_name">Дата</small>
+            <time class="h-bold" datetime="2018-07-27T00:00:00+00:00" itemprop="datePublished">
+              
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+27 июля 2018
+
+            </time>
+          </span>
+          
+
+          
+        </li>
+        
+        <li class="meta_list__item">
+            <span class="tag_cloud tags_cloud--inline h-no_margin">
+              <small class="meta_list__item_name">Теги</small> 
+
+
+<ul class="tags_cloud__list">
+  
+    <a href="/tags/#deploy" class="tags_cloud__link tag tag--deploy">deploy</a>
+  
+    <a href="/tags/#overview" class="tags_cloud__link tag tag--overview">overview</a>
+  
+</ul>
+
+            </span>
+        </li>
+        
+        <li class="meta_list__item">
+          <span itemprop="author" itemscope itemtype="http://schema.org/Person">
+            <small class="meta_list__item_name">
+              
+                Перевод
+              
+            </small>
+            <span itemprop="name" class="h-bold">Надежда Нестерова</span>
+          </span>
+        </li>
+
+        <li class="meta_list__item">
+          
+            <div >
+              <small>Оригинал</small>
+              <strong>
+                &laquo;<a href="https://www.verypossible.com/blog/what-to-consider-when-hosting-elixir" style="text-transform: none; text-decoration: underline; color: #4b2e39;">Shake Before Use: 3 Things to Consider When Hosting Elixir</a>&raquo;
+              </strong>
+              <small>&copy;</small>
+              <strong>Daniel Spofford</strong>
+            </div>
+          
+        </li>
+      </ul>
+    </div>
+  </header>
+
+  <div class="post__content" itemprop="articleBody">
+    <p><a href="https://wunsh.ru/">Эликсир</a> предоставляет мощные встроенные инструменты вроде <a href="https://redis.io/">Редиса</a> или <a href="https://kubernetes.io/">Кубернейтса</a>, которые в некоторых случаях могут заменить эти внешние зависимости. При этом, есть три области, требующие осторожности:</p>
+
+<ul>
+  <li>хранение состояния в памяти;</li>
+  <li>масштабируемость;</li>
+  <li>горячее обновление кода.</li>
+</ul>
+
+<p>Три мощных идеи со своими неприятными особенностями, стоимости использования которых стоит уделить должное внимание.</p>
+
+<h2 id="хранение-состояния-впамяти">Хранение состояния в памяти</h2>
+
+<p>Для управления состоянием сервиса, разработчики нередко прибегают к помощи таких хранилищ, как Редис или Постгрес. Избежать подобных зависимостей иногда под силу следующим встроенным инструментам Эликсира:</p>
+
+<ul>
+  <li><a href="/docs/processes.html">Процессы</a> (<a href="/docs/processes.html#tasks">Задачи</a>, <a href="/docs/mix-otp/agent.html">Агент</a>, <a href="/docs/mix-otp/genserver.html">ГенСервер</a>);</li>
+  <li><a href="/docs/mix-otp/ets.html">ETS</a>.</li>
+</ul>
+
+<p>Это добавляет разработчикам некой гибкости, позволяя обращаться к зависимостям только тогда, когда это необходимо. Однако если состояние хранится в памяти приложения, возникает спорная ситуация: с одной стороны, задержка при взаимодействии с данными уменьшается, но если содержащий состояние процесс умирает, то состояние умирает вместе с ним. Если в качестве хоста используется <a href="https://aws.amazon.com/ec2/">AWS EC2</a>, такие ситуации редки, и их возникновение будет в основном обусловлено частотой возникновения критических ошибок. При использовании <a href="https://www.heroku.com/">Хероку</a> с перезапусками «серверных контейнеров» это будет происходить как минимум ежедневно.</p>
+
+<p>Важно отметить, что вариант с Хероку всё равно имеет место быть. Имеет смысл хотя бы предположить, что драгоценные хранящие состояние процессы потерпят крах, потому что рано или поздно это случится, каким бы длительным ни было время безотказной работы приложения. Такова правда, и она должна натолкнуть вас на принятие важных архитектурных решений как можно скорее (читай: прежде чем приступать к основной разработке). Как минимум, задайтесь следующими вопросами о состоянии, которым будет управлять сервис.</p>
+
+<p>Насколько данные моего приложения:</p>
+
+<ul>
+  <li>временные?</li>
+  <li>несущественные?</li>
+  <li>восстанавливаемые быстро и без особых затрат?</li>
+</ul>
+
+<p>В зависимости от ответов на данные вопросы и конкретного случая, можно обойтись и теми средствами, которые предлагает Эликсир — сбрасывать состояние или управлять им только в случае гибели процесса и восстанавливать согласованное состояние, когда они возвращаются к жизни. С другой стороны, если важное состояние хранится в памяти, восстановление которой затратно и занимает продолжительное время, а родительский процесс умирает, то клиентам такого сервиса придётся непросто. Если в приоритете уменьшение времени задержки, а не избавление от зависимости, отличным выбором станет Редис. Его можно использовать как самостоятельно, так и в качестве кэша со сквозным чтением поверх Постгреса.</p>
+
+<h2 id="масштабируемость">Масштабируемость</h2>
+
+<p>Несмотря на то, что Эликсир способствует созданию масштабируемых распределённых сервисов, не стоит забывать что бесплатный сыр — только в мышеловке. Эликсир будет масштабироваться вертикально, пока всё ядро не будет полностью задействовано, а затем — масштабировать ядра горизонтально, но что дальше? Горизонтальное масштабирование нескольких машин и объединение нод из этих машин в кластеры — это не одно и то же.</p>
+
+<p>Масштабируя в рамках нескольких машин, не объединяя ноды в кластеры, вы зададите себе ряд вопросов. Как нужно масштабировать сервис? Нормально ли, что требуется делать это вручную? Как быстро я смогу это с этим справиться? Во сколько мне это обойдется? Как правило, провайдеры, выполняющие большее количество работы за вас и упрощающие разработку и эксплуатацию априори будут стоить дороже, и цена возрастёт при масштабировании. В свою очередь, если вы уже инвестировали время и знания в проект, вполне подойдёт провайдер с более узким спектром услуг, который, разумеется, будет дешевле.</p>
+
+<p>Если существует необходимость создания кластеров, использование провайдеров без внутренних частных сетей, в частности Хероку, невозможно. Однако это правило применимо далеко не во всех случаях, да и не каждому сервису необходимы кластеры для масштабирования.</p>
+
+<h2 id="горячее-обновление-кода">Горячее обновление кода</h2>
+
+<p>Горячее обновление кода — способность обновления уже запущенного релиза до новой версии без простоя. Это очень мощная функция, которой не стоит увлекаться. Будет даже правильнее сказать, пользоваться только в случае крайней необходимости, при этом не обойтись без продолжительного и тщательного планирования. Если форма состояния изменилась в системе повсеместно, её необходимо передать через функцию, которая аккуратно поменяет старую форму на новую. Тестированию обновления следует уделять не меньше времени, чем тестированию целой системы.</p>
+
+<p>В добавок, горячее обновление кода противоречит одному из лучших актуальных подходов в разработке и развертывании, а именно контейнеризации. Рекомендуется создавать релизы в контейнерах, похожих на то, что будет в продакшене. Помимо этого, с появлением таких сервисов, как <a href="https://aws.amazon.com/ecs/">AWS ECS</a> и Кубернейтс, подобная практика с контейнерами стала ещё более широко распространённой. Среди главных её преимуществ — концепция иммутабельных релизов и среда разработки, очень напоминающая продакшн. Релиз новой версии через горячее обновление кода с помощью контейнеров в теории возможен, но на практике такой подход перечеркнёт идею иммутабельности и добавит сложности проекту — будет сложно разобраться что и где развернуто и убедиться, что незапланированные перезапуски системы выдадут корректную версию сервиса.</p>
+
+<p>Из-за присущей сложности и несогласованности в работе с контейнерами рекомендуется воздержаться от применения горячего обновления кода, насколько это возможно. В большинстве случаев это достаточно просто, особенно при использовании таких подходов, как последовательное обновление или сине-зеленый деплой для достижения адекватного уровня доступности до, после и во время развертывания новой версии.</p>
+
+<p>Если исключительная особенность сервиса заключается в том, чтобы у него не было простоя, состояние хранилось в памяти приложения и он будет неспособен истощить ноды, то горячее обновление кода отлично подойдёт. Часто в таких ситуациях разработчики останавливают свой выбор на AWS EC2 или других облачных провайдерах. В общем, требования таковы:</p>
+
+<ul>
+  <li>Никаких контейнеров.</li>
+  <li>Машина, находящаяся под полным контролем команды разработчиков.</li>
+  <li>Масштабный проверенный в действии провайдер с впечатляющими гарантиями времени безотказной работы и достаточным набором сопутствующих функций, позволяющих в будущем не усомниться в выборе.</li>
+</ul>
+
+<p>Поставив галочку напротив каждого пункта выше, можно быть уверенным, что горячее обновление кода обеспечит поразительные временные показатели и быстрое обновление, так как истощение ресурсов ноды не произойдёт. Но будьте готовы к большему количеству ручных доработок в девопсе и усиленным подготовкам к новым релизам.</p>
+
+<h2 id="выводы">Выводы</h2>
+
+<p>Выбирая провайдера, обратите внимание на следующие параметры:</p>
+
+<ul>
+  <li><strong>размер:</strong> проверенный на практике, гарантирующий качество;</li>
+  <li><strong>ключевые характеристики:</strong> время безотказной работы, сторонние сервисы и наличие внутренних частных сетей;</li>
+  <li><strong>сложность:</strong> количество девопс-задач;</li>
+  <li><strong>стоимость:</strong> соотношение цена/качество.</li>
+</ul>
+
+<p>Оцените вышеизложенные параметры в отношение Эликсира, акцентируя внимание на:</p>
+
+<ul>
+  <li>хранение состояния в памяти;</li>
+  <li>масштабируемость;</li>
+  <li>горячее обновление кода.</li>
+</ul>
+
+<p>API Эликсира с Фениксом прямолинейны и не хранят состояние, поэтому здесь подойдут почти все провайдеры, при условии если ожидания по трафику и стоимость масштабирования учтены. Если сервису понадобится хранить состояние или он начнёт планомерно усложняться, стоит уделить больше внимания требованиям. Если вы запускаете несколько сервисов сразу, можно сэкономить, выбрав для разных целей один хост, которому под силу справиться как с простыми, так и со сложными задачами. Конечно, два разных сервиса не могут иметь одни и те же требования, но этап тщательного планирования, к которому можно прибегать неоднократно, позволит увеличить эффективность ваших приложений.</p>
+
+  </div>
+
+  <!-- uSocial -->
+  <div class="post__share_block share_block">
+    <script async src="https://usocial.pro/usocial/usocial.js?v=6.1.4" data-script="usocial" charset="utf-8"></script>
+    <div class="uSocial-Share" data-pid="2fd19544e551bce292425ee8adaa31be" data-type="share" data-options="round,style2,default,absolute,horizontal,size32,counter1,counter-before,upArrow-right,nomobile" data-social="telegram,fb,vk,gPlus,twi,bookmarks"></div>
+  </div>
+  <!-- /uSocial -->
+</article>
+
+
+        <footer class="footer">
+    &copy; 2020
+    / Россия
+
+    <span class="pull-right">Любые мысли и вопросы пишите на <a href="mailto:elixir@wunsh.ru">elixir@wunsh.ru</a>.</span>
+</footer>
+
+        <div id="subscribeModal" class="modal">
+    <div class="modal__content">
+        <a href="#close" title="Close" class="modal__close">x</a>
+
+        <h2 class="modal__title">Ламповая рассылка про&nbsp;Эликсир</h2>
+
+        <p>Один-два раза в&nbsp;неделю присылаем тёплые письма об&nbsp;Эликсире: переводы самых интересных статей до&nbsp;их&nbsp;появления в&nbsp;открытом доступе, анонсы событий и&nbsp;вкусные бонусы.</p>
+
+        <form action="//wunsh.us14.list-manage.com/subscribe/post?u=c81ca3d4693f62db7f7f67c71&amp;id=a192e2dfef" method="post" id="mc-embedded-subscribe-form" name="mc-embedded-subscribe-form" class="pure-form h-tc validate" target="_blank" novalidate>
+            <input type="email" value="" name="EMAIL" class="modal__input pure-input-rounded large" id="mce-EMAIL" placeholder="Твоя почта" required>
+            <div style="position: absolute; left: -5000px;" aria-hidden="true"><input type="text" name="b_c81ca3d4693f62db7f7f67c71_a192e2dfef" tabindex="-1" value=""></div>
+
+            <input type="submit" value="Присоединиться" name="subscribe" onClick="yaCounter39773490.reachGoal('SUBSCRIBED'); return true" id="mc-embedded-subscribe" class="pure-button button-success large">
+        </form>
+
+        <p>Обязательно подтверди почту, перейдя по&nbsp;ссылке в&nbsp;письме, иначе мы&nbsp;не&nbsp;сможем делиться с&nbsp;тобой полезностями.</p>
+
+        <p>Надоедать точно не&nbsp;будем :)</p>
+    </div>
+</div>
+
+        <script src="/assets/js/vendors/zepto.min.js"></script>
+
+<script>
+    if ($(".post--docs").length) {
+        $(".footer").addClass("footer--docs")
+    }
+
+    $(".modal--close_backdrop").click(function(){
+        window.location.hash = "";
+    });
+</script>
+
+        <!-- Yandex.Metrika counter -->
+<script type="text/javascript">
+    (function (d, w, c) {
+        (w[c] = w[c] || []).push(function() {
+            try {
+                w.yaCounter39773490 = new Ya.Metrika({
+                    id:39773490,
+                    clickmap:true,
+                    trackLinks:true,
+                    accurateTrackBounce:true,
+                    webvisor:true,
+                    ut:"noindex"
+                });
+            } catch(e) { }
+        });
+
+        var n = d.getElementsByTagName("script")[0],
+            s = d.createElement("script"),
+            f = function () { n.parentNode.insertBefore(s, n); };
+        s.type = "text/javascript";
+        s.async = true;
+        s.src = "https://mc.yandex.ru/metrika/watch.js";
+
+        if (w.opera == "[object Opera]") {
+            d.addEventListener("DOMContentLoaded", f, false);
+        } else { f(); }
+    })(document, window, "yandex_metrika_callbacks");
+</script>
+<noscript><div><img src="https://mc.yandex.ru/watch/39773490?ut=noindex" style="position:absolute; left:-9999px;" alt="" /></div></noscript>
+<!-- /Yandex.Metrika counter -->
+
+      </div>
+    </div>
+  </body>
+</html>

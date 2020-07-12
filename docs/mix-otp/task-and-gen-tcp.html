@@ -1,0 +1,576 @@
+<!DOCTYPE html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Модули `Task` и `:gen_tcp` |> Сообщество Elixir и Phoenix Framework</title>
+    <meta name="description" content="Русскоязычное сообщество Elixir и Phoenix Framework
+">
+
+    <link rel="alternate" type="application/rss+xml" title="Сообщество Elixir и Phoenix Framework" href="/feed.xml" />
+    <link rel="canonical" href="https://wunsh.ru/docs/mix-otp/task-and-gen-tcp">
+
+    <style type="text/css">@import url("//fonts.googleapis.com/css?family=Source+Sans+Pro:400,700&subset=cyrillic");</style>
+    <link rel="stylesheet" href="/assets/css/vendors/pure.min.css">
+    <link rel="stylesheet" href="/assets/css/vendors/pure-grids-responsive.min.css">
+    <link rel="stylesheet" href="/assets/css/style.css?1594516983">
+
+    <link rel="shortcut icon" type="image/png" href="/assets/favicon.png" >
+</head>
+
+
+  <body>
+    <div class="wunsh pure-g">
+      
+
+
+
+
+<div class="menu pure-u-1 pure-u-md-1-4">
+  <div class="header">
+    <h2 class="header__title">
+      
+        <a href="https://wunsh.ru" class="header__title_link" title="На главную">Эликсир и&nbsp;Вунш</a>
+      
+    </h2>
+    <h3 class="header__tagline">Erlang + Ruby = &#10084;</h3>
+
+    <nav class="nav">
+      <ul class="nav_list">
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/elixir" class="nav_list__item_link pure-button">О языке</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/install/linux-asdf" class="nav_list__item_link pure-button">Установка</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/docs/" class="nav_list__item_link pure-button">Документация</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/guides" class="nav_list__item_link pure-button">Гайды</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/news" class="nav_list__item_link pure-button">Новости</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/articles" class="nav_list__item_link pure-button">Статьи</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/videos" class="nav_list__item_link pure-button">Видео</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/vacancies" class="nav_list__item_link pure-button">Вакансии</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/faq" class="nav_list__item_link pure-button">FAQ</a>
+            </li>
+          
+        
+      </ul>
+    </nav>
+
+    <a href="#subscribeModal" class="pure-button header__subscribe_link">Подписаться на рассылку</a>
+  </div>
+</div>
+
+
+      <div class="content pure-u-1 pure-u-md-3-4">
+        <article class="post post--docs" itemscope itemtype="http://schema.org/BlogPosting">
+    <header class="post__header">
+        <h1 class="post__title" itemprop="name headline">
+            <p>Модули <code class="highlighter-rouge">Task</code> и <code class="highlighter-rouge">:gen_tcp</code></p>
+
+        </h1>
+    </header>
+
+    <div class="post__content" itemprop="articleBody">
+        <p>В этой главе мы изучим, как использовать <a href="http://www.erlang.org/doc/man/gen_tcp.html">модуль Эрланга <code class="highlighter-rouge">:gen_tcp</code></a> для обработки запросов. При этом мы получим возможность посмотреть также модуль Эликсира <code class="highlighter-rouge">Task</code>. В дальнейших главах мы расширим наш сервер так, чтобы он действительно мог обрабатывать команды.</p>
+
+<h2 id="эхо-сервер">Эхо-сервер</h2>
+
+<p>Начнём разработку TCP-сервера с реализации эхо-сервера. Он будет посылать в ответ тот текст, который он получил в запросе. Будем постепенно улучшать наш сервер, пока он не будет управляться супервизором и будет готов к работе с множеством подключений.</p>
+
+<p>TCP-сервер, грубо говоря, делает следующие шаги:</p>
+
+<ol>
+  <li>Слушает порт, пока порт доступен и удерживает сокет.</li>
+  <li>Ждёт подключение клиента на этом порту и принимает его.</li>
+  <li>Читает запросы клиента и отправляет ответы.</li>
+</ol>
+
+<p>Давайте реализуем эти шаги. Перейдите к приложению <code class="highlighter-rouge">apps/kv_server</code>, откройте файл <code class="highlighter-rouge">lib/kv_server.ix</code> и добавьте следующие функции:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">require</span> <span class="no">Logger</span>
+
+<span class="k">def</span> <span class="n">accept</span><span class="p">(</span><span class="n">port</span><span class="p">)</span> <span class="k">do</span>
+  <span class="c1"># Опции ниже означают:</span>
+  <span class="c1">#</span>
+  <span class="c1"># 1. `:binary` – принимает данные в двоичном виде (вместо списков)</span>
+  <span class="c1"># 2. `packet: :line` – принимает данные построчно</span>
+  <span class="c1"># 3. `active: false` – блокирует функцию `:gen_tcp.recv/2`, пока данные не будут доступны</span>
+  <span class="c1"># 4. `reuseaddr: true` – разрешает повторно использовать адрес, если слушатель отвалился с ошибкой</span>
+  <span class="c1">#</span>
+  <span class="p">{</span><span class="ss">:ok</span><span class="p">,</span> <span class="n">socket</span><span class="p">}</span> <span class="o">=</span> <span class="ss">:gen_tcp</span><span class="o">.</span><span class="n">listen</span><span class="p">(</span><span class="n">port</span><span class="p">,</span>
+                    <span class="p">[</span><span class="ss">:binary</span><span class="p">,</span> <span class="ss">packet:</span> <span class="ss">:line</span><span class="p">,</span> <span class="ss">active:</span> <span class="no">false</span><span class="p">,</span> <span class="ss">reuseaddr:</span> <span class="no">true</span><span class="p">])</span>
+  <span class="no">Logger</span><span class="o">.</span><span class="n">info</span> <span class="sd">"</span><span class="s2">Accepting connections on port </span><span class="si">#{</span><span class="n">port</span><span class="si">}</span><span class="s2">"</span>
+  <span class="n">loop_acceptor</span><span class="p">(</span><span class="n">socket</span><span class="p">)</span>
+<span class="k">end</span>
+
+<span class="k">defp</span> <span class="n">loop_acceptor</span><span class="p">(</span><span class="n">socket</span><span class="p">)</span> <span class="k">do</span>
+  <span class="p">{</span><span class="ss">:ok</span><span class="p">,</span> <span class="n">client</span><span class="p">}</span> <span class="o">=</span> <span class="ss">:gen_tcp</span><span class="o">.</span><span class="n">accept</span><span class="p">(</span><span class="n">socket</span><span class="p">)</span>
+  <span class="n">serve</span><span class="p">(</span><span class="n">client</span><span class="p">)</span>
+  <span class="n">loop_acceptor</span><span class="p">(</span><span class="n">socket</span><span class="p">)</span>
+<span class="k">end</span>
+
+<span class="k">defp</span> <span class="n">serve</span><span class="p">(</span><span class="n">socket</span><span class="p">)</span> <span class="k">do</span>
+  <span class="n">socket</span>
+  <span class="o">|&gt;</span> <span class="n">read_line</span><span class="p">()</span>
+  <span class="o">|&gt;</span> <span class="n">write_line</span><span class="p">(</span><span class="n">socket</span><span class="p">)</span>
+
+  <span class="n">serve</span><span class="p">(</span><span class="n">socket</span><span class="p">)</span>
+<span class="k">end</span>
+
+<span class="k">defp</span> <span class="n">read_line</span><span class="p">(</span><span class="n">socket</span><span class="p">)</span> <span class="k">do</span>
+  <span class="p">{</span><span class="ss">:ok</span><span class="p">,</span> <span class="n">data</span><span class="p">}</span> <span class="o">=</span> <span class="ss">:gen_tcp</span><span class="o">.</span><span class="n">recv</span><span class="p">(</span><span class="n">socket</span><span class="p">,</span> <span class="m">0</span><span class="p">)</span>
+  <span class="n">data</span>
+<span class="k">end</span>
+
+<span class="k">defp</span> <span class="n">write_line</span><span class="p">(</span><span class="n">line</span><span class="p">,</span> <span class="n">socket</span><span class="p">)</span> <span class="k">do</span>
+  <span class="ss">:gen_tcp</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="n">socket</span><span class="p">,</span> <span class="n">line</span><span class="p">)</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<p>Запускаем сервер, вызвав <code class="highlighter-rouge">KVServer.accept(4040)</code>, где <code class="highlighter-rouge">4040</code> – это порт. Первый шаг в функции <code class="highlighter-rouge">accept/1</code> – слушать порт, пока сокет не станет доступен и затем вызвать функцию <code class="highlighter-rouge">loop_acceptor/1</code>. Функция <code class="highlighter-rouge">loop_acceptor/1</code> – цикл, принимающий подключения клиентов. Для каждого принятого подключения мы вызываем функцию <code class="highlighter-rouge">serve/1</code>.</p>
+
+<p>Функция <code class="highlighter-rouge">serve/1</code> – другой цикл, который читает строки из сокета и пишет эти строки обратно в сокет. Обратите внимание, что функция <code class="highlighter-rouge">serve/1</code> использует <a href="https://hexdocs.pm/elixir/Kernel.html#%7C%3E/2">пайп-оператор <code class="highlighter-rouge">|&gt;</code></a> для выполнения этого потока операций. Оператор конвейера выполняет левую часть и передаёт её результат в качестве первого аргумента в функцию в правой части. Пример выше:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">socket</span> <span class="o">|&gt;</span> <span class="n">read_line</span><span class="p">()</span> <span class="o">|&gt;</span> <span class="n">write_line</span><span class="p">(</span><span class="n">socket</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p>эквивалентен этому:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">write_line</span><span class="p">(</span><span class="n">read_line</span><span class="p">(</span><span class="n">socket</span><span class="p">),</span> <span class="n">socket</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p>Функция <code class="highlighter-rouge">read_line/1</code> получает данные из сокета, используя функцию <code class="highlighter-rouge">:gen_tcp.recv/2</code>, и функция <code class="highlighter-rouge">write_line/2</code> пишет в сокет, используя функцию <code class="highlighter-rouge">:gen_tcp.send/2</code>.</p>
+
+<p>Обратите внимание, что функция <code class="highlighter-rouge">serve/1</code> – это бесконечный цикл, вызываемый последовательно внутри функции <code class="highlighter-rouge">loop_acceptor/1</code>, поэтому её конечный вызов никогда не будет достигнут и его можно опустить. Однако, как мы увидим, нам нужно будет выполнять функцию <code class="highlighter-rouge">serve/1</code> в отдельном процессе, поэтому нам скоро понадобится этот конечный вызов.</p>
+
+<p>Это всё, что нам нужно для реализации нашего эхо-сервера. Давайте попробуем его в деле!</p>
+
+<p>Запустите IEx-сессию внутри приложения <code class="highlighter-rouge">kv_server</code> командой <code class="highlighter-rouge">iex -S mix</code>. В консоли выполните:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">iex</span><span class="o">&gt;</span> <span class="no">KVServer</span><span class="o">.</span><span class="n">accept</span><span class="p">(</span><span class="m">4040</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p>Сервер теперь запущен, и вы можете увидеть, что консоль заблокирована. Давайте используем <a href="https://en.wikipedia.org/wiki/Telnet">Телнет-клиент</a> для доступа к этому серверу. Такие клиенты доступны для многих операционных систем, а их команды обычно похожи:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span>telnet 127.0.0.1 4040
+Trying 127.0.0.1...
+Connected to localhost.
+Escape character is <span class="s1">'^]'</span><span class="nb">.</span>
+hello
+hello
+is it me
+is it me
+you are looking <span class="k">for</span>?
+you are looking <span class="k">for</span>?
+</code></pre></div></div>
+
+<p>Введите «hello», нажмите <code class="highlighter-rouge">Enter</code>, и вы получите «hello» в ответ. Прекрасно!</p>
+
+<p>Телнет-клиент можно закрыть, нажав <code class="highlighter-rouge">ctrl + ]</code>, набрав следом <code class="highlighter-rouge">quit</code>, и нажав <code class="highlighter-rouge">&lt;Enter&gt;</code>, либо другой последовательностью действий, предусмотренной вашим клиентом.</p>
+
+<p>После закрытия Телнет-клиента, вы скорее всего увидите ошибку в IEx-сессии:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>** (MatchError) no match of right hand side value: {:error, :closed}
+    (kv_server) lib/kv_server.ex:45: KVServer.read_line/1
+    (kv_server) lib/kv_server.ex:37: KVServer.serve/1
+    (kv_server) lib/kv_server.ex:30: KVServer.loop_acceptor/1
+</code></pre></div></div>
+
+<p>Это происходит, потому что мы ждём данные от функции <code class="highlighter-rouge">:gen_tcp.recv/2</code>, но клиент закрывает соединение. Нам нужно лучше обрабатывать подобные сценарии в будущих версиях нашего сервера.</p>
+
+<p>Пока у нас есть более важные проблемы, которые нужно решить: что произойдёт, если наш TCP-приёмник соединений упадёт? Т. к. у нас нет супервизора, сервер умрёт и мы не сможем больше обрабатывать запросы, потому что он не перезапустится. Поэтому нам необходимо поместить наш сервер в дерево супервизора.</p>
+
+<h2 id="задачи">Задачи</h2>
+
+<p>Мы изучили агенты, генсерверы и супервизоры. Они все работают с множеством сообщений или управляют состоянием. Но что делать, если нам нужно всего лишь выполнить какую-то одну задачу?</p>
+
+<p><a href="https://hexdocs.pm/elixir/Task.html">Модуль <code class="highlighter-rouge">Task</code></a> предоставляет именно такую функциональность. Например, в нём есть фукнция <code class="highlighter-rouge">start_link/3</code>, которая принимает модуль, функцию и аргументы, позволяя запустить переданную фукнцию как часть дерева супервизора.</p>
+
+<p>Давайте попробуем на практике. Откройте файл <code class="highlighter-rouge">lib/kv_server/application.ex</code> и измените супервизор в функции <code class="highlighter-rouge">start/2</code> как показано ниже:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code>  <span class="k">def</span> <span class="n">start</span><span class="p">(</span><span class="n">_type</span><span class="p">,</span> <span class="n">_args</span><span class="p">)</span> <span class="k">do</span>
+    <span class="n">children</span> <span class="o">=</span> <span class="p">[</span>
+      <span class="p">{</span><span class="no">Task</span><span class="p">,</span> <span class="k">fn</span> <span class="o">-&gt;</span> <span class="no">KVServer</span><span class="o">.</span><span class="n">accept</span><span class="p">(</span><span class="m">4040</span><span class="p">)</span> <span class="k">end</span><span class="p">}</span>
+    <span class="p">]</span>
+
+    <span class="n">opts</span> <span class="o">=</span> <span class="p">[</span><span class="ss">strategy:</span> <span class="ss">:one_for_one</span><span class="p">,</span> <span class="ss">name:</span> <span class="no">KVServer</span><span class="o">.</span><span class="no">Supervisor</span><span class="p">]</span>
+    <span class="no">Supervisor</span><span class="o">.</span><span class="n">start_link</span><span class="p">(</span><span class="n">children</span><span class="p">,</span> <span class="n">opts</span><span class="p">)</span>
+  <span class="k">end</span>
+</code></pre></div></div>
+
+<p>Этим изменением мы говорим, что хотим запустить <code class="highlighter-rouge">KVServer.accept(4040)</code> как задачу. Мы задали порт прямо в коде, но он может быть изменён несколькими способами, например, его можно взять из системного окружения при запуске приложения:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">port</span> <span class="o">=</span> <span class="no">String</span><span class="o">.</span><span class="n">to_integer</span><span class="p">(</span><span class="no">System</span><span class="o">.</span><span class="n">get_env</span><span class="p">(</span><span class="sd">"</span><span class="s2">PORT"</span><span class="p">)</span> <span class="o">||</span> <span class="k">raise</span> <span class="sd">"</span><span class="s2">missing $PORT environment variable"</span><span class="p">)</span>
+<span class="c1"># ...</span>
+<span class="p">{</span><span class="no">Task</span><span class="p">,</span> <span class="k">fn</span> <span class="o">-&gt;</span> <span class="no">KVServer</span><span class="o">.</span><span class="n">accept</span><span class="p">(</span><span class="n">port</span><span class="p">)</span> <span class="k">end</span><span class="p">}</span>
+</code></pre></div></div>
+
+<p>Теперь сервер является частью дерева супервизора и должен запуститься автоматически при запуске приложения. Выполните команду <code class="highlighter-rouge">mix run --no-halt</code> в консоли и снова используйте Телнет-клиент, чтобы убедиться, что всё работает:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span>telnet 127.0.0.1 4040
+Trying 127.0.0.1...
+Connected to localhost.
+Escape character is <span class="s1">'^]'</span><span class="nb">.</span>
+say you
+say you
+say me
+say me
+</code></pre></div></div>
+
+<p>Да, всё отлично! Однако, может ли это решение <em>масштабироваться</em>?</p>
+
+<p>Попробуйте подключить два Телнет-клиента одновременно. Когда вы сделаете это, вы увидите, что второй клиент не отвечает:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span>telnet 127.0.0.1 4040
+Trying 127.0.0.1...
+Connected to localhost.
+Escape character is <span class="s1">'^]'</span><span class="nb">.</span>
+hello
+hello?
+HELLOOOOOO?
+</code></pre></div></div>
+
+<p>Не похоже, что он вообще работает. Это происходит потому, что мы обрабатываем запросы в том же процессе, в котором принимаем подключения. Когда один клиент подключен, мы не можем подключить другой клиент.</p>
+
+<h2 id="супервизор-задач">Супервизор задач</h2>
+
+<p>Чтобы наш сервер мог обрабатывать множество подключений, нам нужно сделать так, чтобы один процесс принимал подключения и порождал другие процессы, которые обрабатывают запросы. Одно из решений – изменить код:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">defp</span> <span class="n">loop_acceptor</span><span class="p">(</span><span class="n">socket</span><span class="p">)</span> <span class="k">do</span>
+  <span class="p">{</span><span class="ss">:ok</span><span class="p">,</span> <span class="n">client</span><span class="p">}</span> <span class="o">=</span> <span class="ss">:gen_tcp</span><span class="o">.</span><span class="n">accept</span><span class="p">(</span><span class="n">socket</span><span class="p">)</span>
+  <span class="n">serve</span><span class="p">(</span><span class="n">client</span><span class="p">)</span>
+  <span class="n">loop_acceptor</span><span class="p">(</span><span class="n">socket</span><span class="p">)</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<p>Используя функцию <code class="highlighter-rouge">Task.start_link/1</code>, которая похожа на функцию <code class="highlighter-rouge">Task.start_link/3</code>, но принимает анонимную функцию вместо модуля, функции и аргументов:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">defp</span> <span class="n">loop_acceptor</span><span class="p">(</span><span class="n">socket</span><span class="p">)</span> <span class="k">do</span>
+  <span class="p">{</span><span class="ss">:ok</span><span class="p">,</span> <span class="n">client</span><span class="p">}</span> <span class="o">=</span> <span class="ss">:gen_tcp</span><span class="o">.</span><span class="n">accept</span><span class="p">(</span><span class="n">socket</span><span class="p">)</span>
+  <span class="no">Task</span><span class="o">.</span><span class="n">start_link</span><span class="p">(</span><span class="k">fn</span> <span class="o">-&gt;</span> <span class="n">serve</span><span class="p">(</span><span class="n">client</span><span class="p">)</span> <span class="k">end</span><span class="p">)</span>
+  <span class="n">loop_acceptor</span><span class="p">(</span><span class="n">socket</span><span class="p">)</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<p>Мы запускаем связанную задачу прямо из процесса-приёмника. Но мы уже делали такую ошибку раньше. Вы помните?</p>
+
+<p>Это такая же ошибка, как в случае с вызовом функции <code class="highlighter-rouge">KV.Bucket.start_link/1</code> прямо из реестра. Там падение любой корзины приводило к падению всего реестра.</p>
+
+<p>Код выше имеет такую же проблему: если мы связываем задачу <code class="highlighter-rouge">serve(client)</code> с приёмником, падение обработки запроса приведёт к падению приёмника и всех других подключений.</p>
+
+<p>Для реестра мы решили эту проблему, используя супервизор. Мы придержимся этой же тактики здесь, т. к. этот шаблон настолько распространён для задач, что модуль <code class="highlighter-rouge">Task</code> уже содержит решение: простой супервизор «one for one», который запускает временные задачи как часть дерева супервизора.</p>
+
+<p>Давайте изменим функцию <code class="highlighter-rouge">start/2</code> ещё раз, добавив супервизор в дерево:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code>  <span class="k">def</span> <span class="n">start</span><span class="p">(</span><span class="n">_type</span><span class="p">,</span> <span class="n">_args</span><span class="p">)</span> <span class="k">do</span>
+    <span class="n">children</span> <span class="o">=</span> <span class="p">[</span>
+      <span class="p">{</span><span class="no">Task</span><span class="o">.</span><span class="no">Supervisor</span><span class="p">,</span> <span class="ss">name:</span> <span class="no">KVServer</span><span class="o">.</span><span class="no">TaskSupervisor</span><span class="p">},</span>
+      <span class="p">{</span><span class="no">Task</span><span class="p">,</span> <span class="k">fn</span> <span class="o">-&gt;</span> <span class="no">KVServer</span><span class="o">.</span><span class="n">accept</span><span class="p">(</span><span class="m">4040</span><span class="p">)</span> <span class="k">end</span><span class="p">}</span>
+    <span class="p">]</span>
+
+    <span class="n">opts</span> <span class="o">=</span> <span class="p">[</span><span class="ss">strategy:</span> <span class="ss">:one_for_one</span><span class="p">,</span> <span class="ss">name:</span> <span class="no">KVServer</span><span class="o">.</span><span class="no">Supervisor</span><span class="p">]</span>
+    <span class="no">Supervisor</span><span class="o">.</span><span class="n">start_link</span><span class="p">(</span><span class="n">children</span><span class="p">,</span> <span class="n">opts</span><span class="p">)</span>
+  <span class="k">end</span>
+</code></pre></div></div>
+
+<p>Сейчас мы запустим процесс <a href="https://hexdocs.pm/elixir/Task.Supervisor.html"><code class="highlighter-rouge">Task.Supervisor</code></a> с именем <code class="highlighter-rouge">KVServer.TaskSupervisor</code>. Помните, т. к. задача приёмника зависит от нашего супервизора, супервизор должен быть запущен первым.</p>
+
+<p>Теперь нам нужно изменить функцию <code class="highlighter-rouge">loop_acceptor/1</code> с использованием модуля <code class="highlighter-rouge">Task.Supervisor</code> для обработки каждого запроса:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">defp</span> <span class="n">loop_acceptor</span><span class="p">(</span><span class="n">socket</span><span class="p">)</span> <span class="k">do</span>
+  <span class="p">{</span><span class="ss">:ok</span><span class="p">,</span> <span class="n">client</span><span class="p">}</span> <span class="o">=</span> <span class="ss">:gen_tcp</span><span class="o">.</span><span class="n">accept</span><span class="p">(</span><span class="n">socket</span><span class="p">)</span>
+  <span class="p">{</span><span class="ss">:ok</span><span class="p">,</span> <span class="n">pid</span><span class="p">}</span> <span class="o">=</span> <span class="no">Task</span><span class="o">.</span><span class="no">Supervisor</span><span class="o">.</span><span class="n">start_child</span><span class="p">(</span><span class="no">KVServer</span><span class="o">.</span><span class="no">TaskSupervisor</span><span class="p">,</span> <span class="k">fn</span> <span class="o">-&gt;</span> <span class="n">serve</span><span class="p">(</span><span class="n">client</span><span class="p">)</span> <span class="k">end</span><span class="p">)</span>
+  <span class="ss">:ok</span> <span class="o">=</span> <span class="ss">:gen_tcp</span><span class="o">.</span><span class="n">controlling_process</span><span class="p">(</span><span class="n">client</span><span class="p">,</span> <span class="n">pid</span><span class="p">)</span>
+  <span class="n">loop_acceptor</span><span class="p">(</span><span class="n">socket</span><span class="p">)</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<p>Вы можете заметить, что мы добавили строку <code class="highlighter-rouge">:ok = :gen_tcp.controlling_process(client, pid)</code>. Это сделает процесс-потомок «контроллирующим процессом» для сокета <code class="highlighter-rouge">client</code>. Если бы мы не сделали это, приёмник при падении отключил бы всех клиентов, потому что сокеты были бы связаны с процессом, который принимает их (это стандартное поведение).</p>
+
+<p>Запустите новый сервер с помощью <code class="highlighter-rouge">PORT=4040 mix run --no-halt</code>, а следом откройте несколько Телнет-клиентов параллельно. Вы сможете убедиться, что отключение клиента не приводит к отключению приёмника. Прекрасно!</p>
+
+<p>Вот полная реализация эхо-сервера:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">defmodule</span> <span class="no">KVServer</span> <span class="k">do</span>
+  <span class="kn">require</span> <span class="no">Logger</span>
+
+  <span class="nv">@doc</span> <span class="sd">"""
+  Начинает принимать подключения на определённом порту `port`.
+  """</span>
+  <span class="k">def</span> <span class="n">accept</span><span class="p">(</span><span class="n">port</span><span class="p">)</span> <span class="k">do</span>
+    <span class="p">{</span><span class="ss">:ok</span><span class="p">,</span> <span class="n">socket</span><span class="p">}</span> <span class="o">=</span> <span class="ss">:gen_tcp</span><span class="o">.</span><span class="n">listen</span><span class="p">(</span><span class="n">port</span><span class="p">,</span>
+                      <span class="p">[</span><span class="ss">:binary</span><span class="p">,</span> <span class="ss">packet:</span> <span class="ss">:line</span><span class="p">,</span> <span class="ss">active:</span> <span class="no">false</span><span class="p">,</span> <span class="ss">reuseaddr:</span> <span class="no">true</span><span class="p">])</span>
+    <span class="no">Logger</span><span class="o">.</span><span class="n">info</span> <span class="sd">"</span><span class="s2">Accepting connections on port </span><span class="si">#{</span><span class="n">port</span><span class="si">}</span><span class="s2">"</span>
+    <span class="n">loop_acceptor</span><span class="p">(</span><span class="n">socket</span><span class="p">)</span>
+  <span class="k">end</span>
+
+  <span class="k">defp</span> <span class="n">loop_acceptor</span><span class="p">(</span><span class="n">socket</span><span class="p">)</span> <span class="k">do</span>
+    <span class="p">{</span><span class="ss">:ok</span><span class="p">,</span> <span class="n">client</span><span class="p">}</span> <span class="o">=</span> <span class="ss">:gen_tcp</span><span class="o">.</span><span class="n">accept</span><span class="p">(</span><span class="n">socket</span><span class="p">)</span>
+    <span class="p">{</span><span class="ss">:ok</span><span class="p">,</span> <span class="n">pid</span><span class="p">}</span> <span class="o">=</span> <span class="no">Task</span><span class="o">.</span><span class="no">Supervisor</span><span class="o">.</span><span class="n">start_child</span><span class="p">(</span><span class="no">KVServer</span><span class="o">.</span><span class="no">TaskSupervisor</span><span class="p">,</span> <span class="k">fn</span> <span class="o">-&gt;</span> <span class="n">serve</span><span class="p">(</span><span class="n">client</span><span class="p">)</span> <span class="k">end</span><span class="p">)</span>
+    <span class="ss">:ok</span> <span class="o">=</span> <span class="ss">:gen_tcp</span><span class="o">.</span><span class="n">controlling_process</span><span class="p">(</span><span class="n">client</span><span class="p">,</span> <span class="n">pid</span><span class="p">)</span>
+    <span class="n">loop_acceptor</span><span class="p">(</span><span class="n">socket</span><span class="p">)</span>
+  <span class="k">end</span>
+
+  <span class="k">defp</span> <span class="n">serve</span><span class="p">(</span><span class="n">socket</span><span class="p">)</span> <span class="k">do</span>
+    <span class="n">socket</span>
+    <span class="o">|&gt;</span> <span class="n">read_line</span><span class="p">()</span>
+    <span class="o">|&gt;</span> <span class="n">write_line</span><span class="p">(</span><span class="n">socket</span><span class="p">)</span>
+
+    <span class="n">serve</span><span class="p">(</span><span class="n">socket</span><span class="p">)</span>
+  <span class="k">end</span>
+
+  <span class="k">defp</span> <span class="n">read_line</span><span class="p">(</span><span class="n">socket</span><span class="p">)</span> <span class="k">do</span>
+    <span class="p">{</span><span class="ss">:ok</span><span class="p">,</span> <span class="n">data</span><span class="p">}</span> <span class="o">=</span> <span class="ss">:gen_tcp</span><span class="o">.</span><span class="n">recv</span><span class="p">(</span><span class="n">socket</span><span class="p">,</span> <span class="m">0</span><span class="p">)</span>
+    <span class="n">data</span>
+  <span class="k">end</span>
+
+  <span class="k">defp</span> <span class="n">write_line</span><span class="p">(</span><span class="n">line</span><span class="p">,</span> <span class="n">socket</span><span class="p">)</span> <span class="k">do</span>
+    <span class="ss">:gen_tcp</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="n">socket</span><span class="p">,</span> <span class="n">line</span><span class="p">)</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<p>Мы изменили спецификацию супервизора, теперь нужно спросить: является ли используемая стратегия супервизора всё ещё правильной?</p>
+
+<p>В данном случае ответ «да»: если приёмник падает, нет необходимости разрушать все существующие подключения. С другой стороны, если задача супервизора падает, также нет нужды отключать приёмник.</p>
+
+<p>Однако, осталась ещё одна проблема: стратегия перезапуска. Задачи, по умолчанию, имеют в поле <code class="highlighter-rouge">:restart</code> значение <code class="highlighter-rouge">:temporary</code>, то есть они не будут перезапущены. Это отличный вариант для соединений, запущенных через <code class="highlighter-rouge">Task.Supervisor</code>, т. к. нет смысла перезапускать упавшее подключение, но это плохой выбор для приёмника. Если он упадёт, мы хотим снова его запустить.</p>
+
+<p>Мы можем исправить это, определив в модуле вызов <code class="highlighter-rouge">use Task, restart: :permanent</code> и назначить функцию <code class="highlighter-rouge">start_link</code> ответственной за перезапуск, по аналогии с модулями <code class="highlighter-rouge">Agent</code> и <code class="highlighter-rouge">GenServer</code>. Однако, давайте поступим другим образом в данном случае. При интеграции с чужой библиотекой, мы не сможем изменить там определение агентов, задач и серверов. В этом случае нам нужно иметь возможность изменить спецификацию их потомков динамически. Это можно сделать с помощью <code class="highlighter-rouge">Supervisor.child_spec/2</code>, функции, с которой мы познакомились в предыдущих главах. Давайте перепишем <code class="highlighter-rouge">start/2</code> в <code class="highlighter-rouge">KVServer.Application</code> ещё раз:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code>  <span class="k">def</span> <span class="n">start</span><span class="p">(</span><span class="n">_type</span><span class="p">,</span> <span class="n">_args</span><span class="p">)</span> <span class="k">do</span>
+    <span class="n">children</span> <span class="o">=</span> <span class="p">[</span>
+      <span class="p">{</span><span class="no">Task</span><span class="o">.</span><span class="no">Supervisor</span><span class="p">,</span> <span class="ss">name:</span> <span class="no">KVServer</span><span class="o">.</span><span class="no">TaskSupervisor</span><span class="p">},</span>
+      <span class="no">Supervisor</span><span class="o">.</span><span class="n">child_spec</span><span class="p">({</span><span class="no">Task</span><span class="p">,</span> <span class="k">fn</span> <span class="o">-&gt;</span> <span class="no">KVServer</span><span class="o">.</span><span class="n">accept</span><span class="p">(</span><span class="m">4040</span><span class="p">)</span> <span class="k">end</span><span class="p">},</span> <span class="ss">restart:</span> <span class="ss">:permanent</span><span class="p">)</span>
+    <span class="p">]</span>
+
+    <span class="n">opts</span> <span class="o">=</span> <span class="p">[</span><span class="ss">strategy:</span> <span class="ss">:one_for_one</span><span class="p">,</span> <span class="ss">name:</span> <span class="no">KVServer</span><span class="o">.</span><span class="no">Supervisor</span><span class="p">]</span>
+    <span class="no">Supervisor</span><span class="o">.</span><span class="n">start_link</span><span class="p">(</span><span class="n">children</span><span class="p">,</span> <span class="n">opts</span><span class="p">)</span>
+  <span class="k">end</span>
+</code></pre></div></div>
+
+<p>Функция <code class="highlighter-rouge">Supervisor.child_spec/2</code> может собирать спецификации потомков из переданного модуля и/или кортежа, и также принимает значения, которые переопределяют существующую спецификацию потомков. Теперь у нас есть всегда запущенный приёмник, который запускает временные процессы задач через всегда запущенный супервизор задач.</p>
+
+<p>В следующей главе мы сделаем парсер для запросов клиентов и отправку ответов на них, и доделаем наш сервер до конца.</p>
+
+    </div>
+</article>
+
+<nav class="docs_nav pure-g">
+    <div class="docs_nav__inner pure-u-1 pure-u-md-3-4">
+        <div class="pure-g">
+            <div class="docs_nav__column docs_nav__column--prev pure-u-1-3">
+                
+                    <a href="/docs/mix-otp/dependencies-and-umbrella-apps.html" class="docs_nav__link pure-button">
+                        &larr;<span class="h-hidden_mobile"> Назад</span></a>
+                
+            </div>
+
+            <div class="docs_nav__column docs_nav__column--contents pure-u-1-3">
+                <a href="#docsContents" class="docs_nav__link docs_nav__link--contents pure-button">☰</a>
+            </div>
+
+            <div class="docs_nav__column docs_nav__column--next pure-u-1-3">
+                
+                    <a href="/docs/mix-otp/docs-tests-and-with.html" class="docs_nav__link pure-button">
+                        <span class="h-hidden_mobile">Вперёд </span>&rarr;
+                    </a>
+                
+            </div>
+        </div>
+    </div>
+</nav>
+
+<div id="docsContents" class="modal modal--docs_contents modal--close_backdrop">
+    <div class="modal__content">
+        <a href="#close" title="Закрыть" class="modal__close">x</a>
+
+        <h2 class="modal__title">Содержание</h2>
+
+        
+        <h3 id="руководство-для-начинающих">Руководство для начинающих</h3>
+<ul>
+  <li><a href="/docs">Введение</a></li>
+  <li><a href="/docs/basic-types.html">Базовые типы</a></li>
+  <li><a href="/docs/basic-operators.html">Базовые операторы</a></li>
+  <li><a href="/docs/pattern-matching.html">Сопоставление с образцом</a></li>
+  <li><a href="/docs/case-cond-and-if.html">Конструкции ветвления</a></li>
+  <li><a href="/docs/binaries-strings-and-char-lists.html">Двоичные данные, строки и списки символов</a></li>
+  <li><a href="/docs/keywords-and-maps.html">Ключевые списки и словари</a></li>
+  <li><a href="/docs/modules-and-functions.html">Модули и функции</a></li>
+  <li><a href="/docs/recursion.html">Рекурсия</a></li>
+  <li><a href="/docs/enumerables-and-streams.html">Перечисления и потоки</a></li>
+  <li><a href="/docs/processes.html">Процессы</a></li>
+  <li><a href="/docs/io-and-the-file-system.html">Ввод/вывод и файловая система</a></li>
+  <li><a href="/docs/alias-require-and-import.html">Директивы <code class="highlighter-rouge">alias</code>, <code class="highlighter-rouge">require</code> и <code class="highlighter-rouge">import</code></a></li>
+  <li><a href="/docs/module-attributes.html">Атрибуты модулей</a></li>
+  <li><a href="/docs/structs.html">Структуры</a></li>
+  <li><a href="/docs/protocols.html">Протоколы</a></li>
+  <li><a href="/docs/comprehensions.html">Списковые выражения</a></li>
+  <li><a href="/docs/sigils.html">Сигилы</a></li>
+  <li><a href="/docs/try-catch-and-rescue.html">Конструкция <code class="highlighter-rouge">try</code>, <code class="highlighter-rouge">catch</code> и <code class="highlighter-rouge">rescue</code></a></li>
+  <li><a href="/docs/typespecs-and-behaviours.html">Спецификации типов и поведения</a></li>
+  <li><a href="/docs/erlang-libraries.html">Библиотеки Эрланга</a></li>
+  <li><a href="/docs/where-to-go-next.html">Куда двигаться дальше</a></li>
+</ul>
+
+<h3 id="микс-и-otp">Микс и <code class="highlighter-rouge">OTP</code></h3>
+<ul>
+  <li><a href="/docs/mix-otp/introduction-to-mix.html">Введение в Микс</a></li>
+  <li><a href="/docs/mix-otp/agent.html">Агент</a></li>
+  <li><a href="/docs/mix-otp/genserver.html">GenServer</a></li>
+  <li><a href="/docs/mix-otp/supervisor-and-application.html">Супервизор и приложение</a></li>
+  <li><a href="/docs/mix-otp/dynamic-supervisor.html">Динамический супервизор</a></li>
+  <li><a href="/docs/mix-otp/ets.html">ETS</a></li>
+  <li><a href="/docs/mix-otp/dependencies-and-umbrella-apps.html">Зависимости и зонтичные проекты</a></li>
+  <li><a href="/docs/mix-otp/task-and-gen-tcp.html">Модули <code class="highlighter-rouge">Task</code> и <code class="highlighter-rouge">:gen_tcp</code></a></li>
+  <li><a href="/docs/mix-otp/docs-tests-and-with.html">Доктесты, паттерны и оператор <code class="highlighter-rouge">with</code></a></li>
+  <li><a href="/docs/mix-otp/distributed-tasks-and-configuration.html">Распределенные задачи и конфигурация</a></li>
+</ul>
+
+<h3 id="метапрограммирование">Метапрограммирование</h3>
+<ul>
+  <li><a href="/docs/meta/quote-and-unquote.html">Конструкции <code class="highlighter-rouge">quote</code> и <code class="highlighter-rouge">unquote</code></a></li>
+  <li><a href="/docs/meta/macros.html">Макросы</a></li>
+  <li><a href="/docs/meta/domain-specific-languages.html">Предметно-ориентированные языки</a></li>
+</ul>
+
+    </div>
+</div>
+
+
+
+        <footer class="footer">
+    &copy; 2020
+    / Россия
+
+    <span class="pull-right">Любые мысли и вопросы пишите на <a href="mailto:elixir@wunsh.ru">elixir@wunsh.ru</a>.</span>
+</footer>
+
+        <div id="subscribeModal" class="modal">
+    <div class="modal__content">
+        <a href="#close" title="Close" class="modal__close">x</a>
+
+        <h2 class="modal__title">Ламповая рассылка про&nbsp;Эликсир</h2>
+
+        <p>Один-два раза в&nbsp;неделю присылаем тёплые письма об&nbsp;Эликсире: переводы самых интересных статей до&nbsp;их&nbsp;появления в&nbsp;открытом доступе, анонсы событий и&nbsp;вкусные бонусы.</p>
+
+        <form action="//wunsh.us14.list-manage.com/subscribe/post?u=c81ca3d4693f62db7f7f67c71&amp;id=a192e2dfef" method="post" id="mc-embedded-subscribe-form" name="mc-embedded-subscribe-form" class="pure-form h-tc validate" target="_blank" novalidate>
+            <input type="email" value="" name="EMAIL" class="modal__input pure-input-rounded large" id="mce-EMAIL" placeholder="Твоя почта" required>
+            <div style="position: absolute; left: -5000px;" aria-hidden="true"><input type="text" name="b_c81ca3d4693f62db7f7f67c71_a192e2dfef" tabindex="-1" value=""></div>
+
+            <input type="submit" value="Присоединиться" name="subscribe" onClick="yaCounter39773490.reachGoal('SUBSCRIBED'); return true" id="mc-embedded-subscribe" class="pure-button button-success large">
+        </form>
+
+        <p>Обязательно подтверди почту, перейдя по&nbsp;ссылке в&nbsp;письме, иначе мы&nbsp;не&nbsp;сможем делиться с&nbsp;тобой полезностями.</p>
+
+        <p>Надоедать точно не&nbsp;будем :)</p>
+    </div>
+</div>
+
+        <script src="/assets/js/vendors/zepto.min.js"></script>
+
+<script>
+    if ($(".post--docs").length) {
+        $(".footer").addClass("footer--docs")
+    }
+
+    $(".modal--close_backdrop").click(function(){
+        window.location.hash = "";
+    });
+</script>
+
+        <!-- Yandex.Metrika counter -->
+<script type="text/javascript">
+    (function (d, w, c) {
+        (w[c] = w[c] || []).push(function() {
+            try {
+                w.yaCounter39773490 = new Ya.Metrika({
+                    id:39773490,
+                    clickmap:true,
+                    trackLinks:true,
+                    accurateTrackBounce:true,
+                    webvisor:true,
+                    ut:"noindex"
+                });
+            } catch(e) { }
+        });
+
+        var n = d.getElementsByTagName("script")[0],
+            s = d.createElement("script"),
+            f = function () { n.parentNode.insertBefore(s, n); };
+        s.type = "text/javascript";
+        s.async = true;
+        s.src = "https://mc.yandex.ru/metrika/watch.js";
+
+        if (w.opera == "[object Opera]") {
+            d.addEventListener("DOMContentLoaded", f, false);
+        } else { f(); }
+    })(document, window, "yandex_metrika_callbacks");
+</script>
+<noscript><div><img src="https://mc.yandex.ru/watch/39773490?ut=noindex" style="position:absolute; left:-9999px;" alt="" /></div></noscript>
+<!-- /Yandex.Metrika counter -->
+
+      </div>
+    </div>
+  </body>
+</html>

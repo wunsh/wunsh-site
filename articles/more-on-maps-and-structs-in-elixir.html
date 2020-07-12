@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Словари и структуры для новичков |> Сообщество Elixir и Phoenix Framework</title>
+    <meta name="description" content="Ещё немного про словари и структуры для новичков, которым оказалось мало документации.">
+
+    <link rel="alternate" type="application/rss+xml" title="Сообщество Elixir и Phoenix Framework" href="/feed.xml" />
+    <link rel="canonical" href="https://wunsh.ru/articles/more-on-maps-and-structs-in-elixir.html">
+
+    <style type="text/css">@import url("//fonts.googleapis.com/css?family=Source+Sans+Pro:400,700&subset=cyrillic");</style>
+    <link rel="stylesheet" href="/assets/css/vendors/pure.min.css">
+    <link rel="stylesheet" href="/assets/css/vendors/pure-grids-responsive.min.css">
+    <link rel="stylesheet" href="/assets/css/style.css?1594516983">
+
+    <link rel="shortcut icon" type="image/png" href="/assets/favicon.png" >
+</head>
+
+
+  <body>
+    <div class="wunsh pure-g">
+      
+
+
+
+
+<div class="menu pure-u-1 pure-u-md-1-4">
+  <div class="header">
+    <h2 class="header__title">
+      
+        <a href="https://wunsh.ru" class="header__title_link" title="На главную">Эликсир и&nbsp;Вунш</a>
+      
+    </h2>
+    <h3 class="header__tagline">Erlang + Ruby = &#10084;</h3>
+
+    <nav class="nav">
+      <ul class="nav_list">
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/elixir" class="nav_list__item_link pure-button">О языке</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/install/linux-asdf" class="nav_list__item_link pure-button">Установка</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/docs/" class="nav_list__item_link pure-button">Документация</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/guides" class="nav_list__item_link pure-button">Гайды</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/news" class="nav_list__item_link pure-button">Новости</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/articles" class="nav_list__item_link pure-button">Статьи</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/videos" class="nav_list__item_link pure-button">Видео</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/vacancies" class="nav_list__item_link pure-button">Вакансии</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/faq" class="nav_list__item_link pure-button">FAQ</a>
+            </li>
+          
+        
+      </ul>
+    </nav>
+
+    <a href="#subscribeModal" class="pure-button header__subscribe_link">Подписаться на рассылку</a>
+  </div>
+</div>
+
+
+      <div class="content pure-u-1 pure-u-md-3-4">
+        
+
+<article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+  <header class="post__header">
+    
+    <h1 class="post__title" itemprop="name headline">Словари и структуры для новичков</h1>
+
+    <div class="post__meta post_meta">
+      <ul class="meta_list">
+        <li class="meta_list__item">
+          
+          <span class="">
+            <small class="meta_list__item_name">Дата</small>
+            <time class="h-bold" datetime="2017-12-01T00:00:00+00:00" itemprop="datePublished">
+              
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+01 декабря 2017
+
+            </time>
+          </span>
+          
+
+          
+        </li>
+        
+        <li class="meta_list__item">
+            <span class="tag_cloud tags_cloud--inline h-no_margin">
+              <small class="meta_list__item_name">Теги</small> 
+
+
+<ul class="tags_cloud__list">
+  
+    <a href="/tags/#beginner" class="tags_cloud__link tag tag--beginner">beginner</a>
+  
+</ul>
+
+            </span>
+        </li>
+        
+        <li class="meta_list__item">
+          <span itemprop="author" itemscope itemtype="http://schema.org/Person">
+            <small class="meta_list__item_name">
+              
+                Перевод
+              
+            </small>
+            <span itemprop="name" class="h-bold">Надежда Нестерова</span>
+          </span>
+        </li>
+
+        <li class="meta_list__item">
+          
+            <div >
+              <small>Оригинал</small>
+              <strong>
+                &laquo;<a href="http://whatdidilearn.info/2017/11/06/more-on-maps-and-structs-in-elixir.html" style="text-transform: none; text-decoration: underline; color: #4b2e39;">More on Maps and Structs in Elixir</a>&raquo;
+              </strong>
+              <small>&copy;</small>
+              <strong>Vitaly Tatarintsev</strong>
+            </div>
+          
+        </li>
+      </ul>
+    </div>
+  </header>
+
+  <div class="post__content" itemprop="articleBody">
+    <p>Полагаем, вы уже прочитали раздел о <a href="/docs/keywords-and-maps.html"><strong>Словарях</strong></a> и <a href="/docs/structs.html"><strong>Структурах</strong></a> в документации. Настало время заглянуть немного дальше и научиться обновлять словари и добавлять в них новые значения.</p>
+
+<h2 id="словари">Словари</h2>
+
+<p>Допустим, есть следующий словарь:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">iex</span><span class="o">&gt;</span> <span class="n">john</span> <span class="o">=</span> <span class="p">%{</span> <span class="sd">"</span><span class="s2">first_name"</span> <span class="o">=&gt;</span> <span class="sd">"</span><span class="s2">John"</span><span class="p">,</span> <span class="sd">"</span><span class="s2">last_name"</span> <span class="o">=&gt;</span> <span class="sd">"</span><span class="s2">Doe"</span><span class="p">,</span> <span class="sd">"</span><span class="s2">age"</span> <span class="o">=&gt;</span> <span class="m">35</span> <span class="p">}</span>
+<span class="p">%{</span><span class="sd">"</span><span class="s2">age"</span> <span class="o">=&gt;</span> <span class="m">35</span><span class="p">,</span> <span class="sd">"</span><span class="s2">first_name"</span> <span class="o">=&gt;</span> <span class="sd">"</span><span class="s2">John"</span><span class="p">,</span> <span class="sd">"</span><span class="s2">last_name"</span> <span class="o">=&gt;</span> <span class="sd">"</span><span class="s2">Doe"</span><span class="p">}</span>
+</code></pre></div></div>
+
+<p>Представим, что у нашего Джона недавно был день рождения, а значит, необходимо обновить данные о его возрасте.</p>
+
+<h2 id="обновление-словарей">Обновление словарей</h2>
+
+<p>Обновить словарь можно следующим образом:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">new_map</span> <span class="o">=</span> <span class="p">%{</span> <span class="n">old_map</span> <span class="o">|</span> <span class="n">key</span> <span class="o">=&gt;</span> <span class="n">value</span><span class="p">,</span> <span class="o">...</span> <span class="p">}</span>
+</code></pre></div></div>
+
+<p>Теоретически словарь в Elixir не может быть обновлён по причине иммутабельности данных. Значит, просто заменим словарь на новый.</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">iex</span><span class="o">&gt;</span> <span class="n">john</span> <span class="o">=</span> <span class="p">%{</span> <span class="n">john</span> <span class="o">|</span> <span class="sd">"</span><span class="s2">age"</span> <span class="o">=&gt;</span> <span class="m">36</span> <span class="p">}</span>
+<span class="p">%{</span><span class="sd">"</span><span class="s2">age"</span> <span class="o">=&gt;</span> <span class="m">36</span><span class="p">,</span> <span class="sd">"</span><span class="s2">first_name"</span> <span class="o">=&gt;</span> <span class="sd">"</span><span class="s2">John"</span><span class="p">,</span> <span class="sd">"</span><span class="s2">last_name"</span> <span class="o">=&gt;</span> <span class="sd">"</span><span class="s2">Doe"</span><span class="p">}</span>
+</code></pre></div></div>
+
+<p>Недостаток (а может, и преимущество) данного метода состоит в том, что если указать несуществующий ключ, новое значение не будет добавлено в словарь.</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">iex</span><span class="o">&gt;</span> <span class="n">john</span> <span class="o">=</span> <span class="p">%{</span> <span class="n">john</span> <span class="o">|</span> <span class="sd">"</span><span class="s2">title"</span> <span class="o">=&gt;</span> <span class="sd">"</span><span class="s2">Mr."</span> <span class="p">}</span>
+<span class="o">**</span> <span class="p">(</span><span class="no">KeyError</span><span class="p">)</span> <span class="n">key</span> <span class="sd">"</span><span class="s2">title"</span> <span class="ow">not</span> <span class="n">found</span> <span class="ow">in</span><span class="p">:</span> <span class="p">%{</span><span class="sd">"</span><span class="s2">age"</span> <span class="o">=&gt;</span> <span class="m">36</span><span class="p">,</span> <span class="sd">"</span><span class="s2">first_name"</span> <span class="o">=&gt;</span> <span class="sd">"</span><span class="s2">John"</span><span class="p">,</span> <span class="sd">"</span><span class="s2">last_name"</span> <span class="o">=&gt;</span> <span class="sd">"</span><span class="s2">Doe"</span><span class="p">}</span>
+    <span class="p">(</span><span class="n">stdlib</span><span class="p">)</span> <span class="ss">:maps</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="sd">"</span><span class="s2">title"</span><span class="p">,</span> <span class="sd">"</span><span class="s2">Mr."</span><span class="p">,</span> <span class="p">%{</span><span class="sd">"</span><span class="s2">age"</span> <span class="o">=&gt;</span> <span class="m">36</span><span class="p">,</span> <span class="sd">"</span><span class="s2">first_name"</span> <span class="o">=&gt;</span> <span class="sd">"</span><span class="s2">John"</span><span class="p">,</span> <span class="sd">"</span><span class="s2">last_name"</span> <span class="o">=&gt;</span> <span class="sd">"</span><span class="s2">Doe"</span><span class="p">})</span>
+    <span class="p">(</span><span class="n">stdlib</span><span class="p">)</span> <span class="n">erl_eval</span><span class="o">.</span><span class="ss">erl:</span><span class="m">255</span><span class="p">:</span> <span class="n">anonymous</span> <span class="k">fn</span><span class="o">/</span><span class="m">2</span> <span class="ow">in</span> <span class="ss">:erl_eval</span><span class="o">.</span><span class="n">expr</span><span class="o">/</span><span class="m">5</span>
+    <span class="p">(</span><span class="n">stdlib</span><span class="p">)</span> <span class="n">lists</span><span class="o">.</span><span class="ss">erl:</span><span class="m">1263</span><span class="p">:</span> <span class="ss">:lists</span><span class="o">.</span><span class="n">foldl</span><span class="o">/</span><span class="m">3</span>
+</code></pre></div></div>
+
+<h2 id="добавление-новых-элементов">Добавление новых элементов</h2>
+
+<p>Для добавления новых элементов в словарь служит функция <code class="highlighter-rouge">Map.put_new/3</code>.</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">iex</span><span class="o">&gt;</span> <span class="n">john</span> <span class="o">=</span> <span class="no">Map</span><span class="o">.</span><span class="n">put_new</span><span class="p">(</span><span class="n">john</span><span class="p">,</span> <span class="sd">"</span><span class="s2">title"</span><span class="p">,</span> <span class="sd">"</span><span class="s2">Mr."</span><span class="p">)</span>
+<span class="p">%{</span><span class="sd">"</span><span class="s2">age"</span> <span class="o">=&gt;</span> <span class="m">36</span><span class="p">,</span> <span class="sd">"</span><span class="s2">first_name"</span> <span class="o">=&gt;</span> <span class="sd">"</span><span class="s2">John"</span><span class="p">,</span> <span class="sd">"</span><span class="s2">last_name"</span> <span class="o">=&gt;</span> <span class="sd">"</span><span class="s2">Doe"</span><span class="p">,</span> <span class="sd">"</span><span class="s2">title"</span> <span class="o">=&gt;</span> <span class="sd">"</span><span class="s2">Mr."</span><span class="p">}</span>
+</code></pre></div></div>
+
+<p>Повторюсь, она не вносит изменения в текущий словарь, а создаёт совершенно новый. Работая с Elixir, не стоит забывать об иммутабельности. Итак, нам необходимо присвоить результат функции новой переменной. Кстати говоря, «присвоить» – не совсем верный термин для Elixir, если вы понимаете, о чём я.</p>
+
+<p>Есть ещё одна функция, с помощью которой можно добавить новые значения в словарь – <code class="highlighter-rouge">Map.put/3</code>.</p>
+
+<p>Стоит отметить, что она не только вставляет новые значения, но и обновляет уже существующие.</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">iex</span><span class="o">&gt;</span> <span class="n">john</span> <span class="o">=</span> <span class="p">%{</span><span class="sd">"</span><span class="s2">age"</span> <span class="o">=&gt;</span> <span class="m">35</span><span class="p">,</span> <span class="sd">"</span><span class="s2">first_name"</span> <span class="o">=&gt;</span> <span class="sd">"</span><span class="s2">John"</span><span class="p">,</span> <span class="sd">"</span><span class="s2">last_name"</span> <span class="o">=&gt;</span> <span class="sd">"</span><span class="s2">Doe"</span><span class="p">}</span>
+<span class="p">%{</span><span class="sd">"</span><span class="s2">age"</span> <span class="o">=&gt;</span> <span class="m">35</span><span class="p">,</span> <span class="sd">"</span><span class="s2">first_name"</span> <span class="o">=&gt;</span> <span class="sd">"</span><span class="s2">John"</span><span class="p">,</span> <span class="sd">"</span><span class="s2">last_name"</span> <span class="o">=&gt;</span> <span class="sd">"</span><span class="s2">Doe"</span><span class="p">}</span>
+
+<span class="n">iex</span><span class="o">&gt;</span> <span class="n">john</span> <span class="o">=</span> <span class="no">Map</span><span class="o">.</span><span class="n">put</span><span class="p">(</span><span class="n">john</span><span class="p">,</span> <span class="sd">"</span><span class="s2">title"</span><span class="p">,</span> <span class="sd">"</span><span class="s2">Mr."</span><span class="p">)</span>
+<span class="p">%{</span><span class="sd">"</span><span class="s2">age"</span> <span class="o">=&gt;</span> <span class="m">35</span><span class="p">,</span> <span class="sd">"</span><span class="s2">first_name"</span> <span class="o">=&gt;</span> <span class="sd">"</span><span class="s2">John"</span><span class="p">,</span> <span class="sd">"</span><span class="s2">last_name"</span> <span class="o">=&gt;</span> <span class="sd">"</span><span class="s2">Doe"</span><span class="p">,</span> <span class="sd">"</span><span class="s2">title"</span> <span class="o">=&gt;</span> <span class="sd">"</span><span class="s2">Mr."</span><span class="p">}</span>
+
+<span class="n">iex</span><span class="o">&gt;</span> <span class="n">john</span> <span class="o">=</span> <span class="no">Map</span><span class="o">.</span><span class="n">put</span><span class="p">(</span><span class="n">john</span><span class="p">,</span> <span class="sd">"</span><span class="s2">age"</span><span class="p">,</span> <span class="sd">"</span><span class="s2">36"</span><span class="p">)</span>
+<span class="p">%{</span><span class="sd">"</span><span class="s2">age"</span> <span class="o">=&gt;</span> <span class="sd">"</span><span class="s2">36"</span><span class="p">,</span> <span class="sd">"</span><span class="s2">first_name"</span> <span class="o">=&gt;</span> <span class="sd">"</span><span class="s2">John"</span><span class="p">,</span> <span class="sd">"</span><span class="s2">last_name"</span> <span class="o">=&gt;</span> <span class="sd">"</span><span class="s2">Doe"</span><span class="p">,</span> <span class="sd">"</span><span class="s2">title"</span> <span class="o">=&gt;</span> <span class="sd">"</span><span class="s2">Mr."</span><span class="p">}</span>
+</code></pre></div></div>
+
+<p>В зависимости от поставленных задач, для добавления новых элементов в словарь можно использовать как <code class="highlighter-rouge">Map.put_new/3</code>, так и <code class="highlighter-rouge">Map.put/3</code>.</p>
+
+<p>Разобравшись с обновлением и добавлением элементов, перейдём к вопросу об удалении из словаря определённых ключей.</p>
+
+<h2 id="удаление-ключей">Удаление ключей</h2>
+
+<p>Функция <code class="highlighter-rouge">Map.delete/2</code> предназначена специально для этого.</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">iex</span><span class="o">&gt;</span> <span class="n">john</span>
+<span class="p">%{</span><span class="sd">"</span><span class="s2">age"</span> <span class="o">=&gt;</span> <span class="m">36</span><span class="p">,</span> <span class="sd">"</span><span class="s2">first_name"</span> <span class="o">=&gt;</span> <span class="sd">"</span><span class="s2">John"</span><span class="p">,</span> <span class="sd">"</span><span class="s2">last_name"</span> <span class="o">=&gt;</span> <span class="sd">"</span><span class="s2">Doe"</span><span class="p">,</span> <span class="sd">"</span><span class="s2">title"</span> <span class="o">=&gt;</span> <span class="sd">"</span><span class="s2">Mr."</span><span class="p">}</span>
+
+<span class="n">iex</span><span class="o">&gt;</span> <span class="n">john</span> <span class="o">=</span> <span class="no">Map</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="n">john</span><span class="p">,</span> <span class="sd">"</span><span class="s2">title"</span><span class="p">)</span>
+<span class="p">%{</span><span class="sd">"</span><span class="s2">age"</span> <span class="o">=&gt;</span> <span class="m">36</span><span class="p">,</span> <span class="sd">"</span><span class="s2">first_name"</span> <span class="o">=&gt;</span> <span class="sd">"</span><span class="s2">John"</span><span class="p">,</span> <span class="sd">"</span><span class="s2">last_name"</span> <span class="o">=&gt;</span> <span class="sd">"</span><span class="s2">Doe"</span><span class="p">}</span>
+</code></pre></div></div>
+
+<p>Отлично. Теперь вы знаете, как работать со словарями. Отличная база для следующего пункта.</p>
+
+<h2 id="структуры">Структуры</h2>
+
+<p>Структуры – что-то вроде оболочки над словарями, предоставляющей им дополнительную функциональность.</p>
+
+<p>Возьмём тот же пример с Джоном и перепишем его, используя структуры: Чтобы объявить структуру, необходимо определить модуль, имя которого она позаимствует. Затем, используя ключевое слово <code class="highlighter-rouge">defstruct</code>, перечисляем доступные ключи.</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">iex</span><span class="o">&gt;</span> <span class="k">defmodule</span> <span class="no">Person</span> <span class="k">do</span>
+<span class="o">...&gt;</span>   <span class="n">defstruct</span> <span class="ss">first_name:</span> <span class="sd">"</span><span class="s2">"</span><span class="p">,</span> <span class="ss">last_name:</span> <span class="sd">"</span><span class="s2">"</span><span class="p">,</span> <span class="ss">age:</span> <span class="no">nil</span><span class="p">,</span> <span class="ss">adult:</span> <span class="no">true</span>
+<span class="o">...&gt;</span> <span class="k">end</span>
+<span class="p">{</span><span class="ss">:module</span><span class="p">,</span> <span class="no">Person</span><span class="p">,</span>
+ <span class="o">&lt;&lt;</span><span class="m">70</span><span class="p">,</span> <span class="m">79</span><span class="p">,</span> <span class="m">82</span><span class="p">,</span> <span class="m">49</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">8</span><span class="p">,</span> <span class="m">92</span><span class="p">,</span> <span class="m">66</span><span class="p">,</span> <span class="m">69</span><span class="p">,</span> <span class="m">65</span><span class="p">,</span> <span class="m">77</span><span class="p">,</span> <span class="m">65</span><span class="p">,</span> <span class="m">116</span><span class="p">,</span> <span class="m">85</span><span class="p">,</span> <span class="m">56</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">234</span><span class="p">,</span>
+   <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">22</span><span class="p">,</span> <span class="m">13</span><span class="p">,</span> <span class="m">69</span><span class="p">,</span> <span class="m">108</span><span class="p">,</span> <span class="m">105</span><span class="p">,</span> <span class="m">120</span><span class="p">,</span> <span class="m">105</span><span class="p">,</span> <span class="m">114</span><span class="p">,</span> <span class="m">46</span><span class="p">,</span> <span class="m">80</span><span class="p">,</span> <span class="m">101</span><span class="p">,</span> <span class="m">114</span><span class="p">,</span> <span class="m">115</span><span class="p">,</span> <span class="m">111</span><span class="p">,</span>
+   <span class="m">110</span><span class="p">,</span> <span class="m">8</span><span class="p">,</span> <span class="m">95</span><span class="p">,</span> <span class="m">95</span><span class="p">,</span> <span class="m">105</span><span class="p">,</span> <span class="m">110</span><span class="p">,</span> <span class="m">102</span><span class="p">,</span> <span class="m">111</span><span class="p">,</span> <span class="m">95</span><span class="p">,</span> <span class="m">95</span><span class="p">,</span> <span class="o">...&gt;&gt;</span><span class="p">,</span>
+ <span class="p">%</span><span class="no">Person</span><span class="p">{</span><span class="ss">adult:</span> <span class="no">true</span><span class="p">,</span> <span class="ss">age:</span> <span class="no">nil</span><span class="p">,</span> <span class="ss">first_name:</span> <span class="sd">"</span><span class="s2">"</span><span class="p">,</span> <span class="ss">last_name:</span> <span class="sd">"</span><span class="s2">"</span><span class="p">}}</span>
+
+<span class="n">iex</span><span class="o">&gt;</span> <span class="n">john</span> <span class="o">=</span> <span class="p">%</span><span class="no">Person</span><span class="p">{</span><span class="ss">first_name:</span> <span class="sd">"</span><span class="s2">John"</span><span class="p">,</span> <span class="ss">last_name:</span> <span class="sd">"</span><span class="s2">Doe"</span><span class="p">,</span> <span class="ss">age:</span> <span class="m">35</span><span class="p">}</span>
+<span class="p">%</span><span class="no">Person</span><span class="p">{</span><span class="ss">adult:</span> <span class="no">true</span><span class="p">,</span> <span class="ss">age:</span> <span class="m">35</span><span class="p">,</span> <span class="ss">first_name:</span> <span class="sd">"</span><span class="s2">John"</span><span class="p">,</span> <span class="ss">last_name:</span> <span class="sd">"</span><span class="s2">Doe"</span><span class="p">}</span>
+
+<span class="n">iex</span><span class="o">&gt;</span> <span class="n">bob</span> <span class="o">=</span> <span class="p">%</span><span class="no">Person</span><span class="p">{</span><span class="ss">first_name:</span> <span class="sd">"</span><span class="s2">Bob"</span><span class="p">,</span> <span class="ss">age:</span> <span class="m">40</span><span class="p">}</span>
+<span class="p">%</span><span class="no">Person</span><span class="p">{</span><span class="ss">adult:</span> <span class="no">true</span><span class="p">,</span> <span class="ss">age:</span> <span class="m">40</span><span class="p">,</span> <span class="ss">first_name:</span> <span class="sd">"</span><span class="s2">Bob"</span><span class="p">,</span> <span class="ss">last_name:</span> <span class="sd">"</span><span class="s2">"</span><span class="p">}</span>
+</code></pre></div></div>
+
+<p>Объявив структуру в таком виде, мы определим поля, которые она будет иметь. Теперь у нас есть определённая структура атрибутов, и неуказанные ключи не могут быть использованы.</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">iex</span><span class="o">&gt;</span> <span class="n">alice</span> <span class="o">=</span> <span class="p">%</span><span class="no">Person</span><span class="p">{</span><span class="ss">first_name:</span> <span class="sd">"</span><span class="s2">Alice"</span><span class="p">,</span> <span class="ss">address:</span> <span class="sd">"</span><span class="s2">White Hall Str. 503"</span><span class="p">}</span>
+<span class="o">**</span> <span class="p">(</span><span class="no">KeyError</span><span class="p">)</span> <span class="n">key</span> <span class="ss">:address</span> <span class="ow">not</span> <span class="n">found</span> <span class="ow">in</span><span class="p">:</span> <span class="p">%</span><span class="no">Person</span><span class="p">{</span><span class="ss">adult:</span> <span class="no">true</span><span class="p">,</span> <span class="ss">age:</span> <span class="no">nil</span><span class="p">,</span> <span class="ss">first_name:</span> <span class="sd">"</span><span class="s2">Alice"</span><span class="p">,</span> <span class="ss">last_name:</span> <span class="sd">"</span><span class="s2">"</span><span class="p">}</span>
+    <span class="p">(</span><span class="n">stdlib</span><span class="p">)</span> <span class="ss">:maps</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="ss">:address</span><span class="p">,</span> <span class="sd">"</span><span class="s2">White Hall Str. 503"</span><span class="p">,</span> <span class="p">%</span><span class="no">Person</span><span class="p">{</span><span class="ss">adult:</span> <span class="no">true</span><span class="p">,</span> <span class="ss">age:</span> <span class="no">nil</span><span class="p">,</span> <span class="ss">first_name:</span> <span class="sd">"</span><span class="s2">Alice"</span><span class="p">,</span> <span class="ss">last_name:</span> <span class="sd">"</span><span class="s2">"</span><span class="p">})</span>
+    <span class="ss">iex:</span> <span class="n">anonymous</span> <span class="k">fn</span><span class="o">/</span><span class="m">2</span> <span class="ow">in</span> <span class="no">Person</span><span class="o">.</span><span class="n">__struct__</span><span class="o">/</span><span class="m">1</span>
+    <span class="p">(</span><span class="n">elixir</span><span class="p">)</span> <span class="n">lib</span><span class="o">/</span><span class="n">enum</span><span class="o">.</span><span class="ss">ex:</span><span class="m">1811</span><span class="p">:</span> <span class="no">Enum</span><span class="o">.</span><span class="sd">"</span><span class="s2">-reduce/3-lists^foldl/2-0-"</span><span class="o">/</span><span class="m">3</span>
+    <span class="n">expanding</span> <span class="ss">struct:</span> <span class="no">Person</span><span class="o">.</span><span class="n">__struct__</span><span class="o">/</span><span class="m">1</span>
+    <span class="ss">iex:</span> <span class="p">(</span><span class="n">file</span><span class="p">)</span>
+</code></pre></div></div>
+
+<h2 id="обновление-структур">Обновление структур</h2>
+
+<p>Поскольку структура по сути представляет собой словарь, можно воспользоваться тем же способом:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">iex</span><span class="o">&gt;</span> <span class="n">john</span>
+<span class="p">%</span><span class="no">Person</span><span class="p">{</span><span class="ss">adult:</span> <span class="no">true</span><span class="p">,</span> <span class="ss">age:</span> <span class="m">35</span><span class="p">,</span> <span class="ss">first_name:</span> <span class="sd">"</span><span class="s2">John"</span><span class="p">,</span> <span class="ss">last_name:</span> <span class="sd">"</span><span class="s2">Doe"</span><span class="p">}</span>
+
+<span class="n">iex</span><span class="o">&gt;</span> <span class="n">john</span> <span class="o">=</span> <span class="p">%</span><span class="no">Person</span><span class="p">{</span> <span class="n">john</span> <span class="o">|</span> <span class="ss">age:</span> <span class="m">36</span> <span class="p">}</span>
+<span class="p">%</span><span class="no">Person</span><span class="p">{</span><span class="ss">adult:</span> <span class="no">true</span><span class="p">,</span> <span class="ss">age:</span> <span class="m">36</span><span class="p">,</span> <span class="ss">first_name:</span> <span class="sd">"</span><span class="s2">John"</span><span class="p">,</span> <span class="ss">last_name:</span> <span class="sd">"</span><span class="s2">Doe"</span><span class="p">}</span>
+</code></pre></div></div>
+
+<p>Следующий код тоже рабочий, хотя и выглядит немного непривычно:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">iex</span><span class="o">&gt;</span> <span class="n">john</span> <span class="o">=</span> <span class="no">Map</span><span class="o">.</span><span class="n">put</span><span class="p">(</span><span class="n">john</span><span class="p">,</span> <span class="ss">:age</span><span class="p">,</span> <span class="m">37</span><span class="p">)</span>
+<span class="p">%</span><span class="no">Person</span><span class="p">{</span><span class="ss">adult:</span> <span class="no">true</span><span class="p">,</span> <span class="ss">age:</span> <span class="m">37</span><span class="p">,</span> <span class="ss">first_name:</span> <span class="sd">"</span><span class="s2">John"</span><span class="p">,</span> <span class="ss">last_name:</span> <span class="sd">"</span><span class="s2">Doe"</span><span class="p">}</span>
+</code></pre></div></div>
+
+<p>Однако, если здесь попробовать использовать <code class="highlighter-rouge">Map.put_new/3</code> или <code class="highlighter-rouge">Map.delete/2</code> (что в принципе возможно), получим такой результат:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">iex</span><span class="o">&gt;</span> <span class="no">Map</span><span class="o">.</span><span class="n">put_new</span><span class="p">(</span><span class="n">john</span><span class="p">,</span> <span class="ss">:title</span><span class="p">,</span> <span class="sd">"</span><span class="s2">Mr."</span><span class="p">)</span>
+<span class="p">%{</span><span class="ss">__struct__:</span> <span class="no">Person</span><span class="p">,</span> <span class="ss">adult:</span> <span class="no">true</span><span class="p">,</span> <span class="ss">age:</span> <span class="m">37</span><span class="p">,</span> <span class="ss">first_name:</span> <span class="sd">"</span><span class="s2">John"</span><span class="p">,</span>
+  <span class="ss">last_name:</span> <span class="sd">"</span><span class="s2">Doe"</span><span class="p">,</span> <span class="ss">title:</span> <span class="sd">"</span><span class="s2">Mr."</span><span class="p">}</span>
+  
+<span class="n">iex</span><span class="o">&gt;</span> <span class="no">Map</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="n">john</span><span class="p">,</span> <span class="ss">:adult</span><span class="p">)</span>
+<span class="p">%{</span><span class="ss">__struct__:</span> <span class="no">Person</span><span class="p">,</span> <span class="ss">age:</span> <span class="m">37</span><span class="p">,</span> <span class="ss">first_name:</span> <span class="sd">"</span><span class="s2">John"</span><span class="p">,</span> <span class="ss">last_name:</span> <span class="sd">"</span><span class="s2">Doe"</span><span class="p">}</span>
+</code></pre></div></div>
+
+<h2 id="определение-структур">Определение структур</h2>
+<p>Ещё одно преимущество структур перед словарями состоит в том, можно определять функции внутри структур. Возможно, поэтому они и обёрнуты в модуль.</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">iex</span><span class="o">&gt;</span> <span class="k">defmodule</span> <span class="no">Person</span> <span class="k">do</span>
+<span class="o">...&gt;</span>   <span class="n">defstruct</span> <span class="ss">first_name:</span> <span class="sd">"</span><span class="s2">"</span><span class="p">,</span> <span class="ss">last_name:</span> <span class="sd">"</span><span class="s2">"</span><span class="p">,</span> <span class="ss">age:</span> <span class="no">nil</span>
+<span class="o">...&gt;</span>
+<span class="o">...&gt;</span>   <span class="k">def</span> <span class="n">has_discount?</span><span class="p">(</span><span class="n">person</span><span class="p">)</span> <span class="k">do</span>
+<span class="o">...&gt;</span>     <span class="n">person</span><span class="o">.</span><span class="n">age</span> <span class="o">!=</span> <span class="no">nil</span> <span class="o">&amp;&amp;</span> <span class="n">person</span><span class="o">.</span><span class="n">age</span> <span class="o">&lt;</span> <span class="m">18</span>
+<span class="o">...&gt;</span>   <span class="k">end</span>
+<span class="o">...&gt;</span>
+<span class="o">...&gt;</span>   <span class="k">def</span> <span class="n">full_name</span><span class="p">(</span><span class="n">person</span><span class="p">)</span> <span class="k">do</span>
+<span class="o">...&gt;</span>     <span class="sd">"</span><span class="si">#{</span><span class="n">person</span><span class="o">.</span><span class="n">first_name</span><span class="si">}</span><span class="s2"> </span><span class="si">#{</span><span class="n">person</span><span class="o">.</span><span class="n">last_name</span><span class="si">}</span><span class="s2">"</span>
+<span class="o">...&gt;</span>   <span class="k">end</span>
+<span class="o">...&gt;</span> <span class="k">end</span>
+<span class="p">{</span><span class="ss">:module</span><span class="p">,</span> <span class="no">Person</span><span class="p">,</span>
+ <span class="o">&lt;&lt;</span><span class="m">70</span><span class="p">,</span> <span class="m">79</span><span class="p">,</span> <span class="m">82</span><span class="p">,</span> <span class="m">49</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">11</span><span class="p">,</span> <span class="m">192</span><span class="p">,</span> <span class="m">66</span><span class="p">,</span> <span class="m">69</span><span class="p">,</span> <span class="m">65</span><span class="p">,</span> <span class="m">77</span><span class="p">,</span> <span class="m">65</span><span class="p">,</span> <span class="m">116</span><span class="p">,</span> <span class="m">85</span><span class="p">,</span> <span class="m">56</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">1</span><span class="p">,</span> <span class="m">89</span><span class="p">,</span>
+   <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">35</span><span class="p">,</span> <span class="m">13</span><span class="p">,</span> <span class="m">69</span><span class="p">,</span> <span class="m">108</span><span class="p">,</span> <span class="m">105</span><span class="p">,</span> <span class="m">120</span><span class="p">,</span> <span class="m">105</span><span class="p">,</span> <span class="m">114</span><span class="p">,</span> <span class="m">46</span><span class="p">,</span> <span class="m">80</span><span class="p">,</span> <span class="m">101</span><span class="p">,</span> <span class="m">114</span><span class="p">,</span> <span class="m">115</span><span class="p">,</span> <span class="m">111</span><span class="p">,</span>
+   <span class="m">110</span><span class="p">,</span> <span class="m">8</span><span class="p">,</span> <span class="m">95</span><span class="p">,</span> <span class="m">95</span><span class="p">,</span> <span class="m">105</span><span class="p">,</span> <span class="m">110</span><span class="p">,</span> <span class="m">102</span><span class="p">,</span> <span class="m">111</span><span class="p">,</span> <span class="m">95</span><span class="p">,</span> <span class="m">95</span><span class="p">,</span> <span class="o">...&gt;&gt;</span><span class="p">,</span> <span class="p">{</span><span class="ss">:full_name</span><span class="p">,</span> <span class="m">1</span><span class="p">}}</span>
+
+<span class="n">iex</span><span class="o">&gt;</span> <span class="n">john</span> <span class="o">=</span> <span class="p">%</span><span class="no">Person</span><span class="p">{</span><span class="ss">first_name:</span> <span class="sd">"</span><span class="s2">John"</span><span class="p">,</span> <span class="ss">last_name:</span> <span class="sd">"</span><span class="s2">Doe"</span><span class="p">,</span> <span class="ss">age:</span> <span class="m">35</span><span class="p">}</span>
+<span class="p">%</span><span class="no">Person</span><span class="p">{</span><span class="ss">age:</span> <span class="m">35</span><span class="p">,</span> <span class="ss">first_name:</span> <span class="sd">"</span><span class="s2">John"</span><span class="p">,</span> <span class="ss">last_name:</span> <span class="sd">"</span><span class="s2">Doe"</span><span class="p">}</span>
+
+<span class="n">iex</span><span class="o">&gt;</span> <span class="no">Person</span><span class="o">.</span><span class="n">has_discount?</span><span class="p">(</span><span class="n">john</span><span class="p">)</span>
+<span class="no">false</span>
+
+<span class="n">iex</span><span class="o">&gt;</span> <span class="no">Person</span><span class="o">.</span><span class="n">full_name</span><span class="p">(</span><span class="n">john</span><span class="p">)</span>
+<span class="sd">"</span><span class="s2">John Doe"</span>
+</code></pre></div></div>
+
+<h2 id="заключение">Заключение</h2>
+
+<p>Теперь ваш багаж знаний пополнился ещё немного. Что именно использовать в своих программах – структуры или словари – решать только вам. Если необходим чётко описанный тип с предопределённым набором атрибутов, выбирайте структуры. Хотите нечто анонимное с коротким жизненным циклом? Тогда используйте словари.</p>
+
+
+  </div>
+
+  <!-- uSocial -->
+  <div class="post__share_block share_block">
+    <script async src="https://usocial.pro/usocial/usocial.js?v=6.1.4" data-script="usocial" charset="utf-8"></script>
+    <div class="uSocial-Share" data-pid="2fd19544e551bce292425ee8adaa31be" data-type="share" data-options="round,style2,default,absolute,horizontal,size32,counter1,counter-before,upArrow-right,nomobile" data-social="telegram,fb,vk,gPlus,twi,bookmarks"></div>
+  </div>
+  <!-- /uSocial -->
+</article>
+
+
+        <footer class="footer">
+    &copy; 2020
+    / Россия
+
+    <span class="pull-right">Любые мысли и вопросы пишите на <a href="mailto:elixir@wunsh.ru">elixir@wunsh.ru</a>.</span>
+</footer>
+
+        <div id="subscribeModal" class="modal">
+    <div class="modal__content">
+        <a href="#close" title="Close" class="modal__close">x</a>
+
+        <h2 class="modal__title">Ламповая рассылка про&nbsp;Эликсир</h2>
+
+        <p>Один-два раза в&nbsp;неделю присылаем тёплые письма об&nbsp;Эликсире: переводы самых интересных статей до&nbsp;их&nbsp;появления в&nbsp;открытом доступе, анонсы событий и&nbsp;вкусные бонусы.</p>
+
+        <form action="//wunsh.us14.list-manage.com/subscribe/post?u=c81ca3d4693f62db7f7f67c71&amp;id=a192e2dfef" method="post" id="mc-embedded-subscribe-form" name="mc-embedded-subscribe-form" class="pure-form h-tc validate" target="_blank" novalidate>
+            <input type="email" value="" name="EMAIL" class="modal__input pure-input-rounded large" id="mce-EMAIL" placeholder="Твоя почта" required>
+            <div style="position: absolute; left: -5000px;" aria-hidden="true"><input type="text" name="b_c81ca3d4693f62db7f7f67c71_a192e2dfef" tabindex="-1" value=""></div>
+
+            <input type="submit" value="Присоединиться" name="subscribe" onClick="yaCounter39773490.reachGoal('SUBSCRIBED'); return true" id="mc-embedded-subscribe" class="pure-button button-success large">
+        </form>
+
+        <p>Обязательно подтверди почту, перейдя по&nbsp;ссылке в&nbsp;письме, иначе мы&nbsp;не&nbsp;сможем делиться с&nbsp;тобой полезностями.</p>
+
+        <p>Надоедать точно не&nbsp;будем :)</p>
+    </div>
+</div>
+
+        <script src="/assets/js/vendors/zepto.min.js"></script>
+
+<script>
+    if ($(".post--docs").length) {
+        $(".footer").addClass("footer--docs")
+    }
+
+    $(".modal--close_backdrop").click(function(){
+        window.location.hash = "";
+    });
+</script>
+
+        <!-- Yandex.Metrika counter -->
+<script type="text/javascript">
+    (function (d, w, c) {
+        (w[c] = w[c] || []).push(function() {
+            try {
+                w.yaCounter39773490 = new Ya.Metrika({
+                    id:39773490,
+                    clickmap:true,
+                    trackLinks:true,
+                    accurateTrackBounce:true,
+                    webvisor:true,
+                    ut:"noindex"
+                });
+            } catch(e) { }
+        });
+
+        var n = d.getElementsByTagName("script")[0],
+            s = d.createElement("script"),
+            f = function () { n.parentNode.insertBefore(s, n); };
+        s.type = "text/javascript";
+        s.async = true;
+        s.src = "https://mc.yandex.ru/metrika/watch.js";
+
+        if (w.opera == "[object Opera]") {
+            d.addEventListener("DOMContentLoaded", f, false);
+        } else { f(); }
+    })(document, window, "yandex_metrika_callbacks");
+</script>
+<noscript><div><img src="https://mc.yandex.ru/watch/39773490?ut=noindex" style="position:absolute; left:-9999px;" alt="" /></div></noscript>
+<!-- /Yandex.Metrika counter -->
+
+      </div>
+    </div>
+  </body>
+</html>

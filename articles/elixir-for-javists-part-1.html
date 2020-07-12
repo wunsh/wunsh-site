@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Эликсир для джавистов. Часть первая |> Сообщество Elixir и Phoenix Framework</title>
+    <meta name="description" content="Как перейти с Джавы на Эликсир.">
+
+    <link rel="alternate" type="application/rss+xml" title="Сообщество Elixir и Phoenix Framework" href="/feed.xml" />
+    <link rel="canonical" href="https://wunsh.ru/articles/elixir-for-javists-part-1.html">
+
+    <style type="text/css">@import url("//fonts.googleapis.com/css?family=Source+Sans+Pro:400,700&subset=cyrillic");</style>
+    <link rel="stylesheet" href="/assets/css/vendors/pure.min.css">
+    <link rel="stylesheet" href="/assets/css/vendors/pure-grids-responsive.min.css">
+    <link rel="stylesheet" href="/assets/css/style.css?1594516983">
+
+    <link rel="shortcut icon" type="image/png" href="/assets/favicon.png" >
+</head>
+
+
+  <body>
+    <div class="wunsh pure-g">
+      
+
+
+
+
+<div class="menu pure-u-1 pure-u-md-1-4">
+  <div class="header">
+    <h2 class="header__title">
+      
+        <a href="https://wunsh.ru" class="header__title_link" title="На главную">Эликсир и&nbsp;Вунш</a>
+      
+    </h2>
+    <h3 class="header__tagline">Erlang + Ruby = &#10084;</h3>
+
+    <nav class="nav">
+      <ul class="nav_list">
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/elixir" class="nav_list__item_link pure-button">О языке</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/install/linux-asdf" class="nav_list__item_link pure-button">Установка</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/docs/" class="nav_list__item_link pure-button">Документация</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/guides" class="nav_list__item_link pure-button">Гайды</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/news" class="nav_list__item_link pure-button">Новости</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/articles" class="nav_list__item_link pure-button">Статьи</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/videos" class="nav_list__item_link pure-button">Видео</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/vacancies" class="nav_list__item_link pure-button">Вакансии</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/faq" class="nav_list__item_link pure-button">FAQ</a>
+            </li>
+          
+        
+      </ul>
+    </nav>
+
+    <a href="#subscribeModal" class="pure-button header__subscribe_link">Подписаться на рассылку</a>
+  </div>
+</div>
+
+
+      <div class="content pure-u-1 pure-u-md-3-4">
+        
+
+<article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+  <header class="post__header">
+    
+    <h1 class="post__title" itemprop="name headline">Эликсир для джавистов. Часть первая</h1>
+
+    <div class="post__meta post_meta">
+      <ul class="meta_list">
+        <li class="meta_list__item">
+          
+          <span class="">
+            <small class="meta_list__item_name">Дата</small>
+            <time class="h-bold" datetime="2017-12-14T00:00:00+00:00" itemprop="datePublished">
+              
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+14 декабря 2017
+
+            </time>
+          </span>
+          
+
+          
+        </li>
+        
+        <li class="meta_list__item">
+            <span class="tag_cloud tags_cloud--inline h-no_margin">
+              <small class="meta_list__item_name">Теги</small> 
+
+
+<ul class="tags_cloud__list">
+  
+    <a href="/tags/#beginner" class="tags_cloud__link tag tag--beginner">beginner</a>
+  
+    <a href="/tags/#overview" class="tags_cloud__link tag tag--overview">overview</a>
+  
+</ul>
+
+            </span>
+        </li>
+        
+        <li class="meta_list__item">
+          <span itemprop="author" itemscope itemtype="http://schema.org/Person">
+            <small class="meta_list__item_name">
+              
+                Перевод
+              
+            </small>
+            <span itemprop="name" class="h-bold">Надежда Нестерова</span>
+          </span>
+        </li>
+
+        <li class="meta_list__item">
+          
+            <div >
+              <small>Оригинал</small>
+              <strong>
+                &laquo;<a href="https://medium.com/skyhub-labs/elixir-for-java-developers-episode-i-66b65c862652" style="text-transform: none; text-decoration: underline; color: #4b2e39;">Elixir for Java Developers, Episode I</a>&raquo;
+              </strong>
+              <small>&copy;</small>
+              <strong>Jusabe Guedes</strong>
+            </div>
+          
+        </li>
+      </ul>
+    </div>
+  </header>
+
+  <div class="post__content" itemprop="articleBody">
+    <p>Не так давно я решил изменить образ мышления с помощью изучения нового языка программирования. С самого начала карьеры я работал с Джавой, и сейчас стал ощущать необходимость в совершенно другой парадигме. Так я повстречал невероятный язык под названием Эликсир.</p>
+
+<p>Рубистам хорошо знакомо название этого языка, а также, возможно, имя создателя – Джозе Валима. Однако у пришедших из более многословных языков шансы быть знакомыми с Эликсиром довольно низки.</p>
+
+<p>Так я решил написать несколько постов, чтобы помочь джавистам быстрее понять как устроен Эликсир. С помощью сравнения этих двух языков будет проще понять новый для вас мир. Через эти посты я расскажу о синтаксисе, о работе языка и о ключевых особенностях, которые делают Эликсир по-настоящему потрясающим!</p>
+
+<h2 id="функциональное-программирование">Функциональное программирование</h2>
+
+<p>На минутку забудем об объектах, классах и интерфейсах. Эликсир – компилируемый функциональный язык программирования, в основе которого лежит принцип иммутабельности. Достаточно запомнить три простых правила, чтобы понять, как же в нём всё устроено.</p>
+
+<ol>
+  <li>Данные иммутабельны.</li>
+  <li>Функции идемпотентны. Это означает, что сколько ни вызывай функцию с одними и теми же аргументами, она всегда будет возвращать одинаковый результат.</li>
+  <li>Да здравствует сопоставление с образцом!</li>
+</ol>
+
+<h2 id="привет-мир">Привет, мир!</h2>
+
+<p>Какой бы язык вы ни изучали, начало всегда одно – «Hello world!». Что ж, и мы не будем изобретать велосипед.</p>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// Java</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">HelloWorld</span> <span class="o">{</span>
+  <span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">main</span><span class="o">(</span><span class="n">String</span><span class="o">[]</span> <span class="n">args</span><span class="o">){</span>
+    <span class="n">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"Hello world!"</span><span class="o">);</span>
+  <span class="o">}</span>
+<span class="o">}</span>
+</code></pre></div></div>
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># Elixir</span>
+<span class="no">IO</span><span class="o">.</span><span class="n">puts</span> <span class="sd">"</span><span class="s2">Hello world!"</span>
+</code></pre></div></div>
+
+<h2 id="типы-и-переменные">Типы и переменные</h2>
+
+<p>Типы переменных в Эликсире определяются динамически во время выполнения программы. То есть нет необходимости явно задавать тип переменной при её объявлении, но при этом существуют определённые правила для каждого типа:</p>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// Java </span>
+<span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">1</span><span class="o">;</span>
+<span class="kt">float</span> <span class="n">f</span> <span class="o">=</span> <span class="mf">3.0f</span><span class="o">;</span>
+<span class="kt">boolean</span> <span class="n">b</span> <span class="o">=</span> <span class="kc">true</span><span class="o">;</span>
+<span class="kt">int</span><span class="o">[]</span> <span class="n">array</span> <span class="o">=</span> <span class="o">{};</span>
+<span class="n">String</span> <span class="n">s</span> <span class="o">=</span> <span class="s">"foo"</span><span class="o">;</span>
+<span class="n">Map</span><span class="o">&lt;</span><span class="n">String</span><span class="o">,</span> <span class="n">Integer</span><span class="o">&gt;</span> <span class="n">map</span> <span class="o">=</span> <span class="k">new</span> <span class="n">HashMap</span><span class="o">&lt;&gt;();</span>
+</code></pre></div></div>
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># Elixir</span>
+<span class="n">i</span> <span class="o">=</span> <span class="m">1</span>
+<span class="n">f</span> <span class="o">=</span> <span class="m">3.0</span>
+<span class="n">b</span> <span class="o">=</span> <span class="no">true</span>
+<span class="n">list</span> <span class="o">=</span> <span class="p">[</span><span class="m">1</span><span class="p">,</span> <span class="m">2</span><span class="p">]</span>
+<span class="n">s</span> <span class="o">=</span> <span class="sd">"</span><span class="s2">foo"</span>
+<span class="n">map</span> <span class="o">=</span> <span class="p">%{</span><span class="sd">"</span><span class="s2">one"</span> <span class="o">=&gt;</span> <span class="m">1</span><span class="p">,</span> <span class="sd">"</span><span class="s2">two"</span> <span class="o">=&gt;</span> <span class="m">2</span><span class="p">}</span>
+<span class="n">tuple</span> <span class="o">=</span> <span class="p">{</span><span class="m">1</span><span class="p">,</span> <span class="m">2</span><span class="p">}</span>
+<span class="n">keyword_list</span> <span class="o">=</span> <span class="p">[</span><span class="ss">one:</span> <span class="m">1</span><span class="p">,</span> <span class="ss">two:</span> <span class="m">2</span><span class="p">]</span>
+</code></pre></div></div>
+
+<p>А теперь создадим список и добавим в него новый элемент. Вот так это будет выглядеть на Джаве:</p>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// Java</span>
+<span class="n">List</span><span class="o">&lt;</span><span class="n">Integer</span><span class="o">&gt;</span> <span class="n">list</span> <span class="o">=</span> <span class="k">new</span> <span class="n">ArrayList</span><span class="o">&lt;&gt;();</span>
+<span class="n">list</span><span class="o">.</span><span class="na">add</span><span class="o">(</span><span class="mi">1</span><span class="o">);</span>
+<span class="n">list</span><span class="o">.</span><span class="na">add</span><span class="o">(</span><span class="mi">2</span><span class="o">);</span>
+<span class="n">list</span><span class="o">.</span><span class="na">size</span><span class="o">();</span> <span class="c1">// возвращает 2</span>
+</code></pre></div></div>
+
+<p>Вспоминаем про первое правило – <strong><em>правило иммутабельности</em></strong>. Чтобы изменить значение какой-либо переменной, нужно заново привязать его к другой переменной. В примере ниже только первые три строчки изменяют значение элементов списка, далее уже создаётся копия с новыми значениями:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># Elixir</span>
+<span class="n">list</span> <span class="o">=</span> <span class="p">[]</span> <span class="c1"># создаёт список</span>
+<span class="n">list</span> <span class="o">=</span> <span class="p">[</span><span class="m">1</span> <span class="o">|</span> <span class="n">list</span><span class="p">]</span> <span class="c1"># добавляет 1 в начало списка</span>
+<span class="n">list</span> <span class="o">=</span> <span class="p">[</span><span class="m">2</span> <span class="o">|</span> <span class="n">list</span><span class="p">]</span> <span class="c1"># добавляет 2 в начало списка</span>
+<span class="no">Enum</span><span class="o">.</span><span class="n">into</span><span class="p">(</span><span class="n">list</span><span class="p">,</span> <span class="p">[</span><span class="m">3</span><span class="p">])</span> <span class="c1"># добавляет 3 в начало списка</span>
+<span class="n">list</span> <span class="o">++</span> <span class="p">[</span><span class="m">3</span><span class="p">,</span> <span class="m">4</span><span class="p">]</span> <span class="c1"># объединяет два списка, производя [2, 1, 3, 4]</span>
+<span class="no">Enum</span><span class="o">.</span><span class="n">count</span><span class="p">(</span><span class="n">list</span><span class="p">)</span> <span class="c1"># возвращает 2</span>
+</code></pre></div></div>
+
+<p>Небольшая подсказка по спискам в Эликсире: <strong><em>они хранятся в памяти как связные списки</em></strong>. Так как имеется только ссылка на голову списка, то чтобы добавить в список новый элемент, нужно вставить его в начало, заменив голову списка. Это гарантирует выполнение вставки за время <code class="highlighter-rouge">O(1)</code>. Если же требуется добавить элементы в конец, то нужно, как показано выше, произвести сцепление текущего списка с новым элементом, обёрнутым в список. Но с этим поаккуратнее, операция не из простых, поскольку требует большое количество памяти для копирования целого списка и создания нового.</p>
+
+<p>Ещё одна загадка – определение длины списка. Как вы могли догадаться, единственный способ это сделать – пройти весь список и посчитать количество элементов (сложность <code class="highlighter-rouge">O(n)</code>). Опять же, будьте осторожны.</p>
+
+<p>Не переживайте, просто ваш разум привык видеть всё в императивном ключе. Кроме этого способа подсчёта элементов есть и другие, которые будут рассмотрены позже. А пока… давайте прислушаемся к слогану небезысвестной компании:</p>
+
+<blockquote>
+  <p><strong><em>Думай иначе!</em></strong></p>
+</blockquote>
+
+<h2 id="функции-vs-методы">Функции vs методы</h2>
+
+<p>В отличие от методов в Джаве, которые могут иметь один из четырёх модификаторов доступа (<code class="highlighter-rouge">public</code>, <code class="highlighter-rouge">default</code>, <code class="highlighter-rouge">protected</code> или <code class="highlighter-rouge">private</code>), функции в Эликсире могут быть только двух типов (<code class="highlighter-rouge">public</code> или <code class="highlighter-rouge">private</code>). Определение публичных и приватных функций начинается со слов <code class="highlighter-rouge">def</code> и <code class="highlighter-rouge">defp</code> соответственно. Например:</p>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// Java</span>
+<span class="kd">public</span> <span class="kt">void</span> <span class="nf">addElement</span><span class="o">(</span><span class="n">List</span><span class="o">&lt;</span><span class="n">Integer</span><span class="o">&gt;</span> <span class="n">list</span><span class="o">,</span> <span class="n">Integer</span> <span class="n">element</span><span class="o">){</span>
+  <span class="n">list</span><span class="o">.</span><span class="na">add</span><span class="o">(</span><span class="n">element</span><span class="o">);</span>
+<span class="o">}</span>
+<span class="kd">private</span> <span class="kt">int</span> <span class="nf">privateSum</span><span class="o">(</span><span class="kt">int</span> <span class="n">a</span><span class="o">,</span> <span class="kt">int</span> <span class="n">b</span><span class="o">){</span>
+  <span class="k">return</span> <span class="n">a</span> <span class="o">+</span> <span class="n">b</span><span class="o">;</span>
+<span class="o">}</span>
+</code></pre></div></div>
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># Elixir</span>
+<span class="k">def</span> <span class="n">say_hello</span><span class="p">(</span><span class="n">person</span><span class="p">)</span> <span class="k">do</span>
+  <span class="sd">"</span><span class="s2">Hello </span><span class="si">#{</span><span class="n">person</span><span class="si">}</span><span class="s2">"</span>
+<span class="k">end</span>
+
+<span class="k">def</span> <span class="n">prepend_element</span><span class="p">(</span><span class="n">list</span><span class="p">,</span> <span class="n">element</span><span class="p">)</span> <span class="k">do</span>
+  <span class="p">[</span><span class="n">element</span> <span class="o">|</span> <span class="n">list</span><span class="p">]</span>
+<span class="k">end</span>
+
+<span class="k">def</span> <span class="n">sum</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">),</span> <span class="k">do</span><span class="p">:</span> <span class="n">a</span> <span class="o">+</span> <span class="n">b</span>
+
+<span class="k">def</span> <span class="n">sum</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">c</span> <span class="k">do</span>
+  <span class="n">a</span> <span class="o">+</span> <span class="n">b</span> <span class="o">+</span> <span class="n">c</span>
+<span class="k">end</span>
+
+<span class="k">defp</span> <span class="n">sum</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="n">d</span><span class="p">)</span> <span class="k">do</span>
+  <span class="n">a</span> <span class="o">+</span> <span class="n">b</span> <span class="o">+</span> <span class="n">c</span> <span class="o">+</span> <span class="n">d</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<p>Итак, функцию можно задавать различными способами, при этом не нужно указывать ключевое слово <code class="highlighter-rouge">return</code>. А всё потому, что при обращении к функции будет всегда возвращён результат последней команды внутри неё.</p>
+
+<p>Попробуем снова добавить в список новый элемент, используя вышеприведённые функции. Поскольку в Джаве каждый объект является указателем, то при передаче объекта методу в качестве аргумента внутри метода используется созданная копия этого указателя. Это означает, что до тех пор пока значения списка не будут переприсвоены в <code class="highlighter-rouge">addElement</code>, любые изменения, происходящие в списке, будут отображены за пределами метода. В Эликсире всё совершенно иначе.</p>
+
+<p>Помните второе правило? <strong><em>Функции идемпотентны!</em></strong> Всё, что происходит внутри функций, за исключением возвращаемого результата, остаётся там же. Это одна из основных особенностей Эликсира, позволяющая запускать код изолированно и достигать тем самым абсолютно новый уровень параллелизма. И вам даже не придётся беспокоиться о побочных эффектах своего кода.</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># Elixir</span>
+<span class="n">list</span> <span class="o">=</span> <span class="p">[</span><span class="m">1</span><span class="p">,</span> <span class="m">2</span><span class="p">]</span>
+<span class="n">prepend_element</span><span class="p">(</span><span class="n">list</span><span class="p">,</span> <span class="m">3</span><span class="p">)</span>
+<span class="n">prepend_element</span><span class="p">(</span><span class="n">list</span><span class="p">,</span> <span class="m">4</span><span class="p">)</span>
+<span class="n">prepend_element</span><span class="p">(</span><span class="n">list</span><span class="p">,</span> <span class="m">5</span><span class="p">)</span>
+<span class="no">IO</span><span class="o">.</span><span class="n">inspect</span><span class="p">(</span><span class="n">list</span><span class="p">)</span> <span class="c1"># возвращает [1, 2]</span>
+</code></pre></div></div>
+
+<p>Нельзя не упомянуть пайп-оператор <code class="highlighter-rouge">|&gt;</code>. С его помощью можно легко и просто объединять функции в цепочки, передавая результат предыдущей функции следующей в качестве аргумента. Приведу простейший пример его использования:</p>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// Java</span>
+<span class="n">String</span> <span class="n">fullName</span> <span class="o">=</span> <span class="s">"my full name"</span><span class="o">;</span>
+<span class="n">String</span><span class="o">[]</span> <span class="n">names</span> <span class="o">=</span> <span class="n">fullName</span><span class="o">.</span><span class="na">split</span><span class="o">(</span><span class="s">" "</span><span class="o">);</span>
+<span class="n">String</span> <span class="n">firstName</span> <span class="o">=</span> <span class="n">names</span><span class="o">[</span><span class="mi">0</span><span class="o">];</span>
+<span class="n">firstName</span><span class="o">.</span><span class="na">toUpperCase</span><span class="o">();</span>
+</code></pre></div></div>
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># Elixir</span>
+<span class="sd">"</span><span class="s2">my full name"</span>
+<span class="o">|&gt;</span> <span class="no">String</span><span class="o">.</span><span class="n">split</span>
+<span class="o">|&gt;</span> <span class="no">List</span><span class="o">.</span><span class="n">first</span>
+<span class="o">|&gt;</span> <span class="no">String</span><span class="o">.</span><span class="n">upcase</span>
+</code></pre></div></div>
+
+<h2 id="модули-vs-классы">Модули vs классы</h2>
+
+<p>Чтобы реализовать что-то в Джаве, сначала нужно создать класс, содержащий конструкторы, методы и переменные. В Эликсире же код состоит из модулей, объединяющих функции в одно целое. Выглядит всё это примерно так:</p>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// Java</span>
+<span class="kd">class</span> <span class="nc">Calculator</span> <span class="o">{</span>
+  <span class="kd">public</span> <span class="kt">int</span> <span class="nf">sum</span><span class="o">(</span><span class="kt">int</span> <span class="n">a</span><span class="o">,</span> <span class="kt">int</span> <span class="n">b</span><span class="o">){</span>
+    <span class="k">return</span> <span class="n">a</span> <span class="o">+</span> <span class="n">b</span><span class="o">;</span>
+  <span class="o">}</span>
+<span class="o">}</span>
+</code></pre></div></div>
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># Elixir</span>
+<span class="k">defmodule</span> <span class="no">Calculator</span> <span class="k">do</span>
+  <span class="k">def</span> <span class="n">sum</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">),</span> <span class="k">do</span><span class="p">:</span> <span class="n">a</span> <span class="o">+</span> <span class="n">b</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<p>Можно провести параллель между модулями и функциями и статическими методами внутри класса. Здесь нет понятия экземпляра, поэтому каждый модуль и каждая функция «статичны». Различия в их использовании иллюстрирует следующий пример:</p>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// Java</span>
+<span class="n">Calculator</span> <span class="n">calculator</span> <span class="o">=</span> <span class="k">new</span> <span class="n">Calculator</span><span class="o">();</span>
+<span class="n">calculator</span><span class="o">.</span><span class="na">sum</span><span class="o">(</span><span class="mi">1</span><span class="o">,</span> <span class="mi">2</span><span class="o">);</span>
+</code></pre></div></div>
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># Elixir</span>
+<span class="no">Calculator</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="m">1</span><span class="p">,</span> <span class="m">2</span><span class="p">)</span>
+<span class="c1"># скобки необязательны</span>
+<span class="no">Calculator</span><span class="o">.</span><span class="n">sum</span> <span class="m">1</span><span class="p">,</span> <span class="m">2</span>
+</code></pre></div></div>
+
+  </div>
+
+  <!-- uSocial -->
+  <div class="post__share_block share_block">
+    <script async src="https://usocial.pro/usocial/usocial.js?v=6.1.4" data-script="usocial" charset="utf-8"></script>
+    <div class="uSocial-Share" data-pid="2fd19544e551bce292425ee8adaa31be" data-type="share" data-options="round,style2,default,absolute,horizontal,size32,counter1,counter-before,upArrow-right,nomobile" data-social="telegram,fb,vk,gPlus,twi,bookmarks"></div>
+  </div>
+  <!-- /uSocial -->
+</article>
+
+
+        <footer class="footer">
+    &copy; 2020
+    / Россия
+
+    <span class="pull-right">Любые мысли и вопросы пишите на <a href="mailto:elixir@wunsh.ru">elixir@wunsh.ru</a>.</span>
+</footer>
+
+        <div id="subscribeModal" class="modal">
+    <div class="modal__content">
+        <a href="#close" title="Close" class="modal__close">x</a>
+
+        <h2 class="modal__title">Ламповая рассылка про&nbsp;Эликсир</h2>
+
+        <p>Один-два раза в&nbsp;неделю присылаем тёплые письма об&nbsp;Эликсире: переводы самых интересных статей до&nbsp;их&nbsp;появления в&nbsp;открытом доступе, анонсы событий и&nbsp;вкусные бонусы.</p>
+
+        <form action="//wunsh.us14.list-manage.com/subscribe/post?u=c81ca3d4693f62db7f7f67c71&amp;id=a192e2dfef" method="post" id="mc-embedded-subscribe-form" name="mc-embedded-subscribe-form" class="pure-form h-tc validate" target="_blank" novalidate>
+            <input type="email" value="" name="EMAIL" class="modal__input pure-input-rounded large" id="mce-EMAIL" placeholder="Твоя почта" required>
+            <div style="position: absolute; left: -5000px;" aria-hidden="true"><input type="text" name="b_c81ca3d4693f62db7f7f67c71_a192e2dfef" tabindex="-1" value=""></div>
+
+            <input type="submit" value="Присоединиться" name="subscribe" onClick="yaCounter39773490.reachGoal('SUBSCRIBED'); return true" id="mc-embedded-subscribe" class="pure-button button-success large">
+        </form>
+
+        <p>Обязательно подтверди почту, перейдя по&nbsp;ссылке в&nbsp;письме, иначе мы&nbsp;не&nbsp;сможем делиться с&nbsp;тобой полезностями.</p>
+
+        <p>Надоедать точно не&nbsp;будем :)</p>
+    </div>
+</div>
+
+        <script src="/assets/js/vendors/zepto.min.js"></script>
+
+<script>
+    if ($(".post--docs").length) {
+        $(".footer").addClass("footer--docs")
+    }
+
+    $(".modal--close_backdrop").click(function(){
+        window.location.hash = "";
+    });
+</script>
+
+        <!-- Yandex.Metrika counter -->
+<script type="text/javascript">
+    (function (d, w, c) {
+        (w[c] = w[c] || []).push(function() {
+            try {
+                w.yaCounter39773490 = new Ya.Metrika({
+                    id:39773490,
+                    clickmap:true,
+                    trackLinks:true,
+                    accurateTrackBounce:true,
+                    webvisor:true,
+                    ut:"noindex"
+                });
+            } catch(e) { }
+        });
+
+        var n = d.getElementsByTagName("script")[0],
+            s = d.createElement("script"),
+            f = function () { n.parentNode.insertBefore(s, n); };
+        s.type = "text/javascript";
+        s.async = true;
+        s.src = "https://mc.yandex.ru/metrika/watch.js";
+
+        if (w.opera == "[object Opera]") {
+            d.addEventListener("DOMContentLoaded", f, false);
+        } else { f(); }
+    })(document, window, "yandex_metrika_callbacks");
+</script>
+<noscript><div><img src="https://mc.yandex.ru/watch/39773490?ut=noindex" style="position:absolute; left:-9999px;" alt="" /></div></noscript>
+<!-- /Yandex.Metrika counter -->
+
+      </div>
+    </div>
+  </body>
+</html>

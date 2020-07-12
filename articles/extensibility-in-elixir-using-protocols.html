@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Протоколы и расширяемость в Elixir |> Сообщество Elixir и Phoenix Framework</title>
+    <meta name="description" content="В статье речь пойдёт о протоколах – механезме реализации полиморфизма в Elixir.">
+
+    <link rel="alternate" type="application/rss+xml" title="Сообщество Elixir и Phoenix Framework" href="/feed.xml" />
+    <link rel="canonical" href="https://wunsh.ru/articles/extensibility-in-elixir-using-protocols.html">
+
+    <style type="text/css">@import url("//fonts.googleapis.com/css?family=Source+Sans+Pro:400,700&subset=cyrillic");</style>
+    <link rel="stylesheet" href="/assets/css/vendors/pure.min.css">
+    <link rel="stylesheet" href="/assets/css/vendors/pure-grids-responsive.min.css">
+    <link rel="stylesheet" href="/assets/css/style.css?1594516983">
+
+    <link rel="shortcut icon" type="image/png" href="/assets/favicon.png" >
+</head>
+
+
+  <body>
+    <div class="wunsh pure-g">
+      
+
+
+
+
+<div class="menu pure-u-1 pure-u-md-1-4">
+  <div class="header">
+    <h2 class="header__title">
+      
+        <a href="https://wunsh.ru" class="header__title_link" title="На главную">Эликсир и&nbsp;Вунш</a>
+      
+    </h2>
+    <h3 class="header__tagline">Erlang + Ruby = &#10084;</h3>
+
+    <nav class="nav">
+      <ul class="nav_list">
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/elixir" class="nav_list__item_link pure-button">О языке</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/install/linux-asdf" class="nav_list__item_link pure-button">Установка</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/docs/" class="nav_list__item_link pure-button">Документация</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/guides" class="nav_list__item_link pure-button">Гайды</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/news" class="nav_list__item_link pure-button">Новости</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/articles" class="nav_list__item_link pure-button">Статьи</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/videos" class="nav_list__item_link pure-button">Видео</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/vacancies" class="nav_list__item_link pure-button">Вакансии</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/faq" class="nav_list__item_link pure-button">FAQ</a>
+            </li>
+          
+        
+      </ul>
+    </nav>
+
+    <a href="#subscribeModal" class="pure-button header__subscribe_link">Подписаться на рассылку</a>
+  </div>
+</div>
+
+
+      <div class="content pure-u-1 pure-u-md-3-4">
+        
+
+<article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+  <header class="post__header">
+    
+    <h1 class="post__title" itemprop="name headline">Протоколы и расширяемость в Elixir</h1>
+
+    <div class="post__meta post_meta">
+      <ul class="meta_list">
+        <li class="meta_list__item">
+          
+          <span class="">
+            <small class="meta_list__item_name">Дата</small>
+            <time class="h-bold" datetime="2017-09-22T00:00:00+00:00" itemprop="datePublished">
+              
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+22 сентября 2017
+
+            </time>
+          </span>
+          
+
+          
+        </li>
+        
+        <li class="meta_list__item">
+            <span class="tag_cloud tags_cloud--inline h-no_margin">
+              <small class="meta_list__item_name">Теги</small> 
+
+
+<ul class="tags_cloud__list">
+  
+    <a href="/tags/#beginner" class="tags_cloud__link tag tag--beginner">beginner</a>
+  
+    <a href="/tags/#practical" class="tags_cloud__link tag tag--practical">practical</a>
+  
+</ul>
+
+            </span>
+        </li>
+        
+        <li class="meta_list__item">
+          <span itemprop="author" itemscope itemtype="http://schema.org/Person">
+            <small class="meta_list__item_name">
+              
+                Перевод
+              
+            </small>
+            <span itemprop="name" class="h-bold">Надежда Нестерова</span>
+          </span>
+        </li>
+
+        <li class="meta_list__item">
+          
+            <div >
+              <small>Оригинал</small>
+              <strong>
+                &laquo;<a href="https://medium.com/everydayhero-engineering/extensibility-in-elixir-using-protocols-2e8fb0a35c48" style="text-transform: none; text-decoration: underline; color: #4b2e39;">Extensibility in Elixir Using Protocols</a>&raquo;
+              </strong>
+              <small>&copy;</small>
+              <strong>Matt Furness</strong>
+            </div>
+          
+        </li>
+      </ul>
+    </div>
+  </header>
+
+  <div class="post__content" itemprop="articleBody">
+    <p>В данной статье речь пойдёт о <a href="http://elixir-lang.org/getting-started/protocols.html">протоколах</a> — особенности Elixir, обеспечивающей расширяемость приложений.</p>
+
+<h2 id="протоколы">Протоколы</h2>
+
+<p>Согласно <a href="http://elixir-lang.org/getting-started/protocols.html">документации</a>:</p>
+
+<blockquote>
+  <p>Протоколы — это механизм реализации полиморфизма в Elixir. Диспетчеризация возможна для любого типа данных, если тип указан в реализации протокола.</p>
+</blockquote>
+
+<p>Другими словами, можно создать функцию, поведение которой будет различно в зависимости от типа её первого аргумента. Реализации протоколов могут существовать для одного из встроенных поддерживаемых псевдонимов типов: <code class="highlighter-rouge">Atom</code>, <code class="highlighter-rouge">BitString</code>, <code class="highlighter-rouge">Float</code>, <code class="highlighter-rouge">Function</code>, <code class="highlighter-rouge">Integer</code>, <code class="highlighter-rouge">List</code>, <code class="highlighter-rouge">Map</code>, <code class="highlighter-rouge">PID</code>, <code class="highlighter-rouge">Port</code>, <code class="highlighter-rouge">Reference</code>, <code class="highlighter-rouge">Tuple</code>, <code class="highlighter-rouge">Any</code>, а также для пользовательских структур. Создадим протокол под названием Countable для подсчёта элементов.</p>
+
+<p>Сначала протокол нужно определить:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">iex</span><span class="o">&gt;</span> <span class="k">defprotocol</span> <span class="no">Countable</span> <span class="k">do</span>
+<span class="o">...&gt;</span>  <span class="k">def</span> <span class="n">count_items</span><span class="p">(</span><span class="n">term</span><span class="p">)</span>
+<span class="o">...&gt;</span> <span class="k">end</span>
+</code></pre></div></div>
+
+<p>Заметьте, функция, объявленная в протоколе, не имеет тела. Протоколы поддерживают только заголовки определений; в сущности, они <a href="https://github.com/elixir-lang/elixir/blob/v1.4.2/lib/elixir/lib/protocol.ex#L13">переопределяют макрос</a> <code class="highlighter-rouge">def</code>. Заголовки определений имеют больше ограничений. К примеру, определение, содержащее охранное условие, не будет скомпилировано:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">iex</span><span class="o">&gt;</span> <span class="k">defprotocol</span> <span class="no">Countable</span> <span class="k">do</span>
+<span class="o">...&gt;</span>   <span class="k">def</span> <span class="n">count_items</span><span class="p">(</span><span class="n">term</span><span class="p">)</span> <span class="ow">when</span> <span class="n">is_binary</span><span class="p">(</span><span class="n">term</span><span class="p">)</span>
+<span class="o">...&gt;</span> <span class="k">end</span>
+<span class="o">**</span> <span class="p">(</span><span class="no">CompileError</span><span class="p">)</span> <span class="ss">iex:</span><span class="m">4</span><span class="p">:</span> <span class="n">missing</span> <span class="k">do</span> <span class="n">keyword</span> <span class="ow">in</span> <span class="k">def</span>
+    <span class="ss">iex:</span><span class="m">4</span><span class="p">:</span> <span class="p">(</span><span class="n">module</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p>Такая же ошибка возникнет при попытке компиляции функции сопоставления с литералом:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">iex</span><span class="o">&gt;</span> <span class="k">defprotocol</span> <span class="no">Countable</span> <span class="k">do</span>
+<span class="o">...&gt;</span>   <span class="k">def</span> <span class="n">count_items</span><span class="p">(</span><span class="sd">"</span><span class="s2">"</span><span class="p">)</span>
+<span class="o">...&gt;</span> <span class="k">end</span>
+<span class="o">**</span> <span class="p">(</span><span class="no">CompileError</span><span class="p">)</span> <span class="ss">iex:</span><span class="m">4</span><span class="p">:</span> <span class="n">can</span> <span class="kn">use</span> <span class="n">only</span> <span class="n">variables</span> <span class="ow">and</span> <span class="p">\\</span> <span class="n">as</span> <span class="n">arguments</span> <span class="ow">in</span> <span class="n">definition</span> <span class="n">header</span>
+    <span class="ss">iex:</span><span class="m">4</span><span class="p">:</span> <span class="p">(</span><span class="n">module</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p>Заголовок функции в объявлении протокола должен содержать хотя бы один аргумент, именно он впоследствии понадобится для обращения к нужной реализации протокола:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">iex</span><span class="o">&gt;</span> <span class="k">defprotocol</span> <span class="no">Countable</span> <span class="k">do</span>
+<span class="o">...&gt;</span>   <span class="k">def</span> <span class="n">count_items</span><span class="p">()</span>
+<span class="o">...&gt;</span> <span class="k">end</span>
+<span class="o">**</span> <span class="p">(</span><span class="no">ArgumentError</span><span class="p">)</span> <span class="n">protocol</span> <span class="n">functions</span> <span class="n">expect</span> <span class="n">at</span> <span class="n">least</span> <span class="n">one</span> <span class="n">argument</span>
+    <span class="p">(</span><span class="n">elixir</span><span class="p">)</span> <span class="n">expanding</span> <span class="ss">macro:</span> <span class="no">Protocol</span><span class="o">.</span><span class="k">def</span><span class="o">/</span><span class="m">1</span>
+             <span class="ss">iex:</span><span class="m">19</span><span class="p">:</span> <span class="no">Countable</span> <span class="p">(</span><span class="n">module</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p>Определим реализации протокола для подсчёта элементов для типов <code class="highlighter-rouge">List</code>, <code class="highlighter-rouge">Map</code> и пользовательского типа <code class="highlighter-rouge">Order</code>.</p>
+
+<p>Реализация для <code class="highlighter-rouge">List</code>:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">iex</span><span class="o">&gt;</span> <span class="k">defimpl</span> <span class="no">Countable</span><span class="p">,</span> <span class="ss">for:</span> <span class="no">List</span> <span class="k">do</span>
+<span class="o">...&gt;</span>   <span class="k">def</span> <span class="n">count_items</span><span class="p">(</span><span class="n">list</span><span class="p">),</span> <span class="k">do</span><span class="p">:</span> <span class="n">length</span><span class="p">(</span><span class="n">list</span><span class="p">)</span>
+<span class="o">...&gt;</span> <span class="k">end</span>
+</code></pre></div></div>
+
+<p>Реализация для <code class="highlighter-rouge">Map</code>:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">iex</span><span class="o">&gt;</span> <span class="k">defimpl</span> <span class="no">Countable</span><span class="p">,</span> <span class="ss">for:</span> <span class="no">Map</span> <span class="k">do</span>
+<span class="o">...&gt;</span>   <span class="k">def</span> <span class="n">count_items</span><span class="p">(</span><span class="n">map</span><span class="p">),</span> <span class="k">do</span><span class="p">:</span> <span class="n">map_size</span><span class="p">(</span><span class="n">map</span><span class="p">)</span>
+<span class="o">...&gt;</span> <span class="k">end</span>
+</code></pre></div></div>
+
+<p>Реализация для <code class="highlighter-rouge">Order</code>:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">iex</span><span class="o">&gt;</span> <span class="k">defmodule</span> <span class="no">Order</span> <span class="k">do</span>
+<span class="o">...&gt;</span>   <span class="n">defstruct</span> <span class="ss">number:</span> <span class="m">0</span><span class="p">,</span> <span class="ss">items:</span> <span class="p">[]</span>
+<span class="o">...&gt;</span>
+<span class="o">...&gt;</span>   <span class="k">defimpl</span> <span class="no">Countable</span> <span class="k">do</span>
+<span class="o">...&gt;</span>     <span class="k">def</span> <span class="n">count_items</span><span class="p">(%</span><span class="no">Order</span><span class="p">{</span><span class="ss">items:</span> <span class="n">items</span><span class="p">})</span> <span class="k">do</span>
+<span class="o">...&gt;</span>       <span class="no">Countable</span><span class="o">.</span><span class="n">count_items</span><span class="p">(</span><span class="n">items</span><span class="p">)</span>
+<span class="o">...&gt;</span>     <span class="k">end</span>
+<span class="o">...&gt;</span>   <span class="k">end</span>
+<span class="o">...&gt;</span> <span class="k">end</span>
+</code></pre></div></div>
+
+<p>Обратите внимание, что при определении реализации внутри модуля, в котором уже определена структура, аргумент <code class="highlighter-rouge">for</code> может быть опущен.</p>
+
+<p>Несмотря на наличие ограничений на сопоставление при объявлении протокола, в его реализации эти ограничения отсутствуют: можно без опаски использовать сопоставление с образцом и охранные условия. Это означает, что для одного и того же количества аргументов могут существовать несколько тел функции.</p>
+
+<p>Вызовем функцию протокола с указанием аргумента, который совпадает с указанными выше типами:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">iex</span><span class="o">&gt;</span> <span class="no">Countable</span><span class="o">.</span><span class="n">count_items</span><span class="p">([</span><span class="ss">:one</span><span class="p">,</span> <span class="ss">:two</span><span class="p">])</span>
+<span class="m">2</span>
+
+<span class="n">iex</span><span class="o">&gt;</span> <span class="no">Countable</span><span class="o">.</span><span class="n">count_items</span><span class="p">(%{</span><span class="ss">one:</span> <span class="m">1</span><span class="p">,</span> <span class="ss">two:</span> <span class="m">2</span><span class="p">})</span>
+<span class="m">2</span>
+
+<span class="n">iex</span><span class="o">&gt;</span> <span class="no">Countable</span><span class="o">.</span><span class="n">count_items</span><span class="p">(%</span><span class="no">Order</span><span class="p">{</span><span class="ss">number:</span> <span class="m">1</span><span class="p">,</span> <span class="ss">items:</span> <span class="p">[</span><span class="ss">:apple</span><span class="p">]})</span>
+<span class="m">1</span>
+
+<span class="n">iex</span><span class="o">&gt;</span> <span class="no">Countable</span><span class="o">.</span><span class="n">count_items</span><span class="p">({</span><span class="ss">:one</span><span class="p">,</span> <span class="ss">:two</span><span class="p">})</span>
+<span class="o">**</span> <span class="p">(</span><span class="no">Protocol</span><span class="o">.</span><span class="no">UndefinedError</span><span class="p">)</span> <span class="n">protocol</span> <span class="no">Countable</span> <span class="ow">not</span> <span class="n">implemented</span> <span class="n">for</span> <span class="p">{</span><span class="ss">:one</span><span class="p">,</span> <span class="ss">:two</span><span class="p">}</span>
+    <span class="ss">iex:</span><span class="m">1</span><span class="p">:</span> <span class="no">Countable</span><span class="o">.</span><span class="n">impl_for!</span><span class="o">/</span><span class="m">1</span>
+    <span class="ss">iex:</span><span class="m">2</span><span class="p">:</span> <span class="no">Countable</span><span class="o">.</span><span class="n">count_items</span><span class="o">/</span><span class="m">1</span>
+</code></pre></div></div>
+
+<p>Любопытно, что каждая реализация становится подмодулем модуля протокола, а значит, в реализации протокола будут поддерживаться атрибуты модуля. Чтобы убедиться в этом, посмотрим информацию о модуле:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">iex</span><span class="o">&gt;</span> <span class="no">Countable</span><span class="o">.</span><span class="no">Order</span><span class="o">.</span><span class="n">__info__</span><span class="p">(</span><span class="ss">:functions</span><span class="p">)</span>
+<span class="p">[</span><span class="ss">__impl__:</span> <span class="m">1</span><span class="p">,</span> <span class="ss">count_items:</span> <span class="m">1</span><span class="p">]</span>
+
+<span class="n">iex</span><span class="o">&gt;</span> <span class="no">Countable</span><span class="o">.</span><span class="n">impl_for</span><span class="p">(%</span><span class="no">Order</span><span class="p">{})</span>
+<span class="no">Countable</span><span class="o">.</span><span class="no">Order</span>
+</code></pre></div></div>
+
+<h2 id="атрибут-модуля-for">Атрибут модуля @for</h2>
+
+<p>Реализации протокола имеют доступ к атрибуту модуля <code class="highlighter-rouge">@for</code>, который представляет собой псевдоним текущего типа, и атрибуту <code class="highlighter-rouge">@protocol</code> — псевдониму реализуемого протокола. Это очень удобно во время реализации протокола для различных псевдонимов:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">iex</span><span class="o">&gt;</span> <span class="k">defprotocol</span> <span class="no">ToList</span> <span class="k">do</span>
+<span class="o">...&gt;</span>   <span class="k">def</span> <span class="n">to_list</span><span class="p">(</span><span class="n">term</span><span class="p">)</span>
+<span class="o">...&gt;</span> <span class="k">end</span>
+
+<span class="n">iex</span><span class="o">&gt;</span> <span class="k">defimpl</span> <span class="no">ToList</span><span class="p">,</span> <span class="ss">for:</span> <span class="p">[</span><span class="no">Map</span><span class="p">,</span> <span class="no">Tuple</span><span class="p">]</span> <span class="k">do</span>
+<span class="o">...&gt;</span>   <span class="k">def</span> <span class="n">to_list</span><span class="p">(</span><span class="n">term</span><span class="p">)</span> <span class="k">do</span>
+<span class="o">...&gt;</span>     <span class="nv">@for</span><span class="o">.</span><span class="n">to_list</span><span class="p">(</span><span class="n">term</span><span class="p">)</span>
+<span class="o">...&gt;</span>   <span class="k">end</span>
+<span class="o">...&gt;</span> <span class="k">end</span>
+
+<span class="n">iex</span><span class="o">&gt;</span> <span class="no">ToList</span><span class="o">.</span><span class="n">to_list</span><span class="p">({</span><span class="ss">:ok</span><span class="p">,</span> <span class="sd">"</span><span class="s2">Hurray"</span><span class="p">})</span>
+<span class="p">[</span><span class="ss">:ok</span><span class="p">,</span> <span class="sd">"</span><span class="s2">Hurray"</span><span class="p">]</span>
+</code></pre></div></div>
+
+<p>В примере выше оба модуля <code class="highlighter-rouge">Map</code> и <code class="highlighter-rouge">Tuple</code> определяют функцию <code class="highlighter-rouge">to_list</code>, и в зависимости от значения атрибута <code class="highlighter-rouge">@for</code> будет вызвана правильная реализация.</p>
+
+<h2 id="резервная-реализация-для-any">Резервная реализация для Any</h2>
+
+<p><code class="highlighter-rouge">Any</code> — особый псевдоним, который можно использовать в качестве резервной реализации протокола или его реализации по умолчанию. При этом, в объявлении протокола необходимо указать:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">iex</span><span class="o">&gt;</span> <span class="k">defprotocol</span> <span class="no">Countable</span> <span class="k">do</span>
+<span class="o">...&gt;</span>   <span class="nv">@fallback_to_any</span> <span class="no">true</span>
+<span class="o">...&gt;</span>   <span class="k">def</span> <span class="n">count_items</span><span class="p">(</span><span class="n">term</span><span class="p">)</span>
+<span class="o">...&gt;</span> <span class="k">end</span>
+
+<span class="n">iex</span><span class="o">&gt;</span> <span class="k">defimpl</span> <span class="no">Countable</span><span class="p">,</span> <span class="ss">for:</span> <span class="no">Any</span> <span class="k">do</span>
+<span class="o">...&gt;</span>   <span class="k">def</span> <span class="n">count_items</span><span class="p">(</span><span class="n">_</span><span class="p">),</span> <span class="k">do</span><span class="p">:</span> <span class="ss">:unknown</span>
+<span class="o">...&gt;</span> <span class="k">end</span>
+
+<span class="n">iex</span><span class="o">&gt;</span> <span class="no">Countable</span><span class="o">.</span><span class="n">count_items</span><span class="p">({</span><span class="ss">:one</span><span class="p">,</span> <span class="ss">:two</span><span class="p">})</span>
+<span class="ss">:unknown</span>
+</code></pre></div></div>
+
+<p>Примечание: можно <a href="https://elixir-lang.org/getting-started/protocols.html#deriving">обратиться</a> к реализации протокола с Any, если необходимо создать список модулей, которые могут быть восстановлены.</p>
+
+<h2 id="встроенные-протоколы">Встроенные протоколы</h2>
+
+<p>Существует некоторое количество встроенных протоколов, которые могут оказаться крайне полезными в практических задачах. На данный момент это такие протоколы, как <a href="https://hexdocs.pm/elixir/Collectable.html">Collectable</a>, <a href="https://hexdocs.pm/elixir/Enumerable.html">Enumerable</a>, <a href="https://hexdocs.pm/elixir/Inspect.html">Inspect</a>, <a href="https://hexdocs.pm/elixir/List.Chars.html">List.Chars</a> и <a href="https://hexdocs.pm/elixir/String.Chars.html">String.Chars</a>. Каждый из них имеет только одну функцию, за исключением <code class="highlighter-rouge">Enumerable</code>, у которого их целых три. Стоит отметить, что лучше делать протоколы настолько «лёгкими», насколько это возможно.</p>
+
+<p>К списку выше можно было бы добавить и модуль <a href="https://hexdocs.pm/elixir/Access.html">Access</a>, который из протокола <a href="https://github.com/elixir-lang/elixir/commit/af7c09e0c19974117b26ec0340b9a2dbb9d36ae9">превратился</a> в <a href="http://elixir-lang.org/getting-started/typespecs-and-behaviours.html#behaviours">поведение</a>.</p>
+
+<h2 id="когда-ихиспользовать">Когда их использовать</h2>
+
+<p>Одно из значительных преимуществ протоколов заключается в том, что реализация протокола может находиться вне библиотеки/приложения, где он определён. Это пригодится разработчикам библиотек: они смогут создавать точки расширения для пользовательских типов. Вот несколько наглядных примеров из реальных проектов:</p>
+
+<ul>
+  <li><strong><a href="https://hexdocs.pm/plug/Plug.Exception.html#content">Plug.Exception</a></strong> — протокол, позволяющий исключениям получать код состояния</li>
+  <li><strong><a href="https://hexdocs.pm/phoenix/Phoenix.Param.html#content">Phoenix.Para</a></strong> — протокол, конвертирующий структуры данных в параметры URL</li>
+  <li><strong><a href="https://hexdocs.pm/scrivener/Scrivener.Paginater.html#content">Scrivener.Paginater</a></strong> — протокол, нумерующий типы</li>
+  <li><strong><a href="https://hexdocs.pm/poison/Poison.Encoder.html#content">Poison.Encoder</a></strong> — протокол, кодирующий типы в формат JSON</li>
+  <li><strong><a href="https://hexdocs.pm/joken/Joken.Claims.html">Joken.Claims</a></strong> — протокол, превращающий данные в запросы.</li>
+</ul>
+
+<h2 id="производительность">Производительность</h2>
+
+<p>Согласно документации, существует потенциальная угроза снижения производительности при использовании протоколов:</p>
+
+<blockquote>
+  <p>Поскольку протокол может работать с любым типом данных, необходимо при каждом вызове проверять, существует ли реализация для данного типа. Производительность при этом может упасть.</p>
+</blockquote>
+
+<p>В связи с этим <a href="https://hexdocs.pm/mix/Mix.Tasks.Compile.Protocols.html#content">консолидация</a> протоколов (как часть <a href="https://hexdocs.pm/mix/Mix.Tasks.Compile.html">компиляции</a>) по умолчанию включена. Консолидация протоколов — это процесс оптимизации диспетчеризации путём поиска всех реализаций в проекте или приложении. Чтобы проверить, включена ли эта опция, запустите следующую команду:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">iex</span><span class="o">&gt;</span> <span class="no">Mix</span><span class="o">.</span><span class="no">Project</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="ss">:consolidate_protocols</span><span class="p">]</span>
+<span class="no">true</span>
+</code></pre></div></div>
+
+<h2 id="заключение">Заключение</h2>
+
+<p>Протоколы позволяют с лёгкостью добавлять в код точки расширения, что особенно важно для создателей библиотек. Разумеется, не стоит этим увлекаться. Не используйте протоколы, когда к ним обращаются функции, проводящие сопоставление с образцом. То, что встроенных протоколов всего шесть, только подтверждает эту мысль.</p>
+
+  </div>
+
+  <!-- uSocial -->
+  <div class="post__share_block share_block">
+    <script async src="https://usocial.pro/usocial/usocial.js?v=6.1.4" data-script="usocial" charset="utf-8"></script>
+    <div class="uSocial-Share" data-pid="2fd19544e551bce292425ee8adaa31be" data-type="share" data-options="round,style2,default,absolute,horizontal,size32,counter1,counter-before,upArrow-right,nomobile" data-social="telegram,fb,vk,gPlus,twi,bookmarks"></div>
+  </div>
+  <!-- /uSocial -->
+</article>
+
+
+        <footer class="footer">
+    &copy; 2020
+    / Россия
+
+    <span class="pull-right">Любые мысли и вопросы пишите на <a href="mailto:elixir@wunsh.ru">elixir@wunsh.ru</a>.</span>
+</footer>
+
+        <div id="subscribeModal" class="modal">
+    <div class="modal__content">
+        <a href="#close" title="Close" class="modal__close">x</a>
+
+        <h2 class="modal__title">Ламповая рассылка про&nbsp;Эликсир</h2>
+
+        <p>Один-два раза в&nbsp;неделю присылаем тёплые письма об&nbsp;Эликсире: переводы самых интересных статей до&nbsp;их&nbsp;появления в&nbsp;открытом доступе, анонсы событий и&nbsp;вкусные бонусы.</p>
+
+        <form action="//wunsh.us14.list-manage.com/subscribe/post?u=c81ca3d4693f62db7f7f67c71&amp;id=a192e2dfef" method="post" id="mc-embedded-subscribe-form" name="mc-embedded-subscribe-form" class="pure-form h-tc validate" target="_blank" novalidate>
+            <input type="email" value="" name="EMAIL" class="modal__input pure-input-rounded large" id="mce-EMAIL" placeholder="Твоя почта" required>
+            <div style="position: absolute; left: -5000px;" aria-hidden="true"><input type="text" name="b_c81ca3d4693f62db7f7f67c71_a192e2dfef" tabindex="-1" value=""></div>
+
+            <input type="submit" value="Присоединиться" name="subscribe" onClick="yaCounter39773490.reachGoal('SUBSCRIBED'); return true" id="mc-embedded-subscribe" class="pure-button button-success large">
+        </form>
+
+        <p>Обязательно подтверди почту, перейдя по&nbsp;ссылке в&nbsp;письме, иначе мы&nbsp;не&nbsp;сможем делиться с&nbsp;тобой полезностями.</p>
+
+        <p>Надоедать точно не&nbsp;будем :)</p>
+    </div>
+</div>
+
+        <script src="/assets/js/vendors/zepto.min.js"></script>
+
+<script>
+    if ($(".post--docs").length) {
+        $(".footer").addClass("footer--docs")
+    }
+
+    $(".modal--close_backdrop").click(function(){
+        window.location.hash = "";
+    });
+</script>
+
+        <!-- Yandex.Metrika counter -->
+<script type="text/javascript">
+    (function (d, w, c) {
+        (w[c] = w[c] || []).push(function() {
+            try {
+                w.yaCounter39773490 = new Ya.Metrika({
+                    id:39773490,
+                    clickmap:true,
+                    trackLinks:true,
+                    accurateTrackBounce:true,
+                    webvisor:true,
+                    ut:"noindex"
+                });
+            } catch(e) { }
+        });
+
+        var n = d.getElementsByTagName("script")[0],
+            s = d.createElement("script"),
+            f = function () { n.parentNode.insertBefore(s, n); };
+        s.type = "text/javascript";
+        s.async = true;
+        s.src = "https://mc.yandex.ru/metrika/watch.js";
+
+        if (w.opera == "[object Opera]") {
+            d.addEventListener("DOMContentLoaded", f, false);
+        } else { f(); }
+    })(document, window, "yandex_metrika_callbacks");
+</script>
+<noscript><div><img src="https://mc.yandex.ru/watch/39773490?ut=noindex" style="position:absolute; left:-9999px;" alt="" /></div></noscript>
+<!-- /Yandex.Metrika counter -->
+
+      </div>
+    </div>
+  </body>
+</html>

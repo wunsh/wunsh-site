@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Сопровождение приложений на&nbsp;Elixir |> Сообщество Elixir и Phoenix Framework</title>
+    <meta name="description" content="В этой статье рассказывается о том, как обеспечить высокую надёжность эксплуатации кода на Эликсире.">
+
+    <link rel="alternate" type="application/rss+xml" title="Сообщество Elixir и Phoenix Framework" href="/feed.xml" />
+    <link rel="canonical" href="https://wunsh.ru/articles/elixir-maintainability.html">
+
+    <style type="text/css">@import url("//fonts.googleapis.com/css?family=Source+Sans+Pro:400,700&subset=cyrillic");</style>
+    <link rel="stylesheet" href="/assets/css/vendors/pure.min.css">
+    <link rel="stylesheet" href="/assets/css/vendors/pure-grids-responsive.min.css">
+    <link rel="stylesheet" href="/assets/css/style.css?1594516983">
+
+    <link rel="shortcut icon" type="image/png" href="/assets/favicon.png" >
+</head>
+
+
+  <body>
+    <div class="wunsh pure-g">
+      
+
+
+
+
+<div class="menu pure-u-1 pure-u-md-1-4">
+  <div class="header">
+    <h2 class="header__title">
+      
+        <a href="https://wunsh.ru" class="header__title_link" title="На главную">Эликсир и&nbsp;Вунш</a>
+      
+    </h2>
+    <h3 class="header__tagline">Erlang + Ruby = &#10084;</h3>
+
+    <nav class="nav">
+      <ul class="nav_list">
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/elixir" class="nav_list__item_link pure-button">О языке</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/install/linux-asdf" class="nav_list__item_link pure-button">Установка</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/docs/" class="nav_list__item_link pure-button">Документация</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/guides" class="nav_list__item_link pure-button">Гайды</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/news" class="nav_list__item_link pure-button">Новости</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/articles" class="nav_list__item_link pure-button">Статьи</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/videos" class="nav_list__item_link pure-button">Видео</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/vacancies" class="nav_list__item_link pure-button">Вакансии</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/faq" class="nav_list__item_link pure-button">FAQ</a>
+            </li>
+          
+        
+      </ul>
+    </nav>
+
+    <a href="#subscribeModal" class="pure-button header__subscribe_link">Подписаться на рассылку</a>
+  </div>
+</div>
+
+
+      <div class="content pure-u-1 pure-u-md-3-4">
+        
+
+<article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+  <header class="post__header">
+    
+    <h1 class="post__title" itemprop="name headline">Сопровождение приложений на&nbsp;Elixir</h1>
+
+    <div class="post__meta post_meta">
+      <ul class="meta_list">
+        <li class="meta_list__item">
+          
+          <span class="">
+            <small class="meta_list__item_name">Дата</small>
+            <time class="h-bold" datetime="2016-12-23T00:00:00+00:00" itemprop="datePublished">
+              
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+23 декабря 2016
+
+            </time>
+          </span>
+          
+
+          
+        </li>
+        
+        <li class="meta_list__item">
+            <span class="tag_cloud tags_cloud--inline h-no_margin">
+              <small class="meta_list__item_name">Теги</small> 
+
+
+<ul class="tags_cloud__list">
+  
+    <a href="/tags/#practical" class="tags_cloud__link tag tag--practical">practical</a>
+  
+</ul>
+
+            </span>
+        </li>
+        
+        <li class="meta_list__item">
+          <span itemprop="author" itemscope itemtype="http://schema.org/Person">
+            <small class="meta_list__item_name">
+              
+                Перевод
+              
+            </small>
+            <span itemprop="name" class="h-bold">Надежда Нестерова</span>
+          </span>
+        </li>
+
+        <li class="meta_list__item">
+          
+            <div >
+              <small>Оригинал</small>
+              <strong>
+                &laquo;<a href="http://tech.findmypast.com/elixir-maintainability/" style="text-transform: none; text-decoration: underline; color: #4b2e39;">Elixir Maintainability</a>&raquo;
+              </strong>
+              <small>&copy;</small>
+              <strong>Steven Blowers</strong>
+            </div>
+          
+        </li>
+      </ul>
+    </div>
+  </header>
+
+  <div class="post__content" itemprop="articleBody">
+    <p>В&nbsp;процессе создания кода будет не&nbsp;лишним подумать о&nbsp;том, каково придётся читающему его человеку, будь&nbsp;то другой разработчик или вы&nbsp;сами. Будь то&nbsp;завтра или через полгода.</p>
+<p>Участники сообщества Elixir/Erlang написали множество различных инструментов для улучшения читабельности кода и&nbsp;удобства его сопровождения. В&nbsp;данной статье мы&nbsp;рассмотрим четыре основных инструмента для этого и&nbsp;обсудим каждый&nbsp;из.</p>
+<p>Прежде чем перейти к&nbsp;обсуждению инструментов, оставлю небольшую заметку. Я&nbsp;возлагаю большие надежды на&nbsp;технику разработки через тестирование и&nbsp;полное покрытие кода. <noindex><a href="http://elixir-lang.org/docs/stable/ex_unit/ExUnit.html" rel="nofollow">ExUnit</a></noindex>&nbsp;&mdash; замечательный инструмент для создания быстро работающих юнит-тестов на&nbsp;Elixir, а&nbsp;все перечисленные ниже инструменты следует использовать при выполнении условия полного покрытия кода.</p>
+<h2>Почему мне можно доверять?</h2>
+<p>Недавно с&nbsp;моей командой разработчиков мы&nbsp;закончили работу над проектом по&nbsp;созданию API на&nbsp;Elixir, где одной из&nbsp;основных целей было обеспечение удобного сопровождения. Ниже приведены инструменты, которые мы&nbsp;использовали для достижения этой цели.</p>
+<h2>ExDoc</h2>
+<noindex><small class="subheader"><a href="https://github.com/elixir-lang/ex_doc" rel="nofollow">Github</a> / <a href="https://hex.pm/packages/ex_doc" rel="nofollow">Hex</a></small></noindex>
+<p>С&nbsp;помощью данного инструмента была сгенерирована <noindex><a href="http://elixir-lang.org/docs/stable/elixir/" rel="nofollow">официальная документация</a></noindex> Elixir, а&nbsp;также документация к&nbsp;пакетам на&nbsp;ресурсе <noindex><a href="https://hex.pm/" rel="nofollow">Hex</a></noindex>, наиболее популярном менеджере пакетов для экосистемы Elixir/Erlang. Его главная задача&nbsp;&mdash; сделать процесс создания документации как можно более простым, и&nbsp;я&nbsp;считаю, что он&nbsp;прекрасно с&nbsp;этим справляется.</p>
+<h3>Добавление инструмента в&nbsp;проект</h3>
+<p>Поместите в&nbsp;файл <code>mix.exs</code> следующий код:</p>
+<figure class="highlight"><pre><code class="language-elixir" data-lang="elixir"><span class="k">def</span> <span class="n">deps</span> <span class="k">do</span>
+  <span class="p">{</span><span class="ss">:ex_doc</span><span class="p">,</span> <span class="sd">"</span><span class="s2">~&gt; 0.13"</span><span class="p">,</span> <span class="ss">only:</span> <span class="ss">:dev</span><span class="p">}</span>
+<span class="k">end</span></code></pre></figure>
+<p>Более подробные инструкции по&nbsp;установке и&nbsp;настройке инструмента можно найти <noindex><a href="https://github.com/elixir-lang/ex_doc" rel="nofollow">на&nbsp;странице Github</a></noindex>.</p>
+<h3>Создание документации</h3>
+<p>Инструмент ExDoc создаёт при запуске &laquo;скелет&raquo; документации, состоящий из&nbsp;модулей проекта, который просто нужно заполнить необходимой информацией.</p>
+<p>Это делается путём добавления атрибутов в&nbsp;модули. Например:</p>
+<figure class="highlight"><pre><code class="language-elixir" data-lang="elixir"><span class="k">defmodule</span> <span class="no">MyProject</span><span class="o">.</span><span class="no">Response</span> <span class="k">do</span>
+  <span class="nv">@moduledoc</span> <span class="sd">"""
+  This module will respond to a greeting.
+  """</span>
+<span class="k">end</span></code></pre></figure>
+<p>Из&nbsp;примера видно, что для добавления документации на&nbsp;уровне модуля используется атрибут <code>@moduledoc</code>.</p>
+<p>Добавить документацию для отдельной функции можно с&nbsp;помощью атрибута <code>@doc</code>. Если использовать этот атрибут с&nbsp;функциями, повторно определёнными через сопоставления с&nbsp;образцом, документация будет выглядеть неаккуратно. Чтобы этого избежать, можно определить функцию с&nbsp;пустым телом и&nbsp;добавить для неё атрибут <code>@doc</code>. Например:</p>
+<figure class="highlight"><pre><code class="language-elixir" data-lang="elixir"><span class="k">defmodule</span> <span class="no">MyAnimals</span><span class="o">.</span><span class="no">Sound</span> <span class="k">do</span>
+
+  <span class="nv">@doc</span> <span class="sd">"""
+  Recognises an animal given its sound.
+  """</span>
+  <span class="k">def</span> <span class="n">recognise</span><span class="p">(</span><span class="n">sound</span><span class="p">)</span>
+
+  <span class="k">def</span> <span class="n">recognise</span><span class="p">(</span><span class="sd">"</span><span class="s2">oink"</span><span class="p">)</span> <span class="k">do</span>
+    <span class="ss">:pig</span>
+  <span class="k">end</span>
+
+  <span class="k">def</span> <span class="n">recognise</span><span class="p">(</span><span class="sd">"</span><span class="s2">moo"</span><span class="p">)</span> <span class="k">do</span>
+    <span class="ss">:cow</span>
+  <span class="k">end</span>
+<span class="k">end</span></code></pre></figure>
+<p>Помимо добавления документации в&nbsp;проект, ExDoc может похвастаться такой волшебной возможностью, как <noindex><a href="http://elixir-lang.org/docs/stable/ex_unit/ExUnit.DocTest.html" rel="nofollow">DocTest</a></noindex>. Она позволяет проводить юнит-тестирование функции на&nbsp;примерах её&nbsp;использования, которые вы&nbsp;описываете внутри документации. Рассмотрим такой пример:</p>
+<figure class="highlight"><pre><code class="language-elixir" data-lang="elixir"><span class="k">defmodule</span> <span class="no">MyMaths</span><span class="o">.</span><span class="no">Basic</span> <span class="k">do</span>
+
+  <span class="nv">@doc</span> <span class="sd">"""
+  This function will add two numbers together.
+
+  ## Examples
+
+      iex&gt; MyMaths.Basic.add(3, 4)
+      7
+
+  """</span>
+  <span class="k">def</span> <span class="n">add</span><span class="p">(</span><span class="n">num_one</span><span class="p">,</span> <span class="n">num_two</span><span class="p">)</span> <span class="k">do</span>
+    <span class="n">num_one</span> <span class="o">+</span> <span class="n">num_two</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+
+<span class="k">defmodule</span> <span class="no">MyMaths</span><span class="o">.</span><span class="no">BasicTest</span> <span class="k">do</span>
+  <span class="kn">use</span> <span class="no">ExUnit</span><span class="o">.</span><span class="no">Case</span><span class="p">,</span> <span class="ss">async:</span> <span class="no">true</span>
+  <span class="n">doctest</span> <span class="no">MyModule</span>
+<span class="k">end</span></code></pre></figure>
+<p>Из&nbsp;примера видно, что команда <code>iex&gt;</code> присутствует в&nbsp;атрибуте <code>@doc</code> в качестве примера использования функции. Затем в&nbsp;соответствующем тест-файле с&nbsp;помощью макроса <code>doctest</code> проводится тестирование вышеописанных примеров.</p>
+<p>Основная задача DocTest&nbsp;&mdash; сделать документацию достоверной, убедившись, что приведённые в&nbsp;ней примеры актуальны и&nbsp;безошибочны. Но&nbsp;это совершенно не&nbsp;значит, что такая проверка может заменить юнит-тесты. Справедливо и&nbsp;обратное: если юнит-тест пройден, это не&nbsp;значит, что в&nbsp;документации содержатся рабочие примеры.</p>
+<p>Подробную информацию о&nbsp;процессе <noindex><a href="http://elixir-lang.org/docs/master/elixir/writing-documentation.html" rel="nofollow">создания документации</a></noindex> можно найти на&nbsp;официальном сайте Elixir.</p>
+<h3>Генерация документации</h3>
+<p>В&nbsp;корневом каталоге проекта нужно запустить <code>mix docs</code>, после чего документация станет доступна в&nbsp;файле <code>doc/index.html</code>.</p>
+<p>Чтобы узнать о&nbsp;других доступных действиях, запустите <code>mix help docs</code>.</p>
+<h2>Dialyzer&nbsp;/ Dialyxir</h2>
+<noindex><small class="subheader"><a href="https://github.com/jeremyjh/dialyxir" rel="nofollow">Github</a> / <a href="https://hex.pm/packages/dialyxir" rel="nofollow">Hex</a></small></noindex>
+<p>Ещё один атрибут&nbsp;&mdash; <code>@spec</code>&nbsp;&mdash; позволяет задавать типы входных и&nbsp;выходных данных функции. Он&nbsp;добавляется на&nbsp;созданные с&nbsp;помощью ExDoc страницы, помогая пользователю разобраться в&nbsp;нюансах использования функции. Например:</p>
+<figure class="highlight"><pre><code class="language-elixir" data-lang="elixir"><span class="nv">@spec</span> <span class="n">multiply</span><span class="p">(</span><span class="n">integer</span><span class="p">,</span> <span class="n">integer</span><span class="p">)</span> <span class="p">::</span> <span class="n">integer</span>
+<span class="k">def</span> <span class="n">multiply</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">)</span> <span class="k">do</span>
+  <span class="n">a</span> <span class="o">*</span> <span class="n">b</span>
+<span class="k">end</span></code></pre></figure>
+<p>Подробную информацию <noindex><a href="http://elixir-lang.org/docs/stable/elixir/typespecs.html" rel="nofollow">о&nbsp;типах данных и&nbsp;спецификациях</a></noindex> можно найти на&nbsp;официальном сайте Elixir.</p>
+<p>Но&nbsp;как проверить корректность объявленных типов? Здесь-то нам и&nbsp;пригодится Dialyxir, работающий на&nbsp;базе инструмента <noindex><a href="http://erlang.org/doc/man/dialyzer.html" rel="nofollow">Dialyzer</a></noindex>.</p>
+<h3>Добавление инструмента в&nbsp;проект</h3>
+<p>Поместите в&nbsp;файл <code>mix.exs</code> следующий код:</p>
+<figure class="highlight"><pre><code class="language-elixir" data-lang="elixir"><span class="k">defp</span> <span class="n">deps</span> <span class="k">do</span>
+  <span class="p">[{</span><span class="ss">:dialyxir</span><span class="p">,</span> <span class="sd">"</span><span class="s2">~&gt; 0.3"</span><span class="p">,</span> <span class="ss">only:</span> <span class="ss">:dev</span><span class="p">}]</span>
+<span class="k">end</span></code></pre></figure>
+<h3>Запуск анализа</h3>
+<p>Перед первым использованием Dialyxir придётся сначала запустить файл <code>mix dialyzer.plt</code>. Это займёт достаточно много времени, но&nbsp;зато последующие запуски будут осуществляться быстрее.</p>
+<p>После этого запустите инструмент с&nbsp;помощью <code>mix dialyzer</code>. К&nbsp;сожалению, отчёт Dialyzer далёк от&nbsp;идеала, но&nbsp;как&nbsp;бы то&nbsp;ни&nbsp;было, польза от&nbsp;него всё-таки есть. Подсказка: если требуется найти результат анализа какого-то определённого файла, можно передать результат работы в&nbsp;<code>grep</code>.</p>
+<h2>Credo</h2>
+<noindex><small class="subheader"><a href="https://github.com/rrrene/credo" rel="nofollow">Github</a> / <a href="https://hex.pm/packages/credo" rel="nofollow">Hex</a></small></noindex>
+<p>Credo&nbsp;&mdash; инструмент для анализа кода, особое внимание в&nbsp;котором уделяется согласованности кода внутри кодовой базы. Он&nbsp;покажет, правильно&nbsp;ли вы&nbsp;расставили пробелы и&nbsp;табуляцию, выполнили&nbsp;ли вы&nbsp;действия из&nbsp;списка TODO, не&nbsp;содержат&nbsp;ли функции слишком много аргументов и&nbsp;многое другое.</p>
+<p>Инструмент выделяет все найденные неточности, что упрощает процесс исправления ошибок.</p>
+<h3>Добавление инструмента в&nbsp;проект</h3>
+<p>Поместите в&nbsp;файл <code>mix.exs</code> следующий код:</p>
+<figure class="highlight"><pre><code class="language-elixir" data-lang="elixir"><span class="k">def</span> <span class="n">deps</span> <span class="k">do</span>
+  <span class="p">{</span><span class="ss">:credo</span><span class="p">,</span> <span class="sd">"</span><span class="s2">~&gt; 0.4"</span><span class="p">,</span> <span class="ss">only:</span> <span class="p">[</span><span class="ss">:dev</span><span class="p">,</span> <span class="ss">:test</span><span class="p">]}</span>
+<span class="k">end</span></code></pre></figure>
+<p>Более подробные инструкции по&nbsp;установке инструмента можно найти <noindex><a href="https://github.com/rrrene/credo" rel="nofollow">на&nbsp;странице Github</a></noindex>.</p>
+<h3>Конфигурация</h3>
+<p>Credo можно настроить таким образом, чтобы при анализе включались/исключались определённые директории или проверки и&nbsp;даже создавались отдельные профили.</p>
+<p>Конфигурации хранятся в&nbsp;файле <code>.credo.exs</code>, который находится либо в&nbsp;корневом каталоге проекта, либо в&nbsp;папке <code>config/</code>. Пример <noindex><a href="https://github.com/rrrene/credo/blob/master/.credo.exs" rel="nofollow">файла конфигураций</a></noindex>.</p>
+<h3>Запуск анализа</h3>
+<p>Находясь в&nbsp;корневой директории проекта, выполните команду <code>mix credo</code>. Советую сделать это, указав аргумент <code>--strict</code>, тогда результаты будут более полными.</p>
+<h2>ExCoveralls</h2>
+<noindex><small class="subheader"><a href="https://github.com/parroty/excoveralls" rel="nofollow">Github</a> / <a href="https://hex.pm/packages/excoveralls" rel="nofollow">Hex</a></small></noindex>
+<p>ExCoveralls&nbsp;&mdash; инструмент для анализа покрытия кода в&nbsp;проекте. Он&nbsp;способен выводить отчёт в&nbsp;командную строку и&nbsp;работать с&nbsp;такими инструментами непрерывной интеграции, как Travis CI&nbsp;или Gitlab CI.</p>
+<p>Очень удобно копаться в&nbsp;отчётах с&nbsp;помощью бесплатного для публичных репозиториев сервиса <noindex><a href="https://coveralls.io/" rel="nofollow">coveralls.io</a></noindex>.</p>
+<h3>Добавление инструмента в&nbsp;проект</h3>
+<p>Поместите в&nbsp;файл <code>mix.exs</code> следующий код:</p>
+<figure class="highlight"><pre><code class="language-elixir" data-lang="elixir"><span class="k">def</span> <span class="n">project</span> <span class="k">do</span>
+  <span class="p">[</span><span class="o">...</span>
+   <span class="ss">test_coverage:</span> <span class="p">[</span><span class="ss">tool:</span> <span class="no">ExCoveralls</span><span class="p">],</span>
+   <span class="ss">preferred_cli_env:</span> <span class="p">[</span><span class="sd">"</span><span class="s2">coveralls"</span><span class="p">:</span> <span class="ss">:test</span><span class="p">]]</span>
+<span class="k">end</span>
+
+<span class="k">defp</span> <span class="n">deps</span> <span class="k">do</span>
+  <span class="p">[{</span><span class="ss">:excoveralls</span><span class="p">,</span> <span class="sd">"</span><span class="s2">~&gt; 0.5"</span><span class="p">,</span> <span class="ss">only:</span> <span class="ss">:test</span><span class="p">}]</span>
+<span class="k">end</span></code></pre></figure>
+<h3>Запуск анализа</h3>
+<p>Запустите файл <code>mix coveralls</code>, находящийся в&nbsp;корневом каталоге проекта.</p>
+<h2>Заключение</h2>
+<p>Надеюсь, данная статья поможет вам в&nbsp;изучении инструментов для обеспечения более высокой надёжности эксплуатации кода. Также обратите особое внимание на&nbsp;ссылки в&nbsp;тексте, если вы&nbsp;хотели&nbsp;бы узнать все подробности об&nbsp;использовании описанных выше инструментов.</p>
+
+  </div>
+
+  <!-- uSocial -->
+  <div class="post__share_block share_block">
+    <script async src="https://usocial.pro/usocial/usocial.js?v=6.1.4" data-script="usocial" charset="utf-8"></script>
+    <div class="uSocial-Share" data-pid="2fd19544e551bce292425ee8adaa31be" data-type="share" data-options="round,style2,default,absolute,horizontal,size32,counter1,counter-before,upArrow-right,nomobile" data-social="telegram,fb,vk,gPlus,twi,bookmarks"></div>
+  </div>
+  <!-- /uSocial -->
+</article>
+
+
+        <footer class="footer">
+    &copy; 2020
+    / Россия
+
+    <span class="pull-right">Любые мысли и вопросы пишите на <a href="mailto:elixir@wunsh.ru">elixir@wunsh.ru</a>.</span>
+</footer>
+
+        <div id="subscribeModal" class="modal">
+    <div class="modal__content">
+        <a href="#close" title="Close" class="modal__close">x</a>
+
+        <h2 class="modal__title">Ламповая рассылка про&nbsp;Эликсир</h2>
+
+        <p>Один-два раза в&nbsp;неделю присылаем тёплые письма об&nbsp;Эликсире: переводы самых интересных статей до&nbsp;их&nbsp;появления в&nbsp;открытом доступе, анонсы событий и&nbsp;вкусные бонусы.</p>
+
+        <form action="//wunsh.us14.list-manage.com/subscribe/post?u=c81ca3d4693f62db7f7f67c71&amp;id=a192e2dfef" method="post" id="mc-embedded-subscribe-form" name="mc-embedded-subscribe-form" class="pure-form h-tc validate" target="_blank" novalidate>
+            <input type="email" value="" name="EMAIL" class="modal__input pure-input-rounded large" id="mce-EMAIL" placeholder="Твоя почта" required>
+            <div style="position: absolute; left: -5000px;" aria-hidden="true"><input type="text" name="b_c81ca3d4693f62db7f7f67c71_a192e2dfef" tabindex="-1" value=""></div>
+
+            <input type="submit" value="Присоединиться" name="subscribe" onClick="yaCounter39773490.reachGoal('SUBSCRIBED'); return true" id="mc-embedded-subscribe" class="pure-button button-success large">
+        </form>
+
+        <p>Обязательно подтверди почту, перейдя по&nbsp;ссылке в&nbsp;письме, иначе мы&nbsp;не&nbsp;сможем делиться с&nbsp;тобой полезностями.</p>
+
+        <p>Надоедать точно не&nbsp;будем :)</p>
+    </div>
+</div>
+
+        <script src="/assets/js/vendors/zepto.min.js"></script>
+
+<script>
+    if ($(".post--docs").length) {
+        $(".footer").addClass("footer--docs")
+    }
+
+    $(".modal--close_backdrop").click(function(){
+        window.location.hash = "";
+    });
+</script>
+
+        <!-- Yandex.Metrika counter -->
+<script type="text/javascript">
+    (function (d, w, c) {
+        (w[c] = w[c] || []).push(function() {
+            try {
+                w.yaCounter39773490 = new Ya.Metrika({
+                    id:39773490,
+                    clickmap:true,
+                    trackLinks:true,
+                    accurateTrackBounce:true,
+                    webvisor:true,
+                    ut:"noindex"
+                });
+            } catch(e) { }
+        });
+
+        var n = d.getElementsByTagName("script")[0],
+            s = d.createElement("script"),
+            f = function () { n.parentNode.insertBefore(s, n); };
+        s.type = "text/javascript";
+        s.async = true;
+        s.src = "https://mc.yandex.ru/metrika/watch.js";
+
+        if (w.opera == "[object Opera]") {
+            d.addEventListener("DOMContentLoaded", f, false);
+        } else { f(); }
+    })(document, window, "yandex_metrika_callbacks");
+</script>
+<noscript><div><img src="https://mc.yandex.ru/watch/39773490?ut=noindex" style="position:absolute; left:-9999px;" alt="" /></div></noscript>
+<!-- /Yandex.Metrika counter -->
+
+      </div>
+    </div>
+  </body>
+</html>

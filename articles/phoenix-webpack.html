@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Как связать Феникс c Вебпаком |> Сообщество Elixir и Phoenix Framework</title>
+    <meta name="description" content="Работая над приложением, большое внимание в котором уделено фронтенду, можно облегчить себе жизнь с помощью Webpack, особенно если вам хочется добавить в про...">
+
+    <link rel="alternate" type="application/rss+xml" title="Сообщество Elixir и Phoenix Framework" href="/feed.xml" />
+    <link rel="canonical" href="https://wunsh.ru/articles/phoenix-webpack.html">
+
+    <style type="text/css">@import url("//fonts.googleapis.com/css?family=Source+Sans+Pro:400,700&subset=cyrillic");</style>
+    <link rel="stylesheet" href="/assets/css/vendors/pure.min.css">
+    <link rel="stylesheet" href="/assets/css/vendors/pure-grids-responsive.min.css">
+    <link rel="stylesheet" href="/assets/css/style.css?1594516983">
+
+    <link rel="shortcut icon" type="image/png" href="/assets/favicon.png" >
+</head>
+
+
+  <body>
+    <div class="wunsh pure-g">
+      
+
+
+
+
+<div class="menu pure-u-1 pure-u-md-1-4">
+  <div class="header">
+    <h2 class="header__title">
+      
+        <a href="https://wunsh.ru" class="header__title_link" title="На главную">Эликсир и&nbsp;Вунш</a>
+      
+    </h2>
+    <h3 class="header__tagline">Erlang + Ruby = &#10084;</h3>
+
+    <nav class="nav">
+      <ul class="nav_list">
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/elixir" class="nav_list__item_link pure-button">О языке</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/install/linux-asdf" class="nav_list__item_link pure-button">Установка</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/docs/" class="nav_list__item_link pure-button">Документация</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/guides" class="nav_list__item_link pure-button">Гайды</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/news" class="nav_list__item_link pure-button">Новости</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/articles" class="nav_list__item_link pure-button">Статьи</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/videos" class="nav_list__item_link pure-button">Видео</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/vacancies" class="nav_list__item_link pure-button">Вакансии</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/faq" class="nav_list__item_link pure-button">FAQ</a>
+            </li>
+          
+        
+      </ul>
+    </nav>
+
+    <a href="#subscribeModal" class="pure-button header__subscribe_link">Подписаться на рассылку</a>
+  </div>
+</div>
+
+
+      <div class="content pure-u-1 pure-u-md-3-4">
+        
+
+<article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+  <header class="post__header">
+    
+    <h1 class="post__title" itemprop="name headline">Как связать Феникс c Вебпаком</h1>
+
+    <div class="post__meta post_meta">
+      <ul class="meta_list">
+        <li class="meta_list__item">
+          
+          <span class="">
+            <small class="meta_list__item_name">Дата</small>
+            <time class="h-bold" datetime="2018-07-06T00:00:00+00:00" itemprop="datePublished">
+              
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+06 июля 2018
+
+            </time>
+          </span>
+          
+
+          
+        </li>
+        
+        <li class="meta_list__item">
+            <span class="tag_cloud tags_cloud--inline h-no_margin">
+              <small class="meta_list__item_name">Теги</small> 
+
+
+<ul class="tags_cloud__list">
+  
+    <a href="/tags/#howto" class="tags_cloud__link tag tag--howto">howto</a>
+  
+    <a href="/tags/#phoenix" class="tags_cloud__link tag tag--phoenix">phoenix</a>
+  
+</ul>
+
+            </span>
+        </li>
+        
+        <li class="meta_list__item">
+          <span itemprop="author" itemscope itemtype="http://schema.org/Person">
+            <small class="meta_list__item_name">
+              
+                Перевод
+              
+            </small>
+            <span itemprop="name" class="h-bold">Надежда Нестерова</span>
+          </span>
+        </li>
+
+        <li class="meta_list__item">
+          
+            <div >
+              <small>Оригинал</small>
+              <strong>
+                &laquo;<a href="http://whatdidilearn.info/2018/05/20/how-to-use-webpack-and-react-with-phoenix-1-3.html" style="text-transform: none; text-decoration: underline; color: #4b2e39;">How to use Webpack and React with Phoenix 1.3</a>&raquo;
+              </strong>
+              <small>&copy;</small>
+              <strong>Vitaly Tatarintsev</strong>
+            </div>
+          
+        </li>
+      </ul>
+    </div>
+  </header>
+
+  <div class="post__content" itemprop="articleBody">
+    <blockquote>
+  <p>Переведено в <a href="https://docdog.io"><strong>Докдоге</strong></a> – системе перевода технических текстов.</p>
+</blockquote>
+
+<p>Работая над приложением, большое внимание в котором уделено фронтенду, можно облегчить себе жизнь с помощью <a href="https://webpack.js.org/concepts/">Webpack</a>, особенно если вам хочется добавить в проект <a href="https://reactjs.org/">React</a>.</p>
+
+<p>Webpack - довольно популярный на сегодняшний день инструмент, и Феникс, начиная с версии 1.4, будет поддерживать его прямо из коробки.</p>
+
+<p>Но что делать, если хочется воспользоваться им уже сейчас, до выхода новой версии Феникса? Решение есть: заменить <a href="http://brunch.io/">Brunch</a> на Webpack.</p>
+
+<p>Давайте посмотрим, как это можно сделать.</p>
+
+<h2 id="настройка-webpack">Настройка Webpack</h2>
+
+<p>Для начала целиком удалим конфигурацию Brunch из своего проекта.</p>
+
+<p>В качестве наглядного примера будем рассматривать стандартное Феникс-приложение, использующее Brunch.</p>
+
+<p>Поехали!</p>
+
+<p>Первым делом удалим из зависимостей файла <code class="highlighter-rouge">assets/package.json</code> следующие библиотеки:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>"babel-brunch"
+"brunch"
+"clean-css-brunch"
+"uglify-js-brunch"
+</code></pre></div></div>
+
+<p>Теперь установим необходимые зависимости:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>→ cd assets → npm install –save-dev babel-core babel-loader babel-preset-env 
+→ npm install –save-dev webpack webpack-cli 
+→ npm install –save-dev copy-webpack-plugin css-loader mini-css-extract-plugin optimize-css-assets-webpack-plugin uglifyjs-webpack-plugin 
+→ cd ..
+</code></pre></div></div>
+
+<p>Команда <code class="highlighter-rouge">--save-dev</code> добавит все вышеперечисленные зависимости в файл <code class="highlighter-rouge">assets/package.json</code>.</p>
+
+<p>Откроем файл ещё раз и внесём изменения:</p>
+
+<div class="language-json highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="s2">"deploy"</span><span class="p">:</span><span class="w"> </span><span class="s2">"brunch build --production"</span><span class="p">,</span><span class="w">
+</span><span class="s2">"watch"</span><span class="p">:</span><span class="w"> </span><span class="s2">"brunch watch --stdin"</span><span class="w">
+</span></code></pre></div></div>
+
+<p>заменим на:</p>
+
+<div class="language-json highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="s2">"deploy"</span><span class="p">:</span><span class="w"> </span><span class="s2">"webpack --mode production"</span><span class="p">,</span><span class="w">
+</span><span class="s2">"watch"</span><span class="p">:</span><span class="w"> </span><span class="s2">"webpack --mode development --watch"</span><span class="w">
+</span></code></pre></div></div>
+
+<p>Это понадобится нам далее.</p>
+
+<p>Теперь удалим файл <code class="highlighter-rouge">assets/brunch-config.js</code>.</p>
+
+<p>Вместо него нужно будет создать <code class="highlighter-rouge">assets/webpack.config.js</code>, содержащий следующий код:</p>
+
+<div class="language-js highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">const</span> <span class="nx">path</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">'path'</span><span class="p">);</span>
+<span class="kd">const</span> <span class="nx">MiniCssExtractPlugin</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">'mini-css-extract-plugin'</span><span class="p">);</span>
+<span class="kd">const</span> <span class="nx">UglifyJsPlugin</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">'uglifyjs-webpack-plugin'</span><span class="p">);</span>
+<span class="kd">const</span> <span class="nx">OptimizeCSSAssetsPlugin</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">'optimize-css-assets-webpack-plugin'</span><span class="p">);</span>
+<span class="kd">const</span> <span class="nx">CopyWebpackPlugin</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">'copy-webpack-plugin'</span><span class="p">);</span>
+
+<span class="nx">module</span><span class="p">.</span><span class="nx">exports</span> <span class="o">=</span> <span class="p">(</span><span class="nx">env</span><span class="p">,</span> <span class="nx">options</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="p">({</span>
+    <span class="na">optimization</span><span class="p">:</span> <span class="p">{</span>
+        <span class="na">minimizer</span><span class="p">:</span> <span class="p">[</span>
+            <span class="k">new</span> <span class="nx">UglifyJsPlugin</span><span class="p">({</span> <span class="na">cache</span><span class="p">:</span> <span class="kc">true</span><span class="p">,</span> <span class="na">parallel</span><span class="p">:</span> <span class="kc">true</span><span class="p">,</span> <span class="na">sourceMap</span><span class="p">:</span> <span class="kc">false</span> <span class="p">}),</span>
+            <span class="k">new</span> <span class="nx">OptimizeCSSAssetsPlugin</span><span class="p">({})</span>
+        <span class="p">]</span>
+    <span class="p">},</span>
+    <span class="na">entry</span><span class="p">:</span> <span class="s1">'./js/app.js'</span><span class="p">,</span>
+    <span class="na">output</span><span class="p">:</span> <span class="p">{</span>
+        <span class="na">filename</span><span class="p">:</span> <span class="s1">'app.js'</span><span class="p">,</span>
+        <span class="na">path</span><span class="p">:</span> <span class="nx">path</span><span class="p">.</span><span class="nx">resolve</span><span class="p">(</span><span class="nx">__dirname</span><span class="p">,</span> <span class="s1">'../priv/static/js'</span><span class="p">)</span>
+    <span class="p">},</span>
+    <span class="na">module</span><span class="p">:</span> <span class="p">{</span>
+        <span class="na">rules</span><span class="p">:</span> <span class="p">[</span>
+            <span class="p">{</span>
+                <span class="na">test</span><span class="p">:</span> <span class="sr">/</span><span class="se">\.</span><span class="sr">js$/</span><span class="p">,</span>
+                <span class="na">exclude</span><span class="p">:</span> <span class="sr">/node_modules/</span><span class="p">,</span>
+                <span class="na">use</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="na">loader</span><span class="p">:</span> <span class="s1">'babel-loader'</span>
+                <span class="p">}</span>
+            <span class="p">},</span>
+            <span class="p">{</span>
+                <span class="na">test</span><span class="p">:</span> <span class="sr">/</span><span class="se">\.</span><span class="sr">css$/</span><span class="p">,</span>
+                <span class="na">use</span><span class="p">:</span> <span class="p">[</span><span class="nx">MiniCssExtractPlugin</span><span class="p">.</span><span class="nx">loader</span><span class="p">,</span> <span class="s1">'css-loader'</span><span class="p">]</span>
+            <span class="p">}</span>
+        <span class="p">]</span>
+    <span class="p">},</span>
+    <span class="na">plugins</span><span class="p">:</span> <span class="p">[</span>
+        <span class="k">new</span> <span class="nx">MiniCssExtractPlugin</span><span class="p">({</span> <span class="na">filename</span><span class="p">:</span> <span class="s1">'../css/app.css'</span> <span class="p">}),</span>
+        <span class="k">new</span> <span class="nx">CopyWebpackPlugin</span><span class="p">([{</span> <span class="na">from</span><span class="p">:</span> <span class="s1">'static/'</span><span class="p">,</span> <span class="na">to</span><span class="p">:</span> <span class="s1">'../'</span> <span class="p">}])</span>
+    <span class="p">]</span>
+<span class="p">});</span>
+</code></pre></div></div>
+
+<p>Добавим <code class="highlighter-rouge">import css from "../css/app.css"</code> в начало файла <code class="highlighter-rouge">assets/js/app.js</code>.</p>
+
+<p>В <code class="highlighter-rouge">config/dev.exs</code> заменим</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="ss">watchers:</span> <span class="p">[</span><span class="ss">node:</span> <span class="p">[</span><span class="sd">"</span><span class="s2">node_modules/brunch/bin/brunch"</span><span class="p">,</span> <span class="sd">"</span><span class="s2">watch"</span><span class="p">,</span> <span class="sd">"</span><span class="s2">--stdin"</span><span class="p">,</span>
+</code></pre></div></div>
+
+<p>на</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="ss">watchers:</span> <span class="p">[</span><span class="ss">node:</span> <span class="p">[</span><span class="sd">"</span><span class="s2">node_modules/webpack/bin/webpack.js"</span><span class="p">,</span> <span class="sd">"</span><span class="s2">--mode"</span><span class="p">,</span> <span class="sd">"</span><span class="s2">development"</span><span class="p">,</span> <span class="sd">"</span><span class="s2">--watch-stdin"</span><span class="p">,</span>
+</code></pre></div></div>
+
+<p>Создадим файл <code class="highlighter-rouge">assets/.babelrc</code> со следующим содержимым:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">{</span><span class="sd">"</span><span class="s2">presets"</span><span class="p">:</span> <span class="p">[</span><span class="sd">"</span><span class="s2">env"</span><span class="p">]}</span>
+</code></pre></div></div>
+
+<p>Сюда можно добавить любую другую необходимую вам опцию. Их можно найти на <a href="https://github.com/babel/babel/tree/master/packages/babel-preset-env#install">странице библиотеки</a>.</p>
+
+<h3 id="примечание">Примечание</h3>
+
+<p>Обратите внимание, что подключение файла  <code class="highlighter-rouge">assets/css/phoenix.css</code> отсутствует в файле <code class="highlighter-rouge">assets/css/app.css</code> намеренно.</p>
+
+<p>Это сделано по той причине, что стили Феникса 1.3 по умолчанию используют набор иконок “glyphicons”, шрифт для которых не включён в сам Феникс. Ранее ошибки не возникало, если не пытаться использовать данные символы, но с Webpack дела обстоят иначе. При обработке файла он пытается построить граф зависимостей и не может найти шрифты, вследствие чего мы получаем ошибку.</p>
+
+<p>Не так-то просто выкинуть из файла правила CSS, где эти шрифты используются, так как большая его часть минифицирована.</p>
+
+<p>Скорее всего, в своем Феникс-приложении вы уже заменили стандартные стили на свои или что-то вроде <a href="http://whatdidilearn.info/2018/02/11/how-to-use-bootstrap-4-with-phoenix.html">Bootstrap</a>, или <a href="http://whatdidilearn.info/2018/05/13/how-to-use-materialize-css-with-phoenix.html">Material Design</a>.</p>
+
+<p>В любом случае, в нашем примере мы не будем с этим заморачиваться.</p>
+
+<p>Ну вот и всё. Теперь, если запустить веб-сервер, то проект, все стили и JavaScript должны работать как прежде.</p>
+
+<p>Следующий шаг - настройка React.</p>
+
+<h2 id="настройка-react">Настройка React</h2>
+
+<p>Сначала установим дополнительные зависимости:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>→ cd assets
+→ npm install --save react react-dom
+→ npm install --save-dev babel-preset-react
+→ cd ..
+</code></pre></div></div>
+
+<p>“react” и “react-dom” нужны для работы самого React, а “babel-preset-react” - для того, чтобы появилась возможность использовать JSX в файлах JavaScript.</p>
+
+<p>Допишем пресеты <code class="highlighter-rouge">assets/.babelrc</code>, чтобы они тоже содержали <code class="highlighter-rouge">"react"</code>:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>{"presets": ["env", "react"]}
+</code></pre></div></div>
+
+<p>Пока ни один стиль не задействован, добавим одно правило CSS для примера.
+(<code class="highlighter-rouge">assets/css/app.css</code>):</p>
+
+<div class="language-css highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nc">.jumbotron</span> <span class="p">{</span>
+<span class="nl">background</span><span class="p">:</span> <span class="m">#eee</span><span class="p">;</span>
+<span class="nl">text-align</span><span class="p">:</span> <span class="nb">center</span><span class="p">;</span>
+<span class="nl">padding</span><span class="p">:</span> <span class="m">50px</span> <span class="m">0</span> <span class="m">50px</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>Создадим <code class="highlighter-rouge">assets/js/components/Jumbotron.js</code>:</p>
+
+<div class="language-js highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">import</span> <span class="nx">React</span> <span class="k">from</span> <span class="s2">"react"</span><span class="p">;</span>
+
+<span class="kd">const</span> <span class="nx">Jumbotron</span> <span class="o">=</span> <span class="p">()</span> <span class="o">=&gt;</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="p">(</span>
+        <span class="o">&lt;</span><span class="nx">div</span> <span class="nx">className</span><span class="o">=</span><span class="s2">"jumbotron"</span><span class="o">&gt;</span>
+            <span class="o">&lt;</span><span class="nx">h2</span><span class="o">&gt;</span><span class="nx">Welcome</span> <span class="nx">to</span> <span class="nx">Phoenix</span> <span class="kd">with</span> <span class="nx">Webpack</span> <span class="nx">and</span> <span class="nx">React</span><span class="o">&lt;</span><span class="sr">/h2</span><span class="err">&gt;
+</span>            <span class="o">&lt;</span><span class="nx">p</span> <span class="nx">className</span><span class="o">=</span><span class="s2">"lead"</span><span class="o">&gt;</span>
+                <span class="nx">A</span> <span class="nx">productive</span> <span class="nx">web</span> <span class="nx">framework</span> <span class="nx">that</span><span class="o">&lt;</span><span class="nx">br</span> <span class="o">/&gt;</span>
+                <span class="nx">does</span> <span class="nx">not</span> <span class="nx">compromise</span> <span class="nx">speed</span> <span class="nx">and</span> <span class="nx">maintainability</span><span class="p">.</span>
+            <span class="o">&lt;</span><span class="sr">/p</span><span class="err">&gt;
+</span>        <span class="o">&lt;</span><span class="sr">/div</span><span class="err">&gt;
+</span>    <span class="p">)</span>
+<span class="p">};</span>
+
+<span class="k">export</span> <span class="k">default</span> <span class="nx">Jumbotron</span><span class="p">;</span>
+</code></pre></div></div>
+
+<p>Добавим в <code class="highlighter-rouge">assets/js/app.js</code> следующие строки:</p>
+
+<div class="language-js highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">import</span> <span class="nx">React</span> <span class="k">from</span> <span class="s2">"react"</span><span class="p">;</span>
+<span class="k">import</span> <span class="nx">ReactDOM</span> <span class="k">from</span> <span class="s2">"react-dom"</span><span class="p">;</span>
+
+<span class="k">import</span> <span class="nx">Jumbotron</span> <span class="k">from</span> <span class="s1">'./components/Jumbotron'</span><span class="p">;</span>
+
+<span class="nx">ReactDOM</span><span class="p">.</span><span class="nx">render</span><span class="p">(</span><span class="o">&lt;</span><span class="nx">Jumbotron</span> <span class="o">/&gt;</span><span class="p">,</span> <span class="nb">document</span><span class="p">.</span><span class="nx">getElementById</span><span class="p">(</span><span class="s2">"react-app"</span><span class="p">));</span>
+</code></pre></div></div>
+
+<p>И наконец, добавим элемент “react-app” на страницу.</p>
+
+<p>В <code class="highlighter-rouge">lib/&lt;project_name&gt;_web/templates/page/index.html.eex</code> заменим всё на:</p>
+
+<div class="language-html highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nt">&lt;div</span> <span class="na">id=</span><span class="s">"react-app"</span><span class="nt">&gt;&lt;/div&gt;</span>
+</code></pre></div></div>
+
+<p>Готово. Запустите Феникс-сервер снова, и на странице должно появиться сообщение: “Welcome to Phoenix with Webpack and React”. Это значит, что компонент React подключён.</p>
+
+<h2 id="заключение">Заключение</h2>
+
+<p>Вот таким образом проводится настройка Webpack и React для проектов на Фениксе. Теперь вы сможете использовать React в своих приложениях, не дожидаясь релиза Феникса 1.4.</p>
+
+<p>Рассмотренный пример можно найти <a href="https://phoenix-webpack-example.herokuapp.com/">по ссылке</a>, а все его изменения - на <a href="https://github.com/ck3g/phoenix-webpack-example">GitHub</a>.</p>
+
+  </div>
+
+  <!-- uSocial -->
+  <div class="post__share_block share_block">
+    <script async src="https://usocial.pro/usocial/usocial.js?v=6.1.4" data-script="usocial" charset="utf-8"></script>
+    <div class="uSocial-Share" data-pid="2fd19544e551bce292425ee8adaa31be" data-type="share" data-options="round,style2,default,absolute,horizontal,size32,counter1,counter-before,upArrow-right,nomobile" data-social="telegram,fb,vk,gPlus,twi,bookmarks"></div>
+  </div>
+  <!-- /uSocial -->
+</article>
+
+
+        <footer class="footer">
+    &copy; 2020
+    / Россия
+
+    <span class="pull-right">Любые мысли и вопросы пишите на <a href="mailto:elixir@wunsh.ru">elixir@wunsh.ru</a>.</span>
+</footer>
+
+        <div id="subscribeModal" class="modal">
+    <div class="modal__content">
+        <a href="#close" title="Close" class="modal__close">x</a>
+
+        <h2 class="modal__title">Ламповая рассылка про&nbsp;Эликсир</h2>
+
+        <p>Один-два раза в&nbsp;неделю присылаем тёплые письма об&nbsp;Эликсире: переводы самых интересных статей до&nbsp;их&nbsp;появления в&nbsp;открытом доступе, анонсы событий и&nbsp;вкусные бонусы.</p>
+
+        <form action="//wunsh.us14.list-manage.com/subscribe/post?u=c81ca3d4693f62db7f7f67c71&amp;id=a192e2dfef" method="post" id="mc-embedded-subscribe-form" name="mc-embedded-subscribe-form" class="pure-form h-tc validate" target="_blank" novalidate>
+            <input type="email" value="" name="EMAIL" class="modal__input pure-input-rounded large" id="mce-EMAIL" placeholder="Твоя почта" required>
+            <div style="position: absolute; left: -5000px;" aria-hidden="true"><input type="text" name="b_c81ca3d4693f62db7f7f67c71_a192e2dfef" tabindex="-1" value=""></div>
+
+            <input type="submit" value="Присоединиться" name="subscribe" onClick="yaCounter39773490.reachGoal('SUBSCRIBED'); return true" id="mc-embedded-subscribe" class="pure-button button-success large">
+        </form>
+
+        <p>Обязательно подтверди почту, перейдя по&nbsp;ссылке в&nbsp;письме, иначе мы&nbsp;не&nbsp;сможем делиться с&nbsp;тобой полезностями.</p>
+
+        <p>Надоедать точно не&nbsp;будем :)</p>
+    </div>
+</div>
+
+        <script src="/assets/js/vendors/zepto.min.js"></script>
+
+<script>
+    if ($(".post--docs").length) {
+        $(".footer").addClass("footer--docs")
+    }
+
+    $(".modal--close_backdrop").click(function(){
+        window.location.hash = "";
+    });
+</script>
+
+        <!-- Yandex.Metrika counter -->
+<script type="text/javascript">
+    (function (d, w, c) {
+        (w[c] = w[c] || []).push(function() {
+            try {
+                w.yaCounter39773490 = new Ya.Metrika({
+                    id:39773490,
+                    clickmap:true,
+                    trackLinks:true,
+                    accurateTrackBounce:true,
+                    webvisor:true,
+                    ut:"noindex"
+                });
+            } catch(e) { }
+        });
+
+        var n = d.getElementsByTagName("script")[0],
+            s = d.createElement("script"),
+            f = function () { n.parentNode.insertBefore(s, n); };
+        s.type = "text/javascript";
+        s.async = true;
+        s.src = "https://mc.yandex.ru/metrika/watch.js";
+
+        if (w.opera == "[object Opera]") {
+            d.addEventListener("DOMContentLoaded", f, false);
+        } else { f(); }
+    })(document, window, "yandex_metrika_callbacks");
+</script>
+<noscript><div><img src="https://mc.yandex.ru/watch/39773490?ut=noindex" style="position:absolute; left:-9999px;" alt="" /></div></noscript>
+<!-- /Yandex.Metrika counter -->
+
+      </div>
+    </div>
+  </body>
+</html>

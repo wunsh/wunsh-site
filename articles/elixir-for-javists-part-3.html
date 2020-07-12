@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Эликсир для джавистов. Часть третья |> Сообщество Elixir и Phoenix Framework</title>
+    <meta name="description" content="Как перейти с Джавы на Эликсир.">
+
+    <link rel="alternate" type="application/rss+xml" title="Сообщество Elixir и Phoenix Framework" href="/feed.xml" />
+    <link rel="canonical" href="https://wunsh.ru/articles/elixir-for-javists-part-3.html">
+
+    <style type="text/css">@import url("//fonts.googleapis.com/css?family=Source+Sans+Pro:400,700&subset=cyrillic");</style>
+    <link rel="stylesheet" href="/assets/css/vendors/pure.min.css">
+    <link rel="stylesheet" href="/assets/css/vendors/pure-grids-responsive.min.css">
+    <link rel="stylesheet" href="/assets/css/style.css?1594516983">
+
+    <link rel="shortcut icon" type="image/png" href="/assets/favicon.png" >
+</head>
+
+
+  <body>
+    <div class="wunsh pure-g">
+      
+
+
+
+
+<div class="menu pure-u-1 pure-u-md-1-4">
+  <div class="header">
+    <h2 class="header__title">
+      
+        <a href="https://wunsh.ru" class="header__title_link" title="На главную">Эликсир и&nbsp;Вунш</a>
+      
+    </h2>
+    <h3 class="header__tagline">Erlang + Ruby = &#10084;</h3>
+
+    <nav class="nav">
+      <ul class="nav_list">
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/elixir" class="nav_list__item_link pure-button">О языке</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/install/linux-asdf" class="nav_list__item_link pure-button">Установка</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/docs/" class="nav_list__item_link pure-button">Документация</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/guides" class="nav_list__item_link pure-button">Гайды</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/news" class="nav_list__item_link pure-button">Новости</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/articles" class="nav_list__item_link pure-button">Статьи</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/videos" class="nav_list__item_link pure-button">Видео</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/vacancies" class="nav_list__item_link pure-button">Вакансии</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/faq" class="nav_list__item_link pure-button">FAQ</a>
+            </li>
+          
+        
+      </ul>
+    </nav>
+
+    <a href="#subscribeModal" class="pure-button header__subscribe_link">Подписаться на рассылку</a>
+  </div>
+</div>
+
+
+      <div class="content pure-u-1 pure-u-md-3-4">
+        
+
+<article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+  <header class="post__header">
+    
+    <h1 class="post__title" itemprop="name headline">Эликсир для джавистов. Часть третья</h1>
+
+    <div class="post__meta post_meta">
+      <ul class="meta_list">
+        <li class="meta_list__item">
+          
+          <span class="">
+            <small class="meta_list__item_name">Дата</small>
+            <time class="h-bold" datetime="2018-01-26T00:00:00+00:00" itemprop="datePublished">
+              
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+26 января 2018
+
+            </time>
+          </span>
+          
+
+          
+        </li>
+        
+        <li class="meta_list__item">
+            <span class="tag_cloud tags_cloud--inline h-no_margin">
+              <small class="meta_list__item_name">Теги</small> 
+
+
+<ul class="tags_cloud__list">
+  
+    <a href="/tags/#beginner" class="tags_cloud__link tag tag--beginner">beginner</a>
+  
+    <a href="/tags/#overview" class="tags_cloud__link tag tag--overview">overview</a>
+  
+</ul>
+
+            </span>
+        </li>
+        
+        <li class="meta_list__item">
+          <span itemprop="author" itemscope itemtype="http://schema.org/Person">
+            <small class="meta_list__item_name">
+              
+                Перевод
+              
+            </small>
+            <span itemprop="name" class="h-bold">Надежда Нестерова</span>
+          </span>
+        </li>
+
+        <li class="meta_list__item">
+          
+            <div >
+              <small>Оригинал</small>
+              <strong>
+                &laquo;<a href="https://medium.com/skyhub-labs/elixir-for-java-developers-episode-iii-e2257c2da17f" style="text-transform: none; text-decoration: underline; color: #4b2e39;">Elixir for Java Developers, Episode III</a>&raquo;
+              </strong>
+              <small>&copy;</small>
+              <strong>Jusabe Guedes</strong>
+            </div>
+          
+        </li>
+      </ul>
+    </div>
+  </header>
+
+  <div class="post__content" itemprop="articleBody">
+    <p>Перевод заключительной части знакомства джавистов с Эликсиром.</p>
+
+<h2 id="интерфейсы-vs-поведения">Интерфейсы vs поведения</h2>
+
+<p>В Джаве полиморфизм достигается путём использования интерфейсов, абстрактных классов и методов. В Эликсире на уровне модуля этому служат поведения, на уровне функций – протоколы.</p>
+
+<p>Сравнивая два языка, можно провести параллель между интерфейсами Джавы и поведениями и протоколами Эликсира. Остановимся подробнее на поведениях.</p>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// Java</span>
+<span class="kd">public</span> <span class="kd">interface</span> <span class="nc">Runner</span> <span class="o">{</span>
+    <span class="kt">boolean</span> <span class="nf">run</span><span class="o">(</span><span class="n">MyRunnable</span> <span class="n">runnable</span><span class="o">);</span>
+    <span class="kt">boolean</span> <span class="nf">stop</span><span class="o">();</span>
+<span class="o">}</span>
+</code></pre></div></div>
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># Elixir</span>
+<span class="k">defmodule</span> <span class="no">Runner</span> <span class="k">do</span>
+  <span class="nv">@callback</span> <span class="n">run</span><span class="p">(</span><span class="n">runnable</span> <span class="p">::</span> <span class="n">term</span><span class="p">)</span> <span class="p">::</span> <span class="n">boolean</span>
+  <span class="nv">@callback</span> <span class="n">stop</span> <span class="p">::</span> <span class="n">boolean</span>
+  
+  <span class="k">def</span> <span class="n">call</span><span class="p">(</span><span class="n">element</span><span class="p">)</span> <span class="k">do</span>
+    <span class="no">IO</span><span class="o">.</span><span class="n">inspect</span> <span class="n">element</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<p>Как видите, они мало чем отличаются друг от друга. Необходимо задать типы входных и выходных данных. Единственное отличие в том, что поведение в Эликсире определено как модуль, но вместо реализации функций внутри объявим их, используя директиву <code class="highlighter-rouge">@callback</code>. Несмотря на это, определению функции ничего не мешает иметь и реализацию рядом с соответствующей директивой <code class="highlighter-rouge">@callback</code>. Функция <code class="highlighter-rouge">call</code> служит отличным примером.</p>
+
+<p>С другой стороны, Джавы сразу обязывает к явному указанию интерфейса с помощью зарезервированного слова <code class="highlighter-rouge">interface</code>. Кроме того, внутри интерфейсов нельзя осуществлять реализацию методов, если только они не объявлены с ключевым словом default (в Джаве 8 и выше).</p>
+
+<p>В обоих случаях код достаточно прост:</p>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// Java</span>
+<span class="kd">class</span> <span class="nc">JobRunner</span> <span class="kd">implements</span> <span class="n">Runner</span><span class="o">{</span>
+  <span class="kd">public</span> <span class="kt">boolean</span> <span class="nf">run</span><span class="o">(</span><span class="n">MyRunnable</span> <span class="n">runnable</span><span class="o">)</span> <span class="o">{</span>
+    <span class="k">return</span> <span class="kc">true</span><span class="o">;</span>
+  <span class="o">}</span>
+  <span class="kd">public</span> <span class="kt">boolean</span> <span class="nf">stop</span><span class="o">()</span> <span class="o">{</span>
+    <span class="k">return</span> <span class="kc">true</span><span class="o">;</span>
+  <span class="o">}</span>
+<span class="o">}</span>
+</code></pre></div></div>
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># Elixir</span>
+<span class="k">defmodule</span> <span class="no">JobRunner</span> <span class="k">do</span>
+  <span class="nv">@behaviour</span> <span class="no">Runner</span>
+  <span class="k">def</span> <span class="n">run</span><span class="p">(</span><span class="n">runnable</span><span class="p">),</span> <span class="k">do</span><span class="p">:</span> <span class="no">true</span>
+  <span class="k">def</span> <span class="n">stop</span><span class="p">,</span> <span class="k">do</span><span class="p">:</span> <span class="no">true</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<p>Поведения в Эликсире – это способ задания некоторого количества функций, которые, возможно, будут использованы динамически в зависимости от контекста. С точки зрения компилятора, интерфейсы и поведения имеют одно самое главное отличие. <strong>В Джаве класс не будет скомпилирован, если не реализовать указанный интерфейс.</strong></p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>JobRunner.java:2: error: JobRunner is not abstract and does not override abstract method stop() in Runner
+</code></pre></div></div>
+
+<p>В Эликсире на каждую нереализованную функцию, объявленную с помощью поведения, <strong>высветится предупреждение</strong>, и код продолжит выполняться.</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>warning: undefined behaviour function run/1 (for behaviour Runner)
+warning: undefined behaviour function stop/0 (for behaviour Runner)
+</code></pre></div></div>
+
+<h2 id="протоколы">Протоколы</h2>
+
+<p>Протоколы в Эликсире – отличный способ достижения полиморфизма на функциональном уровне. А именно, реализацию можно расширять на основе типа без необходимости изменения <em>интерфейсов</em>. Для наглядности рассмотрим простенький пример приветствия пользователей:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># Elixir</span>
+<span class="k">defprotocol</span> <span class="no">Greeting</span> <span class="k">do</span>
+  <span class="nv">@fallback_to_any</span> <span class="no">true</span>
+  <span class="k">def</span> <span class="n">hello</span><span class="p">(</span><span class="n">element</span><span class="p">)</span>
+<span class="k">end</span>
+
+<span class="k">defimpl</span> <span class="no">Greeting</span><span class="p">,</span> <span class="ss">for:</span> <span class="no">Integer</span> <span class="k">do</span>
+  <span class="k">def</span> <span class="n">hello</span><span class="p">(</span><span class="n">number</span><span class="p">),</span> <span class="k">do</span><span class="p">:</span> <span class="sd">"</span><span class="s2">Hello number </span><span class="si">#{</span><span class="n">number</span><span class="si">}</span><span class="s2">."</span>
+<span class="k">end</span>
+
+<span class="k">defimpl</span> <span class="no">Greeting</span><span class="p">,</span> <span class="ss">for:</span> <span class="no">Map</span> <span class="k">do</span>
+  <span class="k">def</span> <span class="n">hello</span><span class="p">(</span><span class="n">map</span><span class="p">)</span> <span class="k">do</span> 
+    <span class="n">keys</span> <span class="o">=</span> <span class="no">Map</span><span class="o">.</span><span class="n">keys</span><span class="p">(</span><span class="n">map</span><span class="p">)</span>
+    <span class="sd">"</span><span class="s2">Hello map! Your keys are </span><span class="si">#{</span><span class="n">inspect</span><span class="p">(</span><span class="n">keys</span><span class="p">)</span><span class="si">}</span><span class="s2">."</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+
+<span class="k">defimpl</span> <span class="no">Greeting</span><span class="p">,</span> <span class="ss">for:</span> <span class="no">Any</span> <span class="k">do</span>
+  <span class="k">def</span> <span class="n">hello</span><span class="p">(</span><span class="n">_any</span><span class="p">),</span> <span class="k">do</span><span class="p">:</span> <span class="sd">"</span><span class="s2">Hello! You can be anything."</span>
+<span class="k">end</span>
+
+
+<span class="c1"># Here are some usage examples</span>
+<span class="n">iex</span><span class="p">(</span><span class="m">1</span><span class="p">)</span><span class="o">&gt;</span> <span class="no">Greeting</span><span class="o">.</span><span class="n">hello</span> <span class="m">5</span>
+<span class="sd">"</span><span class="s2">Hello number 5."</span>
+
+<span class="n">iex</span><span class="p">(</span><span class="m">2</span><span class="p">)</span><span class="o">&gt;</span> <span class="no">Greeting</span><span class="o">.</span><span class="n">hello</span> <span class="p">%{</span><span class="ss">first_name:</span> <span class="sd">"</span><span class="s2">foo"</span><span class="p">,</span> <span class="ss">last_name:</span> <span class="sd">"</span><span class="s2">bar"</span><span class="p">}</span>
+<span class="sd">"</span><span class="s2">Hello map! Your keys are [:first_name, :last_name]"</span>
+
+<span class="n">iex</span><span class="p">(</span><span class="m">3</span><span class="p">)</span><span class="o">&gt;</span> <span class="no">Greeting</span><span class="o">.</span><span class="n">hello</span> <span class="sd">"</span><span class="s2">foo"</span>
+<span class="sd">"</span><span class="s2">Hello! You can be anything."</span>
+</code></pre></div></div>
+
+<p>Самый быстрый способ получения той же абстракции в Джаве – перегрузка метода <code class="highlighter-rouge">hello</code> внутри класса <code class="highlighter-rouge">Greeting</code>. Ниже можно увидеть, что такой подход может привести к наличию класса внушительного размера, содержащего несколько реализаций. Ещё один способ – создать интерфейс (или абстрактный класс), изначально прописываемый с дефолтной реализацией (a.k.a <code class="highlighter-rouge">Greeting&lt;T&gt;</code>).</p>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// Java</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">Greeting</span><span class="o">{</span>
+  <span class="kd">public</span> <span class="kd">static</span> <span class="n">String</span> <span class="nf">hello</span><span class="o">(</span><span class="n">Integer</span> <span class="n">integer</span><span class="o">){</span>
+    <span class="k">return</span> <span class="n">String</span><span class="o">.</span><span class="na">format</span><span class="o">(</span><span class="s">"Hello number %d."</span><span class="o">,</span> <span class="n">integer</span><span class="o">);</span>
+  <span class="o">}</span>
+
+  <span class="kd">public</span> <span class="kd">static</span> <span class="n">String</span> <span class="nf">hello</span><span class="o">(</span><span class="n">Object</span> <span class="n">obj</span><span class="o">){</span>
+    <span class="k">return</span> <span class="s">"Hello! You can be anything."</span><span class="o">;</span>
+  <span class="o">}</span>
+<span class="o">}</span>
+
+<span class="c1">// Here are some usage examples</span>
+<span class="o">&gt;</span> <span class="n">Greeting</span><span class="o">.</span><span class="na">hello</span><span class="o">(</span><span class="mi">5</span><span class="o">);</span>
+<span class="s">"Hello number 5."</span>
+
+<span class="o">&gt;</span> <span class="n">Greeting</span><span class="o">.</span><span class="na">hello</span><span class="o">(</span><span class="s">"foo"</span><span class="o">);</span>
+<span class="s">"Hello! You can be anything."</span>
+</code></pre></div></div>
+
+<p>Да, способы получения протоколов в Джаве существуют, но вряд ли им впору тягаться с протоколами Эликсира. Используя интерфейсы, всё равно придётся создать некое подобие фабрики или конкретный класс и инстанцировать его. Протоколы же позволяют решить эту проблему заочно с помощью своей прозрачной реализации.</p>
+
+<h2 id="наследование-vs-композиция">Наследование vs композиция</h2>
+
+<p><strong>Прежде всего, наследования как такового в Эликсире не существует.</strong> Правда, это совсем не проблема. В Эликсире существуют эффективные способы построения модулей: их можно создавать из других модулей или сделать так, чтобы <strong>код генерировал сам себя</strong>.</p>
+
+<p>Даже взяв во внимание возможность реализации нескольких интерфейсов, в Джаве никак не получится осуществить наследования от нескольких предков, только от одного единственного класса. Элементарный пример:</p>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// Java</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">Bar</span> <span class="o">{</span>
+  <span class="n">String</span> <span class="nf">bar</span><span class="o">(){</span>
+    <span class="k">return</span> <span class="s">"bar"</span><span class="o">;</span>
+  <span class="o">}</span>
+<span class="o">}</span>
+
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">Foo</span> <span class="kd">extends</span> <span class="n">Bar</span><span class="o">{</span>
+<span class="o">}</span>
+
+<span class="c1">// Usage</span>
+<span class="o">&gt;</span> <span class="k">new</span> <span class="n">Foo</span><span class="o">().</span><span class="na">bar</span><span class="o">();</span>
+<span class="s">"bar"</span>
+</code></pre></div></div>
+
+<p>Теперь на Эликсире:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># Elixir</span>
+<span class="k">defmodule</span> <span class="no">Bar</span> <span class="k">do</span>
+  <span class="k">defmacro</span> <span class="n">__using__</span><span class="p">(</span><span class="n">_opts</span><span class="p">)</span> <span class="k">do</span>
+    <span class="kn">quote</span> <span class="k">do</span>
+      <span class="k">def</span> <span class="n">bar</span> <span class="k">do</span>
+        <span class="sd">"</span><span class="s2">bar"</span>
+      <span class="k">end</span>
+    <span class="k">end</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+
+<span class="k">defmodule</span> <span class="no">Foo</span> <span class="k">do</span>
+  <span class="kn">use</span> <span class="no">Bar</span>
+<span class="k">end</span>
+
+<span class="c1"># Usage</span>
+<span class="n">iex</span><span class="p">(</span><span class="m">1</span><span class="p">)</span><span class="o">&gt;</span> <span class="no">Foo</span><span class="o">.</span><span class="n">bar</span>
+<span class="sd">"</span><span class="s2">bar"</span>
+</code></pre></div></div>
+
+<p>Под <code class="highlighter-rouge">use Bar</code> подразумевается скрытый вызов макроса <code class="highlighter-rouge">__using__</code>, после чего целый блок будет внедрён в модуль <code class="highlighter-rouge">Foo</code>. Проще говоря, мы заставляем код создавать код, позволяя макросу <code class="highlighter-rouge">use</code> расширять модуль <code class="highlighter-rouge">Foo</code> во время компиляции.</p>
+
+<p>Макросы в Эликсире настолько сильны, что заслуживают отдельной статьи. Конечно, если вам интересна эта тема, можете полистать книгу «Metaprogramming Elixir», где она рассматривается во всех подробностях.</p>
+
+<p>На минутку забудем о макросах. Иногда необходимо сделать некоторые функции доступными внутри контекста, и для достижения этой цели можно импортировать сколько угодно модулей. Перепишем последний пример, заменив слово use на слово <code class="highlighter-rouge">import</code>, и посмотрим, что из этого выйдет:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># Elixir</span>
+<span class="k">defmodule</span> <span class="no">Bar</span> <span class="k">do</span>
+  <span class="k">def</span> <span class="n">bar</span> <span class="k">do</span>
+    <span class="sd">"</span><span class="s2">bar"</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+
+<span class="k">defmodule</span> <span class="no">Foo</span> <span class="k">do</span>
+  <span class="kn">import</span> <span class="no">Bar</span>
+
+  <span class="k">def</span> <span class="n">call_bar</span> <span class="k">do</span>
+    <span class="n">bar</span><span class="p">()</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<p>Все макросы и функции модуля <code class="highlighter-rouge">Bar</code> теперь доступны модулю <code class="highlighter-rouge">Foo</code> без необходимости указания модуля <code class="highlighter-rouge">Bar</code>. Чтобы добиться того же в Джаве, можно воспользоваться оператором <code class="highlighter-rouge">import static</code> и представить, что функции в Эликсире – это своего рода статические методы.</p>
+
+  </div>
+
+  <!-- uSocial -->
+  <div class="post__share_block share_block">
+    <script async src="https://usocial.pro/usocial/usocial.js?v=6.1.4" data-script="usocial" charset="utf-8"></script>
+    <div class="uSocial-Share" data-pid="2fd19544e551bce292425ee8adaa31be" data-type="share" data-options="round,style2,default,absolute,horizontal,size32,counter1,counter-before,upArrow-right,nomobile" data-social="telegram,fb,vk,gPlus,twi,bookmarks"></div>
+  </div>
+  <!-- /uSocial -->
+</article>
+
+
+        <footer class="footer">
+    &copy; 2020
+    / Россия
+
+    <span class="pull-right">Любые мысли и вопросы пишите на <a href="mailto:elixir@wunsh.ru">elixir@wunsh.ru</a>.</span>
+</footer>
+
+        <div id="subscribeModal" class="modal">
+    <div class="modal__content">
+        <a href="#close" title="Close" class="modal__close">x</a>
+
+        <h2 class="modal__title">Ламповая рассылка про&nbsp;Эликсир</h2>
+
+        <p>Один-два раза в&nbsp;неделю присылаем тёплые письма об&nbsp;Эликсире: переводы самых интересных статей до&nbsp;их&nbsp;появления в&nbsp;открытом доступе, анонсы событий и&nbsp;вкусные бонусы.</p>
+
+        <form action="//wunsh.us14.list-manage.com/subscribe/post?u=c81ca3d4693f62db7f7f67c71&amp;id=a192e2dfef" method="post" id="mc-embedded-subscribe-form" name="mc-embedded-subscribe-form" class="pure-form h-tc validate" target="_blank" novalidate>
+            <input type="email" value="" name="EMAIL" class="modal__input pure-input-rounded large" id="mce-EMAIL" placeholder="Твоя почта" required>
+            <div style="position: absolute; left: -5000px;" aria-hidden="true"><input type="text" name="b_c81ca3d4693f62db7f7f67c71_a192e2dfef" tabindex="-1" value=""></div>
+
+            <input type="submit" value="Присоединиться" name="subscribe" onClick="yaCounter39773490.reachGoal('SUBSCRIBED'); return true" id="mc-embedded-subscribe" class="pure-button button-success large">
+        </form>
+
+        <p>Обязательно подтверди почту, перейдя по&nbsp;ссылке в&nbsp;письме, иначе мы&nbsp;не&nbsp;сможем делиться с&nbsp;тобой полезностями.</p>
+
+        <p>Надоедать точно не&nbsp;будем :)</p>
+    </div>
+</div>
+
+        <script src="/assets/js/vendors/zepto.min.js"></script>
+
+<script>
+    if ($(".post--docs").length) {
+        $(".footer").addClass("footer--docs")
+    }
+
+    $(".modal--close_backdrop").click(function(){
+        window.location.hash = "";
+    });
+</script>
+
+        <!-- Yandex.Metrika counter -->
+<script type="text/javascript">
+    (function (d, w, c) {
+        (w[c] = w[c] || []).push(function() {
+            try {
+                w.yaCounter39773490 = new Ya.Metrika({
+                    id:39773490,
+                    clickmap:true,
+                    trackLinks:true,
+                    accurateTrackBounce:true,
+                    webvisor:true,
+                    ut:"noindex"
+                });
+            } catch(e) { }
+        });
+
+        var n = d.getElementsByTagName("script")[0],
+            s = d.createElement("script"),
+            f = function () { n.parentNode.insertBefore(s, n); };
+        s.type = "text/javascript";
+        s.async = true;
+        s.src = "https://mc.yandex.ru/metrika/watch.js";
+
+        if (w.opera == "[object Opera]") {
+            d.addEventListener("DOMContentLoaded", f, false);
+        } else { f(); }
+    })(document, window, "yandex_metrika_callbacks");
+</script>
+<noscript><div><img src="https://mc.yandex.ru/watch/39773490?ut=noindex" style="position:absolute; left:-9999px;" alt="" /></div></noscript>
+<!-- /Yandex.Metrika counter -->
+
+      </div>
+    </div>
+  </body>
+</html>

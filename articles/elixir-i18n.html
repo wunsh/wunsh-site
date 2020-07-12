@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Интернационализация приложения на Elixir |> Сообщество Elixir и Phoenix Framework</title>
+    <meta name="description" content="В этой статье рассказывается о том, как добавить поддержку нескольких языков с использованием Gettext и Transifex.">
+
+    <link rel="alternate" type="application/rss+xml" title="Сообщество Elixir и Phoenix Framework" href="/feed.xml" />
+    <link rel="canonical" href="https://wunsh.ru/articles/elixir-i18n.html">
+
+    <style type="text/css">@import url("//fonts.googleapis.com/css?family=Source+Sans+Pro:400,700&subset=cyrillic");</style>
+    <link rel="stylesheet" href="/assets/css/vendors/pure.min.css">
+    <link rel="stylesheet" href="/assets/css/vendors/pure-grids-responsive.min.css">
+    <link rel="stylesheet" href="/assets/css/style.css?1594516983">
+
+    <link rel="shortcut icon" type="image/png" href="/assets/favicon.png" >
+</head>
+
+
+  <body>
+    <div class="wunsh pure-g">
+      
+
+
+
+
+<div class="menu pure-u-1 pure-u-md-1-4">
+  <div class="header">
+    <h2 class="header__title">
+      
+        <a href="https://wunsh.ru" class="header__title_link" title="На главную">Эликсир и&nbsp;Вунш</a>
+      
+    </h2>
+    <h3 class="header__tagline">Erlang + Ruby = &#10084;</h3>
+
+    <nav class="nav">
+      <ul class="nav_list">
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/elixir" class="nav_list__item_link pure-button">О языке</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/install/linux-asdf" class="nav_list__item_link pure-button">Установка</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/docs/" class="nav_list__item_link pure-button">Документация</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/guides" class="nav_list__item_link pure-button">Гайды</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/news" class="nav_list__item_link pure-button">Новости</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/articles" class="nav_list__item_link pure-button">Статьи</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/videos" class="nav_list__item_link pure-button">Видео</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/vacancies" class="nav_list__item_link pure-button">Вакансии</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/faq" class="nav_list__item_link pure-button">FAQ</a>
+            </li>
+          
+        
+      </ul>
+    </nav>
+
+    <a href="#subscribeModal" class="pure-button header__subscribe_link">Подписаться на рассылку</a>
+  </div>
+</div>
+
+
+      <div class="content pure-u-1 pure-u-md-3-4">
+        
+
+<article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+  <header class="post__header">
+    
+    <h1 class="post__title" itemprop="name headline">Интернационализация приложения на Elixir</h1>
+
+    <div class="post__meta post_meta">
+      <ul class="meta_list">
+        <li class="meta_list__item">
+          
+          <span class="">
+            <small class="meta_list__item_name">Дата</small>
+            <time class="h-bold" datetime="2017-01-20T00:00:00+00:00" itemprop="datePublished">
+              
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+20 января 2017
+
+            </time>
+          </span>
+          
+
+          
+        </li>
+        
+        <li class="meta_list__item">
+            <span class="tag_cloud tags_cloud--inline h-no_margin">
+              <small class="meta_list__item_name">Теги</small> 
+
+
+<ul class="tags_cloud__list">
+  
+    <a href="/tags/#i18n" class="tags_cloud__link tag tag--i18n">i18n</a>
+  
+    <a href="/tags/#howto" class="tags_cloud__link tag tag--howto">howto</a>
+  
+</ul>
+
+            </span>
+        </li>
+        
+        <li class="meta_list__item">
+          <span itemprop="author" itemscope itemtype="http://schema.org/Person">
+            <small class="meta_list__item_name">
+              
+                Перевод
+              
+            </small>
+            <span itemprop="name" class="h-bold">Надежда Нестерова</span>
+          </span>
+        </li>
+
+        <li class="meta_list__item">
+          
+            <div >
+              <small>Оригинал</small>
+              <strong>
+                &laquo;<a href="http://tech.footballaddicts.com/blog/internationalization-of-elixir-applications-with-gettext-and-transifex" style="text-transform: none; text-decoration: underline; color: #4b2e39;">Internationalization of Elixir applications with Gettext and Transifex</a>&raquo;
+              </strong>
+              <small>&copy;</small>
+              <strong>Andrea Leopardi</strong>
+            </div>
+          
+        </li>
+      </ul>
+    </div>
+  </header>
+
+  <div class="post__content" itemprop="articleBody">
+    <p>Одна из&nbsp;основных возможностей приложения Forza Football&nbsp;&mdash; отправка подписчикам push-уведомлений о&nbsp;ключевых событиях футбольных матчей (подробнее об&nbsp;этих уведомлениях <noindex><a href="http://tech.footballaddicts.com/blog/the-pursuit-of-instant-pushes" rel="nofolow">здесь</a></noindex>). Поскольку приложением пользуются люди по&nbsp;всему миру, возникает задача перевода push-уведомлений на&nbsp;множество различных языков. В&nbsp;данной статье я&nbsp;расскажу, как решить эту проблему в&nbsp;Elixir (именно на&nbsp;нём написана push-система нашего приложения) и&nbsp;о&nbsp;том, какие для этого понадобятся инструменты.</p>
+<h2>Gettext для Elixir</h2>
+<p>Основной инструмент, который мы&nbsp;используем в&nbsp;Elixir для переводов,&nbsp;&mdash; <a href="https://github.com/elixir-lang/gettext">Gettext</a>. Он&nbsp;представляет собой реализацию <noindex><a href="https://www.gnu.org/software/gettext/" rel="nofollow">библиотеки Gettext операционной системы GNU</a></noindex> для приложений, написанных на&nbsp;Elixir. Если говорить коротко, то&nbsp;Gettext&nbsp;&mdash; это система интернационализации программного обеспечения, в&nbsp;основе которой лежит процесс извлечения строк из&nbsp;исходного кода и&nbsp;помещение их&nbsp;в&nbsp;файлы перевода. Все подробности об&nbsp;особенностях реализации Gettext для Elixir можно узнать из&nbsp;файла README.</p>
+<p>Данные уведомлений для отправки пользователям формируются следующим кодом:</p>
+<figure class="highlight"><pre><code class="language-elixir" data-lang="elixir"><span class="kn">import</span> <span class="no">Pushboy</span><span class="o">.</span><span class="no">Gettext</span><span class="p">,</span> <span class="ss">only:</span> <span class="p">[</span><span class="ss">gettext:</span> <span class="m">2</span><span class="p">]</span>
+
+<span class="n">gettext</span> <span class="sd">"</span><span class="s2">%{minute}′ Red Card - %{player_name} (%{team_name})"</span><span class="p">,</span>
+        <span class="ss">minute:</span> <span class="n">minute</span><span class="p">,</span>
+        <span class="ss">player_name:</span> <span class="n">player_name</span><span class="p">,</span>
+        <span class="ss">team_name:</span> <span class="n">team_name</span></code></pre></figure>
+<p>Приложение, посылающее push-уведомления, мы&nbsp;назвали Pushboy. <code>gettext/2</code>&nbsp;&mdash; макрос, автоматически определяемый в&nbsp;модуле <code>Pushboy.Gettext</code> с&nbsp;помощью Gettext:</p>
+<figure class="highlight"><pre><code class="language-elixir" data-lang="elixir"><span class="k">defmodule</span> <span class="no">Pushboy</span><span class="o">.</span><span class="no">Gettext</span> <span class="k">do</span>
+  <span class="kn">use</span> <span class="no">Gettext</span><span class="p">,</span> <span class="ss">otp_app:</span> <span class="ss">:pushboy</span>
+<span class="k">end</span></code></pre></figure>
+<p>Переводы будут идентифицироваться по&nbsp;строке (<code>"%{minute}′ Red Card ..."</code>); она&nbsp;же поможет Gettext во&nbsp;время выполнения приложения отыскать перевод для указанного языка.</p>
+<h3>Извлечение переводов</h3>
+<p>Разобравшись в&nbsp;тонкостях процесса интернационализации, можно приступить к&nbsp;извлечению из&nbsp;исходного кода строк, перевод которых необходимо выполнить. Для этого в&nbsp;Gettext имеется специальная mix-задача:</p>
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash"><span class="nv">$ </span>mix gettext.extract
+Extracted priv/gettext/default.pot</code></pre></figure>
+<p>Задача считывает все вызовы к&nbsp;макросу Gettext (<code>gettext/2</code>&nbsp;в примере выше) во&nbsp;время компиляции и&nbsp;записывает их&nbsp;в&nbsp;файлы с&nbsp;расширением .pot, которые выглядят следующим образом:</p>
+<figure class="highlight"><pre><code class="language-pot" data-lang="pot"># This would go in priv/gettext/default.pot
+
+#: lib/pushboy/event/red_card.ex:86
+msgid "%{minute}′ Red Card - %{player_name} (%{team_name})"
+msgstr ""</code></pre></figure>
+<p>POT-файлы&nbsp;&mdash; это шаблоны, в&nbsp;которых хранится список строк для перевода. В&nbsp;приведённом примере <code>msgid</code>&nbsp;&mdash; идентификатор строки для перевода, а&nbsp;<code>msgstr</code>&nbsp;&mdash; сам перевод. Так как POT-файлы не&nbsp;создаются отдельно для каждого языка, то&nbsp;переводы хранятся не&nbsp;в&nbsp;них, а&nbsp;в&nbsp;файлах с&nbsp;расширением <code>.po</code>, располагающихся в&nbsp;директории определённого языка. Если перевести эту строку, например, на&nbsp;итальянский, то&nbsp;файл будет выглядеть так:</p>
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash"><span class="c"># This would go in priv/gettext/it/LC_MESSAGES/default.po</span>
+
+<span class="c">#: lib/pushboy/event/red_card.ex:86</span>
+msgid <span class="s2">"%{minute}′ Red Card - %{player_name} (%{team_name})"</span>
+msgstr <span class="s2">"%{minute}′ Cartellino rosso - %{player_name} (%{team_name})"</span></code></pre></figure>
+<p>На&nbsp;этапе компиляции Gettext сканирует такие PO-файлы, пытаясь как можно быстрее отыскать перевод нужных строк. Всё, что находится между <code>%{</code> и <code>}</code>, &mdash; интерполяционные переменные: они не&nbsp;подлежат переводу и&nbsp;во&nbsp;время работы приложения заменяются на&nbsp;динамические значения.</p>
+<p>После создания POT- и&nbsp;PO-файлов перевод программно будет выглядеть так:</p>
+<figure class="highlight"><pre><code class="language-iex" data-lang="iex">iex&gt; import Pushboy.Gettext, only: [gettext: 2]
+iex&gt; Gettext.put_locale(Pushboy.Gettext, "it")
+iex&gt; gettext "%{minute}′ Red Card - %{player_name} (%{team_name})",
+...&gt;         minute: 38,
+...&gt;         player_name: "Cristiano Ronaldo",
+...&gt;         team_name: "Real Madrid"
+"38′ Cartellino rosso - Cristiano Ronaldo (Real Madrid)"</code></pre></figure>
+<h2>Перевод на&nbsp;несколько языков</h2>
+<p>С&nbsp;интернационализацией приложения мы&nbsp;разобрались, но&nbsp;каким образом осуществляется перевод? Приложение поддерживает множество различных языков, но&nbsp;члены нашей команды владеют только некоторыми из&nbsp;них, в&nbsp;связи с&nbsp;чем вариант выполнения перевода штатными сотрудниками отпадает.</p>
+<p>Поэтому мы&nbsp;пользуемся <noindex><a href="https://www.transifex.com/" rel="nofollow">Transifex</a></noindex>&nbsp;&mdash; веб-сайтом с&nbsp;удобным интерфейсом для осуществления перевода и&nbsp;редактирования текста и&nbsp;поддержкой аутсорсинга лингвистических услуг. Платформа взаимодействует с&nbsp;несколькими переводческими сервисами, которые позволяют заказать переводы у&nbsp;носителей языка.</p>
+<p>В&nbsp;большинстве случаев мы&nbsp;прибегаем к&nbsp;использованию внешних сервисов для перевода, однако некоторые сотрудники нашей компании являются носителями различных языков. С&nbsp;помощью Transifex они тоже могут работать над переводами, ведь интерфейс сайта прост и&nbsp;интуитивно понятен даже несведущему в&nbsp;компьютерной технике пользователю.</p>
+
+<img src="http://tech.footballaddicts.com/assets/posts//2016-12-19-internationalization-of-elixir-applications-with-gettext-and-transifex/transifex-interface.png"
+     alt="Интерфейс Transifex">
+
+<h3>Интеграция с&nbsp;Gettext</h3>
+<p>Transifex взаимодействует со&nbsp;многими платформами для локализации приложений, в&nbsp;том числе и&nbsp;с&nbsp;Gettext. Загрузив PO/POT-файлы на&nbsp;Transifex, можно потом скачать их&nbsp;переводы в&nbsp;формате <code>.po</code>. В&nbsp;Transifex существует понятие ресурсов, то&nbsp;есть различных областей перевода (например, уведомления&nbsp;&mdash; это один ресурс, сообщения об&nbsp;ошибках&nbsp;&mdash; другой и&nbsp;т.&nbsp;п.). Ресурсы Transifex удачно соотносятся с&nbsp;областями в&nbsp;Gettext: для извлечения переведённого текста из&nbsp;определённой области в&nbsp;Gettext можно использовать макрос <code>dgettext/3</code> (<code>gettext/2</code> использует область <code>default</code>), после чего каждый домен помещается в&nbsp;отдельный PO(T)-файл (как default.pot в&nbsp;примере выше.</p>
+<p>В&nbsp;общих чертах, порядок действий таков. Как было показано выше, сначала из&nbsp;исходного кода в&nbsp;POT-файл извлекаем необходимые для перевода строки с&nbsp;помощью mix-задачи <code>mix gettext.extract</code>. Затем загружаем POT-файл на&nbsp;Transifex и&nbsp;подготавливаем его содержимое к&nbsp;переводу: добавляем и&nbsp;удаляем строки или обновляем файл целиком.</p>
+<img src="http://tech.footballaddicts.com/assets/posts//2016-12-19-internationalization-of-elixir-applications-with-gettext-and-transifex/uploading-pot-to-transifex.png"
+     alt="Загрузка POT в Transifex">
+<p>Ждём, когда перевод будет готов. Как только перевод будет готов, скачиваем с&nbsp;Transifex PO-файлы для всех необходимых языков.</p>
+<h3>Инструменты командной строки</h3>
+<p>Описанная выше схема справляется со&nbsp;своими задачами, но&nbsp;пользоваться ей&nbsp;не&nbsp;так удобно: многие действия приходится осуществлять вручную, чем больше количество языков локализации, тем медленнее она будет работать. К&nbsp;счастью, в&nbsp;Transifex имеется замечательный инструмент командной строки под названием&nbsp;<code>tx</code>, позволяющий оправлять строки на&nbsp;перевод сразу&nbsp;же после запуска команды <code>mix gettext.extract</code> и&nbsp;помещать переведённые строки в&nbsp;PO-файлы, как только те&nbsp;будут доступны.</p>
+<p>Настроим&nbsp;<code>tx</code>, отредактировав файл <code>.tx/config</code>, расположенный в&nbsp;корневом каталоге приложения. Получаем следующее:</p>
+
+<figure class="highlight"><pre><code class="language-ini" data-lang="ini"><span class="nn">[main]</span>
+<span class="py">host</span> <span class="p">=</span> <span class="s">https://www.transifex.com</span>
+
+<span class="nn">[pushboy.default]</span>
+<span class="py">type</span> <span class="p">=</span> <span class="s">PO</span>
+<span class="py">source_file</span> <span class="p">=</span> <span class="s">priv/gettext/default.pot</span>
+<span class="py">source_lang</span> <span class="p">=</span> <span class="s">en</span>
+<span class="py">file_filter</span> <span class="p">=</span> <span class="s">priv/gettext/&lt;lang&gt;/LC_MESSAGES/default.po</span></code></pre></figure>
+
+    <p>В&nbsp;этом файле мы&nbsp;создаём конфигурации ресурса <code>pushboy.default</code> (который соотносится с&nbsp;областью <code>default</code> из Gettext) и&nbsp;передаём инструменту <code>tx</code>&nbsp;следующую информацию:</p>
+
+<ul>
+    <li>
+        <p>форматы используемых файлов (PO&nbsp;и&nbsp;POT)</p>
+    </li>
+    <li>
+        <p>местонахождение исходного текста (<code>priv/gettext/default.pot</code>)</p>
+    </li>
+    <li>
+        <p>язык оригинала (English)</p>
+    </li>
+    <li>
+        <p>загруженные переводы должны находиться по&nbsp;адресу <code>priv/gettext</code> в&nbsp;каталоге с&nbsp;названием языка перевода (<code>&lt;lang&gt;</code> заменяется через&nbsp;<code>tx</code>)</p>
+    </li>
+</ul>
+    <p>После приведения файла настроек к&nbsp;такому виду, строки можно будет отправлять на&nbsp;перевод командой <code>$tx push --source</code> (<code>--source</code> проследит, чтобы действия производились только с&nbsp;обновлённым POT-файлом), а&nbsp;получать переведённые строки&nbsp;&mdash; командой <code>tx pull</code>.</p>
+<h3>Редактирование PO-файлов, загруженных с&nbsp;Transifex</h3>
+    <p>В&nbsp;нашей компании существуют свои требования к&nbsp;оформлению кода, которым не&nbsp;удовлетворяют PO-файлы, созданные платформой Transifex. Для таких случаев в&nbsp;Gettext имеются специальные инструменты для парсинга и&nbsp;редактирования PO/POT-файлов. Достаточно выполнить mix-задачу <code>mix translations.pull</code>, и&nbsp;она прекратит взаимодействие с&nbsp;<code>tx</code>.</p>
+    <p>Сначала вызовется <code>tx pull</code>, затем выполнится перебор всех PO-файлов и&nbsp;их&nbsp;форматирование согласно указанным правилам:</p>
+<figure class="highlight"><pre><code class="language-elixir" data-lang="elixir"><span class="k">defp</span> <span class="n">reformat_po_file</span><span class="p">(</span><span class="n">path</span><span class="p">)</span> <span class="k">do</span>
+  <span class="n">reformatted_po</span> <span class="o">=</span>
+    <span class="n">path</span>
+    <span class="o">|&gt;</span> <span class="no">Gettext</span><span class="o">.</span><span class="no">PO</span><span class="o">.</span><span class="n">parse_file!</span><span class="p">()</span>
+    <span class="o">|&gt;</span> <span class="n">reformat_headers</span><span class="p">()</span>
+    <span class="o">|&gt;</span> <span class="n">remove_top_of_the_file_comments</span><span class="p">()</span>
+
+  <span class="no">File</span><span class="o">.</span><span class="n">write!</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="no">Gettext</span><span class="o">.</span><span class="no">PO</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">reformatted_po</span><span class="p">))</span>
+<span class="k">end</span>
+
+<span class="c1"># We get rid of the Last-Translator header</span>
+<span class="k">defp</span> <span class="n">reformat_headers</span><span class="p">(%</span><span class="no">Gettext</span><span class="o">.</span><span class="no">PO</span><span class="p">{</span><span class="ss">headers:</span> <span class="n">headers</span><span class="p">}</span> <span class="o">=</span> <span class="n">po</span><span class="p">)</span> <span class="k">do</span>
+  <span class="n">new_headers</span> <span class="o">=</span> <span class="no">Enum</span><span class="o">.</span><span class="n">reject</span><span class="p">(</span><span class="n">headers</span><span class="p">,</span> <span class="o">&amp;</span><span class="no">String</span><span class="o">.</span><span class="n">starts_with?</span><span class="p">(</span><span class="nv">&amp;1</span><span class="p">,</span> <span class="sd">"</span><span class="s2">Last-Translator"</span><span class="p">))</span>
+  <span class="p">%</span><span class="no">Gettext</span><span class="o">.</span><span class="no">PO</span><span class="p">{</span><span class="n">po</span> <span class="o">|</span> <span class="ss">headers:</span> <span class="n">new_headers</span><span class="p">}</span>
+<span class="k">end</span>
+
+<span class="c1"># We get rid of comments that Transifex leaves at the top of the PO file</span>
+<span class="k">defp</span> <span class="n">remove_top_of_the_file_comments</span><span class="p">(%</span><span class="no">Gettext</span><span class="o">.</span><span class="no">PO</span><span class="p">{}</span> <span class="o">=</span> <span class="n">po</span><span class="p">)</span> <span class="k">do</span>
+  <span class="p">%</span><span class="no">Gettext</span><span class="o">.</span><span class="no">PO</span><span class="p">{</span><span class="n">po</span> <span class="o">|</span> <span class="ss">top_of_the_file_comments:</span> <span class="p">[]}</span>
+<span class="k">end</span></code></pre></figure>
+<h2>Окончательная схема работы приложения</h2>
+<p>Схема состоит из&nbsp;следующих действий:</p>
+<ul>
+    <li>
+        <p>закончив работу над исходным кодом, запускаем <code>mix gettext.extract</code>, чтобы получить набор обновлённых POT-файлов</p>
+    </li>
+    <li>
+        <p>запускаем <code>tx push --source</code>, чтобы загрузить в&nbsp;Transifex обновлённые строки для перевода</p>
+    </li>
+    <li>
+        <p>ждём, когда будет выполнен перевод обновлённых строк</p>
+    </li>
+    <li>
+        <p>запускаем <code>mix translations.pull</code> и&nbsp;получаем обновлённые переводы</p>
+    </li>
+</ul>
+<p>Такая схема работы очень удобна, ведь она позволяет обновлять, отправлять и&nbsp;извлекать переводы программно, а&nbsp;также легко масштабировать приложение после добавления новых языков (схема остаётся прежней, нужно лишь заказать переводы для добавленных языков в&nbsp;Transifex).</p>
+<h2>Заключение</h2>
+<p>Теперь вы&nbsp;знаете удобную и&nbsp;быстро работающую схему осуществления перевода на&nbsp;несколько языков push-уведомлений для своего приложения, обеспечивающую хорошую масштабируемость при изменении количества языков перевода и&nbsp;объёма текста.</p>
+
+  </div>
+
+  <!-- uSocial -->
+  <div class="post__share_block share_block">
+    <script async src="https://usocial.pro/usocial/usocial.js?v=6.1.4" data-script="usocial" charset="utf-8"></script>
+    <div class="uSocial-Share" data-pid="2fd19544e551bce292425ee8adaa31be" data-type="share" data-options="round,style2,default,absolute,horizontal,size32,counter1,counter-before,upArrow-right,nomobile" data-social="telegram,fb,vk,gPlus,twi,bookmarks"></div>
+  </div>
+  <!-- /uSocial -->
+</article>
+
+
+        <footer class="footer">
+    &copy; 2020
+    / Россия
+
+    <span class="pull-right">Любые мысли и вопросы пишите на <a href="mailto:elixir@wunsh.ru">elixir@wunsh.ru</a>.</span>
+</footer>
+
+        <div id="subscribeModal" class="modal">
+    <div class="modal__content">
+        <a href="#close" title="Close" class="modal__close">x</a>
+
+        <h2 class="modal__title">Ламповая рассылка про&nbsp;Эликсир</h2>
+
+        <p>Один-два раза в&nbsp;неделю присылаем тёплые письма об&nbsp;Эликсире: переводы самых интересных статей до&nbsp;их&nbsp;появления в&nbsp;открытом доступе, анонсы событий и&nbsp;вкусные бонусы.</p>
+
+        <form action="//wunsh.us14.list-manage.com/subscribe/post?u=c81ca3d4693f62db7f7f67c71&amp;id=a192e2dfef" method="post" id="mc-embedded-subscribe-form" name="mc-embedded-subscribe-form" class="pure-form h-tc validate" target="_blank" novalidate>
+            <input type="email" value="" name="EMAIL" class="modal__input pure-input-rounded large" id="mce-EMAIL" placeholder="Твоя почта" required>
+            <div style="position: absolute; left: -5000px;" aria-hidden="true"><input type="text" name="b_c81ca3d4693f62db7f7f67c71_a192e2dfef" tabindex="-1" value=""></div>
+
+            <input type="submit" value="Присоединиться" name="subscribe" onClick="yaCounter39773490.reachGoal('SUBSCRIBED'); return true" id="mc-embedded-subscribe" class="pure-button button-success large">
+        </form>
+
+        <p>Обязательно подтверди почту, перейдя по&nbsp;ссылке в&nbsp;письме, иначе мы&nbsp;не&nbsp;сможем делиться с&nbsp;тобой полезностями.</p>
+
+        <p>Надоедать точно не&nbsp;будем :)</p>
+    </div>
+</div>
+
+        <script src="/assets/js/vendors/zepto.min.js"></script>
+
+<script>
+    if ($(".post--docs").length) {
+        $(".footer").addClass("footer--docs")
+    }
+
+    $(".modal--close_backdrop").click(function(){
+        window.location.hash = "";
+    });
+</script>
+
+        <!-- Yandex.Metrika counter -->
+<script type="text/javascript">
+    (function (d, w, c) {
+        (w[c] = w[c] || []).push(function() {
+            try {
+                w.yaCounter39773490 = new Ya.Metrika({
+                    id:39773490,
+                    clickmap:true,
+                    trackLinks:true,
+                    accurateTrackBounce:true,
+                    webvisor:true,
+                    ut:"noindex"
+                });
+            } catch(e) { }
+        });
+
+        var n = d.getElementsByTagName("script")[0],
+            s = d.createElement("script"),
+            f = function () { n.parentNode.insertBefore(s, n); };
+        s.type = "text/javascript";
+        s.async = true;
+        s.src = "https://mc.yandex.ru/metrika/watch.js";
+
+        if (w.opera == "[object Opera]") {
+            d.addEventListener("DOMContentLoaded", f, false);
+        } else { f(); }
+    })(document, window, "yandex_metrika_callbacks");
+</script>
+<noscript><div><img src="https://mc.yandex.ru/watch/39773490?ut=noindex" style="position:absolute; left:-9999px;" alt="" /></div></noscript>
+<!-- /Yandex.Metrika counter -->
+
+      </div>
+    </div>
+  </body>
+</html>

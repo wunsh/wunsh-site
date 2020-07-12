@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Предметно-ориентированные языки |> Сообщество Elixir и Phoenix Framework</title>
+    <meta name="description" content="Русскоязычное сообщество Elixir и Phoenix Framework
+">
+
+    <link rel="alternate" type="application/rss+xml" title="Сообщество Elixir и Phoenix Framework" href="/feed.xml" />
+    <link rel="canonical" href="https://wunsh.ru/docs/meta/domain-specific-languages">
+
+    <style type="text/css">@import url("//fonts.googleapis.com/css?family=Source+Sans+Pro:400,700&subset=cyrillic");</style>
+    <link rel="stylesheet" href="/assets/css/vendors/pure.min.css">
+    <link rel="stylesheet" href="/assets/css/vendors/pure-grids-responsive.min.css">
+    <link rel="stylesheet" href="/assets/css/style.css?1594516983">
+
+    <link rel="shortcut icon" type="image/png" href="/assets/favicon.png" >
+</head>
+
+
+  <body>
+    <div class="wunsh pure-g">
+      
+
+
+
+
+<div class="menu pure-u-1 pure-u-md-1-4">
+  <div class="header">
+    <h2 class="header__title">
+      
+        <a href="https://wunsh.ru" class="header__title_link" title="На главную">Эликсир и&nbsp;Вунш</a>
+      
+    </h2>
+    <h3 class="header__tagline">Erlang + Ruby = &#10084;</h3>
+
+    <nav class="nav">
+      <ul class="nav_list">
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/elixir" class="nav_list__item_link pure-button">О языке</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/install/linux-asdf" class="nav_list__item_link pure-button">Установка</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/docs/" class="nav_list__item_link pure-button">Документация</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/guides" class="nav_list__item_link pure-button">Гайды</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/news" class="nav_list__item_link pure-button">Новости</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/articles" class="nav_list__item_link pure-button">Статьи</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/videos" class="nav_list__item_link pure-button">Видео</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/vacancies" class="nav_list__item_link pure-button">Вакансии</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/faq" class="nav_list__item_link pure-button">FAQ</a>
+            </li>
+          
+        
+      </ul>
+    </nav>
+
+    <a href="#subscribeModal" class="pure-button header__subscribe_link">Подписаться на рассылку</a>
+  </div>
+</div>
+
+
+      <div class="content pure-u-1 pure-u-md-3-4">
+        <article class="post post--docs" itemscope itemtype="http://schema.org/BlogPosting">
+    <header class="post__header">
+        <h1 class="post__title" itemprop="name headline">
+            <p>Предметно-ориентированные языки</p>
+
+        </h1>
+    </header>
+
+    <div class="post__content" itemprop="articleBody">
+        <h2 id="введение">Введение</h2>
+
+<p><abbr title="DOMAIN SPECIFIC LANGUAGE"><a href="https://ru.wikipedia.org/wiki/Предметно-ориентированный_язык">Предметно-ориентированные языки (DSL)</a></abbr> позволяют разработчикам адаптировать свои приложения для какой-то конкретной сферы. Вам не нужны макросы, чтобы пользоваться DSL: каждая структура данных и каждая функция, которую вы определяете в своём модуле, является частью вашего предметно-ориентированного языка.</p>
+
+<p>Например, представьте себе, что мы хотим внедрить модуль <code class="highlighter-rouge">Validator</code>, который обеспечивает проверку достоверности данных в вашем языке. Мы могли бы реализовать его с использованием структур данных, функций или макросов. Давайте же посмотрим, как выглядят эти DSL:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># 1. Структуры данных</span>
+<span class="kn">import</span> <span class="no">Validator</span>
+<span class="n">validate</span> <span class="n">user</span><span class="p">,</span> <span class="ss">name:</span> <span class="p">[</span><span class="ss">length:</span> <span class="m">1</span><span class="o">..</span><span class="m">100</span><span class="p">],</span>
+               <span class="ss">email:</span> <span class="p">[</span><span class="ss">matches:</span> <span class="sr">~r/@/</span><span class="p">]</span>
+
+<span class="c1"># 2. Функции</span>
+<span class="kn">import</span> <span class="no">Validator</span>
+<span class="n">user</span>
+<span class="o">|&gt;</span> <span class="n">validate_length</span><span class="p">(</span><span class="ss">:name</span><span class="p">,</span> <span class="m">1</span><span class="o">..</span><span class="m">100</span><span class="p">)</span>
+<span class="o">|&gt;</span> <span class="n">validate_matches</span><span class="p">(</span><span class="ss">:email</span><span class="p">,</span> <span class="sr">~r/@/</span><span class="p">)</span>
+
+<span class="c1"># 3. Макрос + модуль</span>
+<span class="k">defmodule</span> <span class="no">MyValidator</span> <span class="k">do</span>
+  <span class="kn">use</span> <span class="no">Validator</span>
+  <span class="n">validate_length</span> <span class="ss">:name</span><span class="p">,</span> <span class="m">1</span><span class="o">..</span><span class="m">100</span>
+  <span class="n">validate_matches</span> <span class="ss">:email</span><span class="p">,</span> <span class="sr">~r/@/</span>
+<span class="k">end</span>
+
+<span class="no">MyValidator</span><span class="o">.</span><span class="n">validate</span><span class="p">(</span><span class="n">user</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p>Из всех вышеперечисленных подходов, первый, безусловно, является наиболее гибким. Если нормы нашего предмета могут быть закодированы структурами данных, значит, их легче всего создавать и реализовывать, поскольку стандартная библиотека Эликсира просто напичкана функциями для управления различными типами данных.</p>
+
+<p>Второй подход использует вызовы функций, которые лучше подходят для более сложных API, например, если вам необходимо передать множество опций. К тому же, он хорошо читается в Эликсире, благодаря пайп-оператору.</p>
+
+<p>Третий подход использует макросы и, безусловно, является сложным. Для его реализации нам потребуется больше строк кода, что делает его более трудным для восприятия и дорогостоящим в тестировании, если сравнивать с тестированием простых функций. А ещё, он ограничивает пользователя при работе с библиотекой, поскольку все проверки обязаны определяться внутри модуля.</p>
+
+<p>Чтобы лучше понять это, представьте, что вы хотите проверить определённый атрибут только лишь в том случае, если выполнено заданное условие. Мы могли бы легко сделать это с помощью первого решения, манипулируя соответственным образом структурой данных или же вообще, благодаря второму решению, используя условные операторы (<code class="highlighter-rouge">if</code>/<code class="highlighter-rouge">else</code>) перед вызовом функции. Однако, всё это невозможно сделать, используя подход с макросами, если его DSL не будет дополнен.</p>
+
+<p>Другими словами:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>data &gt; functions &gt; macros
+</code></pre></div></div>
+
+<p>Тем не менее, все ешё есть случаи, когда использование макросов и модулей для создания предметно-ориентированных языков оказывается чем-то полезным. Поскольку мы изучили структуры данных и определения функций <a href="/docs">в основном руководстве</a>, в этой главе будет рассмотрено, как использовать макросы и атрибуты модуля для решения проблем более сложных DSL.</p>
+
+<h1 id="создание-нашего-собственного-тестового-примера">Создание нашего собственного тестового примера</h1>
+
+<p>Целью этой главы является создание модуля с именем <code class="highlighter-rouge">TestCase</code>, что позволит нам написать следующее:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">defmodule</span> <span class="no">MyTest</span> <span class="k">do</span>
+  <span class="kn">use</span> <span class="no">TestCase</span>
+
+  <span class="n">test</span> <span class="sd">"</span><span class="s2">arithmetic operations"</span> <span class="k">do</span>
+    <span class="m">4</span> <span class="o">=</span> <span class="m">2</span> <span class="o">+</span> <span class="m">2</span>
+  <span class="k">end</span>
+
+  <span class="n">test</span> <span class="sd">"</span><span class="s2">list operations"</span> <span class="k">do</span>
+    <span class="p">[</span><span class="m">1</span><span class="p">,</span> <span class="m">2</span><span class="p">,</span> <span class="m">3</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="m">1</span><span class="p">,</span> <span class="m">2</span><span class="p">]</span> <span class="o">++</span> <span class="p">[</span><span class="m">3</span><span class="p">]</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+
+<span class="no">MyTest</span><span class="o">.</span><span class="n">run</span>
+</code></pre></div></div>
+
+<p>В приведённом выше примере, используя <code class="highlighter-rouge">TestCase</code>, мы можем писать тесты с помощью макроса <code class="highlighter-rouge">test</code>, который определяет функцию с именем <code class="highlighter-rouge">run</code> для автоматического запуска всех наших тестов. Таким образом, наш прототип будет полагаться на оператор соответствия (<code class="highlighter-rouge">=</code>) как механизм для выполнения заданных утверждений.</p>
+
+<h1 id="макрос-test">Макрос <code class="highlighter-rouge">test</code></h1>
+
+<p>Начнём с создания модуля, который определяет и импортирует макрос <code class="highlighter-rouge">test</code> при его использовании:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">defmodule</span> <span class="no">TestCase</span> <span class="k">do</span>
+  <span class="c1"># Колбэк вызывается через `use`.</span>
+  <span class="c1">#</span>
+  <span class="c1"># Сейчас возвращается маскирующее выражение, которое</span>
+  <span class="c1"># импортирует сам модуль в код пользователя.</span>
+  <span class="nv">@doc</span> <span class="no">false</span>
+  <span class="k">defmacro</span> <span class="n">__using__</span><span class="p">(</span><span class="n">_opts</span><span class="p">)</span> <span class="k">do</span>
+    <span class="kn">quote</span> <span class="k">do</span>
+      <span class="kn">import</span> <span class="no">TestCase</span>
+    <span class="k">end</span>
+  <span class="k">end</span>
+
+  <span class="nv">@doc</span> <span class="sd">"""
+  Определяет тест с заданным описанием.
+
+  ## Примеры
+
+      test "arithmetic operations" do
+        4 = 2 + 2
+      end
+
+  """</span>
+  <span class="k">defmacro</span> <span class="n">test</span><span class="p">(</span><span class="n">description</span><span class="p">,</span> <span class="k">do</span><span class="p">:</span> <span class="n">block</span><span class="p">)</span> <span class="k">do</span>
+    <span class="n">function_name</span> <span class="o">=</span> <span class="no">String</span><span class="o">.</span><span class="n">to_atom</span><span class="p">(</span><span class="sd">"</span><span class="s2">test "</span> <span class="o">&lt;&gt;</span> <span class="n">description</span><span class="p">)</span>
+    <span class="kn">quote</span> <span class="k">do</span>
+      <span class="k">def</span> <span class="kn">unquote</span><span class="p">(</span><span class="n">function_name</span><span class="p">)(),</span> <span class="k">do</span><span class="p">:</span> <span class="kn">unquote</span><span class="p">(</span><span class="n">block</span><span class="p">)</span>
+    <span class="k">end</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<p>Предполагая, что мы определили модуль <code class="highlighter-rouge">TestCase</code> в файле с именем <code class="highlighter-rouge">tests.exs</code>, мы можем открыть его командой <code class="highlighter-rouge">iex tests.exs</code> и, таким образом, определим наши первые тесты:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">iex</span><span class="o">&gt;</span> <span class="k">defmodule</span> <span class="no">MyTest</span> <span class="k">do</span>
+<span class="o">...&gt;</span>   <span class="kn">use</span> <span class="no">TestCase</span>
+<span class="o">...&gt;</span>
+<span class="o">...&gt;</span>   <span class="n">test</span> <span class="sd">"</span><span class="s2">hello"</span> <span class="k">do</span>
+<span class="o">...&gt;</span>     <span class="sd">"</span><span class="s2">hello"</span> <span class="o">=</span> <span class="sd">"</span><span class="s2">world"</span>
+<span class="o">...&gt;</span>   <span class="k">end</span>
+<span class="o">...&gt;</span> <span class="k">end</span>
+</code></pre></div></div>
+
+<p>На данный момент у нас нет механизма для запуска тестов и мы с вами знаем, что функция «test hello» была определена неявно. Поэтому, когда мы вызываем на ней наш тест, он должен не пройти:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">iex</span><span class="o">&gt;</span> <span class="no">MyTest</span><span class="o">.</span><span class="sd">"</span><span class="s2">test hello"</span><span class="p">()</span>
+<span class="o">**</span> <span class="p">(</span><span class="no">MatchError</span><span class="p">)</span> <span class="n">no</span> <span class="n">match</span> <span class="n">of</span> <span class="n">right</span> <span class="n">hand</span> <span class="n">side</span> <span class="ss">value:</span> <span class="sd">"</span><span class="s2">world"</span>
+</code></pre></div></div>
+
+<h1 id="хранение-информации-с-атрибутами">Хранение информации с атрибутами</h1>
+
+<p>Чтобы завершить реализацию модуля <code class="highlighter-rouge">TestCase</code>, мы должны иметь доступ ко всем нашим тестам. Один из способов сделать это – получать тесты во время их выполнения с помощью <code class="highlighter-rouge">__MODULE__.__info__(:functions)</code>, который возвращает список всех функций в текущем модуле. Однако, учитывая, что мы можем хранить гораздо больше информации о каждом тесте, за исключением его имени, нам необходим более гибкий подход.</p>
+
+<p>При обсуждении атрибутов модуля в предыдущих главах, мы упоминали, как их можно использовать в качестве временного хранилища. Именно это их свойство мы применим в этом разделе.</p>
+
+<p>В реализации <code class="highlighter-rouge">__using__/1</code> мы инициализируем атрибут модуля с именем <code class="highlighter-rouge">@tests</code> в пустой список, а затем сохраняем имя каждого определённого теста на этом атрибуте, чтобы они могли быть вызваны из функции <code class="highlighter-rouge">run</code>.</p>
+
+<p>Вот обновленный код модуля <code class="highlighter-rouge">Test Case</code>:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">defmodule</span> <span class="no">TestCase</span> <span class="k">do</span>
+  <span class="nv">@doc</span> <span class="no">false</span>
+  <span class="k">defmacro</span> <span class="n">__using__</span><span class="p">(</span><span class="n">_opts</span><span class="p">)</span> <span class="k">do</span>
+    <span class="kn">quote</span> <span class="k">do</span>
+      <span class="kn">import</span> <span class="no">TestCase</span>
+
+      <span class="c1"># Инициализируем атрибут @tests пустым</span>
+      <span class="nv">@tests</span> <span class="p">[]</span>
+
+      <span class="c1"># Вызываем `TestCase.__before_compile__/1` до компиляции модуля</span>
+      <span class="nv">@before_compile</span> <span class="no">TestCase</span>
+    <span class="k">end</span>
+  <span class="k">end</span>
+
+  <span class="nv">@doc</span> <span class="sd">"""
+  Определяет тест с заданным описанием.
+
+  ## Примеры
+
+      test "arithmetic operations" do
+        4 = 2 + 2
+      end
+
+  """</span>
+  <span class="k">defmacro</span> <span class="n">test</span><span class="p">(</span><span class="n">description</span><span class="p">,</span> <span class="k">do</span><span class="p">:</span> <span class="n">block</span><span class="p">)</span> <span class="k">do</span>
+    <span class="n">function_name</span> <span class="o">=</span> <span class="no">String</span><span class="o">.</span><span class="n">to_atom</span><span class="p">(</span><span class="sd">"</span><span class="s2">test "</span> <span class="o">&lt;&gt;</span> <span class="n">description</span><span class="p">)</span>
+    <span class="kn">quote</span> <span class="k">do</span>
+      <span class="c1"># Prepend the newly defined test to the list of tests</span>
+      <span class="nv">@tests</span> <span class="p">[</span><span class="kn">unquote</span><span class="p">(</span><span class="n">function_name</span><span class="p">)</span> <span class="o">|</span> <span class="nv">@tests</span><span class="p">]</span>
+      <span class="k">def</span> <span class="kn">unquote</span><span class="p">(</span><span class="n">function_name</span><span class="p">)(),</span> <span class="k">do</span><span class="p">:</span> <span class="kn">unquote</span><span class="p">(</span><span class="n">block</span><span class="p">)</span>
+    <span class="k">end</span>
+  <span class="k">end</span>
+
+  <span class="c1"># Этот код вызывается непосредственно перед компиляцией целевого модуля,</span>
+  <span class="c1"># что даёт прекрасную возможность для внедрения функции `run/0`</span>
+  <span class="nv">@doc</span> <span class="no">false</span>
+  <span class="k">defmacro</span> <span class="n">__before_compile__</span><span class="p">(</span><span class="n">_env</span><span class="p">)</span> <span class="k">do</span>
+    <span class="kn">quote</span> <span class="k">do</span>
+      <span class="k">def</span> <span class="n">run</span> <span class="k">do</span>
+        <span class="no">Enum</span><span class="o">.</span><span class="n">each</span> <span class="nv">@tests</span><span class="p">,</span> <span class="k">fn</span> <span class="n">name</span> <span class="o">-&gt;</span>
+          <span class="no">IO</span><span class="o">.</span><span class="n">puts</span> <span class="sd">"</span><span class="s2">Running </span><span class="si">#{</span><span class="n">name</span><span class="si">}</span><span class="s2">"</span>
+          <span class="n">apply</span><span class="p">(</span><span class="bp">__MODULE__</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="p">[])</span>
+        <span class="k">end</span>
+      <span class="k">end</span>
+    <span class="k">end</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<p>Начав новую IEx-сессию, мы теперь можем определить и запустить наши тесты:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">iex</span><span class="o">&gt;</span> <span class="k">defmodule</span> <span class="no">MyTest</span> <span class="k">do</span>
+<span class="o">...&gt;</span>   <span class="kn">use</span> <span class="no">TestCase</span>
+<span class="o">...&gt;</span>
+<span class="o">...&gt;</span>   <span class="n">test</span> <span class="sd">"</span><span class="s2">hello"</span> <span class="k">do</span>
+<span class="o">...&gt;</span>     <span class="sd">"</span><span class="s2">hello"</span> <span class="o">=</span> <span class="sd">"</span><span class="s2">world"</span>
+<span class="o">...&gt;</span>   <span class="k">end</span>
+<span class="o">...&gt;</span> <span class="k">end</span>
+<span class="n">iex</span><span class="o">&gt;</span> <span class="no">MyTest</span><span class="o">.</span><span class="n">run</span>
+<span class="no">Running</span> <span class="n">test</span> <span class="n">hello</span>
+<span class="o">**</span> <span class="p">(</span><span class="no">MatchError</span><span class="p">)</span> <span class="n">no</span> <span class="n">match</span> <span class="n">of</span> <span class="n">right</span> <span class="n">hand</span> <span class="n">side</span> <span class="ss">value:</span> <span class="sd">"</span><span class="s2">world"</span>
+</code></pre></div></div>
+
+<p>Несмотря на то, что мы не затронули некоторые детали, это основная идея создания предметно-ориентированных модулей в Эликсире. Макросы позволяют нам возвращать маскирующие выражения, выполняющиеся в вызывающем их выражении, которые мы затем можем использовать для преобразования кода и хранения соответствующей информации в целевом модуле с помощью его атрибутов. И наконец, колбэки, такие как <code class="highlighter-rouge">@before_compile</code>, позволяют нам вводить код в модуль по завершению его определения.</p>
+
+<p>Помимо <code class="highlighter-rouge">@before_compile</code>, существуют в модулях и другие полезные атрибуты, например, такие как <code class="highlighter-rouge">@on_definition</code> и <code class="highlighter-rouge">@after_compile</code>, о которых вы можете почитать в документации для <a href="https://hexdocs.pm/elixir/Module.html">модуля <code class="highlighter-rouge">Module</code></a>. А также, вы можете найти полезную информацию о макросах и среде компиляции в документации для <a href="https://hexdocs.pm/elixir/Macro.html">модуля <code class="highlighter-rouge">Macro</code></a> и <a href="https://hexdocs.pm/elixir/Macro.Env.html">модуля <code class="highlighter-rouge">Macro.Env</code></a>.</p>
+
+    </div>
+</article>
+
+<nav class="docs_nav pure-g">
+    <div class="docs_nav__inner pure-u-1 pure-u-md-3-4">
+        <div class="pure-g">
+            <div class="docs_nav__column docs_nav__column--prev pure-u-1-3">
+                
+                    <a href="/docs/meta/macros.html" class="docs_nav__link pure-button">
+                        &larr;<span class="h-hidden_mobile"> Назад</span></a>
+                
+            </div>
+
+            <div class="docs_nav__column docs_nav__column--contents pure-u-1-3">
+                <a href="#docsContents" class="docs_nav__link docs_nav__link--contents pure-button">☰</a>
+            </div>
+
+            <div class="docs_nav__column docs_nav__column--next pure-u-1-3">
+                
+            </div>
+        </div>
+    </div>
+</nav>
+
+<div id="docsContents" class="modal modal--docs_contents modal--close_backdrop">
+    <div class="modal__content">
+        <a href="#close" title="Закрыть" class="modal__close">x</a>
+
+        <h2 class="modal__title">Содержание</h2>
+
+        
+        <h3 id="руководство-для-начинающих">Руководство для начинающих</h3>
+<ul>
+  <li><a href="/docs">Введение</a></li>
+  <li><a href="/docs/basic-types.html">Базовые типы</a></li>
+  <li><a href="/docs/basic-operators.html">Базовые операторы</a></li>
+  <li><a href="/docs/pattern-matching.html">Сопоставление с образцом</a></li>
+  <li><a href="/docs/case-cond-and-if.html">Конструкции ветвления</a></li>
+  <li><a href="/docs/binaries-strings-and-char-lists.html">Двоичные данные, строки и списки символов</a></li>
+  <li><a href="/docs/keywords-and-maps.html">Ключевые списки и словари</a></li>
+  <li><a href="/docs/modules-and-functions.html">Модули и функции</a></li>
+  <li><a href="/docs/recursion.html">Рекурсия</a></li>
+  <li><a href="/docs/enumerables-and-streams.html">Перечисления и потоки</a></li>
+  <li><a href="/docs/processes.html">Процессы</a></li>
+  <li><a href="/docs/io-and-the-file-system.html">Ввод/вывод и файловая система</a></li>
+  <li><a href="/docs/alias-require-and-import.html">Директивы <code class="highlighter-rouge">alias</code>, <code class="highlighter-rouge">require</code> и <code class="highlighter-rouge">import</code></a></li>
+  <li><a href="/docs/module-attributes.html">Атрибуты модулей</a></li>
+  <li><a href="/docs/structs.html">Структуры</a></li>
+  <li><a href="/docs/protocols.html">Протоколы</a></li>
+  <li><a href="/docs/comprehensions.html">Списковые выражения</a></li>
+  <li><a href="/docs/sigils.html">Сигилы</a></li>
+  <li><a href="/docs/try-catch-and-rescue.html">Конструкция <code class="highlighter-rouge">try</code>, <code class="highlighter-rouge">catch</code> и <code class="highlighter-rouge">rescue</code></a></li>
+  <li><a href="/docs/typespecs-and-behaviours.html">Спецификации типов и поведения</a></li>
+  <li><a href="/docs/erlang-libraries.html">Библиотеки Эрланга</a></li>
+  <li><a href="/docs/where-to-go-next.html">Куда двигаться дальше</a></li>
+</ul>
+
+<h3 id="микс-и-otp">Микс и <code class="highlighter-rouge">OTP</code></h3>
+<ul>
+  <li><a href="/docs/mix-otp/introduction-to-mix.html">Введение в Микс</a></li>
+  <li><a href="/docs/mix-otp/agent.html">Агент</a></li>
+  <li><a href="/docs/mix-otp/genserver.html">GenServer</a></li>
+  <li><a href="/docs/mix-otp/supervisor-and-application.html">Супервизор и приложение</a></li>
+  <li><a href="/docs/mix-otp/dynamic-supervisor.html">Динамический супервизор</a></li>
+  <li><a href="/docs/mix-otp/ets.html">ETS</a></li>
+  <li><a href="/docs/mix-otp/dependencies-and-umbrella-apps.html">Зависимости и зонтичные проекты</a></li>
+  <li><a href="/docs/mix-otp/task-and-gen-tcp.html">Модули <code class="highlighter-rouge">Task</code> и <code class="highlighter-rouge">:gen_tcp</code></a></li>
+  <li><a href="/docs/mix-otp/docs-tests-and-with.html">Доктесты, паттерны и оператор <code class="highlighter-rouge">with</code></a></li>
+  <li><a href="/docs/mix-otp/distributed-tasks-and-configuration.html">Распределенные задачи и конфигурация</a></li>
+</ul>
+
+<h3 id="метапрограммирование">Метапрограммирование</h3>
+<ul>
+  <li><a href="/docs/meta/quote-and-unquote.html">Конструкции <code class="highlighter-rouge">quote</code> и <code class="highlighter-rouge">unquote</code></a></li>
+  <li><a href="/docs/meta/macros.html">Макросы</a></li>
+  <li><a href="/docs/meta/domain-specific-languages.html">Предметно-ориентированные языки</a></li>
+</ul>
+
+    </div>
+</div>
+
+
+
+        <footer class="footer">
+    &copy; 2020
+    / Россия
+
+    <span class="pull-right">Любые мысли и вопросы пишите на <a href="mailto:elixir@wunsh.ru">elixir@wunsh.ru</a>.</span>
+</footer>
+
+        <div id="subscribeModal" class="modal">
+    <div class="modal__content">
+        <a href="#close" title="Close" class="modal__close">x</a>
+
+        <h2 class="modal__title">Ламповая рассылка про&nbsp;Эликсир</h2>
+
+        <p>Один-два раза в&nbsp;неделю присылаем тёплые письма об&nbsp;Эликсире: переводы самых интересных статей до&nbsp;их&nbsp;появления в&nbsp;открытом доступе, анонсы событий и&nbsp;вкусные бонусы.</p>
+
+        <form action="//wunsh.us14.list-manage.com/subscribe/post?u=c81ca3d4693f62db7f7f67c71&amp;id=a192e2dfef" method="post" id="mc-embedded-subscribe-form" name="mc-embedded-subscribe-form" class="pure-form h-tc validate" target="_blank" novalidate>
+            <input type="email" value="" name="EMAIL" class="modal__input pure-input-rounded large" id="mce-EMAIL" placeholder="Твоя почта" required>
+            <div style="position: absolute; left: -5000px;" aria-hidden="true"><input type="text" name="b_c81ca3d4693f62db7f7f67c71_a192e2dfef" tabindex="-1" value=""></div>
+
+            <input type="submit" value="Присоединиться" name="subscribe" onClick="yaCounter39773490.reachGoal('SUBSCRIBED'); return true" id="mc-embedded-subscribe" class="pure-button button-success large">
+        </form>
+
+        <p>Обязательно подтверди почту, перейдя по&nbsp;ссылке в&nbsp;письме, иначе мы&nbsp;не&nbsp;сможем делиться с&nbsp;тобой полезностями.</p>
+
+        <p>Надоедать точно не&nbsp;будем :)</p>
+    </div>
+</div>
+
+        <script src="/assets/js/vendors/zepto.min.js"></script>
+
+<script>
+    if ($(".post--docs").length) {
+        $(".footer").addClass("footer--docs")
+    }
+
+    $(".modal--close_backdrop").click(function(){
+        window.location.hash = "";
+    });
+</script>
+
+        <!-- Yandex.Metrika counter -->
+<script type="text/javascript">
+    (function (d, w, c) {
+        (w[c] = w[c] || []).push(function() {
+            try {
+                w.yaCounter39773490 = new Ya.Metrika({
+                    id:39773490,
+                    clickmap:true,
+                    trackLinks:true,
+                    accurateTrackBounce:true,
+                    webvisor:true,
+                    ut:"noindex"
+                });
+            } catch(e) { }
+        });
+
+        var n = d.getElementsByTagName("script")[0],
+            s = d.createElement("script"),
+            f = function () { n.parentNode.insertBefore(s, n); };
+        s.type = "text/javascript";
+        s.async = true;
+        s.src = "https://mc.yandex.ru/metrika/watch.js";
+
+        if (w.opera == "[object Opera]") {
+            d.addEventListener("DOMContentLoaded", f, false);
+        } else { f(); }
+    })(document, window, "yandex_metrika_callbacks");
+</script>
+<noscript><div><img src="https://mc.yandex.ru/watch/39773490?ut=noindex" style="position:absolute; left:-9999px;" alt="" /></div></noscript>
+<!-- /Yandex.Metrika counter -->
+
+      </div>
+    </div>
+  </body>
+</html>

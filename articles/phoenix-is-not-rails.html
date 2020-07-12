@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Чем Phoenix отличается от Rails |> Сообщество Elixir и Phoenix Framework</title>
+    <meta name="description" content="Несмотря на то, что Phoenix во многом использует философию Rails, эти фреймворки разительно отличаются в вопросах реализации.">
+
+    <link rel="alternate" type="application/rss+xml" title="Сообщество Elixir и Phoenix Framework" href="/feed.xml" />
+    <link rel="canonical" href="https://wunsh.ru/articles/phoenix-is-not-rails.html">
+
+    <style type="text/css">@import url("//fonts.googleapis.com/css?family=Source+Sans+Pro:400,700&subset=cyrillic");</style>
+    <link rel="stylesheet" href="/assets/css/vendors/pure.min.css">
+    <link rel="stylesheet" href="/assets/css/vendors/pure-grids-responsive.min.css">
+    <link rel="stylesheet" href="/assets/css/style.css?1594516983">
+
+    <link rel="shortcut icon" type="image/png" href="/assets/favicon.png" >
+</head>
+
+
+  <body>
+    <div class="wunsh pure-g">
+      
+
+
+
+
+<div class="menu pure-u-1 pure-u-md-1-4">
+  <div class="header">
+    <h2 class="header__title">
+      
+        <a href="https://wunsh.ru" class="header__title_link" title="На главную">Эликсир и&nbsp;Вунш</a>
+      
+    </h2>
+    <h3 class="header__tagline">Erlang + Ruby = &#10084;</h3>
+
+    <nav class="nav">
+      <ul class="nav_list">
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/elixir" class="nav_list__item_link pure-button">О языке</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/install/linux-asdf" class="nav_list__item_link pure-button">Установка</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/docs/" class="nav_list__item_link pure-button">Документация</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/guides" class="nav_list__item_link pure-button">Гайды</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/news" class="nav_list__item_link pure-button">Новости</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/articles" class="nav_list__item_link pure-button">Статьи</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/videos" class="nav_list__item_link pure-button">Видео</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/vacancies" class="nav_list__item_link pure-button">Вакансии</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/faq" class="nav_list__item_link pure-button">FAQ</a>
+            </li>
+          
+        
+      </ul>
+    </nav>
+
+    <a href="#subscribeModal" class="pure-button header__subscribe_link">Подписаться на рассылку</a>
+  </div>
+</div>
+
+
+      <div class="content pure-u-1 pure-u-md-3-4">
+        
+
+<article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+  <header class="post__header">
+    
+    <h1 class="post__title" itemprop="name headline">Чем Phoenix отличается от Rails</h1>
+
+    <div class="post__meta post_meta">
+      <ul class="meta_list">
+        <li class="meta_list__item">
+          
+          <span class="">
+            <small class="meta_list__item_name">Дата</small>
+            <time class="h-bold" datetime="2016-11-30T00:00:00+00:00" itemprop="datePublished">
+              
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+30 ноября 2016
+
+            </time>
+          </span>
+          
+
+          
+        </li>
+        
+        <li class="meta_list__item">
+            <span class="tag_cloud tags_cloud--inline h-no_margin">
+              <small class="meta_list__item_name">Теги</small> 
+
+
+<ul class="tags_cloud__list">
+  
+    <a href="/tags/#phoenix" class="tags_cloud__link tag tag--phoenix">phoenix</a>
+  
+    <a href="/tags/#rails" class="tags_cloud__link tag tag--rails">rails</a>
+  
+</ul>
+
+            </span>
+        </li>
+        
+        <li class="meta_list__item">
+          <span itemprop="author" itemscope itemtype="http://schema.org/Person">
+            <small class="meta_list__item_name">
+              
+                Перевод
+              
+            </small>
+            <span itemprop="name" class="h-bold">Надежда Нестерова</span>
+          </span>
+        </li>
+
+        <li class="meta_list__item">
+          
+            <div >
+              <small>Оригинал</small>
+              <strong>
+                &laquo;<a href="https://dockyard.com/blog/2015/11/18/phoenix-is-not-rails" style="text-transform: none; text-decoration: underline; color: #4b2e39;">Phoenix is not Rails</a>&raquo;
+              </strong>
+              <small>&copy;</small>
+              <strong>Chris McCord</strong>
+            </div>
+          
+        </li>
+      </ul>
+    </div>
+  </header>
+
+  <div class="post__content" itemprop="articleBody">
+    <p>На&nbsp;первый взгляд, Phoenix по&nbsp;некоторым признакам схож с&nbsp;Rails. Это побуждает разработчиков начинать его осваивать и&nbsp;сразу&nbsp;же создавать свои проекты для того, чтобы в&nbsp;совершенстве им&nbsp;овладеть. Для достижения желаемого результата потребуется немного больше, чем простое знание общих принципов этих двух фреймворков. Однако Ruby-разработчики, приворожённые внешним сходством Phoenix и&nbsp;Rails, с&nbsp;удовольствием погружаются в&nbsp;новую среду и&nbsp;делают это довольно успешно. К&nbsp;сожалению, это приводит к&nbsp;большим заблуждениям о&nbsp;единообразии Phoenix и&nbsp;Rails, а также&nbsp;к&nbsp;упущению значительных различий их&nbsp;идеологий.</p>
+<p>В&nbsp;сообществе Ruby принято считать, что есть Rails-разработчики, а&nbsp;есть Ruby-разработчики. С&nbsp;Phoenix такого раскола не&nbsp;предвидится. Хотя Phoenix, безусловно, имеет свой механизм абстракций, написание Phoenix-приложения&nbsp;&mdash; это написание приложения на&nbsp;Elixir. Тестирование Phoenix-кода&nbsp;&mdash; это тестирование Elixir-функций. В&nbsp;данной статье приводится обоснование этих принципов путём выявления сходств и&nbsp;различий фреймворков Phoenix и&nbsp;Rails.</p>
+<h2>Сходства</h2>
+<p>Большую часть поклонников Phoenix составляют Rails-разработчики, поэтому озвучим несколько основных особенностей, которые принёс с собой фреймворк Rails.</p>
+<ul>
+    <li>
+        <p>Нацеленность на&nbsp;высокие показатели скорости разработки как на&nbsp;клиентской, так и&nbsp;на&nbsp;серверной стороне.</p>
+    </li>
+    <li>
+        <p>Стандартная структура файлов и&nbsp;каталогов, хотя Phoenix попросту берёт за&nbsp;основу структуру Elixir-приложений.</p>
+    </li>
+    <li>
+        <p>MVC&nbsp;во главе с&nbsp;маршрутизатором (правда, Phoenix в&nbsp;своей архитектуре плавно сворачивает в&nbsp;сторону функциональной парадигмы).</p>
+    </li>
+    <li>
+        <p>Стандартный стек технологий с&nbsp;поддержкой реляционных баз данных (sqlite3&nbsp;в Rails, PostgreSQL в&nbsp;Phoenix).</p>
+    </li>
+    <li>
+        <p>Наилучшие подходы к&nbsp;безопасности прямо из&nbsp;коробки.</p>
+    </li>
+    <li>
+        <p>Встроенные механизмы для тестирования приложений.</p>
+    </li>
+</ul>
+<h2>Различия</h2>
+<p>Несмотря на&nbsp;некоторые сходства, фреймворки Phoenix и&nbsp;Rails существенно различаются. Далеко не&nbsp;каждая среда выполнения готова предложить подход, который реализует Phoenix. Он&nbsp;проявляется в&nbsp;особенностях структуры приложения, способности к&nbsp;восстановлению после отказа, отладке системы или установлении связи с&nbsp;клиентом. Принципы OTP и&nbsp;характерные черты Elixir объединяются в&nbsp;Phoenix таким образом, что Phoenix-приложение является всего лишь частью более мощной инфраструктуры. Такое расхождение с&nbsp;Rails накладывает свой отпечаток на&nbsp;стек.</p>
+<h3>Приложения</h3>
+<p>Начнём с&nbsp;того, что понятия &laquo;Phoenix-приложение&raquo; не&nbsp;существует. Проекты Phoenix прежде всего Elixir-приложения, которые строятся на&nbsp;Phoenix для обеспечения дополнительной функциональности. Это означает, что существует только один путь для создания, запуска и&nbsp;развёртывания приложения. И&nbsp;это путь Elixir. Итак, почему&nbsp;же Phoenix выигрывает?</p>
+<h4>Факт &#8470;&nbsp;1. Никаких синглтонов</h4>
+<p>В&nbsp;Rails всё реализуется в&nbsp;виде единственного приложения, получить доступ к&nbsp;которому можно с&nbsp;помощью <code class="elixir">Rails.application</code>. Rails командует парадом: запускает приложение, создаёт конфигурации и&nbsp;даже выполняет задачи из&nbsp;коммандной строки. Данному подходу свойственно такое ограничение, как невозможность одновременного запуска двух Rails-приложений. Если&nbsp;же в&nbsp;этом существует необходимость, придётся каждое из&nbsp;них превратить в&nbsp;отдельный Engine и&nbsp;научиться с&nbsp;ними работать.</p>
+<p>Всё глобальное чуждо для Phoenix. Никаких монолитов. Созданное Phoenix-приложение включает в&nbsp;себя одну точку входа (Endpoint), один маршрутизатор (Router) и&nbsp;один сервер PubSub. Но&nbsp;при желании этот список можно расширить. Так как глобального состояния или глобального сервера не&nbsp;существует, приложение можно разбивать на&nbsp;части по&nbsp;мере роста его инфраструктуры.</p>
+<h4>Факт &#8470;&nbsp;2. Запуск и&nbsp;остановка</h4>
+<p>С&nbsp;точки зрения Elixir, проект представляет собой совокупность небольших компонуемых между собой приложений, которые запускаются и&nbsp;останавливаются как единое целое. Процесс запуска обычно протекает следующим образом (в&nbsp;качестве примера приведён Phoenix):</p>
+<ol>
+    <li>
+        <p>В&nbsp;каждом приложении имеется спецификация, в&nbsp;которой могут быть указаны модули, вызываемые после инициализации приложения:</p>
+        <figure class="highlight"><pre><code class="language-elixir" data-lang="elixir"><span class="k">def</span> <span class="n">application</span> <span class="k">do</span>
+<span class="p">[</span><span class="ss">mod:</span> <span class="p">{</span><span class="no">Phoenix</span><span class="p">,</span> <span class="p">[]},</span>
+ <span class="ss">applications:</span> <span class="p">[</span><span class="ss">:plug</span><span class="p">,</span> <span class="ss">:poison</span><span class="p">,</span> <span class="ss">:logger</span><span class="p">,</span> <span class="ss">:eex</span><span class="p">],</span>
+<span class="o">...</span><span class="p">]</span>
+<span class="k">end</span></code></pre></figure>
+    </li>
+    <li>
+        <p>В&nbsp;указанных модулях вызывается функция <code class="elixir">start/2</code>:</p>
+        <figure class="highlight"><pre><code class="language-elixir" data-lang="elixir"><span class="k">defmodule</span> <span class="no">Phoenix</span> <span class="k">do</span>
+  <span class="k">def</span> <span class="n">start</span><span class="p">(</span><span class="n">_type</span><span class="p">,</span> <span class="n">_args</span><span class="p">)</span> <span class="k">do</span>
+    <span class="o">...</span>
+    <span class="no">Phoenix</span><span class="o">.</span><span class="no">Supervisor</span><span class="o">.</span><span class="n">start_link</span>
+  <span class="k">end</span>
+<span class="k">end</span></code></pre></figure>
+    </li>
+    <li>
+        <p>Функция <code class="elixir">start/2</code> возвращает идентификатор контролируемого супервизором процесса (<code class="elixir">Phoenix.Supervisor.start_link</code> в&nbsp;примере выше).</p>
+    </li>
+</ol>
+<p>Нечто похожее происходит и&nbsp;при остановке приложения. Независимо от&nbsp;того, используете вы&nbsp;Phoenix или нет, каждое приложение содержит свой собственный механизм старта/остановки.</p>
+<p>Сложный и&nbsp;требующий использования расширений процесс инициализации Rails-приложения послужит ярким контрастом единому последовательному набору действий в&nbsp;Phoenix. Для версии Rails&nbsp;4.2.2:</p>
+<figure class="highlight"><pre><code class="language-elixir" data-lang="elixir"><span class="err">$</span> <span class="n">rails</span> <span class="n">c</span>
+<span class="no">Loading</span> <span class="n">development</span> <span class="n">environment</span> <span class="p">(</span><span class="no">Rails</span> <span class="m">4.2</span><span class="o">.</span><span class="m">2</span><span class="p">)</span>
+<span class="n">irb</span><span class="p">(</span><span class="n">main</span><span class="p">):</span><span class="m">001</span><span class="p">:</span><span class="m">0</span><span class="o">&gt;</span> <span class="no">Rails</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">initializers</span><span class="o">.</span><span class="n">length</span>
+<span class="o">=&gt;</span> <span class="m">74</span></code></pre></figure>
+<p>Получаем целых 74&nbsp;фрагмента кода (блоков Ruby), беспорядочно разбросанных по&nbsp;многочисленным файлам! Крайне важно контролировать логику инициализации, чтобы знать, что конкретно запускается в&nbsp;приложении, и&nbsp;обеспечивать быструю загрузку.</p>
+<h4>Факт &#8470;&nbsp;3. Мониторинг и&nbsp;интроспекция</h4>
+<p>Разделяя приложение на&nbsp;несколько более мелких, вы&nbsp;обеспечиваете управление, отказоустойчивость и&nbsp;интроспекцию запущенной системы. При помощи инструмента Observer можно без лишних усилий представить работу приложений по&nbsp;отдельности или в&nbsp;качестве единого целого:</p>
+<img src="https://i.imgur.com/SehijaI.png" alt="Erlang Observer" class="article-image">
+<p>Главное преимущество в&nbsp;том, что проект запускается как единое приложение, при этом его можно разбить на&nbsp;несколько более мелких приложений, что актуально как для запуска на&nbsp;одной ноде, так и&nbsp;для сервис-ориентируемой архитектуры. Среда выполнения не&nbsp;требует от&nbsp;вас никаких вложений. Она построена на&nbsp;проверенных и&nbsp;надёжных подходах. Собственно, наглядный пример этого можно увидеть в&nbsp;одной из&nbsp;глав книги Programming Phoenix.</p>
+<h3>Жизненный цикл запроса</h3>
+<p>Phoenix показывает отличную производительность &laquo;из&nbsp;коробки&raquo;, что можно легко доказать, проведя бенчмарки. Жизненный цикл запроса в&nbsp;корне отличается от&nbsp;цикла, реализованного в&nbsp;Rails при помощи Rack.</p>
+<h4>Факт &#8470;&nbsp;4. Читабельный код</h4>
+<p>Явное лучше неявного. Исключений из&nbsp;этого правила практически нет. Phoenix в&nbsp;большинстве своём поддерживает концепцию &laquo;явного&raquo;. К&nbsp;примеру, в&nbsp;процессе написания приложения на&nbsp;Phoenix, можно просмотреть все плаги, через которые проходит запрос, в&nbsp;файле <code class="elixir">lib/my_app/endpoint.ex</code>. Phoenix представляет все плаги в&nbsp;явном виде, в&nbsp;то&nbsp;время как Rais выделяет Rack middlewares в&nbsp;отдельную часть приложения. Таким образом, просмотрев плаги, можно очень быстро составить себе представление о&nbsp;жизненном цикле запроса.</p>
+<figure class="highlight"><pre><code class="language-elixir" data-lang="elixir"><span class="k">defmodule</span> <span class="no">MyApp</span><span class="o">.</span><span class="no">Endpoint</span> <span class="k">do</span>
+  <span class="kn">use</span> <span class="no">Phoenix</span><span class="o">.</span><span class="no">Endpoint</span><span class="p">,</span> <span class="ss">otp_app:</span> <span class="ss">:my_app</span>
+
+  <span class="n">socket</span> <span class="sd">"</span><span class="s2">/socket"</span><span class="p">,</span> <span class="no">MyApp</span><span class="o">.</span><span class="no">UserSocket</span>
+  <span class="n">plug</span> <span class="no">Plug</span><span class="o">.</span><span class="no">Static</span><span class="p">,</span> <span class="ss">at:</span> <span class="sd">"</span><span class="s2">/"</span><span class="p">,</span> <span class="ss">from:</span> <span class="ss">:my_app</span><span class="p">,</span> <span class="ss">gzip:</span> <span class="no">false</span><span class="p">,</span> <span class="ss">only:</span> <span class="sx">~w(css images js)</span>
+  <span class="n">plug</span> <span class="no">Plug</span><span class="o">.</span><span class="no">RequestId</span>
+  <span class="n">plug</span> <span class="no">Plug</span><span class="o">.</span><span class="no">Logger</span>
+  <span class="n">plug</span> <span class="no">Plug</span><span class="o">.</span><span class="no">Parsers</span><span class="p">,</span> <span class="ss">parsers:</span> <span class="p">[</span><span class="ss">:urlencoded</span><span class="p">,</span> <span class="ss">:multipart</span><span class="p">,</span> <span class="ss">:json</span><span class="p">],</span> <span class="ss">pass:</span> <span class="p">[</span><span class="sd">"</span><span class="s2">*/*"</span><span class="p">]</span>
+  <span class="n">plug</span> <span class="no">Plug</span><span class="o">.</span><span class="no">MethodOverride</span>
+  <span class="n">plug</span> <span class="no">Plug</span><span class="o">.</span><span class="no">Head</span>
+  <span class="n">plug</span> <span class="no">Plug</span><span class="o">.</span><span class="no">Session</span><span class="p">,</span> <span class="ss">store:</span> <span class="ss">:cookie</span>
+  <span class="n">plug</span> <span class="no">MyApp</span><span class="o">.</span><span class="no">Router</span>
+<span class="k">end</span></code></pre></figure>
+<p>Запрос берёт своё начало в&nbsp;точке входа, пробегает через &laquo;основной middleware&raquo;, представленный в&nbsp;явном виде в&nbsp;форме плага, а&nbsp;затем передаётся в&nbsp;маршрутизатор, который сам по&nbsp;себе также является плагом. В&nbsp;маршрутизаторе запрос проходит ещё одну пачку плагов, после чего направляется в&nbsp;контроллер, который (бинго!) тоже представляет собой плаг. Единственная абстракция, обхватывающая все уровни стека, позволяет представить жизненный цикл запроса настолько явно, насколько это вообще возможно. Это также облегчает интеграцию с&nbsp;пакетами от&nbsp;сторонних разработчиков.</p>
+<p>Проведём сравнение двух схожих контроллеров, чтобы увидеть, каким образом функциональный подход с&nbsp;плагами делает код Phoenix более читабельным:</p>
+<figure class="highlight"><pre><code class="language-elixir" data-lang="elixir"><span class="c1"># controller.rb</span>
+
+<span class="n">before_action</span> <span class="ss">:find_user</span>
+
+<span class="k">def</span> <span class="n">show</span> <span class="k">do</span>
+  <span class="nv">@post</span> <span class="o">=</span> <span class="nv">@user</span><span class="o">.</span><span class="n">posts</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="n">params</span><span class="p">[</span><span class="ss">:id</span><span class="p">])</span>
+<span class="k">end</span>
+
+<span class="k">def</span> <span class="n">find_user</span>
+  <span class="nv">@user</span> <span class="o">=</span> <span class="no">User</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="n">params</span><span class="p">[</span><span class="ss">:user_id</span><span class="p">])</span>
+<span class="k">end</span></code></pre></figure>
+
+<figure class="highlight"><pre><code class="language-elixir" data-lang="elixir"><span class="c1">#controller.ex</span>
+
+<span class="n">plug</span> <span class="ss">:find_user</span>
+
+<span class="k">def</span> <span class="n">show</span><span class="p">(</span><span class="n">conn</span><span class="p">,</span> <span class="p">%{</span><span class="sd">"</span><span class="s2">id"</span> <span class="o">=&gt;</span> <span class="n">id</span><span class="p">})</span> <span class="k">do</span>
+  <span class="n">post</span> <span class="o">=</span> <span class="n">conn</span><span class="o">.</span><span class="n">assigns</span><span class="o">.</span><span class="n">user</span> <span class="o">|&gt;</span> <span class="n">assoc</span><span class="p">(</span><span class="ss">:posts</span><span class="p">)</span> <span class="o">|&gt;</span> <span class="no">Repo</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">id</span><span class="p">)</span>
+  <span class="n">render</span> <span class="n">conn</span><span class="p">,</span> <span class="sd">"</span><span class="s2">show.html"</span><span class="p">,</span> <span class="ss">post:</span> <span class="n">post</span>
+<span class="k">end</span>
+
+<span class="k">defp</span> <span class="n">find_user</span><span class="p">(</span><span class="n">conn</span><span class="p">,</span> <span class="n">_</span><span class="p">)</span> <span class="k">do</span>
+  <span class="n">assign</span><span class="p">(</span><span class="n">conn</span><span class="p">,</span> <span class="ss">:user</span><span class="p">,</span> <span class="no">Repo</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="no">User</span><span class="p">,</span> <span class="n">conn</span><span class="o">.</span><span class="n">params</span><span class="p">[</span><span class="sd">"</span><span class="s2">user_id"</span><span class="p">]))</span>
+<span class="k">end</span></code></pre></figure>
+<p>Опытным Rails-разработчикам известно, что <code class="elixir">show</code> неявно вызывает <code class="elixir">render "show.html"</code>. Даже если&nbsp;бы это делалось явно, немногие Rails-разработчики обращают внимание на&nbsp;то, что все объявленные в&nbsp;экземпляре контроллера переменные копируются в&nbsp;экземпляр представления, что только усложняет процесс программирования. Соглашения важнее конфигураций&nbsp;&mdash; это, конечно, хороший принцип, но&nbsp;есть некая грань, где неявная реализация сводит на&nbsp;нет ясность кода. Phoenix обеспечивает идеальное соотношение ясности кода и&nbsp;удобства использования API. Кроме того, программистам с&nbsp;объектно-ориентированным складом ума нельзя забывать о&nbsp;хэше параметров <code class="elixir">params</code>, объектах <code class="elixir">request</code> и&nbsp;других переменных, заданных неявно в&nbsp;фильтрах <code class="elixir">before_action</code>. В&nbsp;Phoenix всё это задаётся явным образом. Структура <code class="elixir">conn</code> выступает в&nbsp;качестве структуры данных и&nbsp;средства связи с&nbsp;сервером. Данные передаются через плаги&nbsp;&mdash; объединённые в&nbsp;цепочку функции, которые проводят некие трансформации над запросом&nbsp;и, если нужно, возвращают ответ.</p>
+<h4>Факт &#8470;&nbsp;5. Лёгкое тестирование</h4>
+<p>Функциональное программирование и&nbsp;плаги позволяют проводить изолированное или интеграционное тестирование контроллеров простой передачей структуры <code class="elixir">conn</code> в&nbsp;цепочку плагов и&nbsp;анализом полученных результатов. Кроме того, действия контроллера в&nbsp;Phoenix&nbsp;&mdash; всего лишь функции, не&nbsp;имеющие неявно заданных переменных. Необходимо изолированно протестировать контроллер? Просто вызываем функцию:</p>
+<figure class="highlight"><pre><code class="language-elixir" data-lang="elixir"><span class="n">test</span> <span class="sd">"</span><span class="s2">sends 404 when user is not found"</span> <span class="k">do</span>
+  <span class="n">conn</span> <span class="o">=</span> <span class="no">MyController</span><span class="o">.</span><span class="n">show</span><span class="p">(</span><span class="n">conn</span><span class="p">(),</span> <span class="p">%{</span><span class="sd">"</span><span class="s2">id"</span> <span class="o">=&gt;</span> <span class="sd">"</span><span class="s2">not-found"</span><span class="p">})</span>
+  <span class="n">assert</span> <span class="n">conn</span><span class="o">.</span><span class="n">status</span> <span class="o">==</span> <span class="m">404</span>
+<span class="k">end</span></code></pre></figure>
+<p>Благодаря функциональному программированию, построение экземпляров контроллеров проходит без каких-либо трудностей. А&nbsp;если нужно провести интеграционное тестирование через точку входа, то&nbsp;фреймворку Phoenix достаточно лишь вызвать цепочку функций:</p>
+<figure class="highlight"><pre><code class="language-elixir" data-lang="elixir"><span class="n">test</span> <span class="sd">"</span><span class="s2">shows users"</span> <span class="k">do</span>
+  <span class="n">conn</span> <span class="o">=</span> <span class="n">get</span> <span class="n">conn</span><span class="p">(),</span> <span class="sd">"</span><span class="s2">/users/123"</span>
+  <span class="n">assert</span> <span class="p">%{</span><span class="ss">id:</span> <span class="sd">"</span><span class="s2">123"</span><span class="p">}</span> <span class="o">=</span> <span class="n">json_response</span><span class="p">(</span><span class="n">conn</span><span class="p">,</span> <span class="ss">:ok</span><span class="p">)</span>
+<span class="k">end</span></code></pre></figure>
+<p>Представления в&nbsp;Phoenix устроены аналогичным образом: они состоят из&nbsp;функций, среди которых нет каких-либо скрытых данных.</p>
+<h4>Факт &#8470;&nbsp;6. Удобно делиться кодом</h4>
+<p>Метод, написанный для Rails-контроллера не&nbsp;получится так просто перенести в&nbsp;Rack, потому как он&nbsp;зависит от&nbsp;множества внутренних переменных контроллера.</p>
+<p>Так как плаги&nbsp;&mdash; это всего лишь функции, то&nbsp;нам известны их&nbsp;входные и&nbsp;выходные параметры. Для всего стека технологий HTTP, будь&nbsp;то точка входа, маршрутизатор или контроллер, существует единое абстрактное представление. Покажем на&nbsp;примере, как использовать плаг <code class="elixir">AdminAuthentication</code> для всех запросов <code class="elixir">"/admin"</code>, а&nbsp;также для отдельного контроллера <code class="elixir">DashboardController</code>. Плаг на&nbsp;уровнях абстракции маршрутизатора и&nbsp;контроллера будет одним и&nbsp;тем&nbsp;же:</p>
+<figure class="highlight"><pre><code class="language-elixir" data-lang="elixir"><span class="k">defmodule</span> <span class="no">MyApp</span><span class="o">.</span><span class="no">Router</span> <span class="k">do</span>
+  <span class="n">pipeline</span> <span class="ss">:browser</span> <span class="k">do</span>
+    <span class="n">plug</span> <span class="ss">:fetch_session</span>
+    <span class="o">...</span>
+    <span class="n">plug</span> <span class="ss">:protect_from_forgery</span>
+  <span class="k">end</span>
+
+  <span class="n">pipeline</span> <span class="ss">:admin</span> <span class="k">do</span>
+    <span class="n">plug</span> <span class="no">AdminAuthentication</span>
+  <span class="k">end</span>
+
+  <span class="n">scope</span> <span class="sd">"</span><span class="s2">/"</span> <span class="k">do</span>
+    <span class="n">get</span> <span class="sd">"</span><span class="s2">/dashboard"</span><span class="p">,</span> <span class="no">DashboardController</span>
+  <span class="k">end</span>
+
+  <span class="n">scope</span> <span class="sd">"</span><span class="s2">/admin"</span> <span class="k">do</span>
+    <span class="n">pipe_through</span> <span class="p">[</span><span class="ss">:browser</span><span class="p">,</span> <span class="ss">:admin</span><span class="p">]</span> <span class="c1"># plugged for all routes in this scope</span>
+
+    <span class="n">resources</span> <span class="sd">"</span><span class="s2">/orders"</span><span class="p">,</span> <span class="no">OrderController</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+
+<span class="k">defmodule</span> <span class="no">MyApp</span><span class="o">.</span><span class="no">DashboardController</span> <span class="k">do</span>
+  <span class="n">plug</span> <span class="no">AdminAuthentication</span> <span class="c1"># plugged only on this controller</span>
+
+  <span class="k">def</span> <span class="n">show</span><span class="p">(</span><span class="n">conn</span><span class="p">,</span> <span class="n">_params</span><span class="p">)</span> <span class="k">do</span>
+    <span class="n">render</span> <span class="n">conn</span><span class="p">,</span> <span class="sd">"</span><span class="s2">show.html"</span>
+  <span class="k">end</span>
+<span class="k">end</span></code></pre></figure>
+<p>Так как плаги используются на&nbsp;всех уровнях стека, то&nbsp;можно подключить плаг <code class="elixir">AdminAuthentication</code> в&nbsp;маршрутизатор и&nbsp;контроллер для осуществления детального контроля доступа. В&nbsp;Rails для этого можно наследоваться от&nbsp;<code class="elixir">AdminController</code>, но&nbsp;тогда теряется прозрачность применяемых преобразований объекта запроса. Придётся прошерстить дерево наследования для того, чтобы выяснить нужные связи и&nbsp;отношения. В&nbsp;Phoenix цепочки функций маршрутизатора позаботятся о&nbsp;чётких и&nbsp;лаконичных запросах.</p>
+<h3>Каналы</h3>
+<p>Phoenix изначально создавался для укрощения современных, высоконагруженных, взаимодействующих в&nbsp;реальном времени веб-систем. Каналы предоставляют приложению независимые от&nbsp;протокола передачи данных соединения, работающие в&nbsp;режиме реального времени, которые могут обеспечить обслуживание нескольких миллионов клиентов на&nbsp;одном сервере. В&nbsp;Rails&nbsp;же функционал реального времени всегда отходил на&nbsp;второй план.</p>
+<img src="https://i.imgur.com/7CHc1Lh.png" alt="Phoenix vs Rails channels" class="article-image">
+<p> </p>
+<h4>Факт &#8470;&nbsp;7. Веб не&nbsp;стоит на&nbsp;месте</h4>
+<p>Каналы Phoenix направлены на&nbsp;веб за&nbsp;пределами браузера. Уже сейчас веб включает в&nbsp;себя <em>соединённые друг с&nbsp;другом устройства</em> (телефоны, часы, умная электроника), а&nbsp;не&nbsp;ограничивается лишь браузером. Для этого нужен фреймворк, который смог&nbsp;бы развиваться, подстраиваясь под новые изменения и&nbsp;протоколы. Именно поэтому каналы являются независимыми от&nbsp;протокола передачи данных и&nbsp;имеют родные клиенты под платформы iOS, Android и&nbsp;Windows. Всё это можно увидеть в&nbsp;действии, запустив чат-приложение Phoenix в&nbsp;браузере, на&nbsp;iPhone и&nbsp;Apple Watch.</p>
+<h4>Факт &#8470;&nbsp;8. Меньше зависимостей&nbsp;&mdash; больше производительности</h4>
+<p>Относительно недавняя разработка для внедрения функционала реального времени в&nbsp;Rails&nbsp;&mdash; Action Cable&nbsp;&mdash; привносит в&nbsp;приложение целый список зависимостей: Faye, Celluloid, EventMachine, Redis и&nbsp;другие. Так как Phoenix запускается на&nbsp;виртуальной машине Erlang, он&nbsp;обладает встроенным функционалом реального времени среды выполнения. Поддержка средой выполнения распределенных вычислений позволяет фреймворку Phoenix для использования PubSub обойтись без Redis или подобных зависимостей.</p>
+<h3>Именование</h3>
+<p>Phoenix не&nbsp;требует строгого соблюдения соглашения об&nbsp;именовании, как это делает Rails.</p>
+<h4>Факт &#8470;&nbsp;9. Лёгкость в&nbsp;изучении</h4>
+<p>В&nbsp;Phoenix имена модулей не&nbsp;привязываются к&nbsp;имени файла. В&nbsp;Rails необходимо поместить контроллер <code class="elixir">UsersController</code> в&nbsp;файл под названием <code class="elixir">users_controller.rb</code>. Да, в&nbsp;таких соглашениях нет ничего плохого, но&nbsp;с&nbsp;Phoenix можно просто о&nbsp;них забыть. Мы&nbsp;отдаём свой голос за&nbsp;адекватные настройки по&nbsp;умолчанию, достаточно гибкие по&nbsp;отношению к&nbsp;индивидуальным требованиям. Присвоение имён вызывает большие трудности у&nbsp;тех, кто сначала изучил Rails, а&nbsp;потом попытался написать приложение на&nbsp;Ruby. В&nbsp;Rails для получения из&nbsp;каталога приложения всех файлов с&nbsp;именем, соответствующим соглашению о&nbsp;присвоении имён классу, используется метод <code class="elixir">const_missing</code>. В&nbsp;связи с&nbsp;этим для разработчиков, желающих выйти за&nbsp;пределы Rails, процесс осуществления запроса файлов в&nbsp;обычном Ruby-приложении окутан тайной.</p>
+<p>В&nbsp;Phoenix включена директория &laquo;web&raquo;, куда помещаются контроллеры, представления и&nbsp;т.&nbsp;п., но&nbsp;существует она только ради перезагрузки кодовой базы, что воплощает в&nbsp;жизнь концепцию разработки через непрерывное обновление страницы.</p>
+<p>Phoenix не&nbsp;различает единственного и&nbsp;множественного числа имён. Правила формирования имён в&nbsp;Rails ставят как начинающих, так и&nbsp;продвинутых разработчиков в&nbsp;тупик: модели называют только в&nbsp;единственном числе, контроллеры&nbsp;&mdash; во&nbsp;множественном, URL-хелперы стерпят и&nbsp;то, и&nbsp;другое, и&nbsp;так далее. В&nbsp;Phoenix, как и&nbsp;в&nbsp;Elixir, для имён используется только единственное число. Можно называть таблицы и&nbsp;пути маршрутов во&nbsp;множественном числе, но&nbsp;они задаются явно в&nbsp;рамках системы.</p>
+<h3>Ассеты</h3>
+<p>Для работы со&nbsp;статическими ассетами в&nbsp;Phoenix по&nbsp;умолчанию используется инструмент brunch, но&nbsp;также существует возможность подключить свой собственный JavaScript-сборщик вместо его написания специально под фреймворк (как это происходит в&nbsp;Rails в&nbsp;случае с&nbsp;его Asset Pipeline). Phoenix также более эффективно использует канальный уровень для предоставления возможности перезагрзуки изменённого кода прямо из&nbsp;коробки.</p>
+<h4>Факт &#8470;&nbsp;10. Будущее за&nbsp;ES6/ES2015</h4>
+<p>Phoenix содействует развитию ES6/ES2015 вместо CoffeeScript, по&nbsp;умолчанию поддерживая в&nbsp;новых проектах ES2015. CoffeeScript уже выполнил свою главную цель по&nbsp;продвижению индустрии вперёд. ES2015 и&nbsp;его первоклассные транспиляторы&nbsp;&mdash; это следующий шаг.</p>
+<h4>Факт &#8470;&nbsp;11. Разработка через непрерывное тестирование</h4>
+<p>Phoenix способен обеспечивать возможность непрерывной перезагрузки кода при внесении изменений. Файлы с&nbsp;расширениями <code>.js</code> или <code>.css</code> автоматически перезагружаются в&nbsp;браузере после внесения в&nbsp;них изменений. Однажды попробовав эту опцию, вы&nbsp;вряд&nbsp;ли сможете без неё обойтись.</p>
+<h2>Заключение</h2>
+<p>Независимо от&nbsp;того, каким языком вы&nbsp;владеете, вы&nbsp;ещё увидите, как Phoenix, основанный на&nbsp;лучших принципах своих предшественников, вместе с&nbsp;Elixir пробьют себе путь к&nbsp;пьедесталу современной веб-разработки.</p>
+
+  </div>
+
+  <!-- uSocial -->
+  <div class="post__share_block share_block">
+    <script async src="https://usocial.pro/usocial/usocial.js?v=6.1.4" data-script="usocial" charset="utf-8"></script>
+    <div class="uSocial-Share" data-pid="2fd19544e551bce292425ee8adaa31be" data-type="share" data-options="round,style2,default,absolute,horizontal,size32,counter1,counter-before,upArrow-right,nomobile" data-social="telegram,fb,vk,gPlus,twi,bookmarks"></div>
+  </div>
+  <!-- /uSocial -->
+</article>
+
+
+        <footer class="footer">
+    &copy; 2020
+    / Россия
+
+    <span class="pull-right">Любые мысли и вопросы пишите на <a href="mailto:elixir@wunsh.ru">elixir@wunsh.ru</a>.</span>
+</footer>
+
+        <div id="subscribeModal" class="modal">
+    <div class="modal__content">
+        <a href="#close" title="Close" class="modal__close">x</a>
+
+        <h2 class="modal__title">Ламповая рассылка про&nbsp;Эликсир</h2>
+
+        <p>Один-два раза в&nbsp;неделю присылаем тёплые письма об&nbsp;Эликсире: переводы самых интересных статей до&nbsp;их&nbsp;появления в&nbsp;открытом доступе, анонсы событий и&nbsp;вкусные бонусы.</p>
+
+        <form action="//wunsh.us14.list-manage.com/subscribe/post?u=c81ca3d4693f62db7f7f67c71&amp;id=a192e2dfef" method="post" id="mc-embedded-subscribe-form" name="mc-embedded-subscribe-form" class="pure-form h-tc validate" target="_blank" novalidate>
+            <input type="email" value="" name="EMAIL" class="modal__input pure-input-rounded large" id="mce-EMAIL" placeholder="Твоя почта" required>
+            <div style="position: absolute; left: -5000px;" aria-hidden="true"><input type="text" name="b_c81ca3d4693f62db7f7f67c71_a192e2dfef" tabindex="-1" value=""></div>
+
+            <input type="submit" value="Присоединиться" name="subscribe" onClick="yaCounter39773490.reachGoal('SUBSCRIBED'); return true" id="mc-embedded-subscribe" class="pure-button button-success large">
+        </form>
+
+        <p>Обязательно подтверди почту, перейдя по&nbsp;ссылке в&nbsp;письме, иначе мы&nbsp;не&nbsp;сможем делиться с&nbsp;тобой полезностями.</p>
+
+        <p>Надоедать точно не&nbsp;будем :)</p>
+    </div>
+</div>
+
+        <script src="/assets/js/vendors/zepto.min.js"></script>
+
+<script>
+    if ($(".post--docs").length) {
+        $(".footer").addClass("footer--docs")
+    }
+
+    $(".modal--close_backdrop").click(function(){
+        window.location.hash = "";
+    });
+</script>
+
+        <!-- Yandex.Metrika counter -->
+<script type="text/javascript">
+    (function (d, w, c) {
+        (w[c] = w[c] || []).push(function() {
+            try {
+                w.yaCounter39773490 = new Ya.Metrika({
+                    id:39773490,
+                    clickmap:true,
+                    trackLinks:true,
+                    accurateTrackBounce:true,
+                    webvisor:true,
+                    ut:"noindex"
+                });
+            } catch(e) { }
+        });
+
+        var n = d.getElementsByTagName("script")[0],
+            s = d.createElement("script"),
+            f = function () { n.parentNode.insertBefore(s, n); };
+        s.type = "text/javascript";
+        s.async = true;
+        s.src = "https://mc.yandex.ru/metrika/watch.js";
+
+        if (w.opera == "[object Opera]") {
+            d.addEventListener("DOMContentLoaded", f, false);
+        } else { f(); }
+    })(document, window, "yandex_metrika_callbacks");
+</script>
+<noscript><div><img src="https://mc.yandex.ru/watch/39773490?ut=noindex" style="position:absolute; left:-9999px;" alt="" /></div></noscript>
+<!-- /Yandex.Metrika counter -->
+
+      </div>
+    </div>
+  </body>
+</html>

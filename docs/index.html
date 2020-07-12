@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Документация Elixir |> Сообщество Elixir и Phoenix Framework</title>
+    <meta name="description" content="Русскоязычное сообщество Elixir и Phoenix Framework
+">
+
+    <link rel="alternate" type="application/rss+xml" title="Сообщество Elixir и Phoenix Framework" href="/feed.xml" />
+    <link rel="canonical" href="https://wunsh.ru/docs/">
+
+    <style type="text/css">@import url("//fonts.googleapis.com/css?family=Source+Sans+Pro:400,700&subset=cyrillic");</style>
+    <link rel="stylesheet" href="/assets/css/vendors/pure.min.css">
+    <link rel="stylesheet" href="/assets/css/vendors/pure-grids-responsive.min.css">
+    <link rel="stylesheet" href="/assets/css/style.css?1594516983">
+
+    <link rel="shortcut icon" type="image/png" href="/assets/favicon.png" >
+</head>
+
+
+  <body>
+    <div class="wunsh pure-g">
+      
+
+
+
+
+<div class="menu pure-u-1 pure-u-md-1-4">
+  <div class="header">
+    <h2 class="header__title">
+      
+        <a href="https://wunsh.ru" class="header__title_link" title="На главную">Эликсир и&nbsp;Вунш</a>
+      
+    </h2>
+    <h3 class="header__tagline">Erlang + Ruby = &#10084;</h3>
+
+    <nav class="nav">
+      <ul class="nav_list">
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/elixir" class="nav_list__item_link pure-button">О языке</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/install/linux-asdf" class="nav_list__item_link pure-button">Установка</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/docs/" class="nav_list__item_link pure-button">Документация</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/guides" class="nav_list__item_link pure-button">Гайды</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/news" class="nav_list__item_link pure-button">Новости</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/articles" class="nav_list__item_link pure-button">Статьи</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/videos" class="nav_list__item_link pure-button">Видео</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/vacancies" class="nav_list__item_link pure-button">Вакансии</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/faq" class="nav_list__item_link pure-button">FAQ</a>
+            </li>
+          
+        
+      </ul>
+    </nav>
+
+    <a href="#subscribeModal" class="pure-button header__subscribe_link">Подписаться на рассылку</a>
+  </div>
+</div>
+
+
+      <div class="content pure-u-1 pure-u-md-3-4">
+        <article class="post post--docs" itemscope itemtype="http://schema.org/BlogPosting">
+    <header class="post__header">
+        <h1 class="post__title" itemprop="name headline">
+            <p>Документация Elixir</p>
+
+        </h1>
+    </header>
+
+    <div class="post__content" itemprop="articleBody">
+        <p>Добро пожаловать!</p>
+
+<p>В этом руководстве мы научим вас основам Эликсира, синтаксису языка, расскажем, как объявлять модули, как управлять основными структурами данных и ещё некоторым вещам. Эта глава посвящена проверке установки Эликсира и запуску его интерактивной оболочки, которая называется <code class="highlighter-rouge">IEx</code>.</p>
+
+<p>Требования:</p>
+
+<ul>
+  <li><strong>Эликсир</strong> (версии 1.4.0 и выше);</li>
+  <li><strong>Эрланг</strong> (версии 18.0 и выше).</li>
+</ul>
+
+<p>Приступим!</p>
+
+<blockquote>
+  <p>Если вы нашли ошибку в этом руководстве, пожалуйста, <a href="https://github.com/wunsh/elixir-docs-ru">сообщите о ней или пришлите исправление</a>.</p>
+</blockquote>
+
+<h2 id="установка">Установка</h2>
+
+<p>Если вы всё ещё не установили Эликсир, сделайте это с помощью <a href="/install">инструкции по установке</a>. Когда закончите, выполните команду <code class="highlighter-rouge">elixir --version</code> для получения текущей версии языка.</p>
+
+<h2 id="интерактивный-режим">Интерактивный режим</h2>
+
+<p>Когда вы установите Эликсир, у вас будет три исполняемых команды: <code class="highlighter-rouge">iex</code>, <code class="highlighter-rouge">elixir</code> и <code class="highlighter-rouge">elixirc</code>. Если вы скомпилировали Эликсир из исходников или используете пакетную версию, вы сможете найти их в директории <code class="highlighter-rouge">bin</code>.</p>
+
+<p>Начнём с выполнения команды <code class="highlighter-rouge">iex</code> (или <code class="highlighter-rouge">iex.bat</code> для Виндоус), которая отвечает за запуск интерактивной оболочки Эликсира. В этом режиме мы можем напечатать любое выражение на Эликсире и получить результат его выполнения. Опробуем несколько базовых команд для разогрева.</p>
+
+<p>Откройте <code class="highlighter-rouge">IEx</code> командой <code class="highlighter-rouge">iex</code> и введите следующие выражения:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="no">Erlang</span><span class="o">/</span><span class="no">OTP</span> <span class="m">19</span> <span class="p">[</span><span class="n">erts</span><span class="o">-</span><span class="m">8.1</span><span class="p">]</span> <span class="p">[</span><span class="n">source</span><span class="p">]</span> <span class="p">[</span><span class="m">64</span><span class="o">-</span><span class="n">bit</span><span class="p">]</span> <span class="p">[</span><span class="ss">smp:</span><span class="m">4</span><span class="p">:</span><span class="m">4</span><span class="p">]</span> <span class="p">[</span><span class="n">async</span><span class="o">-</span><span class="ss">threads:</span><span class="m">10</span><span class="p">]</span> <span class="p">[</span><span class="n">hipe</span><span class="p">]</span> <span class="p">[</span><span class="n">kernel</span><span class="o">-</span><span class="ss">poll:</span><span class="no">false</span><span class="p">]</span> <span class="p">[</span><span class="n">dtrace</span><span class="p">]</span>
+<span class="no">Interactive</span> <span class="no">Elixir</span> <span class="p">(</span><span class="m">1.4</span><span class="o">.</span><span class="m">0</span><span class="p">)</span> <span class="err">–</span> <span class="n">press</span> <span class="no">Ctrl</span><span class="o">+</span><span class="no">C</span> <span class="n">to</span> <span class="k">exit</span> <span class="p">(</span><span class="n">type</span> <span class="n">h</span><span class="p">()</span> <span class="no">ENTER</span> <span class="n">for</span> <span class="n">help</span><span class="p">)</span>
+
+<span class="n">iex</span><span class="p">(</span><span class="m">1</span><span class="p">)</span><span class="o">&gt;</span> <span class="m">40</span> <span class="o">+</span> <span class="m">2</span>
+<span class="m">42</span>
+
+<span class="n">iex</span><span class="p">(</span><span class="m">2</span><span class="p">)</span><span class="o">&gt;</span> <span class="sd">"</span><span class="s2">hello"</span> <span class="o">&lt;&gt;</span> <span class="sd">"</span><span class="s2"> world"</span>
+<span class="sd">"</span><span class="s2">hello world"</span>
+</code></pre></div></div>
+
+<p>Учтите, что некоторые детали, такие как номера версий, могут немного отличаться, и сейчас это не так важно. Далее мы опустим служебный вывод <code class="highlighter-rouge">IEx</code>, чтобы сосредоточиться на коде. Для выхода из консоли нажмите <code class="highlighter-rouge">Ctrl+C</code> дважды.</p>
+
+<p>Похоже, можно идти дальше!</p>
+
+<blockquote>
+  <p><strong>Обратите внимание.</strong> Если у вас Виндоус, вы также можете попробовать выполнить команду <code class="highlighter-rouge">iex.bat --werl</code> для получения более удобного интерфейса, в зависимости от консоли, которую вы используете.</p>
+</blockquote>
+
+<h2 id="запуск-скриптов">Запуск скриптов</h2>
+
+<p>После знакомства с основами языка можно попробовать написать простую программу. Это можно сделать, поместив следующий код на Эликсире в файл:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="no">IO</span><span class="o">.</span><span class="n">puts</span> <span class="sd">"</span><span class="s2">Hello world from Elixir"</span>
+</code></pre></div></div>
+
+<p>Сохраните его как <code class="highlighter-rouge">simple.exs</code> и выполните командой <code class="highlighter-rouge">elixir</code>:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span>elixir simple.exs
+Hello world from Elixir
+</code></pre></div></div>
+
+<p>Позже мы научимся компилировать этот код (в главе <a href="/docs/modules-and-functions.html"><strong>«Модули и функции»</strong></a>) и использовать инструмент сборки Микс (во <a href="/docs/mix-otp/introduction-to-mix.html"><strong>«Введении в Микс»</strong></a>). Теперь можно двигаться дальше.</p>
+
+<h2 id="где-можно-задать-вопрос">Где можно задать вопрос?</h2>
+
+<p>По ходу чтения данного руководства у вас могут возникать вопросы, в конце концов, это часть процесса обучения! Вот несколько мест, где вы можете задать вопрос и узнать больше об Эликсире:</p>
+
+<ul>
+  <li><a href="https://t.me/wunsh">Русскоязычный чат в Телеграме</a></li>
+  <li><a href="irc://irc.freenode.net/elixir-lang">Канал <code class="highlighter-rouge">#elixir-lang</code> в IRC</a></li>
+  <li><a href="https://elixir-slackin.herokuapp.com/">Эликсир в Слаке</a></li>
+  <li><a href="http://elixirforum.com">Форум по Эликсиру</a></li>
+  <li><a href="https://stackoverflow.com/questions/tagged/elixir">Тег <code class="highlighter-rouge">elixir</code> на StackOverflow</a></li>
+</ul>
+
+<p>Чтобы с большей вероятностью получить ответ на ваш вопрос, используйте две подсказки:</p>
+
+<ul>
+  <li>
+    <p>Вместо вопроса «как <em>написать <strong>X</strong></em> на Эликсире», спросите «как на Эликсире <em>решить задачу <strong>Y</strong></em>». Другими словами, не стоит спрашивать реализацию конкретного решения, вместо объяснения сути проблемы. Отталкивание от проблемы даст больше контекста для нахождения корректного ответа.</p>
+  </li>
+  <li>
+    <p>В случае, если что-то работает не так, как ожидалось, пожалуйста, включите достаточно информации в свой отчёт. Например, вашу версию Эликсира, сниппет самого кода и сообщение об ошибке вместе с трассировкой стека. Используйте такие сайты, как <a href="https://gist.github.com/">Gist</a>, для размещения подобной информации.</p>
+  </li>
+</ul>
+
+    </div>
+</article>
+
+<nav class="docs_nav pure-g">
+    <div class="docs_nav__inner pure-u-1 pure-u-md-3-4">
+        <div class="pure-g">
+            <div class="docs_nav__column docs_nav__column--prev pure-u-1-3">
+                
+            </div>
+
+            <div class="docs_nav__column docs_nav__column--contents pure-u-1-3">
+                <a href="#docsContents" class="docs_nav__link docs_nav__link--contents pure-button">☰</a>
+            </div>
+
+            <div class="docs_nav__column docs_nav__column--next pure-u-1-3">
+                
+                    <a href="/docs/basic-types.html" class="docs_nav__link pure-button">
+                        <span class="h-hidden_mobile">Вперёд </span>&rarr;
+                    </a>
+                
+            </div>
+        </div>
+    </div>
+</nav>
+
+<div id="docsContents" class="modal modal--docs_contents modal--close_backdrop">
+    <div class="modal__content">
+        <a href="#close" title="Закрыть" class="modal__close">x</a>
+
+        <h2 class="modal__title">Содержание</h2>
+
+        
+        <h3 id="руководство-для-начинающих">Руководство для начинающих</h3>
+<ul>
+  <li><a href="/docs">Введение</a></li>
+  <li><a href="/docs/basic-types.html">Базовые типы</a></li>
+  <li><a href="/docs/basic-operators.html">Базовые операторы</a></li>
+  <li><a href="/docs/pattern-matching.html">Сопоставление с образцом</a></li>
+  <li><a href="/docs/case-cond-and-if.html">Конструкции ветвления</a></li>
+  <li><a href="/docs/binaries-strings-and-char-lists.html">Двоичные данные, строки и списки символов</a></li>
+  <li><a href="/docs/keywords-and-maps.html">Ключевые списки и словари</a></li>
+  <li><a href="/docs/modules-and-functions.html">Модули и функции</a></li>
+  <li><a href="/docs/recursion.html">Рекурсия</a></li>
+  <li><a href="/docs/enumerables-and-streams.html">Перечисления и потоки</a></li>
+  <li><a href="/docs/processes.html">Процессы</a></li>
+  <li><a href="/docs/io-and-the-file-system.html">Ввод/вывод и файловая система</a></li>
+  <li><a href="/docs/alias-require-and-import.html">Директивы <code class="highlighter-rouge">alias</code>, <code class="highlighter-rouge">require</code> и <code class="highlighter-rouge">import</code></a></li>
+  <li><a href="/docs/module-attributes.html">Атрибуты модулей</a></li>
+  <li><a href="/docs/structs.html">Структуры</a></li>
+  <li><a href="/docs/protocols.html">Протоколы</a></li>
+  <li><a href="/docs/comprehensions.html">Списковые выражения</a></li>
+  <li><a href="/docs/sigils.html">Сигилы</a></li>
+  <li><a href="/docs/try-catch-and-rescue.html">Конструкция <code class="highlighter-rouge">try</code>, <code class="highlighter-rouge">catch</code> и <code class="highlighter-rouge">rescue</code></a></li>
+  <li><a href="/docs/typespecs-and-behaviours.html">Спецификации типов и поведения</a></li>
+  <li><a href="/docs/erlang-libraries.html">Библиотеки Эрланга</a></li>
+  <li><a href="/docs/where-to-go-next.html">Куда двигаться дальше</a></li>
+</ul>
+
+<h3 id="микс-и-otp">Микс и <code class="highlighter-rouge">OTP</code></h3>
+<ul>
+  <li><a href="/docs/mix-otp/introduction-to-mix.html">Введение в Микс</a></li>
+  <li><a href="/docs/mix-otp/agent.html">Агент</a></li>
+  <li><a href="/docs/mix-otp/genserver.html">GenServer</a></li>
+  <li><a href="/docs/mix-otp/supervisor-and-application.html">Супервизор и приложение</a></li>
+  <li><a href="/docs/mix-otp/dynamic-supervisor.html">Динамический супервизор</a></li>
+  <li><a href="/docs/mix-otp/ets.html">ETS</a></li>
+  <li><a href="/docs/mix-otp/dependencies-and-umbrella-apps.html">Зависимости и зонтичные проекты</a></li>
+  <li><a href="/docs/mix-otp/task-and-gen-tcp.html">Модули <code class="highlighter-rouge">Task</code> и <code class="highlighter-rouge">:gen_tcp</code></a></li>
+  <li><a href="/docs/mix-otp/docs-tests-and-with.html">Доктесты, паттерны и оператор <code class="highlighter-rouge">with</code></a></li>
+  <li><a href="/docs/mix-otp/distributed-tasks-and-configuration.html">Распределенные задачи и конфигурация</a></li>
+</ul>
+
+<h3 id="метапрограммирование">Метапрограммирование</h3>
+<ul>
+  <li><a href="/docs/meta/quote-and-unquote.html">Конструкции <code class="highlighter-rouge">quote</code> и <code class="highlighter-rouge">unquote</code></a></li>
+  <li><a href="/docs/meta/macros.html">Макросы</a></li>
+  <li><a href="/docs/meta/domain-specific-languages.html">Предметно-ориентированные языки</a></li>
+</ul>
+
+    </div>
+</div>
+
+
+
+        <footer class="footer">
+    &copy; 2020
+    / Россия
+
+    <span class="pull-right">Любые мысли и вопросы пишите на <a href="mailto:elixir@wunsh.ru">elixir@wunsh.ru</a>.</span>
+</footer>
+
+        <div id="subscribeModal" class="modal">
+    <div class="modal__content">
+        <a href="#close" title="Close" class="modal__close">x</a>
+
+        <h2 class="modal__title">Ламповая рассылка про&nbsp;Эликсир</h2>
+
+        <p>Один-два раза в&nbsp;неделю присылаем тёплые письма об&nbsp;Эликсире: переводы самых интересных статей до&nbsp;их&nbsp;появления в&nbsp;открытом доступе, анонсы событий и&nbsp;вкусные бонусы.</p>
+
+        <form action="//wunsh.us14.list-manage.com/subscribe/post?u=c81ca3d4693f62db7f7f67c71&amp;id=a192e2dfef" method="post" id="mc-embedded-subscribe-form" name="mc-embedded-subscribe-form" class="pure-form h-tc validate" target="_blank" novalidate>
+            <input type="email" value="" name="EMAIL" class="modal__input pure-input-rounded large" id="mce-EMAIL" placeholder="Твоя почта" required>
+            <div style="position: absolute; left: -5000px;" aria-hidden="true"><input type="text" name="b_c81ca3d4693f62db7f7f67c71_a192e2dfef" tabindex="-1" value=""></div>
+
+            <input type="submit" value="Присоединиться" name="subscribe" onClick="yaCounter39773490.reachGoal('SUBSCRIBED'); return true" id="mc-embedded-subscribe" class="pure-button button-success large">
+        </form>
+
+        <p>Обязательно подтверди почту, перейдя по&nbsp;ссылке в&nbsp;письме, иначе мы&nbsp;не&nbsp;сможем делиться с&nbsp;тобой полезностями.</p>
+
+        <p>Надоедать точно не&nbsp;будем :)</p>
+    </div>
+</div>
+
+        <script src="/assets/js/vendors/zepto.min.js"></script>
+
+<script>
+    if ($(".post--docs").length) {
+        $(".footer").addClass("footer--docs")
+    }
+
+    $(".modal--close_backdrop").click(function(){
+        window.location.hash = "";
+    });
+</script>
+
+        <!-- Yandex.Metrika counter -->
+<script type="text/javascript">
+    (function (d, w, c) {
+        (w[c] = w[c] || []).push(function() {
+            try {
+                w.yaCounter39773490 = new Ya.Metrika({
+                    id:39773490,
+                    clickmap:true,
+                    trackLinks:true,
+                    accurateTrackBounce:true,
+                    webvisor:true,
+                    ut:"noindex"
+                });
+            } catch(e) { }
+        });
+
+        var n = d.getElementsByTagName("script")[0],
+            s = d.createElement("script"),
+            f = function () { n.parentNode.insertBefore(s, n); };
+        s.type = "text/javascript";
+        s.async = true;
+        s.src = "https://mc.yandex.ru/metrika/watch.js";
+
+        if (w.opera == "[object Opera]") {
+            d.addEventListener("DOMContentLoaded", f, false);
+        } else { f(); }
+    })(document, window, "yandex_metrika_callbacks");
+</script>
+<noscript><div><img src="https://mc.yandex.ru/watch/39773490?ut=noindex" style="position:absolute; left:-9999px;" alt="" /></div></noscript>
+<!-- /Yandex.Metrika counter -->
+
+      </div>
+    </div>
+  </body>
+</html>

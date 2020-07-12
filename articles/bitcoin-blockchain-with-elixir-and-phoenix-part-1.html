@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Работаем с биткоином на Elixir. Часть 1 |> Сообщество Elixir и Phoenix Framework</title>
+    <meta name="description" content="В данной статье рассматривается создание простейшего обозревателя блокчейна с помощью Phoenix. Поехали!">
+
+    <link rel="alternate" type="application/rss+xml" title="Сообщество Elixir и Phoenix Framework" href="/feed.xml" />
+    <link rel="canonical" href="https://wunsh.ru/articles/bitcoin-blockchain-with-elixir-and-phoenix-part-1.html">
+
+    <style type="text/css">@import url("//fonts.googleapis.com/css?family=Source+Sans+Pro:400,700&subset=cyrillic");</style>
+    <link rel="stylesheet" href="/assets/css/vendors/pure.min.css">
+    <link rel="stylesheet" href="/assets/css/vendors/pure-grids-responsive.min.css">
+    <link rel="stylesheet" href="/assets/css/style.css?1594516983">
+
+    <link rel="shortcut icon" type="image/png" href="/assets/favicon.png" >
+</head>
+
+
+  <body>
+    <div class="wunsh pure-g">
+      
+
+
+
+
+<div class="menu pure-u-1 pure-u-md-1-4">
+  <div class="header">
+    <h2 class="header__title">
+      
+        <a href="https://wunsh.ru" class="header__title_link" title="На главную">Эликсир и&nbsp;Вунш</a>
+      
+    </h2>
+    <h3 class="header__tagline">Erlang + Ruby = &#10084;</h3>
+
+    <nav class="nav">
+      <ul class="nav_list">
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/elixir" class="nav_list__item_link pure-button">О языке</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/install/linux-asdf" class="nav_list__item_link pure-button">Установка</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/docs/" class="nav_list__item_link pure-button">Документация</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/guides" class="nav_list__item_link pure-button">Гайды</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/news" class="nav_list__item_link pure-button">Новости</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/articles" class="nav_list__item_link pure-button">Статьи</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/videos" class="nav_list__item_link pure-button">Видео</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/vacancies" class="nav_list__item_link pure-button">Вакансии</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/faq" class="nav_list__item_link pure-button">FAQ</a>
+            </li>
+          
+        
+      </ul>
+    </nav>
+
+    <a href="#subscribeModal" class="pure-button header__subscribe_link">Подписаться на рассылку</a>
+  </div>
+</div>
+
+
+      <div class="content pure-u-1 pure-u-md-3-4">
+        
+
+<article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+  <header class="post__header">
+    
+    <h1 class="post__title" itemprop="name headline">Работаем с биткоином на Elixir. Часть 1</h1>
+
+    <div class="post__meta post_meta">
+      <ul class="meta_list">
+        <li class="meta_list__item">
+          
+          <span class="">
+            <small class="meta_list__item_name">Дата</small>
+            <time class="h-bold" datetime="2017-10-18T00:00:00+00:00" itemprop="datePublished">
+              
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+18 октября 2017
+
+            </time>
+          </span>
+          
+
+          
+        </li>
+        
+        <li class="meta_list__item">
+            <span class="tag_cloud tags_cloud--inline h-no_margin">
+              <small class="meta_list__item_name">Теги</small> 
+
+
+<ul class="tags_cloud__list">
+  
+    <a href="/tags/#blockchain" class="tags_cloud__link tag tag--blockchain">blockchain</a>
+  
+    <a href="/tags/#overview" class="tags_cloud__link tag tag--overview">overview</a>
+  
+    <a href="/tags/#phoenix" class="tags_cloud__link tag tag--phoenix">phoenix</a>
+  
+</ul>
+
+            </span>
+        </li>
+        
+        <li class="meta_list__item">
+          <span itemprop="author" itemscope itemtype="http://schema.org/Person">
+            <small class="meta_list__item_name">
+              
+                Перевод
+              
+            </small>
+            <span itemprop="name" class="h-bold">Надежда Нестерова</span>
+          </span>
+        </li>
+
+        <li class="meta_list__item">
+          
+            <div >
+              <small>Оригинал</small>
+              <strong>
+                &laquo;<a href="https://medium.com/@east5th/controlling-a-bitcoin-node-with-elixir-6dd36e3adf3d" style="text-transform: none; text-decoration: underline; color: #4b2e39;">Controlling a Bitcoin Node with Elixir</a>&raquo;
+              </strong>
+              <small>&copy;</small>
+              <strong>Pete Corey</strong>
+            </div>
+          
+        </li>
+      </ul>
+    </div>
+  </header>
+
+  <div class="post__content" itemprop="articleBody">
+    <p>Недавно меня с головой захватил волшебный <a href="https://bitcoin.org/ru/">мир биткоин</a>. Жажде знаний не было предела, и утолить её помогла замечательная книга <a href="https://www.amazon.com/gp/product/1449374042/">«Mastering Bitcoin»</a> Андреаса Антонопулоса и полное погружение в биткоин-разработку. Книга подробно освещает технические основы биткоин, но ничто так не помогает в изучении нового дела, как практика.</p>
+
+<p>Простенькое приложение на Эликсире для управления полной биткоин-нодой и связи с ней через <a href="https://en.bitcoin.it/wiki/API_reference_%28JSON-RPC%29">интерфейс JSON-RPC</a>, по-моему, – отличный «Hello, World!». Поехали!</p>
+
+<h2 id="где-взять-полную-ноду">Где взять полную ноду</h2>
+
+<p>Чтобы установить соединение с полной нодой Bitcoin Core, нужно сначала где-то её раздобыть. Достаточно просто <a href="https://bitcoin.org/en/full-node">запустить свою ноду локально</a>, ведь общедоступные ноды с открытым JSON-RPC интерфейсом можно пересчитать по пальцам.</p>
+
+<p><a href="https://bitcoin.org/en/full-node#osx-daemon">Установим демона <code class="highlighter-rouge">bitcoind</code></a> и настроим его в файле <code class="highlighter-rouge">bitcoin.config</code>:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>rpcuser=&lt;username&gt;
+rpcpassword=&lt;password&gt;
+</code></pre></div></div>
+
+<p>Определяемые значения <code class="highlighter-rouge">&lt;username&gt;</code> и <code class="highlighter-rouge">&lt;password&gt;</code> будем использовать для аутентификации при отправке запросов к биткоин-ноде.</p>
+
+<p>По завершении настройки самое время запустить полную ноду:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>bitcoind -conf=&lt;path to bitcoin.config&gt; -daemon
+</code></pre></div></div>
+
+<p>Запустившись, демон полной ноды начнёт подключаться к пирам, загружать и верифицировать транзакции в блоках.</p>
+
+<p>Убедимся, что всё работает как нужно:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>bitcoin-cli getinfo
+</code></pre></div></div>
+
+<p>Данная команда возвратит основную информацию о ноде, включая её версию и количество полученных и верифицированных блоков. Загрузка и верификация всего блокчейна может занять несколько дней, ну а мы пока продолжим работать над нашим проектом.</p>
+
+<h2 id="интерфейс-json-rpc">Интерфейс JSON-RPC</h2>
+
+<p>Биткоин-нода работает через интерфейс JSON-RPC, который можно использовать для извлечения информации о блокчейне и взаимодействия с нодой.</p>
+
+<p>Любопытно, что инструмент <code class="highlighter-rouge">bitcoin-cli</code>, который мы использовали ранее для получения информации о ноде работает поверх JSON-RPC API. Список всех возможных RPC-команд ноды можно увидеть, вызвав <code class="highlighter-rouge">bitcoin-cli help</code> или полистав <a href="https://en.bitcoin.it/wiki/Original_Bitcoin_client/API_calls_list">Bitcoin Wiki</a>.</p>
+
+<p>Протокол JSON-RPC получает входящие команды через HTTP-сервер, а значит, можно обойтись без <code class="highlighter-rouge">bitcoin-cli</code> и прописать эти RPC-команды самостоятельно.</p>
+
+<p>Например, <a href="https://bitcoin.stackexchange.com/a/19839"><code class="highlighter-rouge">запустим getinfo вручную с помощью</code>curl`</a>:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>curl --data-binary '{"jsonrpc":"1.0","method":"getinfo","params":[]}'\
+     http://&lt;user&gt;:&lt;pass&gt;@localhost:8332/
+</code></pre></div></div>
+
+<p>Аналогичным образом можно выполнять такие команды в любой среде программирования с HTTP-клиентом, например, в Эликсире!</p>
+
+<h2 id="разработка-эликсир-приложения">Разработка Эликсир-приложения</h2>
+
+<p>Продумав стратегию взаимодействия с полной биткоин-нодой, займёмся Эликсир-приложением.</p>
+
+<p>Создадим новый проект и обновим <code class="highlighter-rouge">mix.exs</code>, чтобы добавить в зависимости библиотеку <a href="https://hex.pm/packages/poison"><code class="highlighter-rouge">poison</code></a>, которая понадобится для шифрования и расшифровки JSON-объектов, и <a href="https://hex.pm/packages/httpoison"><code class="highlighter-rouge">httpoison</code></a> – один из лучших HTTP-клиентов для Эликсира.</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">defp</span> <span class="n">deps</span> <span class="k">do</span>
+  <span class="p">[</span>
+    <span class="p">{</span><span class="ss">:httpoison</span><span class="p">,</span> <span class="sd">"</span><span class="s2">~&gt; 0.13"</span><span class="p">},</span>
+    <span class="p">{</span><span class="ss">:poison</span><span class="p">,</span> <span class="sd">"</span><span class="s2">~&gt; 3.1"</span><span class="p">}</span>
+  <span class="p">]</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<p>Теперь, когда мы закончили с частью, отвечающей за кодогенерацию, перейдём к реализации взаимодействия с биткоин-нодой.</p>
+
+<p>Начнём работать с модулем <code class="highlighter-rouge">HelloBitcoin</code> и первым делом поставим заглушку для функции <code class="highlighter-rouge">getinfo</code>:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">defmodule</span> <span class="no">HelloBitcoin</span> <span class="k">do</span>
+
+  <span class="k">def</span> <span class="n">getinfo</span> <span class="k">do</span>
+    <span class="k">raise</span> <span class="sd">"</span><span class="s2">TODO: Implement getinfo"</span>
+  <span class="k">end</span>
+
+<span class="k">end</span>
+</code></pre></div></div>
+
+<p>Для простоты будем взаимодействовать с этим модулем через <code class="highlighter-rouge">iex -S mix</code>. Прежде чем приступить к следующему шагу, давайте убедимся, что всё работает правильно.</p>
+
+<p>Вызов заглушки <code class="highlighter-rouge">HelloBitcoin.getinfo</code> должен повлечь за собой исключение времени выполнения:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">iex</span><span class="p">(</span><span class="m">1</span><span class="p">)</span><span class="o">&gt;</span> <span class="no">HelloBitcoin</span><span class="o">.</span><span class="n">getinfo</span>
+<span class="no">HelloBitcoin</span><span class="o">.</span><span class="n">getinfo</span>
+<span class="o">**</span> <span class="p">(</span><span class="no">RuntimeError</span><span class="p">)</span> <span class="ss">TODO:</span> <span class="no">Implement</span> <span class="n">getinfo</span>
+    <span class="p">(</span><span class="n">hello_bitcoin</span><span class="p">)</span> <span class="n">lib</span><span class="o">/</span><span class="n">hello_bitcoin</span><span class="o">.</span><span class="ss">ex:</span><span class="m">4</span><span class="p">:</span> <span class="no">HelloBitcoin</span><span class="o">.</span><span class="n">getinfo</span><span class="o">/</span><span class="m">0</span>
+</code></pre></div></div>
+
+<p>Отлично. Ошибка. Как и должно быть.</p>
+
+<h2 id="построение-командыgetinfo">Построение команды <code class="highlighter-rouge">GetInfo</code></h2>
+
+<p>Теперь наполним функцию <code class="highlighter-rouge">getinfo</code> содержимым.</p>
+
+<p>Повторюсь: нам необходимо послать HTTP-запрос методом <code class="highlighter-rouge">POST</code> к HTTP-серверу биткоин-ноды (обычно слушающему по <code class="highlighter-rouge">http://localhost:8332</code>) и передать JSON-объект, содержащий команду <code class="highlighter-rouge">GetInfo</code> и необходимые параметры.</p>
+
+<p>Оказалось, что <code class="highlighter-rouge">httpoison</code> справляется с таким заданием в два счёта:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">def</span> <span class="n">getinfo</span> <span class="k">do</span>
+  <span class="n">with</span> <span class="n">url</span>     <span class="o">&lt;-</span> <span class="no">Application</span><span class="o">.</span><span class="n">get_env</span><span class="p">(</span><span class="ss">:hello_bitcoin</span><span class="p">,</span> <span class="ss">:bitcoin_url</span><span class="p">),</span>
+       <span class="n">command</span> <span class="o">&lt;-</span> <span class="p">%{</span><span class="ss">jsonrpc:</span> <span class="sd">"</span><span class="s2">1.0"</span><span class="p">,</span> <span class="ss">method:</span> <span class="sd">"</span><span class="s2">getinfo"</span><span class="p">,</span> <span class="ss">params:</span> <span class="p">[]},</span>
+       <span class="n">body</span>    <span class="o">&lt;-</span> <span class="no">Poison</span><span class="o">.</span><span class="n">encode!</span><span class="p">(</span><span class="n">command</span><span class="p">),</span>
+       <span class="n">headers</span> <span class="o">&lt;-</span> <span class="p">[{</span><span class="sd">"</span><span class="s2">Content-Type"</span><span class="p">,</span> <span class="sd">"</span><span class="s2">application/json"</span><span class="p">}]</span> <span class="k">do</span>
+    <span class="no">HTTPoison</span><span class="o">.</span><span class="n">post!</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">body</span><span class="p">,</span> <span class="n">headers</span><span class="p">)</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<p>Сначала получим <code class="highlighter-rouge">url</code> из ключа <code class="highlighter-rouge">bitcoin_url</code> в конфигурации приложения. Адрес должен находиться в файле <code class="highlighter-rouge">config/config.exs</code> и указывать на локальную ноду:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">config</span> <span class="ss">:hello_bitcoin</span><span class="p">,</span> <span class="ss">bitcoin_url:</span> <span class="sd">"</span><span class="s2">http://&lt;user&gt;:&lt;password&gt;@localhost:8332"</span>
+</code></pre></div></div>
+
+<p>Далее, создадим словарь, представляющий нашу JSON-RPC-команду. В данном случае в поле <code class="highlighter-rouge">method</code> прописываем <code class="highlighter-rouge">"getinfo"</code>, а поле <code class="highlighter-rouge">params</code> оставляем пустым. И последнее, сформируем тело запроса, преобразовав команду в формат JSON с помощью <code class="highlighter-rouge">Poison.encode!</code>.</p>
+
+<p>Вызов <code class="highlighter-rouge">HelloBitcoin.getinfo</code> должен возвратить успешный ответ от биткоин-ноды с кодом состояния <code class="highlighter-rouge">200</code>, а также результат команды <code class="highlighter-rouge">getinfo</code> в формате JSON:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">%</span><span class="no">HTTPoison</span><span class="o">.</span><span class="no">Response</span><span class="p">{</span>
+  <span class="ss">body:</span> <span class="sd">"</span><span class="s2">{\"</span><span class="n">result</span><span class="p">\</span><span class="sd">"</span><span class="s2">:{\"</span><span class="n">version</span><span class="p">\</span><span class="sd">"</span><span class="s2">:140200,\"</span><span class="n">protocolversion</span><span class="p">\</span><span class="sd">"</span><span class="s2">:70015,\"</span><span class="n">walletversion</span><span class="p">\</span><span class="sd">"</span><span class="s2">:130000,\"</span><span class="n">balance</span><span class="p">\</span><span class="sd">"</span><span class="s2">:0.00000000,\"</span><span class="n">blocks</span><span class="p">\</span><span class="sd">"</span><span class="s2">:482864,\"</span><span class="n">timeoffset</span><span class="p">\</span><span class="sd">"</span><span class="s2">:-1,\"</span><span class="n">connections</span><span class="p">\</span><span class="sd">"</span><span class="s2">:8,\"</span><span class="n">proxy</span><span class="p">\</span><span class="sd">"</span><span class="s2">:\"</span><span class="p">\</span><span class="sd">"</span><span class="s2">,\"</span><span class="n">difficulty</span><span class="p">\</span><span class="sd">"</span><span class="s2">:888171856257.3206,\"</span><span class="n">testnet</span><span class="p">\</span><span class="sd">"</span><span class="s2">:false,\"</span><span class="n">keypoololdest</span><span class="p">\</span><span class="sd">"</span><span class="s2">:1503512537,\"</span><span class="n">keypoolsize</span><span class="p">\</span><span class="sd">"</span><span class="s2">:100,\"</span><span class="n">paytxfee</span><span class="p">\</span><span class="sd">"</span><span class="s2">:0.00000000,\"</span><span class="n">relayfee</span><span class="p">\</span><span class="sd">"</span><span class="s2">:0.00001000,\"</span><span class="n">errors</span><span class="p">\</span><span class="sd">"</span><span class="s2">:\"</span><span class="p">\</span><span class="sd">"</span><span class="s2">},\"</span><span class="n">error</span><span class="p">\</span><span class="sd">"</span><span class="s2">:null,\"</span><span class="n">id</span><span class="p">\</span><span class="sd">"</span><span class="s2">:null}\n"</span><span class="p">,</span>
+  <span class="ss">headers:</span> <span class="p">[{</span><span class="sd">"</span><span class="s2">Content-Type"</span><span class="p">,</span> <span class="sd">"</span><span class="s2">application/json"</span><span class="p">},</span> <span class="p">{</span><span class="sd">"</span><span class="s2">Date"</span><span class="p">,</span> <span class="sd">"</span><span class="s2">Thu, 31 Aug 2017 21:27:02 GMT"</span><span class="p">},</span> <span class="p">{</span><span class="sd">"</span><span class="s2">Content-Length"</span><span class="p">,</span> <span class="sd">"</span><span class="s2">328"</span><span class="p">}],</span>
+  <span class="ss">request_url:</span> <span class="sd">"</span><span class="s2">http://localhost:8332"</span><span class="p">,</span>
+  <span class="ss">status_code:</span> <span class="m">200</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>Прекрасно.</p>
+
+<p>Расшифруем полученный JSON-текст в <code class="highlighter-rouge">body</code> и получим результат:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="no">HTTPoison</span><span class="o">.</span><span class="n">post!</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">body</span><span class="p">)</span>
+<span class="o">|&gt;</span> <span class="no">Map</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="ss">:body</span><span class="p">)</span>
+<span class="o">|&gt;</span> <span class="no">Poison</span><span class="o">.</span><span class="n">decode!</span>
+</code></pre></div></div>
+
+<p>Теперь результаты вызова <code class="highlighter-rouge">HelloBitcoin.getinfo</code>, полученные от <code class="highlighter-rouge">bitcoind</code>, будут представлены в более удобном виде:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">%{</span><span class="sd">"</span><span class="s2">error"</span> <span class="o">=&gt;</span> <span class="no">nil</span><span class="p">,</span> <span class="sd">"</span><span class="s2">id"</span> <span class="o">=&gt;</span> <span class="no">nil</span><span class="p">,</span>
+  <span class="sd">"</span><span class="s2">result"</span> <span class="o">=&gt;</span> <span class="p">%{</span><span class="sd">"</span><span class="s2">balance"</span> <span class="o">=&gt;</span> <span class="m">0.0</span><span class="p">,</span> <span class="sd">"</span><span class="s2">blocks"</span> <span class="o">=&gt;</span> <span class="m">483001</span><span class="p">,</span> <span class="sd">"</span><span class="s2">connections"</span> <span class="o">=&gt;</span> <span class="m">8</span><span class="p">,</span>
+    <span class="sd">"</span><span class="s2">difficulty"</span> <span class="o">=&gt;</span> <span class="m">888171856257.3206</span><span class="p">,</span> <span class="sd">"</span><span class="s2">errors"</span> <span class="o">=&gt;</span> <span class="sd">"</span><span class="s2">"</span><span class="p">,</span>
+    <span class="sd">"</span><span class="s2">keypoololdest"</span> <span class="o">=&gt;</span> <span class="m">1503512537</span><span class="p">,</span> <span class="sd">"</span><span class="s2">keypoolsize"</span> <span class="o">=&gt;</span> <span class="m">100</span><span class="p">,</span> <span class="sd">"</span><span class="s2">paytxfee"</span> <span class="o">=&gt;</span> <span class="m">0.0</span><span class="p">,</span>
+    <span class="sd">"</span><span class="s2">protocolversion"</span> <span class="o">=&gt;</span> <span class="m">70015</span><span class="p">,</span> <span class="sd">"</span><span class="s2">proxy"</span> <span class="o">=&gt;</span> <span class="sd">"</span><span class="s2">"</span><span class="p">,</span> <span class="sd">"</span><span class="s2">relayfee"</span> <span class="o">=&gt;</span> <span class="m">1.0e-5</span><span class="p">,</span>
+    <span class="sd">"</span><span class="s2">testnet"</span> <span class="o">=&gt;</span> <span class="no">false</span><span class="p">,</span> <span class="sd">"</span><span class="s2">timeoffset"</span> <span class="o">=&gt;</span> <span class="o">-</span><span class="m">1</span><span class="p">,</span> <span class="sd">"</span><span class="s2">version"</span> <span class="o">=&gt;</span> <span class="m">140200</span><span class="p">,</span>
+    <span class="sd">"</span><span class="s2">walletversion"</span> <span class="o">=&gt;</span> <span class="m">130000</span><span class="p">}}</span>
+</code></pre></div></div>
+
+<p>Обратите внимание, что необходимые нам данные (<code class="highlighter-rouge">"result"</code>), обернуты в словарь, содержащий метаданные о самом запросе. Эти метаданные содержат строку с возможной ошибкой и идентификатор запроса.</p>
+
+<p>Перепишем функцию <code class="highlighter-rouge">getinfo</code> так, чтобы она включала обработку ошибок и возвращала фактические данные в случае безошибочного выполнения запроса:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">with</span> <span class="n">url</span> <span class="o">&lt;-</span> <span class="no">Application</span><span class="o">.</span><span class="n">get_env</span><span class="p">(</span><span class="ss">:hello_bitcoin</span><span class="p">,</span> <span class="ss">:bitcoin_url</span><span class="p">),</span>
+     <span class="n">command</span> <span class="o">&lt;-</span> <span class="p">%{</span><span class="ss">jsonrpc:</span> <span class="sd">"</span><span class="s2">1.0"</span><span class="p">,</span> <span class="ss">method:</span> <span class="sd">"</span><span class="s2">getinfo"</span><span class="p">,</span> <span class="ss">params:</span> <span class="p">[]},</span>
+     <span class="p">{</span><span class="ss">:ok</span><span class="p">,</span> <span class="n">body</span><span class="p">}</span> <span class="o">&lt;-</span> <span class="no">Poison</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="n">command</span><span class="p">),</span>
+     <span class="p">{</span><span class="ss">:ok</span><span class="p">,</span> <span class="n">response</span><span class="p">}</span> <span class="o">&lt;-</span> <span class="no">HTTPoison</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">body</span><span class="p">),</span>
+     <span class="p">{</span><span class="ss">:ok</span><span class="p">,</span> <span class="n">metadata</span><span class="p">}</span> <span class="o">&lt;-</span> <span class="no">Poison</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">body</span><span class="p">),</span>
+     <span class="p">%{</span><span class="sd">"</span><span class="s2">error"</span> <span class="o">=&gt;</span> <span class="no">nil</span><span class="p">,</span> <span class="sd">"</span><span class="s2">result"</span> <span class="o">=&gt;</span> <span class="n">result</span><span class="p">}</span> <span class="o">&lt;-</span> <span class="n">metadata</span> <span class="k">do</span>
+  <span class="n">result</span>
+<span class="k">else</span>
+  <span class="p">%{</span><span class="sd">"</span><span class="s2">error"</span> <span class="o">=&gt;</span> <span class="n">reason</span><span class="p">}</span> <span class="o">-&gt;</span> <span class="p">{</span><span class="ss">:error</span><span class="p">,</span> <span class="n">reason</span><span class="p">}</span>
+  <span class="n">error</span> <span class="o">-&gt;</span> <span class="n">error</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<p>Теперь при отсутствии ошибок функция <code class="highlighter-rouge">getinfo</code> будет возвращать кортеж <code class="highlighter-rouge">{:ok, result}</code>, содержащий результат RPC-вызова, а в обратном случае мы получим кортеж <code class="highlighter-rouge">{:error, reason}</code> с описанием ошибки.</p>
+
+<h2 id="обобщение-команд">Обобщение команд</h2>
+
+<p>В похожей манере можно реализовать и другие RPC-команды блокчейна, например, <code class="highlighter-rouge">getblockhash</code>:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">def</span> <span class="n">getblockhash</span><span class="p">(</span><span class="n">index</span><span class="p">)</span> <span class="k">do</span>
+  <span class="n">with</span> <span class="n">url</span> <span class="o">&lt;-</span> <span class="no">Application</span><span class="o">.</span><span class="n">get_env</span><span class="p">(</span><span class="ss">:hello_bitcoin</span><span class="p">,</span> <span class="ss">:bitcoin_url</span><span class="p">),</span>
+       <span class="n">command</span> <span class="o">&lt;-</span> <span class="p">%{</span><span class="ss">jsonrpc:</span> <span class="sd">"</span><span class="s2">1.0"</span><span class="p">,</span> <span class="ss">method:</span> <span class="sd">"</span><span class="s2">getblockhash"</span><span class="p">,</span> <span class="ss">params:</span> <span class="p">[</span><span class="n">index</span><span class="p">]},</span>
+       <span class="p">{</span><span class="ss">:ok</span><span class="p">,</span> <span class="n">body</span><span class="p">}</span> <span class="o">&lt;-</span> <span class="no">Poison</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="n">command</span><span class="p">),</span>
+       <span class="p">{</span><span class="ss">:ok</span><span class="p">,</span> <span class="n">response</span><span class="p">}</span> <span class="o">&lt;-</span> <span class="no">HTTPoison</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">body</span><span class="p">),</span>
+       <span class="p">{</span><span class="ss">:ok</span><span class="p">,</span> <span class="n">metadata</span><span class="p">}</span> <span class="o">&lt;-</span> <span class="no">Poison</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">body</span><span class="p">),</span>
+       <span class="p">%{</span><span class="sd">"</span><span class="s2">error"</span> <span class="o">=&gt;</span> <span class="no">nil</span><span class="p">,</span> <span class="sd">"</span><span class="s2">result"</span> <span class="o">=&gt;</span> <span class="n">result</span><span class="p">}</span> <span class="o">&lt;-</span> <span class="n">metadata</span> <span class="k">do</span>
+    <span class="p">{</span><span class="ss">:ok</span><span class="p">,</span> <span class="n">result</span><span class="p">}</span>
+  <span class="k">else</span>
+    <span class="p">%{</span><span class="sd">"</span><span class="s2">error"</span> <span class="o">=&gt;</span> <span class="n">reason</span><span class="p">}</span> <span class="o">-&gt;</span> <span class="p">{</span><span class="ss">:error</span><span class="p">,</span> <span class="n">reason</span><span class="p">}</span>
+    <span class="n">error</span> <span class="o">-&gt;</span> <span class="n">error</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<p>Вызвав <code class="highlighter-rouge">getblockhash</code> с нулевым индексом, получим <a href="https://en.bitcoin.it/wiki/Genesis_block">первый блок цепочки</a>.</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="no">HelloBitcoin</span><span class="o">.</span><span class="n">getblockhash</span><span class="p">(</span><span class="m">0</span><span class="p">)</span>
+
+<span class="p">{</span><span class="ss">:ok</span><span class="p">,</span> <span class="sd">"</span><span class="s2">000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f"</span><span class="p">}</span>
+</code></pre></div></div>
+
+<p>Функция <code class="highlighter-rouge">getblockhash</code> работает верно, и она практически идентична функции <code class="highlighter-rouge">getinfo</code>.</p>
+
+<p>Чтобы избежать дублирования кода, выделим общую функциональную часть в новую вспомогательную функцию <code class="highlighter-rouge">bitcoin_rpc</code>:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">defp</span> <span class="n">bitcoin_rpc</span><span class="p">(</span><span class="n">method</span><span class="p">,</span> <span class="n">params</span> <span class="p">\\</span> <span class="p">[])</span> <span class="k">do</span>
+  <span class="n">with</span> <span class="n">url</span> <span class="o">&lt;-</span> <span class="no">Application</span><span class="o">.</span><span class="n">get_env</span><span class="p">(</span><span class="ss">:hello_bitcoin</span><span class="p">,</span> <span class="ss">:bitcoin_url</span><span class="p">),</span>
+       <span class="n">command</span> <span class="o">&lt;-</span> <span class="p">%{</span><span class="ss">jsonrpc:</span> <span class="sd">"</span><span class="s2">1.0"</span><span class="p">,</span> <span class="ss">method:</span> <span class="n">method</span><span class="p">,</span> <span class="ss">params:</span> <span class="n">params</span><span class="p">},</span>
+       <span class="p">{</span><span class="ss">:ok</span><span class="p">,</span> <span class="n">body</span><span class="p">}</span> <span class="o">&lt;-</span> <span class="no">Poison</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="n">command</span><span class="p">),</span>
+       <span class="p">{</span><span class="ss">:ok</span><span class="p">,</span> <span class="n">response</span><span class="p">}</span> <span class="o">&lt;-</span> <span class="no">HTTPoison</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">body</span><span class="p">),</span>
+       <span class="p">{</span><span class="ss">:ok</span><span class="p">,</span> <span class="n">metadata</span><span class="p">}</span> <span class="o">&lt;-</span> <span class="no">Poison</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">body</span><span class="p">),</span>
+       <span class="p">%{</span><span class="sd">"</span><span class="s2">error"</span> <span class="o">=&gt;</span> <span class="no">nil</span><span class="p">,</span> <span class="sd">"</span><span class="s2">result"</span> <span class="o">=&gt;</span> <span class="n">result</span><span class="p">}</span> <span class="o">&lt;-</span> <span class="n">metadata</span> <span class="k">do</span>
+    <span class="p">{</span><span class="ss">:ok</span><span class="p">,</span> <span class="n">result</span><span class="p">}</span>
+  <span class="k">else</span>
+    <span class="p">%{</span><span class="sd">"</span><span class="s2">error"</span> <span class="o">=&gt;</span> <span class="n">reason</span><span class="p">}</span> <span class="o">-&gt;</span> <span class="p">{</span><span class="ss">:error</span><span class="p">,</span> <span class="n">reason</span><span class="p">}</span>
+    <span class="n">error</span> <span class="o">-&gt;</span> <span class="n">error</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<p>Теперь переопределим функции <code class="highlighter-rouge">getinfo</code> и <code class="highlighter-rouge">getblockhash</code> в соответствии с функцией <code class="highlighter-rouge">bitcoin_rpc</code>:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">def</span> <span class="n">getinfo</span><span class="p">,</span> <span class="k">do</span><span class="p">:</span> <span class="n">bitcoin_rpc</span><span class="p">(</span><span class="sd">"</span><span class="s2">getinfo"</span><span class="p">)</span>
+
+<span class="k">def</span> <span class="n">getblockhash</span><span class="p">(</span><span class="n">index</span><span class="p">),</span> <span class="k">do</span><span class="p">:</span> <span class="n">bitcoin_rpc</span><span class="p">(</span><span class="sd">"</span><span class="s2">getblockhash"</span><span class="p">,</span> <span class="p">[</span><span class="n">index</span><span class="p">])</span>
+</code></pre></div></div>
+
+<p>Можно видеть, что <code class="highlighter-rouge">bitcoin_rpc</code> представляет собой полноценный RPC-интерфейс для биткоин, позволяющий с лёгкостью выполнять любые RPC-команды.</p>
+
+<p>Если вам интересно попробовать осуществить всё вышеперечисленное на своей машине, то исходники проекта можно <a href="https://github.com/pcorey/hello_bitcoin">найти на GitHub</a>.</p>
+
+<h2 id="заключение">Заключение</h2>
+
+<p>Ну вот и подошла к концу достаточно длинная статья, объясняющая относительно простую идею. Полная нода биткоин предоставляет интерфейс JSON-RPC, доступ к которому можно получить, используя любой язык (например, Эликсир) или стек. Биткоин-разработка – удивительно занимательная вещь, в которую интересно углубиться ещё сильнее.</p>
+
+<p>Следующая часть серии статей о работе с биткоином на Эликсире <a href="https://wunsh.ru/articles/bitcoin-blockchain-with-elixir-and-phoenix-part-2.html">по ссылке</a>.</p>
+
+  </div>
+
+  <!-- uSocial -->
+  <div class="post__share_block share_block">
+    <script async src="https://usocial.pro/usocial/usocial.js?v=6.1.4" data-script="usocial" charset="utf-8"></script>
+    <div class="uSocial-Share" data-pid="2fd19544e551bce292425ee8adaa31be" data-type="share" data-options="round,style2,default,absolute,horizontal,size32,counter1,counter-before,upArrow-right,nomobile" data-social="telegram,fb,vk,gPlus,twi,bookmarks"></div>
+  </div>
+  <!-- /uSocial -->
+</article>
+
+
+        <footer class="footer">
+    &copy; 2020
+    / Россия
+
+    <span class="pull-right">Любые мысли и вопросы пишите на <a href="mailto:elixir@wunsh.ru">elixir@wunsh.ru</a>.</span>
+</footer>
+
+        <div id="subscribeModal" class="modal">
+    <div class="modal__content">
+        <a href="#close" title="Close" class="modal__close">x</a>
+
+        <h2 class="modal__title">Ламповая рассылка про&nbsp;Эликсир</h2>
+
+        <p>Один-два раза в&nbsp;неделю присылаем тёплые письма об&nbsp;Эликсире: переводы самых интересных статей до&nbsp;их&nbsp;появления в&nbsp;открытом доступе, анонсы событий и&nbsp;вкусные бонусы.</p>
+
+        <form action="//wunsh.us14.list-manage.com/subscribe/post?u=c81ca3d4693f62db7f7f67c71&amp;id=a192e2dfef" method="post" id="mc-embedded-subscribe-form" name="mc-embedded-subscribe-form" class="pure-form h-tc validate" target="_blank" novalidate>
+            <input type="email" value="" name="EMAIL" class="modal__input pure-input-rounded large" id="mce-EMAIL" placeholder="Твоя почта" required>
+            <div style="position: absolute; left: -5000px;" aria-hidden="true"><input type="text" name="b_c81ca3d4693f62db7f7f67c71_a192e2dfef" tabindex="-1" value=""></div>
+
+            <input type="submit" value="Присоединиться" name="subscribe" onClick="yaCounter39773490.reachGoal('SUBSCRIBED'); return true" id="mc-embedded-subscribe" class="pure-button button-success large">
+        </form>
+
+        <p>Обязательно подтверди почту, перейдя по&nbsp;ссылке в&nbsp;письме, иначе мы&nbsp;не&nbsp;сможем делиться с&nbsp;тобой полезностями.</p>
+
+        <p>Надоедать точно не&nbsp;будем :)</p>
+    </div>
+</div>
+
+        <script src="/assets/js/vendors/zepto.min.js"></script>
+
+<script>
+    if ($(".post--docs").length) {
+        $(".footer").addClass("footer--docs")
+    }
+
+    $(".modal--close_backdrop").click(function(){
+        window.location.hash = "";
+    });
+</script>
+
+        <!-- Yandex.Metrika counter -->
+<script type="text/javascript">
+    (function (d, w, c) {
+        (w[c] = w[c] || []).push(function() {
+            try {
+                w.yaCounter39773490 = new Ya.Metrika({
+                    id:39773490,
+                    clickmap:true,
+                    trackLinks:true,
+                    accurateTrackBounce:true,
+                    webvisor:true,
+                    ut:"noindex"
+                });
+            } catch(e) { }
+        });
+
+        var n = d.getElementsByTagName("script")[0],
+            s = d.createElement("script"),
+            f = function () { n.parentNode.insertBefore(s, n); };
+        s.type = "text/javascript";
+        s.async = true;
+        s.src = "https://mc.yandex.ru/metrika/watch.js";
+
+        if (w.opera == "[object Opera]") {
+            d.addEventListener("DOMContentLoaded", f, false);
+        } else { f(); }
+    })(document, window, "yandex_metrika_callbacks");
+</script>
+<noscript><div><img src="https://mc.yandex.ru/watch/39773490?ut=noindex" style="position:absolute; left:-9999px;" alt="" /></div></noscript>
+<!-- /Yandex.Metrika counter -->
+
+      </div>
+    </div>
+  </body>
+</html>

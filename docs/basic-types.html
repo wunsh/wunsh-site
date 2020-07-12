@@ -1,0 +1,676 @@
+<!DOCTYPE html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Базовые типы |> Сообщество Elixir и Phoenix Framework</title>
+    <meta name="description" content="Русскоязычное сообщество Elixir и Phoenix Framework
+">
+
+    <link rel="alternate" type="application/rss+xml" title="Сообщество Elixir и Phoenix Framework" href="/feed.xml" />
+    <link rel="canonical" href="https://wunsh.ru/docs/basic-types">
+
+    <style type="text/css">@import url("//fonts.googleapis.com/css?family=Source+Sans+Pro:400,700&subset=cyrillic");</style>
+    <link rel="stylesheet" href="/assets/css/vendors/pure.min.css">
+    <link rel="stylesheet" href="/assets/css/vendors/pure-grids-responsive.min.css">
+    <link rel="stylesheet" href="/assets/css/style.css?1594516983">
+
+    <link rel="shortcut icon" type="image/png" href="/assets/favicon.png" >
+</head>
+
+
+  <body>
+    <div class="wunsh pure-g">
+      
+
+
+
+
+<div class="menu pure-u-1 pure-u-md-1-4">
+  <div class="header">
+    <h2 class="header__title">
+      
+        <a href="https://wunsh.ru" class="header__title_link" title="На главную">Эликсир и&nbsp;Вунш</a>
+      
+    </h2>
+    <h3 class="header__tagline">Erlang + Ruby = &#10084;</h3>
+
+    <nav class="nav">
+      <ul class="nav_list">
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/elixir" class="nav_list__item_link pure-button">О языке</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/install/linux-asdf" class="nav_list__item_link pure-button">Установка</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/docs/" class="nav_list__item_link pure-button">Документация</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/guides" class="nav_list__item_link pure-button">Гайды</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/news" class="nav_list__item_link pure-button">Новости</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/articles" class="nav_list__item_link pure-button">Статьи</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/videos" class="nav_list__item_link pure-button">Видео</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/vacancies" class="nav_list__item_link pure-button">Вакансии</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/faq" class="nav_list__item_link pure-button">FAQ</a>
+            </li>
+          
+        
+      </ul>
+    </nav>
+
+    <a href="#subscribeModal" class="pure-button header__subscribe_link">Подписаться на рассылку</a>
+  </div>
+</div>
+
+
+      <div class="content pure-u-1 pure-u-md-3-4">
+        <article class="post post--docs" itemscope itemtype="http://schema.org/BlogPosting">
+    <header class="post__header">
+        <h1 class="post__title" itemprop="name headline">
+            <p>Базовые типы</p>
+
+        </h1>
+    </header>
+
+    <div class="post__content" itemprop="articleBody">
+        <p>В этой главе мы узнаем больше о базовых типах Эликсира: <abbr title="INTEGERS">целых числах</abbr>, <abbr title="FLOATS">числах с плавающей точкой</abbr>, <abbr title="BOOLEANS">логических или булевых значениях</abbr>, <abbr title="ATOMS">атомах</abbr>, <abbr title="STRINGS">строках</abbr>, <abbr title="LISTS">списках</abbr> и <abbr title="TUPLES">кортежах</abbr>. Вот некоторые базовые типы:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">iex</span><span class="o">&gt;</span> <span class="m">1</span>          <span class="c1"># Целое число</span>
+<span class="n">iex</span><span class="o">&gt;</span> <span class="m">0x1F</span>       <span class="c1"># Целое число</span>
+<span class="n">iex</span><span class="o">&gt;</span> <span class="m">1.0</span>        <span class="c1"># Число с плавающей точкой</span>
+<span class="n">iex</span><span class="o">&gt;</span> <span class="no">true</span>       <span class="c1"># Логическое значение</span>
+<span class="n">iex</span><span class="o">&gt;</span> <span class="ss">:atom</span>      <span class="c1"># Атом</span>
+<span class="n">iex</span><span class="o">&gt;</span> <span class="sd">"</span><span class="s2">elixir"</span>   <span class="c1"># Строка</span>
+<span class="n">iex</span><span class="o">&gt;</span> <span class="p">[</span><span class="m">1</span><span class="p">,</span> <span class="m">2</span><span class="p">,</span> <span class="m">3</span><span class="p">]</span>  <span class="c1"># Список</span>
+<span class="n">iex</span><span class="o">&gt;</span> <span class="p">{</span><span class="m">1</span><span class="p">,</span> <span class="m">2</span><span class="p">,</span> <span class="m">3</span><span class="p">}</span>  <span class="c1"># Кортеж</span>
+</code></pre></div></div>
+
+<h2 id="базовая-арифметика">Базовая арифметика</h2>
+
+<p>Откройте <code class="highlighter-rouge">IEx</code> и введите следующие выражения:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">iex</span><span class="o">&gt;</span> <span class="m">1</span> <span class="o">+</span> <span class="m">2</span>
+<span class="m">3</span>
+
+<span class="n">iex</span><span class="o">&gt;</span> <span class="m">5</span> <span class="o">*</span> <span class="m">5</span>
+<span class="m">25</span>
+
+<span class="n">iex</span><span class="o">&gt;</span> <span class="m">10</span> <span class="o">/</span> <span class="m">2</span>
+<span class="m">5.0</span>
+</code></pre></div></div>
+
+<p>Обратите внимание, что выражение <code class="highlighter-rouge">10 / 2</code> вернёт число с плавающей точкой <code class="highlighter-rouge">5.0</code>, а не целое <code class="highlighter-rouge">5</code>. Это ожидаемо. В Эликсире оператор <code class="highlighter-rouge">/</code> всегда возвращает <code class="highlighter-rouge">float</code>. Если вы хотите совершить целочисленное деление или получить остаток от деления, вы можете использовать функции <code class="highlighter-rouge">div</code> и <code class="highlighter-rouge">rem</code> (от англ. <em>division</em> и <em>remainder</em>):</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">iex</span><span class="o">&gt;</span> <span class="n">div</span><span class="p">(</span><span class="m">10</span><span class="p">,</span> <span class="m">2</span><span class="p">)</span>
+<span class="m">5</span>
+
+<span class="n">iex</span><span class="o">&gt;</span> <span class="n">div</span> <span class="m">10</span><span class="p">,</span> <span class="m">2</span>
+<span class="m">5</span>
+
+<span class="n">iex</span><span class="o">&gt;</span> <span class="n">rem</span> <span class="m">10</span><span class="p">,</span> <span class="m">3</span>
+<span class="m">1</span>
+</code></pre></div></div>
+
+<p>Эликсир позволяет опустить скобки при вызове именованных функций. Такая возможность позволяет получить более читаемый синтаксис при написании декларативных спецификаций и конструкций управления потоком.</p>
+
+<p>Эликсир также поддерживает краткую форму написания двоичных, восьмиричных и шестнадцатеричных чисел:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">iex</span><span class="o">&gt;</span> <span class="m">0b1010</span>
+<span class="m">10</span>
+
+<span class="n">iex</span><span class="o">&gt;</span> <span class="err">0</span><span class="n">o777</span>
+<span class="m">511</span>
+
+<span class="n">iex</span><span class="o">&gt;</span> <span class="m">0x1F</span>
+<span class="m">31</span>
+</code></pre></div></div>
+
+<p>Числа с плавающей запятой обязательно должны содержать точку и хотя бы одну цифру после неё, а также поддерживают <code class="highlighter-rouge">e</code>-нотацию для экспоненциальных чисел:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">iex</span><span class="o">&gt;</span> <span class="m">1.0</span>
+<span class="m">1.0</span>
+
+<span class="n">iex</span><span class="o">&gt;</span> <span class="m">1.0e-10</span>
+<span class="m">1.0e-10</span>
+</code></pre></div></div>
+
+<p>Числа с плавающей точкой в Эликсире занимают 64 бита и имеют двойную точность.</p>
+
+<p>Вы можете выполнить функцию <code class="highlighter-rouge">round</code>, чтобы получить ближайшее целое число к аргументу с типом <code class="highlighter-rouge">float</code>, или функцию <code class="highlighter-rouge">trunc</code>, которая вернёт целую часть от числа.</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">iex</span><span class="o">&gt;</span> <span class="n">round</span><span class="p">(</span><span class="m">3.58</span><span class="p">)</span>
+<span class="m">4</span>
+
+<span class="n">iex</span><span class="o">&gt;</span> <span class="n">trunc</span><span class="p">(</span><span class="m">3.58</span><span class="p">)</span>
+<span class="m">3</span>
+</code></pre></div></div>
+
+<h2 id="идентификация-функций">Идентификация функций</h2>
+
+<p>Функции в Эликсире идентифицируются по их именам и их <abbr title="ARITY">арности</abbr>. Арность функции – это количество аргументов, которые принимает функция. С этого момента мы будем использовать как имя функции, так и её арность для обозначения функции во всей документации. Обозначение <code class="highlighter-rouge">round/1</code> обозначает функцию с именем <code class="highlighter-rouge">round</code>, которая принимает один аргумент, в то время как <code class="highlighter-rouge">round/2</code> обозначает другую (<em>несуществующую</em>) функцию с тем же именем, но с арностью два.</p>
+
+<h2 id="логические-значения">Логические значения</h2>
+
+<p>Эликсир поддерживает <code class="highlighter-rouge">true</code> и <code class="highlighter-rouge">false</code> в качестве логических значений:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">iex</span><span class="o">&gt;</span> <span class="no">true</span>
+<span class="no">true</span>
+
+<span class="n">iex</span><span class="o">&gt;</span> <span class="no">true</span> <span class="o">==</span> <span class="no">false</span>
+<span class="no">false</span>
+</code></pre></div></div>
+
+<p>Эликсир предоставляет набор функций для проверки типа. Например, функция <code class="highlighter-rouge">is_boolean/1</code> может быть использована для проверки, является значение логическим или нет:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">iex</span><span class="o">&gt;</span> <span class="n">is_boolean</span><span class="p">(</span><span class="no">true</span><span class="p">)</span>
+<span class="no">true</span>
+
+<span class="n">iex</span><span class="o">&gt;</span> <span class="n">is_boolean</span><span class="p">(</span><span class="m">1</span><span class="p">)</span>
+<span class="no">false</span>
+</code></pre></div></div>
+
+<p>Вы можете также использовать функции <code class="highlighter-rouge">is_integer/1</code>, <code class="highlighter-rouge">is_float/1</code> или <code class="highlighter-rouge">is_number/1</code>, чтобы проверить, является ли аргумент целым числом, дробным числом или одним из них.</p>
+
+<blockquote>
+  <p><strong>Помните.</strong> В любой момент вы можете набрать <code class="highlighter-rouge">h()</code> в интерактивной оболочке и получить информацию, как её использовать. Хелпер <code class="highlighter-rouge">h</code> может также быть использован для доступа к документации по любой функции. Например, команда <code class="highlighter-rouge">h is_integer/1</code> напечатает документацию функции <code class="highlighter-rouge">is_integer/1</code>. Это также работает для операторов и других конструкций (попробуйте <code class="highlighter-rouge">h ==/2</code>).</p>
+</blockquote>
+
+<h2 id="атомы">Атомы</h2>
+
+<p>Атомы – это константы, имя которых является также и их значением. Некоторые другие языки называют их <abbr title="SYMBOLS">символами</abbr>:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">iex</span><span class="o">&gt;</span> <span class="ss">:hello</span>
+<span class="ss">:hello</span>
+
+<span class="n">iex</span><span class="o">&gt;</span> <span class="ss">:hello</span> <span class="o">==</span> <span class="ss">:world</span>
+<span class="no">false</span>
+</code></pre></div></div>
+
+<p>Логические значения <code class="highlighter-rouge">true</code> и <code class="highlighter-rouge">false</code>, фактически, являются атомами:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">iex</span><span class="o">&gt;</span> <span class="no">true</span> <span class="o">==</span> <span class="ss">:true</span>
+<span class="no">true</span>
+
+<span class="n">iex</span><span class="o">&gt;</span> <span class="n">is_atom</span><span class="p">(</span><span class="no">false</span><span class="p">)</span>
+<span class="no">true</span>
+
+<span class="n">iex</span><span class="o">&gt;</span> <span class="n">is_boolean</span><span class="p">(</span><span class="ss">:false</span><span class="p">)</span>
+<span class="no">true</span>
+</code></pre></div></div>
+
+<h2 id="строки">Строки</h2>
+
+<p>Строки в Эликсире располагаются внутри двойных кавычек, и они представлены в кодировке <code class="highlighter-rouge">UTF-8</code>:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">iex</span><span class="o">&gt;</span> <span class="sd">"</span><span class="s2">hellö"</span>
+<span class="sd">"</span><span class="s2">hellö"</span>
+</code></pre></div></div>
+
+<blockquote>
+  <p><strong>Обратите внимание.</strong> Если вы работаете под Виндоус, ваш терминал может использовать отличную от <code class="highlighter-rouge">UTF-8</code> кодировку по умолчанию. Вы можете сменить кодировку текущей сессии командой <code class="highlighter-rouge">chcp 65001</code> перед запуском <code class="highlighter-rouge">IEx</code>.</p>
+</blockquote>
+
+<p>Эликсир также поддерживает интерполяцию строк:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">iex</span><span class="o">&gt;</span> <span class="sd">"</span><span class="s2">hellö </span><span class="si">#{</span><span class="ss">:world</span><span class="si">}</span><span class="s2">"</span>
+<span class="sd">"</span><span class="s2">hellö world"</span>
+</code></pre></div></div>
+
+<p>Строки могут содержать разрывы. Вы можете ввести их, используя экранированные последовательности:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">iex</span><span class="o">&gt;</span> <span class="sd">"</span><span class="s2">hello
+...&gt; world"</span>
+<span class="sd">"</span><span class="s2">hello\nworld"</span>
+
+<span class="n">iex</span><span class="o">&gt;</span> <span class="sd">"</span><span class="s2">hello\nworld"</span>
+<span class="sd">"</span><span class="s2">hello\nworld"</span>
+</code></pre></div></div>
+
+<p>Вы можете вывести строку, используя функцию <code class="highlighter-rouge">IO.puts/1</code> из модуля <code class="highlighter-rouge">IO</code>:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">iex</span><span class="o">&gt;</span> <span class="no">IO</span><span class="o">.</span><span class="n">puts</span> <span class="sd">"</span><span class="s2">hello\nworld"</span>
+<span class="n">hello</span>
+<span class="n">world</span>
+<span class="ss">:ok</span>
+</code></pre></div></div>
+
+<p>Помните, что функция <code class="highlighter-rouge">IO.puts/1</code> возвращает атом <code class="highlighter-rouge">:ok</code> в качестве результата после вывода.</p>
+
+<p>Строки в Эликсире представлены внутри <abbr title="BINARIES">двоичными данными</abbr>, которые являются последовательностями байтов:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">iex</span><span class="o">&gt;</span> <span class="n">is_binary</span><span class="p">(</span><span class="sd">"</span><span class="s2">hellö"</span><span class="p">)</span>
+<span class="no">true</span>
+</code></pre></div></div>
+
+<p>Мы также можем получить количество байт в строке:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">iex</span><span class="o">&gt;</span> <span class="n">byte_size</span><span class="p">(</span><span class="sd">"</span><span class="s2">hellö"</span><span class="p">)</span>
+<span class="m">6</span>
+</code></pre></div></div>
+
+<p>Обратите внимание, что количество байт в данной строке равно 6, хотя в ней 5 символов. Дело в том, что символ «ö» занимает 2 байта, чтобы быть представленным в <code class="highlighter-rouge">UTF-8</code>. Мы можем получить реальную длину строки, основанную на количестве символов, использовав функцию <code class="highlighter-rouge">String.length/1</code>:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">iex</span><span class="o">&gt;</span> <span class="no">String</span><span class="o">.</span><span class="n">length</span><span class="p">(</span><span class="sd">"</span><span class="s2">hellö"</span><span class="p">)</span>
+<span class="m">5</span>
+</code></pre></div></div>
+
+<p><a href="https://hexdocs.pm/elixir/String.html">Модуль <code class="highlighter-rouge">String</code></a> содержит набор функций для манипуляций со строками, удовлетворяющий стандарту Юникод:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">iex</span><span class="o">&gt;</span> <span class="no">String</span><span class="o">.</span><span class="n">upcase</span><span class="p">(</span><span class="sd">"</span><span class="s2">hellö"</span><span class="p">)</span>
+<span class="sd">"</span><span class="s2">HELLÖ"</span>
+</code></pre></div></div>
+
+<h2 id="анонимные-функции">Анонимные функции</h2>
+
+<p>Анонимные функции могут быть созданы в одну строку. Они заключаются между ключевыми словами <code class="highlighter-rouge">fn</code> и <code class="highlighter-rouge">end</code>:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">iex</span><span class="o">&gt;</span> <span class="n">add</span> <span class="o">=</span> <span class="k">fn</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span> <span class="o">-&gt;</span> <span class="n">a</span> <span class="o">+</span> <span class="n">b</span> <span class="k">end</span>
+<span class="c1">#Function&lt;12.71889879/2 in :erl_eval.expr/5&gt;</span>
+
+<span class="n">iex</span><span class="o">&gt;</span> <span class="n">add</span><span class="o">.</span><span class="p">(</span><span class="m">1</span><span class="p">,</span> <span class="m">2</span><span class="p">)</span>
+<span class="m">3</span>
+
+<span class="n">iex</span><span class="o">&gt;</span> <span class="n">is_function</span><span class="p">(</span><span class="n">add</span><span class="p">)</span>
+<span class="no">true</span>
+
+<span class="n">iex</span><span class="o">&gt;</span> <span class="n">is_function</span><span class="p">(</span><span class="n">add</span><span class="p">,</span> <span class="m">2</span><span class="p">)</span> <span class="c1"># проверяет, что `add` – функция, принимающая ровно два аргумента</span>
+<span class="no">true</span>
+
+<span class="n">iex</span><span class="o">&gt;</span> <span class="n">is_function</span><span class="p">(</span><span class="n">add</span><span class="p">,</span> <span class="m">1</span><span class="p">)</span> <span class="c1"># проверяет, что `add` – функция, принимающая ровно один аргумент</span>
+<span class="no">false</span>
+</code></pre></div></div>
+
+<p>Функции в Эликсире являются сущностями первого класса, то есть они могут быть переданы в качестве аргумента другой функции, так же, как целые числа и строки. В примере мы передали функции <code class="highlighter-rouge">is_function/1</code> переменную <code class="highlighter-rouge">add</code> и она вернула <code class="highlighter-rouge">true</code>. Мы можем также проверить арность функции вызовом <code class="highlighter-rouge">is_function/2</code>.</p>
+
+<p>Обратите внимание, что точка <code class="highlighter-rouge">.</code> между переменной и скобками обязательна для вызова анонимной функции. Эта точка нужна, чтобы избавиться от неоднозначности между анонимной функцией <code class="highlighter-rouge">add</code> и именованной <code class="highlighter-rouge">add/2</code>. В этом смысле в Эликсире явно различаются анонимные и именованные функции. Мы поговорим об этой разнице в главе <a href="/docs/modules-and-functions.html"><strong>«Модули и функции»</strong></a>.</p>
+
+<p>Анонимные функции являются замыканиями и по существу они могут иметь доступ к переменным из <abbr title="SCOPES">области видимости</abbr>, когда функция объявлена. Давайте объявим новую анонимную функцию, использующую анонимную функцию <code class="highlighter-rouge">add</code>, которую мы объявили ранее:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">iex</span><span class="o">&gt;</span> <span class="n">double</span> <span class="o">=</span> <span class="k">fn</span> <span class="n">a</span> <span class="o">-&gt;</span> <span class="n">add</span><span class="o">.</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">a</span><span class="p">)</span> <span class="k">end</span>
+<span class="c1">#Function&lt;6.71889879/1 in :erl_eval.expr/5&gt;</span>
+
+<span class="n">iex</span><span class="o">&gt;</span> <span class="n">double</span><span class="o">.</span><span class="p">(</span><span class="m">2</span><span class="p">)</span>
+<span class="m">4</span>
+</code></pre></div></div>
+
+<p>Помните, что присвоение значений внутри функции никак не изменяют её окружение:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">iex</span><span class="o">&gt;</span> <span class="n">x</span> <span class="o">=</span> <span class="m">42</span>
+<span class="m">42</span>
+
+<span class="n">iex</span><span class="o">&gt;</span> <span class="p">(</span><span class="k">fn</span> <span class="o">-&gt;</span> <span class="n">x</span> <span class="o">=</span> <span class="m">0</span> <span class="k">end</span><span class="p">)</span><span class="o">.</span><span class="p">()</span>
+<span class="m">0</span>
+
+<span class="n">iex</span><span class="o">&gt;</span> <span class="n">x</span>
+<span class="m">42</span>
+</code></pre></div></div>
+
+<h2 id="связные-списки">(Связные) Списки</h2>
+
+<p>Эликсир использует квадратные скобки, чтобы задать список значений. Значения могут быть любого типа:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">iex</span><span class="o">&gt;</span> <span class="p">[</span><span class="m">1</span><span class="p">,</span> <span class="m">2</span><span class="p">,</span> <span class="no">true</span><span class="p">,</span> <span class="m">3</span><span class="p">]</span>
+<span class="p">[</span><span class="m">1</span><span class="p">,</span> <span class="m">2</span><span class="p">,</span> <span class="no">true</span><span class="p">,</span> <span class="m">3</span><span class="p">]</span>
+
+<span class="n">iex</span><span class="o">&gt;</span> <span class="n">length</span> <span class="p">[</span><span class="m">1</span><span class="p">,</span> <span class="m">2</span><span class="p">,</span> <span class="m">3</span><span class="p">]</span>
+<span class="m">3</span>
+</code></pre></div></div>
+
+<p>Два списка могут быть сложены, используя оператор <code class="highlighter-rouge">++/2</code>, и один может быть вычтен из другого с помощью <code class="highlighter-rouge">--/2</code>:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">iex</span><span class="o">&gt;</span> <span class="p">[</span><span class="m">1</span><span class="p">,</span> <span class="m">2</span><span class="p">,</span> <span class="m">3</span><span class="p">]</span> <span class="o">++</span> <span class="p">[</span><span class="m">4</span><span class="p">,</span> <span class="m">5</span><span class="p">,</span> <span class="m">6</span><span class="p">]</span>
+<span class="p">[</span><span class="m">1</span><span class="p">,</span> <span class="m">2</span><span class="p">,</span> <span class="m">3</span><span class="p">,</span> <span class="m">4</span><span class="p">,</span> <span class="m">5</span><span class="p">,</span> <span class="m">6</span><span class="p">]</span>
+
+<span class="n">iex</span><span class="o">&gt;</span> <span class="p">[</span><span class="m">1</span><span class="p">,</span> <span class="no">true</span><span class="p">,</span> <span class="m">2</span><span class="p">,</span> <span class="no">false</span><span class="p">,</span> <span class="m">3</span><span class="p">,</span> <span class="no">true</span><span class="p">]</span> <span class="o">--</span> <span class="p">[</span><span class="no">true</span><span class="p">,</span> <span class="no">false</span><span class="p">]</span>
+<span class="p">[</span><span class="m">1</span><span class="p">,</span> <span class="m">2</span><span class="p">,</span> <span class="m">3</span><span class="p">,</span> <span class="no">true</span><span class="p">]</span>
+</code></pre></div></div>
+
+<p>В этом руководстве мы будем много говорить о голове и хвосте списка. Головой называют первый элемент списка, а хвостом – его оставшуюся часть. Они могут быть получены функциями <code class="highlighter-rouge">hd/1</code> и <code class="highlighter-rouge">tl/1</code>. Давайте создадим список и получим его голову и хвост:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">iex</span><span class="o">&gt;</span> <span class="n">list</span> <span class="o">=</span> <span class="p">[</span><span class="m">1</span><span class="p">,</span> <span class="m">2</span><span class="p">,</span> <span class="m">3</span><span class="p">]</span>
+
+<span class="n">iex</span><span class="o">&gt;</span> <span class="n">hd</span><span class="p">(</span><span class="n">list</span><span class="p">)</span>
+<span class="m">1</span>
+
+<span class="n">iex</span><span class="o">&gt;</span> <span class="n">tl</span><span class="p">(</span><span class="n">list</span><span class="p">)</span>
+<span class="p">[</span><span class="m">2</span><span class="p">,</span> <span class="m">3</span><span class="p">]</span>
+</code></pre></div></div>
+
+<p>Попытка получить голову или хвост пустого списка выбросит ошибку:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">iex</span><span class="o">&gt;</span> <span class="n">hd</span> <span class="p">[]</span>
+<span class="o">**</span> <span class="p">(</span><span class="no">ArgumentError</span><span class="p">)</span> <span class="n">argument</span> <span class="n">error</span>
+</code></pre></div></div>
+
+<p>Иногда вы будете создавать список и он будет возвращать значение в одинарных кавычках. Например:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">iex</span><span class="o">&gt;</span> <span class="p">[</span><span class="m">11</span><span class="p">,</span> <span class="m">12</span><span class="p">,</span> <span class="m">13</span><span class="p">]</span>
+<span class="s1">'\v\f\r'</span>
+
+<span class="n">iex</span><span class="o">&gt;</span> <span class="p">[</span><span class="m">104</span><span class="p">,</span> <span class="m">101</span><span class="p">,</span> <span class="m">108</span><span class="p">,</span> <span class="m">108</span><span class="p">,</span> <span class="m">111</span><span class="p">]</span>
+<span class="s1">'hello'</span>
+</code></pre></div></div>
+
+<p>Когда Эликсир видит список корректных <code class="highlighter-rouge">ASCII</code>-кодов, которые может напечатать, он выводит список символов (в буквальном смысле). Списки символов часто используются для взаимодействия с существующим кодом на Эрланге. Если вы видите значение в <code class="highlighter-rouge">IEx</code>, и вы не уверены, что это такое, вы можете использовать <code class="highlighter-rouge">i/1</code> для получения информации:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">iex</span><span class="o">&gt;</span> <span class="n">i</span> <span class="s1">'hello'</span>
+<span class="no">Term</span>
+  <span class="s1">'hello'</span>
+<span class="no">Data</span> <span class="n">type</span>
+  <span class="no">List</span>
+<span class="no">Description</span>
+  <span class="o">...</span>
+<span class="no">Raw</span> <span class="n">representation</span>
+  <span class="p">[</span><span class="m">104</span><span class="p">,</span> <span class="m">101</span><span class="p">,</span> <span class="m">108</span><span class="p">,</span> <span class="m">108</span><span class="p">,</span> <span class="m">111</span><span class="p">]</span>
+<span class="no">Reference</span> <span class="n">modules</span>
+  <span class="no">List</span>
+</code></pre></div></div>
+
+<p>Помните, что значения в одинарных и двойных кавычках не эквивалентны в Эликсире, они принадлежат разным типам:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">iex</span><span class="o">&gt;</span> <span class="s1">'hello'</span> <span class="o">==</span> <span class="sd">"</span><span class="s2">hello"</span>
+<span class="no">false</span>
+</code></pre></div></div>
+
+<p>Внутри одиночных кавычек <abbr title="CHAR LISTS">списки символов</abbr>, внутри двойных – строки. Мы поговорим об этом больше в главе <a href="/docs/binaries-strings-and-char-lists.html"><strong>«Двоичные данные, строки и списки символов»</strong></a>.</p>
+
+<h2 id="кортежи">Кортежи</h2>
+
+<p>Эликсир использует фигурные скобки для объявления кортежей. Как и списки, кортежи могут хранить любые значения:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">iex</span><span class="o">&gt;</span> <span class="p">{</span><span class="ss">:ok</span><span class="p">,</span> <span class="sd">"</span><span class="s2">hello"</span><span class="p">}</span>
+<span class="p">{</span><span class="ss">:ok</span><span class="p">,</span> <span class="sd">"</span><span class="s2">hello"</span><span class="p">}</span>
+
+<span class="n">iex</span><span class="o">&gt;</span> <span class="n">tuple_size</span> <span class="p">{</span><span class="ss">:ok</span><span class="p">,</span> <span class="sd">"</span><span class="s2">hello"</span><span class="p">}</span>
+<span class="m">2</span>
+</code></pre></div></div>
+
+<p>Кортежи хранят элементы в памяти последовательно. Это значит, что доступ к элементу кортежа по индексу или получение размера кортежа – быстрая операция. Индексы начинаются с нуля:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">iex</span><span class="o">&gt;</span> <span class="n">tuple</span> <span class="o">=</span> <span class="p">{</span><span class="ss">:ok</span><span class="p">,</span> <span class="sd">"</span><span class="s2">hello"</span><span class="p">}</span>
+<span class="p">{</span><span class="ss">:ok</span><span class="p">,</span> <span class="sd">"</span><span class="s2">hello"</span><span class="p">}</span>
+
+<span class="n">iex</span><span class="o">&gt;</span> <span class="n">elem</span><span class="p">(</span><span class="n">tuple</span><span class="p">,</span> <span class="m">1</span><span class="p">)</span>
+<span class="sd">"</span><span class="s2">hello"</span>
+
+<span class="n">iex</span><span class="o">&gt;</span> <span class="n">tuple_size</span><span class="p">(</span><span class="n">tuple</span><span class="p">)</span>
+<span class="m">2</span>
+</code></pre></div></div>
+
+<p>Также можно добавить элемент на определённое место в кортеже с помощью функции <code class="highlighter-rouge">put_elem/3</code>:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">iex</span><span class="o">&gt;</span> <span class="n">tuple</span> <span class="o">=</span> <span class="p">{</span><span class="ss">:ok</span><span class="p">,</span> <span class="sd">"</span><span class="s2">hello"</span><span class="p">}</span>
+<span class="p">{</span><span class="ss">:ok</span><span class="p">,</span> <span class="sd">"</span><span class="s2">hello"</span><span class="p">}</span>
+
+<span class="n">iex</span><span class="o">&gt;</span> <span class="n">put_elem</span><span class="p">(</span><span class="n">tuple</span><span class="p">,</span> <span class="m">1</span><span class="p">,</span> <span class="sd">"</span><span class="s2">world"</span><span class="p">)</span>
+<span class="p">{</span><span class="ss">:ok</span><span class="p">,</span> <span class="sd">"</span><span class="s2">world"</span><span class="p">}</span>
+
+<span class="n">iex</span><span class="o">&gt;</span> <span class="n">tuple</span>
+<span class="p">{</span><span class="ss">:ok</span><span class="p">,</span> <span class="sd">"</span><span class="s2">hello"</span><span class="p">}</span>
+</code></pre></div></div>
+
+<p>Обратите внимание, что функция <code class="highlighter-rouge">put_elem/3</code> вернёт новый кортеж. Исходный кортеж, который хранится в переменной <code class="highlighter-rouge">tuple</code>, не изменяется, потому что данные в Эликсире <abbr title="IMMUTABLE">иммутабельны</abbr>. Благодаря этому, вам не придётся беспокоиться, что какой-то код может изменить ваши структуры данных.</p>
+
+<h2 id="списки-или-кортежи">Списки или кортежи?</h2>
+
+<p>Какая разница между списками и кортежами?</p>
+
+<p>Списки хранятся в памяти, как связные списки, это значит, что каждый элемент списка хранит своё значение и указывает на следующий элемент, пока не будет достигнут конец списка.</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">iex</span><span class="o">&gt;</span> <span class="n">list</span> <span class="o">=</span> <span class="p">[</span><span class="m">1</span> <span class="o">|</span> <span class="p">[</span><span class="m">2</span> <span class="o">|</span> <span class="p">[</span><span class="m">3</span> <span class="o">|</span> <span class="p">[]]]]</span>
+<span class="p">[</span><span class="m">1</span><span class="p">,</span> <span class="m">2</span><span class="p">,</span> <span class="m">3</span><span class="p">]</span>
+</code></pre></div></div>
+
+<p>Это значит, что получение длины списка – линейная операция: нам нужно пройти через весь список последовательно, чтобы узнать его размер. Обновление списка – быстрая операция, также как добавление элементов в начало:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">iex</span><span class="o">&gt;</span> <span class="p">[</span><span class="m">0</span> <span class="o">|</span> <span class="n">list</span><span class="p">]</span>
+<span class="p">[</span><span class="m">0</span><span class="p">,</span> <span class="m">1</span><span class="p">,</span> <span class="m">2</span><span class="p">,</span> <span class="m">3</span><span class="p">]</span>
+</code></pre></div></div>
+
+<p>Кортежи, с другой стороны, хранятся в памяти последовательно. Это значит, что получение размера кортежа или доступ к элементу по индексу работают быстро. Однако, обновление или добавление элементов в кортеже – дорогая операция, поскольку включает в себя копирование всего кортежа в память.</p>
+
+<p>Использование той или иной структуры данных продиктовано особенностями их производительности. Наиболее частый случай использования кортежей – возврат дополнительной информации из функции. Например, <code class="highlighter-rouge">File.read/1</code> – функция, которая используется для чтения содержимого файлов. Она возвращает кортежи:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">iex</span><span class="o">&gt;</span> <span class="no">File</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="sd">"</span><span class="s2">path/to/existing/file"</span><span class="p">)</span>
+<span class="p">{</span><span class="ss">:ok</span><span class="p">,</span> <span class="sd">"</span><span class="s2">... contents ..."</span><span class="p">}</span>
+
+<span class="n">iex</span><span class="o">&gt;</span> <span class="no">File</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="sd">"</span><span class="s2">path/to/unknown/file"</span><span class="p">)</span>
+<span class="p">{</span><span class="ss">:error</span><span class="p">,</span> <span class="ss">:enoent</span><span class="p">}</span>
+</code></pre></div></div>
+
+<p>Если путь, переданный в функцию <code class="highlighter-rouge">File.read/1</code>, существует, она возвращает кортеж с атомом <code class="highlighter-rouge">:ok</code> в качестве первого элемента и содержимым файла в качестве второго. Иначе, она возвращает кортеж с <code class="highlighter-rouge">:error</code> и описанием ошибки.</p>
+
+<p>Большую часть времени Эликсир пытается направить вас поступать правильно. Например, есть функция <code class="highlighter-rouge">elem/2</code> для доступа к элементу кортежа, но нет встроенного эквивалента этой функции для списков:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">iex</span><span class="o">&gt;</span> <span class="n">tuple</span> <span class="o">=</span> <span class="p">{</span><span class="ss">:ok</span><span class="p">,</span> <span class="sd">"</span><span class="s2">hello"</span><span class="p">}</span>
+<span class="p">{</span><span class="ss">:ok</span><span class="p">,</span> <span class="sd">"</span><span class="s2">hello"</span><span class="p">}</span>
+
+<span class="n">iex</span><span class="o">&gt;</span> <span class="n">elem</span><span class="p">(</span><span class="n">tuple</span><span class="p">,</span> <span class="m">1</span><span class="p">)</span>
+<span class="sd">"</span><span class="s2">hello"</span>
+</code></pre></div></div>
+
+<p>При подсчёте элементов в структурах данных, Эликсир также придерживается простого правила: функция называется <code class="highlighter-rouge">size</code>, если операция выполняется за константное время (значение предварительно посчитано), или <code class="highlighter-rouge">length</code>, если операция линейна (подсчёт длины тем дольше, чем больше переданное значение). Удобно запомнить, что «length» и «linear» оба начинаются с «l».</p>
+
+<p>Например, мы уже использовали 4 функции подсчёта: <code class="highlighter-rouge">byte_size/1</code> (количество байт, занимаемых строкой), <code class="highlighter-rouge">tuple_size/1</code> (размер кортежа), <code class="highlighter-rouge">length/1</code> (длина списка), <code class="highlighter-rouge">String.length/1</code> (количество графем в строке). Мы использовали <code class="highlighter-rouge">byte_size</code> для получения количества байт, которые занимает строка – это дешёвая операция. Для получения количества символов Юникода, с другой стороны, используется <code class="highlighter-rouge">String.length</code>, что может быть дорого, т. к. для этого нужен обход всей строки.</p>
+
+<p>Эликсир также предоставляет модули <code class="highlighter-rouge">Port</code>, <code class="highlighter-rouge">Reference</code>, и <code class="highlighter-rouge">PID</code> как типы данных (обычно используются при общении процессов), и мы уделим им немного внимания, когда будем говорить о процессах. Теперь давайте познакомимся с базовыми операторам, которые используются с нашими базовыми типами.</p>
+
+    </div>
+</article>
+
+<nav class="docs_nav pure-g">
+    <div class="docs_nav__inner pure-u-1 pure-u-md-3-4">
+        <div class="pure-g">
+            <div class="docs_nav__column docs_nav__column--prev pure-u-1-3">
+                
+                    <a href="/docs/index.html" class="docs_nav__link pure-button">
+                        &larr;<span class="h-hidden_mobile"> Назад</span></a>
+                
+            </div>
+
+            <div class="docs_nav__column docs_nav__column--contents pure-u-1-3">
+                <a href="#docsContents" class="docs_nav__link docs_nav__link--contents pure-button">☰</a>
+            </div>
+
+            <div class="docs_nav__column docs_nav__column--next pure-u-1-3">
+                
+                    <a href="/docs/basic-operators.html" class="docs_nav__link pure-button">
+                        <span class="h-hidden_mobile">Вперёд </span>&rarr;
+                    </a>
+                
+            </div>
+        </div>
+    </div>
+</nav>
+
+<div id="docsContents" class="modal modal--docs_contents modal--close_backdrop">
+    <div class="modal__content">
+        <a href="#close" title="Закрыть" class="modal__close">x</a>
+
+        <h2 class="modal__title">Содержание</h2>
+
+        
+        <h3 id="руководство-для-начинающих">Руководство для начинающих</h3>
+<ul>
+  <li><a href="/docs">Введение</a></li>
+  <li><a href="/docs/basic-types.html">Базовые типы</a></li>
+  <li><a href="/docs/basic-operators.html">Базовые операторы</a></li>
+  <li><a href="/docs/pattern-matching.html">Сопоставление с образцом</a></li>
+  <li><a href="/docs/case-cond-and-if.html">Конструкции ветвления</a></li>
+  <li><a href="/docs/binaries-strings-and-char-lists.html">Двоичные данные, строки и списки символов</a></li>
+  <li><a href="/docs/keywords-and-maps.html">Ключевые списки и словари</a></li>
+  <li><a href="/docs/modules-and-functions.html">Модули и функции</a></li>
+  <li><a href="/docs/recursion.html">Рекурсия</a></li>
+  <li><a href="/docs/enumerables-and-streams.html">Перечисления и потоки</a></li>
+  <li><a href="/docs/processes.html">Процессы</a></li>
+  <li><a href="/docs/io-and-the-file-system.html">Ввод/вывод и файловая система</a></li>
+  <li><a href="/docs/alias-require-and-import.html">Директивы <code class="highlighter-rouge">alias</code>, <code class="highlighter-rouge">require</code> и <code class="highlighter-rouge">import</code></a></li>
+  <li><a href="/docs/module-attributes.html">Атрибуты модулей</a></li>
+  <li><a href="/docs/structs.html">Структуры</a></li>
+  <li><a href="/docs/protocols.html">Протоколы</a></li>
+  <li><a href="/docs/comprehensions.html">Списковые выражения</a></li>
+  <li><a href="/docs/sigils.html">Сигилы</a></li>
+  <li><a href="/docs/try-catch-and-rescue.html">Конструкция <code class="highlighter-rouge">try</code>, <code class="highlighter-rouge">catch</code> и <code class="highlighter-rouge">rescue</code></a></li>
+  <li><a href="/docs/typespecs-and-behaviours.html">Спецификации типов и поведения</a></li>
+  <li><a href="/docs/erlang-libraries.html">Библиотеки Эрланга</a></li>
+  <li><a href="/docs/where-to-go-next.html">Куда двигаться дальше</a></li>
+</ul>
+
+<h3 id="микс-и-otp">Микс и <code class="highlighter-rouge">OTP</code></h3>
+<ul>
+  <li><a href="/docs/mix-otp/introduction-to-mix.html">Введение в Микс</a></li>
+  <li><a href="/docs/mix-otp/agent.html">Агент</a></li>
+  <li><a href="/docs/mix-otp/genserver.html">GenServer</a></li>
+  <li><a href="/docs/mix-otp/supervisor-and-application.html">Супервизор и приложение</a></li>
+  <li><a href="/docs/mix-otp/dynamic-supervisor.html">Динамический супервизор</a></li>
+  <li><a href="/docs/mix-otp/ets.html">ETS</a></li>
+  <li><a href="/docs/mix-otp/dependencies-and-umbrella-apps.html">Зависимости и зонтичные проекты</a></li>
+  <li><a href="/docs/mix-otp/task-and-gen-tcp.html">Модули <code class="highlighter-rouge">Task</code> и <code class="highlighter-rouge">:gen_tcp</code></a></li>
+  <li><a href="/docs/mix-otp/docs-tests-and-with.html">Доктесты, паттерны и оператор <code class="highlighter-rouge">with</code></a></li>
+  <li><a href="/docs/mix-otp/distributed-tasks-and-configuration.html">Распределенные задачи и конфигурация</a></li>
+</ul>
+
+<h3 id="метапрограммирование">Метапрограммирование</h3>
+<ul>
+  <li><a href="/docs/meta/quote-and-unquote.html">Конструкции <code class="highlighter-rouge">quote</code> и <code class="highlighter-rouge">unquote</code></a></li>
+  <li><a href="/docs/meta/macros.html">Макросы</a></li>
+  <li><a href="/docs/meta/domain-specific-languages.html">Предметно-ориентированные языки</a></li>
+</ul>
+
+    </div>
+</div>
+
+
+
+        <footer class="footer">
+    &copy; 2020
+    / Россия
+
+    <span class="pull-right">Любые мысли и вопросы пишите на <a href="mailto:elixir@wunsh.ru">elixir@wunsh.ru</a>.</span>
+</footer>
+
+        <div id="subscribeModal" class="modal">
+    <div class="modal__content">
+        <a href="#close" title="Close" class="modal__close">x</a>
+
+        <h2 class="modal__title">Ламповая рассылка про&nbsp;Эликсир</h2>
+
+        <p>Один-два раза в&nbsp;неделю присылаем тёплые письма об&nbsp;Эликсире: переводы самых интересных статей до&nbsp;их&nbsp;появления в&nbsp;открытом доступе, анонсы событий и&nbsp;вкусные бонусы.</p>
+
+        <form action="//wunsh.us14.list-manage.com/subscribe/post?u=c81ca3d4693f62db7f7f67c71&amp;id=a192e2dfef" method="post" id="mc-embedded-subscribe-form" name="mc-embedded-subscribe-form" class="pure-form h-tc validate" target="_blank" novalidate>
+            <input type="email" value="" name="EMAIL" class="modal__input pure-input-rounded large" id="mce-EMAIL" placeholder="Твоя почта" required>
+            <div style="position: absolute; left: -5000px;" aria-hidden="true"><input type="text" name="b_c81ca3d4693f62db7f7f67c71_a192e2dfef" tabindex="-1" value=""></div>
+
+            <input type="submit" value="Присоединиться" name="subscribe" onClick="yaCounter39773490.reachGoal('SUBSCRIBED'); return true" id="mc-embedded-subscribe" class="pure-button button-success large">
+        </form>
+
+        <p>Обязательно подтверди почту, перейдя по&nbsp;ссылке в&nbsp;письме, иначе мы&nbsp;не&nbsp;сможем делиться с&nbsp;тобой полезностями.</p>
+
+        <p>Надоедать точно не&nbsp;будем :)</p>
+    </div>
+</div>
+
+        <script src="/assets/js/vendors/zepto.min.js"></script>
+
+<script>
+    if ($(".post--docs").length) {
+        $(".footer").addClass("footer--docs")
+    }
+
+    $(".modal--close_backdrop").click(function(){
+        window.location.hash = "";
+    });
+</script>
+
+        <!-- Yandex.Metrika counter -->
+<script type="text/javascript">
+    (function (d, w, c) {
+        (w[c] = w[c] || []).push(function() {
+            try {
+                w.yaCounter39773490 = new Ya.Metrika({
+                    id:39773490,
+                    clickmap:true,
+                    trackLinks:true,
+                    accurateTrackBounce:true,
+                    webvisor:true,
+                    ut:"noindex"
+                });
+            } catch(e) { }
+        });
+
+        var n = d.getElementsByTagName("script")[0],
+            s = d.createElement("script"),
+            f = function () { n.parentNode.insertBefore(s, n); };
+        s.type = "text/javascript";
+        s.async = true;
+        s.src = "https://mc.yandex.ru/metrika/watch.js";
+
+        if (w.opera == "[object Opera]") {
+            d.addEventListener("DOMContentLoaded", f, false);
+        } else { f(); }
+    })(document, window, "yandex_metrika_callbacks");
+</script>
+<noscript><div><img src="https://mc.yandex.ru/watch/39773490?ut=noindex" style="position:absolute; left:-9999px;" alt="" /></div></noscript>
+<!-- /Yandex.Metrika counter -->
+
+      </div>
+    </div>
+  </body>
+</html>

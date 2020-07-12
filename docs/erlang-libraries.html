@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Библиотеки Эрланга |> Сообщество Elixir и Phoenix Framework</title>
+    <meta name="description" content="Русскоязычное сообщество Elixir и Phoenix Framework
+">
+
+    <link rel="alternate" type="application/rss+xml" title="Сообщество Elixir и Phoenix Framework" href="/feed.xml" />
+    <link rel="canonical" href="https://wunsh.ru/docs/erlang-libraries">
+
+    <style type="text/css">@import url("//fonts.googleapis.com/css?family=Source+Sans+Pro:400,700&subset=cyrillic");</style>
+    <link rel="stylesheet" href="/assets/css/vendors/pure.min.css">
+    <link rel="stylesheet" href="/assets/css/vendors/pure-grids-responsive.min.css">
+    <link rel="stylesheet" href="/assets/css/style.css?1594516983">
+
+    <link rel="shortcut icon" type="image/png" href="/assets/favicon.png" >
+</head>
+
+
+  <body>
+    <div class="wunsh pure-g">
+      
+
+
+
+
+<div class="menu pure-u-1 pure-u-md-1-4">
+  <div class="header">
+    <h2 class="header__title">
+      
+        <a href="https://wunsh.ru" class="header__title_link" title="На главную">Эликсир и&nbsp;Вунш</a>
+      
+    </h2>
+    <h3 class="header__tagline">Erlang + Ruby = &#10084;</h3>
+
+    <nav class="nav">
+      <ul class="nav_list">
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/elixir" class="nav_list__item_link pure-button">О языке</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/install/linux-asdf" class="nav_list__item_link pure-button">Установка</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/docs/" class="nav_list__item_link pure-button">Документация</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/guides" class="nav_list__item_link pure-button">Гайды</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/news" class="nav_list__item_link pure-button">Новости</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/articles" class="nav_list__item_link pure-button">Статьи</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/videos" class="nav_list__item_link pure-button">Видео</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/vacancies" class="nav_list__item_link pure-button">Вакансии</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/faq" class="nav_list__item_link pure-button">FAQ</a>
+            </li>
+          
+        
+      </ul>
+    </nav>
+
+    <a href="#subscribeModal" class="pure-button header__subscribe_link">Подписаться на рассылку</a>
+  </div>
+</div>
+
+
+      <div class="content pure-u-1 pure-u-md-3-4">
+        <article class="post post--docs" itemscope itemtype="http://schema.org/BlogPosting">
+    <header class="post__header">
+        <h1 class="post__title" itemprop="name headline">
+            <p>Библиотеки Эрланга</p>
+
+        </h1>
+    </header>
+
+    <div class="post__content" itemprop="articleBody">
+        <p>Эликсир отлично поддерживает работу с библиотеками Эрланга. Фактически, Эликсир отбивает желание писать обёртки для библиотек Эрланга, сделав удобным прямое взаимодействие с Эрланг-кодом. В данном разделе мы покажем наиболее полезную функциональность из Эрланга, которой нет в Эликсире.</p>
+
+<p>Когда вы познакомитесь с Эликсиром достаточно хорошо, вероятно, вы захотите ознакомиться с <a href="http://erlang.org/doc/apps/stdlib/index.html">«STDLIB Reference Manual»</a> более подробно.</p>
+
+<h2 id="модуль-binary">Модуль <code class="highlighter-rouge">Binary</code></h2>
+
+<p>Встроенный в Эликсир модуль <code class="highlighter-rouge">String</code> работает с бинарными данными, кодирующими <code class="highlighter-rouge">UTF-8</code>. <a href="http://erlang.org/doc/man/binary.html">Модуль <code class="highlighter-rouge">Binary</code></a> полезен, когда вам нужно работать с бинарными данными, которые необязательно представляют Юникод.</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">iex</span><span class="o">&gt;</span> <span class="no">String</span><span class="o">.</span><span class="n">to_charlist</span> <span class="sd">"</span><span class="s2">Ø"</span>
+<span class="p">[</span><span class="m">216</span><span class="p">]</span>
+
+<span class="n">iex</span><span class="o">&gt;</span> <span class="ss">:binary</span><span class="o">.</span><span class="n">bin_to_list</span> <span class="sd">"</span><span class="s2">Ø"</span>
+<span class="p">[</span><span class="m">195</span><span class="p">,</span> <span class="m">152</span><span class="p">]</span>
+</code></pre></div></div>
+
+<p>Пример выше показывает разницу – модуль <code class="highlighter-rouge">String</code> возвращает значения символов Юникода, тогда как <code class="highlighter-rouge">:binary</code> работает с сырыми байтами данных.</p>
+
+<h2 id="форматированный-текстовый-вывод">Форматированный текстовый вывод</h2>
+
+<p>В Эликсире нет функции вроде <code class="highlighter-rouge">printf</code> из Си и других языков. К счастью, в стандартной библиотеке Эрланга есть функции <code class="highlighter-rouge">:io.format/2</code> и <code class="highlighter-rouge">:io_lib.format/2</code>. Первая форматирует вывод терминала, тогда как вторая работает с <code class="highlighter-rouge">iolist</code>. Спецификаторы форматирования отличаются от <code class="highlighter-rouge">printf</code>, <a href="http://erlang.org/doc/man/io.html#format-1">подробности можно узнать в документации Эрланга</a>.</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">iex</span><span class="o">&gt;</span> <span class="ss">:io</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="sd">"</span><span class="s2">Pi is approximately given by:~10.3f~n"</span><span class="p">,</span> <span class="p">[</span><span class="ss">:math</span><span class="o">.</span><span class="n">pi</span><span class="p">])</span>
+<span class="no">Pi</span> <span class="n">is</span> <span class="n">approximately</span> <span class="n">given</span> <span class="ss">by:</span>     <span class="m">3.142</span>
+<span class="ss">:ok</span>
+
+<span class="n">iex</span><span class="o">&gt;</span> <span class="n">to_string</span> <span class="ss">:io_lib</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="sd">"</span><span class="s2">Pi is approximately given by:~10.3f~n"</span><span class="p">,</span> <span class="p">[</span><span class="ss">:math</span><span class="o">.</span><span class="n">pi</span><span class="p">])</span>
+<span class="sd">"</span><span class="s2">Pi is approximately given by:     3.142\n"</span>
+</code></pre></div></div>
+
+<p>Также помните, что функции форматирования в Эрланге уделяют особое внимание обработке Юникода.</p>
+
+<h2 id="модуль-crypto">Модуль <code class="highlighter-rouge">crypto</code></h2>
+
+<p><a href="http://erlang.org/doc/man/crypto.html">Модуль <code class="highlighter-rouge">crypto</code></a> содержит функции хэширования, цифровых подписей, шифрования и другие:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">iex</span><span class="o">&gt;</span> <span class="no">Base</span><span class="o">.</span><span class="n">encode16</span><span class="p">(</span><span class="ss">:crypto</span><span class="o">.</span><span class="n">hash</span><span class="p">(</span><span class="ss">:sha256</span><span class="p">,</span> <span class="sd">"</span><span class="s2">Elixir"</span><span class="p">))</span>
+<span class="sd">"</span><span class="s2">3315715A7A3AD57428298676C5AE465DADA38D951BDFAC9348A8A31E9C7401CB"</span>
+</code></pre></div></div>
+
+<p>Модуль <code class="highlighter-rouge">:crypto</code> не является частью стандартной библиотеки Эрланга, но содержится в стандартной поставке. Это значит, что вам нужно указать <code class="highlighter-rouge">:crypto</code> в вашем приложении, когда вы хотите его использовать. Чтобы это сделать, отредактируйте файл <code class="highlighter-rouge">mix.exs</code>, чтобы он включал следующий код:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">def</span> <span class="n">application</span> <span class="k">do</span>
+  <span class="p">[</span><span class="ss">extra_applications:</span> <span class="p">[</span><span class="ss">:crypto</span><span class="p">]]</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<h2 id="модуль-digraph">Модуль <code class="highlighter-rouge">digraph</code></h2>
+
+<p><a href="http://erlang.org/doc/man/digraph.html">Модуль <code class="highlighter-rouge">digraph</code></a> (также как и <a href="http://erlang.org/doc/man/digraph_utils.html"><code class="highlighter-rouge">digraph_utils</code></a>) содержит функции для работы с направленными графами, состоящими из вершин и рёбер. После построения графа, алгоритмы в нём помогут найти, например, кратчайший путь между двумя вершинами или зацикленность в графе.</p>
+
+<p>Дано три вершины, найдём кратчайший путь из первой к последней.</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">iex</span><span class="o">&gt;</span> <span class="n">digraph</span> <span class="o">=</span> <span class="ss">:digraph</span><span class="o">.</span><span class="n">new</span><span class="p">()</span>
+<span class="n">iex</span><span class="o">&gt;</span> <span class="n">coords</span> <span class="o">=</span> <span class="p">[{</span><span class="m">0.0</span><span class="p">,</span> <span class="m">0.0</span><span class="p">},</span> <span class="p">{</span><span class="m">1.0</span><span class="p">,</span> <span class="m">0.0</span><span class="p">},</span> <span class="p">{</span><span class="m">1.0</span><span class="p">,</span> <span class="m">1.0</span><span class="p">}]</span>
+<span class="n">iex</span><span class="o">&gt;</span> <span class="p">[</span><span class="n">v0</span><span class="p">,</span> <span class="n">v1</span><span class="p">,</span> <span class="n">v2</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">for</span> <span class="n">c</span> <span class="o">&lt;-</span> <span class="n">coords</span><span class="p">,</span> <span class="k">do</span><span class="p">:</span> <span class="ss">:digraph</span><span class="o">.</span><span class="n">add_vertex</span><span class="p">(</span><span class="n">digraph</span><span class="p">,</span> <span class="n">c</span><span class="p">))</span>
+
+<span class="n">iex</span><span class="o">&gt;</span> <span class="ss">:digraph</span><span class="o">.</span><span class="n">add_edge</span><span class="p">(</span><span class="n">digraph</span><span class="p">,</span> <span class="n">v0</span><span class="p">,</span> <span class="n">v1</span><span class="p">)</span>
+<span class="n">iex</span><span class="o">&gt;</span> <span class="ss">:digraph</span><span class="o">.</span><span class="n">add_edge</span><span class="p">(</span><span class="n">digraph</span><span class="p">,</span> <span class="n">v1</span><span class="p">,</span> <span class="n">v2</span><span class="p">)</span>
+
+<span class="n">iex</span><span class="o">&gt;</span> <span class="ss">:digraph</span><span class="o">.</span><span class="n">get_short_path</span><span class="p">(</span><span class="n">digraph</span><span class="p">,</span> <span class="n">v0</span><span class="p">,</span> <span class="n">v2</span><span class="p">)</span>
+<span class="p">[{</span><span class="m">0.0</span><span class="p">,</span> <span class="m">0.0</span><span class="p">},</span> <span class="p">{</span><span class="m">1.0</span><span class="p">,</span> <span class="m">0.0</span><span class="p">},</span> <span class="p">{</span><span class="m">1.0</span><span class="p">,</span> <span class="m">1.0</span><span class="p">}]</span>
+</code></pre></div></div>
+
+<p>Обратите внимание, что функции в модуле <code class="highlighter-rouge">:digraph</code> изменяют структуру графа налету, это возможно благодаря использованию таблиц ETS, которые мы рассмотрим следующим пунктом.</p>
+
+<h2 id="erlang-term-storage">Erlang Term Storage</h2>
+
+<p>Модули <a href="http://erlang.org/doc/man/ets.html"><code class="highlighter-rouge">ets</code></a> и <a href="http://erlang.org/doc/man/dets.html"><code class="highlighter-rouge">dets</code></a> позволяют хранить большие структуры данных в памяти или на диске соответственно.</p>
+
+<p>ETS позволяет вам создать таблицу, содержащую кортежи. По умолчанию, таблицы ETS защищены, это значит, что только владелец процесса может писать в таблицу, но любой другой процесс может её читать. В ETS есть функциональность, позволяющая использовать их как простую базу данных, хранилище пар ключ-значение или в качестве механизма кеширования.</p>
+
+<p>Функции в модуле <code class="highlighter-rouge">ets</code> в качестве побочного эффекта будут менять состояние таблице.</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">iex</span><span class="o">&gt;</span> <span class="n">table</span> <span class="o">=</span> <span class="ss">:ets</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="ss">:ets_test</span><span class="p">,</span> <span class="p">[])</span>
+
+<span class="c1"># Сохраняем в виде кортежей {name, population}</span>
+<span class="n">iex</span><span class="o">&gt;</span> <span class="ss">:ets</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">table</span><span class="p">,</span> <span class="p">{</span><span class="sd">"</span><span class="s2">China"</span><span class="p">,</span> <span class="m">1_374_000_000</span><span class="p">})</span>
+<span class="n">iex</span><span class="o">&gt;</span> <span class="ss">:ets</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">table</span><span class="p">,</span> <span class="p">{</span><span class="sd">"</span><span class="s2">India"</span><span class="p">,</span> <span class="m">1_284_000_000</span><span class="p">})</span>
+<span class="n">iex</span><span class="o">&gt;</span> <span class="ss">:ets</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">table</span><span class="p">,</span> <span class="p">{</span><span class="sd">"</span><span class="s2">USA"</span><span class="p">,</span> <span class="m">322_000_000</span><span class="p">})</span>
+<span class="n">iex</span><span class="o">&gt;</span> <span class="ss">:ets</span><span class="o">.</span><span class="n">i</span><span class="p">(</span><span class="n">table</span><span class="p">)</span>
+
+<span class="o">&lt;</span><span class="m">1</span>   <span class="o">&gt;</span> <span class="p">{</span><span class="o">&lt;&lt;</span><span class="sd">"</span><span class="s2">India"</span><span class="o">&gt;&gt;</span><span class="p">,</span><span class="m">1284000000</span><span class="p">}</span>
+<span class="o">&lt;</span><span class="m">2</span>   <span class="o">&gt;</span> <span class="p">{</span><span class="o">&lt;&lt;</span><span class="sd">"</span><span class="s2">USA"</span><span class="o">&gt;&gt;</span><span class="p">,</span><span class="m">322000000</span><span class="p">}</span>
+<span class="o">&lt;</span><span class="m">3</span>   <span class="o">&gt;</span> <span class="p">{</span><span class="o">&lt;&lt;</span><span class="sd">"</span><span class="s2">China"</span><span class="o">&gt;&gt;</span><span class="p">,</span><span class="m">1374000000</span><span class="p">}</span>
+</code></pre></div></div>
+
+<h2 id="модуль-math">Модуль <code class="highlighter-rouge">math</code></h2>
+
+<p><a href="http://erlang.org/doc/man/math.html">Модуль <code class="highlighter-rouge">math</code></a> содержит основные математические операции: тригонометрия, экспоненциальные и логарифмические функции.</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">iex</span><span class="o">&gt;</span> <span class="n">angle_45_deg</span> <span class="o">=</span> <span class="ss">:math</span><span class="o">.</span><span class="n">pi</span><span class="p">()</span> <span class="o">*</span> <span class="m">45.0</span> <span class="o">/</span> <span class="m">180.0</span>
+<span class="n">iex</span><span class="o">&gt;</span> <span class="ss">:math</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">angle_45_deg</span><span class="p">)</span>
+<span class="m">0.7071067811865475</span>
+
+<span class="n">iex</span><span class="o">&gt;</span> <span class="ss">:math</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="m">55.0</span><span class="p">)</span>
+<span class="m">7.694785265142018e23</span>
+
+<span class="n">iex</span><span class="o">&gt;</span> <span class="ss">:math</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="m">7.694785265142018e23</span><span class="p">)</span>
+<span class="m">55.0</span>
+</code></pre></div></div>
+
+<h2 id="модуль-queue">Модуль <code class="highlighter-rouge">queue</code></h2>
+
+<p><a href="http://erlang.org/doc/man/queue.html">Очередь или <code class="highlighter-rouge">queue</code></a> – структура данных, которая эффективно реализует очереди <abbr title="FIRST-IN FIRST-OUT">FIFO</abbr>:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">iex</span><span class="o">&gt;</span> <span class="n">q</span> <span class="o">=</span> <span class="ss">:queue</span><span class="o">.</span><span class="n">new</span>
+<span class="n">iex</span><span class="o">&gt;</span> <span class="n">q</span> <span class="o">=</span> <span class="ss">:queue</span><span class="o">.</span><span class="ow">in</span><span class="p">(</span><span class="sd">"</span><span class="s2">A"</span><span class="p">,</span> <span class="n">q</span><span class="p">)</span>
+<span class="n">iex</span><span class="o">&gt;</span> <span class="n">q</span> <span class="o">=</span> <span class="ss">:queue</span><span class="o">.</span><span class="ow">in</span><span class="p">(</span><span class="sd">"</span><span class="s2">B"</span><span class="p">,</span> <span class="n">q</span><span class="p">)</span>
+
+<span class="n">iex</span><span class="o">&gt;</span> <span class="p">{</span><span class="n">value</span><span class="p">,</span> <span class="n">q</span><span class="p">}</span> <span class="o">=</span> <span class="ss">:queue</span><span class="o">.</span><span class="n">out</span><span class="p">(</span><span class="n">q</span><span class="p">)</span>
+<span class="n">iex</span><span class="o">&gt;</span> <span class="n">value</span>
+<span class="p">{</span><span class="ss">:value</span><span class="p">,</span> <span class="sd">"</span><span class="s2">A"</span><span class="p">}</span>
+
+<span class="n">iex</span><span class="o">&gt;</span> <span class="p">{</span><span class="n">value</span><span class="p">,</span> <span class="n">q</span><span class="p">}</span> <span class="o">=</span> <span class="ss">:queue</span><span class="o">.</span><span class="n">out</span><span class="p">(</span><span class="n">q</span><span class="p">)</span>
+<span class="n">iex</span><span class="o">&gt;</span> <span class="n">value</span>
+<span class="p">{</span><span class="ss">:value</span><span class="p">,</span> <span class="sd">"</span><span class="s2">B"</span><span class="p">}</span>
+
+<span class="n">iex</span><span class="o">&gt;</span> <span class="p">{</span><span class="n">value</span><span class="p">,</span> <span class="n">q</span><span class="p">}</span> <span class="o">=</span> <span class="ss">:queue</span><span class="o">.</span><span class="n">out</span><span class="p">(</span><span class="n">q</span><span class="p">)</span>
+<span class="n">iex</span><span class="o">&gt;</span> <span class="n">value</span>
+<span class="ss">:empty</span>
+</code></pre></div></div>
+
+<h2 id="модуль-rand">Модуль <code class="highlighter-rouge">rand</code></h2>
+
+<p><a href="http://erlang.org/doc/man/rand.html">В модуле <code class="highlighter-rouge">rand</code> есть функции</a> для возврата случайного значения или получения произвольного элемента множества.</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">iex</span><span class="o">&gt;</span> <span class="ss">:rand</span><span class="o">.</span><span class="n">uniform</span><span class="p">()</span>
+<span class="m">0.8175669086010815</span>
+
+<span class="n">iex</span><span class="o">&gt;</span> <span class="n">_</span> <span class="o">=</span> <span class="ss">:rand</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="ss">:exs1024</span><span class="p">,</span> <span class="p">{</span><span class="m">123</span><span class="p">,</span> <span class="m">123534</span><span class="p">,</span> <span class="m">345345</span><span class="p">})</span>
+
+<span class="n">iex</span><span class="o">&gt;</span> <span class="ss">:rand</span><span class="o">.</span><span class="n">uniform</span><span class="p">()</span>
+<span class="m">0.5820506340260994</span>
+
+<span class="n">iex</span><span class="o">&gt;</span> <span class="ss">:rand</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span><span class="m">6</span><span class="p">)</span>
+<span class="m">6</span>
+</code></pre></div></div>
+
+<h2 id="модули-zip-и-zlib">Модули <code class="highlighter-rouge">zip</code> и <code class="highlighter-rouge">zlib</code></h2>
+
+<p><a href="http://erlang.org/doc/man/zip.html">Модуль <code class="highlighter-rouge">zip</code></a> позволяет вам читать и записывать ZIP-архивы на диск или в память, а также извлекать информацию из этих файлов.</p>
+
+<p>Этот код подсчитывает количество файлов в ZIP-архиве:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">iex</span><span class="o">&gt;</span> <span class="ss">:zip</span><span class="o">.</span><span class="n">foldl</span><span class="p">(</span><span class="k">fn</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">acc</span> <span class="o">-&gt;</span> <span class="n">acc</span> <span class="o">+</span> <span class="m">1</span> <span class="k">end</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="ss">:binary</span><span class="o">.</span><span class="n">bin_to_list</span><span class="p">(</span><span class="sd">"</span><span class="s2">file.zip"</span><span class="p">))</span>
+<span class="p">{</span><span class="ss">:ok</span><span class="p">,</span> <span class="m">633</span><span class="p">}</span>
+</code></pre></div></div>
+
+<p><a href="http://erlang.org/doc/man/zlib.html">Модуль <code class="highlighter-rouge">zlib</code></a> работает со сжатием данных в формате zlib, тем же, с которым работает команда <code class="highlighter-rouge">gzip</code>.</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">iex</span><span class="o">&gt;</span> <span class="n">song</span> <span class="o">=</span> <span class="sd">"</span><span class="s2">
+...&gt; Mary had a little lamb,
+...&gt; His fleece was white as snow,
+...&gt; And everywhere that Mary went,
+...&gt; The lamb was sure to go."</span>
+<span class="n">iex</span><span class="o">&gt;</span> <span class="n">compressed</span> <span class="o">=</span> <span class="ss">:zlib</span><span class="o">.</span><span class="n">compress</span><span class="p">(</span><span class="n">song</span><span class="p">)</span>
+<span class="n">iex</span><span class="o">&gt;</span> <span class="n">byte_size</span> <span class="n">song</span>
+<span class="m">110</span>
+<span class="n">iex</span><span class="o">&gt;</span> <span class="n">byte_size</span> <span class="n">compressed</span>
+<span class="m">99</span>
+<span class="n">iex</span><span class="o">&gt;</span> <span class="ss">:zlib</span><span class="o">.</span><span class="n">uncompress</span><span class="p">(</span><span class="n">compressed</span><span class="p">)</span>
+<span class="sd">"</span><span class="s2">\nMary had a little lamb,\nHis fleece was white as snow,\nAnd everywhere that Mary went,\nThe lamb was sure to go."</span>
+</code></pre></div></div>
+
+    </div>
+</article>
+
+<nav class="docs_nav pure-g">
+    <div class="docs_nav__inner pure-u-1 pure-u-md-3-4">
+        <div class="pure-g">
+            <div class="docs_nav__column docs_nav__column--prev pure-u-1-3">
+                
+                    <a href="/docs/typespecs-and-behaviours.html" class="docs_nav__link pure-button">
+                        &larr;<span class="h-hidden_mobile"> Назад</span></a>
+                
+            </div>
+
+            <div class="docs_nav__column docs_nav__column--contents pure-u-1-3">
+                <a href="#docsContents" class="docs_nav__link docs_nav__link--contents pure-button">☰</a>
+            </div>
+
+            <div class="docs_nav__column docs_nav__column--next pure-u-1-3">
+                
+                    <a href="/docs/where-to-go-next.html" class="docs_nav__link pure-button">
+                        <span class="h-hidden_mobile">Вперёд </span>&rarr;
+                    </a>
+                
+            </div>
+        </div>
+    </div>
+</nav>
+
+<div id="docsContents" class="modal modal--docs_contents modal--close_backdrop">
+    <div class="modal__content">
+        <a href="#close" title="Закрыть" class="modal__close">x</a>
+
+        <h2 class="modal__title">Содержание</h2>
+
+        
+        <h3 id="руководство-для-начинающих">Руководство для начинающих</h3>
+<ul>
+  <li><a href="/docs">Введение</a></li>
+  <li><a href="/docs/basic-types.html">Базовые типы</a></li>
+  <li><a href="/docs/basic-operators.html">Базовые операторы</a></li>
+  <li><a href="/docs/pattern-matching.html">Сопоставление с образцом</a></li>
+  <li><a href="/docs/case-cond-and-if.html">Конструкции ветвления</a></li>
+  <li><a href="/docs/binaries-strings-and-char-lists.html">Двоичные данные, строки и списки символов</a></li>
+  <li><a href="/docs/keywords-and-maps.html">Ключевые списки и словари</a></li>
+  <li><a href="/docs/modules-and-functions.html">Модули и функции</a></li>
+  <li><a href="/docs/recursion.html">Рекурсия</a></li>
+  <li><a href="/docs/enumerables-and-streams.html">Перечисления и потоки</a></li>
+  <li><a href="/docs/processes.html">Процессы</a></li>
+  <li><a href="/docs/io-and-the-file-system.html">Ввод/вывод и файловая система</a></li>
+  <li><a href="/docs/alias-require-and-import.html">Директивы <code class="highlighter-rouge">alias</code>, <code class="highlighter-rouge">require</code> и <code class="highlighter-rouge">import</code></a></li>
+  <li><a href="/docs/module-attributes.html">Атрибуты модулей</a></li>
+  <li><a href="/docs/structs.html">Структуры</a></li>
+  <li><a href="/docs/protocols.html">Протоколы</a></li>
+  <li><a href="/docs/comprehensions.html">Списковые выражения</a></li>
+  <li><a href="/docs/sigils.html">Сигилы</a></li>
+  <li><a href="/docs/try-catch-and-rescue.html">Конструкция <code class="highlighter-rouge">try</code>, <code class="highlighter-rouge">catch</code> и <code class="highlighter-rouge">rescue</code></a></li>
+  <li><a href="/docs/typespecs-and-behaviours.html">Спецификации типов и поведения</a></li>
+  <li><a href="/docs/erlang-libraries.html">Библиотеки Эрланга</a></li>
+  <li><a href="/docs/where-to-go-next.html">Куда двигаться дальше</a></li>
+</ul>
+
+<h3 id="микс-и-otp">Микс и <code class="highlighter-rouge">OTP</code></h3>
+<ul>
+  <li><a href="/docs/mix-otp/introduction-to-mix.html">Введение в Микс</a></li>
+  <li><a href="/docs/mix-otp/agent.html">Агент</a></li>
+  <li><a href="/docs/mix-otp/genserver.html">GenServer</a></li>
+  <li><a href="/docs/mix-otp/supervisor-and-application.html">Супервизор и приложение</a></li>
+  <li><a href="/docs/mix-otp/dynamic-supervisor.html">Динамический супервизор</a></li>
+  <li><a href="/docs/mix-otp/ets.html">ETS</a></li>
+  <li><a href="/docs/mix-otp/dependencies-and-umbrella-apps.html">Зависимости и зонтичные проекты</a></li>
+  <li><a href="/docs/mix-otp/task-and-gen-tcp.html">Модули <code class="highlighter-rouge">Task</code> и <code class="highlighter-rouge">:gen_tcp</code></a></li>
+  <li><a href="/docs/mix-otp/docs-tests-and-with.html">Доктесты, паттерны и оператор <code class="highlighter-rouge">with</code></a></li>
+  <li><a href="/docs/mix-otp/distributed-tasks-and-configuration.html">Распределенные задачи и конфигурация</a></li>
+</ul>
+
+<h3 id="метапрограммирование">Метапрограммирование</h3>
+<ul>
+  <li><a href="/docs/meta/quote-and-unquote.html">Конструкции <code class="highlighter-rouge">quote</code> и <code class="highlighter-rouge">unquote</code></a></li>
+  <li><a href="/docs/meta/macros.html">Макросы</a></li>
+  <li><a href="/docs/meta/domain-specific-languages.html">Предметно-ориентированные языки</a></li>
+</ul>
+
+    </div>
+</div>
+
+
+
+        <footer class="footer">
+    &copy; 2020
+    / Россия
+
+    <span class="pull-right">Любые мысли и вопросы пишите на <a href="mailto:elixir@wunsh.ru">elixir@wunsh.ru</a>.</span>
+</footer>
+
+        <div id="subscribeModal" class="modal">
+    <div class="modal__content">
+        <a href="#close" title="Close" class="modal__close">x</a>
+
+        <h2 class="modal__title">Ламповая рассылка про&nbsp;Эликсир</h2>
+
+        <p>Один-два раза в&nbsp;неделю присылаем тёплые письма об&nbsp;Эликсире: переводы самых интересных статей до&nbsp;их&nbsp;появления в&nbsp;открытом доступе, анонсы событий и&nbsp;вкусные бонусы.</p>
+
+        <form action="//wunsh.us14.list-manage.com/subscribe/post?u=c81ca3d4693f62db7f7f67c71&amp;id=a192e2dfef" method="post" id="mc-embedded-subscribe-form" name="mc-embedded-subscribe-form" class="pure-form h-tc validate" target="_blank" novalidate>
+            <input type="email" value="" name="EMAIL" class="modal__input pure-input-rounded large" id="mce-EMAIL" placeholder="Твоя почта" required>
+            <div style="position: absolute; left: -5000px;" aria-hidden="true"><input type="text" name="b_c81ca3d4693f62db7f7f67c71_a192e2dfef" tabindex="-1" value=""></div>
+
+            <input type="submit" value="Присоединиться" name="subscribe" onClick="yaCounter39773490.reachGoal('SUBSCRIBED'); return true" id="mc-embedded-subscribe" class="pure-button button-success large">
+        </form>
+
+        <p>Обязательно подтверди почту, перейдя по&nbsp;ссылке в&nbsp;письме, иначе мы&nbsp;не&nbsp;сможем делиться с&nbsp;тобой полезностями.</p>
+
+        <p>Надоедать точно не&nbsp;будем :)</p>
+    </div>
+</div>
+
+        <script src="/assets/js/vendors/zepto.min.js"></script>
+
+<script>
+    if ($(".post--docs").length) {
+        $(".footer").addClass("footer--docs")
+    }
+
+    $(".modal--close_backdrop").click(function(){
+        window.location.hash = "";
+    });
+</script>
+
+        <!-- Yandex.Metrika counter -->
+<script type="text/javascript">
+    (function (d, w, c) {
+        (w[c] = w[c] || []).push(function() {
+            try {
+                w.yaCounter39773490 = new Ya.Metrika({
+                    id:39773490,
+                    clickmap:true,
+                    trackLinks:true,
+                    accurateTrackBounce:true,
+                    webvisor:true,
+                    ut:"noindex"
+                });
+            } catch(e) { }
+        });
+
+        var n = d.getElementsByTagName("script")[0],
+            s = d.createElement("script"),
+            f = function () { n.parentNode.insertBefore(s, n); };
+        s.type = "text/javascript";
+        s.async = true;
+        s.src = "https://mc.yandex.ru/metrika/watch.js";
+
+        if (w.opera == "[object Opera]") {
+            d.addEventListener("DOMContentLoaded", f, false);
+        } else { f(); }
+    })(document, window, "yandex_metrika_callbacks");
+</script>
+<noscript><div><img src="https://mc.yandex.ru/watch/39773490?ut=noindex" style="position:absolute; left:-9999px;" alt="" /></div></noscript>
+<!-- /Yandex.Metrika counter -->
+
+      </div>
+    </div>
+  </body>
+</html>

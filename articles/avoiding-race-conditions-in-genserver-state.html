@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Как избежать состояния гонки при использовании GenServer |> Сообщество Elixir и Phoenix Framework</title>
+    <meta name="description" content="В этой статье пойдёт речь о том, как избежать состояния гонки при использовании GenServer на примере многопользовательской игры.">
+
+    <link rel="alternate" type="application/rss+xml" title="Сообщество Elixir и Phoenix Framework" href="/feed.xml" />
+    <link rel="canonical" href="https://wunsh.ru/articles/avoiding-race-conditions-in-genserver-state.html">
+
+    <style type="text/css">@import url("//fonts.googleapis.com/css?family=Source+Sans+Pro:400,700&subset=cyrillic");</style>
+    <link rel="stylesheet" href="/assets/css/vendors/pure.min.css">
+    <link rel="stylesheet" href="/assets/css/vendors/pure-grids-responsive.min.css">
+    <link rel="stylesheet" href="/assets/css/style.css?1594516983">
+
+    <link rel="shortcut icon" type="image/png" href="/assets/favicon.png" >
+</head>
+
+
+  <body>
+    <div class="wunsh pure-g">
+      
+
+
+
+
+<div class="menu pure-u-1 pure-u-md-1-4">
+  <div class="header">
+    <h2 class="header__title">
+      
+        <a href="https://wunsh.ru" class="header__title_link" title="На главную">Эликсир и&nbsp;Вунш</a>
+      
+    </h2>
+    <h3 class="header__tagline">Erlang + Ruby = &#10084;</h3>
+
+    <nav class="nav">
+      <ul class="nav_list">
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/elixir" class="nav_list__item_link pure-button">О языке</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/install/linux-asdf" class="nav_list__item_link pure-button">Установка</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/docs/" class="nav_list__item_link pure-button">Документация</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/guides" class="nav_list__item_link pure-button">Гайды</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/news" class="nav_list__item_link pure-button">Новости</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/articles" class="nav_list__item_link pure-button">Статьи</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/videos" class="nav_list__item_link pure-button">Видео</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/vacancies" class="nav_list__item_link pure-button">Вакансии</a>
+            </li>
+          
+        
+          
+
+          
+            <li class="nav_list__item ">
+              <a href="https://wunsh.ru/faq" class="nav_list__item_link pure-button">FAQ</a>
+            </li>
+          
+        
+      </ul>
+    </nav>
+
+    <a href="#subscribeModal" class="pure-button header__subscribe_link">Подписаться на рассылку</a>
+  </div>
+</div>
+
+
+      <div class="content pure-u-1 pure-u-md-3-4">
+        
+
+<article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+  <header class="post__header">
+    
+    <h1 class="post__title" itemprop="name headline">Как избежать состояния гонки при использовании GenServer</h1>
+
+    <div class="post__meta post_meta">
+      <ul class="meta_list">
+        <li class="meta_list__item">
+          
+          <span class="">
+            <small class="meta_list__item_name">Дата</small>
+            <time class="h-bold" datetime="2017-07-14T00:00:00+00:00" itemprop="datePublished">
+              
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+14 июля 2017
+
+            </time>
+          </span>
+          
+
+          
+        </li>
+        
+        <li class="meta_list__item">
+            <span class="tag_cloud tags_cloud--inline h-no_margin">
+              <small class="meta_list__item_name">Теги</small> 
+
+
+<ul class="tags_cloud__list">
+  
+    <a href="/tags/#advanced" class="tags_cloud__link tag tag--advanced">advanced</a>
+  
+    <a href="/tags/#genserver" class="tags_cloud__link tag tag--genserver">genserver</a>
+  
+    <a href="/tags/#practical" class="tags_cloud__link tag tag--practical">practical</a>
+  
+</ul>
+
+            </span>
+        </li>
+        
+        <li class="meta_list__item">
+          <span itemprop="author" itemscope itemtype="http://schema.org/Person">
+            <small class="meta_list__item_name">
+              
+                Перевод
+              
+            </small>
+            <span itemprop="name" class="h-bold">Надежда Нестерова</span>
+          </span>
+        </li>
+
+        <li class="meta_list__item">
+          
+            <div >
+              <small>Оригинал</small>
+              <strong>
+                &laquo;<a href="https://bhelx.simst.im/articles/avoiding-race-conditions-in-genserver-state/" style="text-transform: none; text-decoration: underline; color: #4b2e39;">Avoiding Race Conditions in GenServer</a>&raquo;
+              </strong>
+              <small>&copy;</small>
+              <strong>Benjamin Eckel</strong>
+            </div>
+          
+        </li>
+      </ul>
+    </div>
+  </header>
+
+  <div class="post__content" itemprop="articleBody">
+    <p>Предположим, вам необходимо разработать многопользовательскую игру, и состояние игры вы решили хранить в структуре <code class="highlighter-rouge">Game</code>. Планируется запускать игру без игроков: они будут присоединяться к ней в индивидуальном порядке. Введём максимальное количество игроков <code class="highlighter-rouge">@max_players</code>, а список игроков представим в виде списка строк (ников игроков).</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">defmodule</span> <span class="no">Game</span> <span class="k">do</span>
+  <span class="nv">@max_players</span> <span class="m">4</span>
+  <span class="n">defstruct</span> <span class="ss">players:</span> <span class="p">[]</span>
+
+  <span class="k">def</span> <span class="n">add_player</span><span class="p">(</span><span class="n">game</span><span class="p">,</span> <span class="n">nick</span><span class="p">)</span> <span class="k">do</span>
+    <span class="no">Map</span><span class="o">.</span><span class="n">update!</span><span class="p">(</span><span class="n">game</span><span class="p">,</span> <span class="ss">:players</span><span class="p">,</span> <span class="o">&amp;</span><span class="p">([</span><span class="n">nick</span> <span class="o">|</span> <span class="nv">&amp;1</span><span class="p">]))</span>
+  <span class="k">end</span>
+
+  <span class="k">def</span> <span class="n">max_players?</span><span class="p">(%{</span><span class="ss">players:</span> <span class="n">ps</span><span class="p">})</span> <span class="ow">when</span> <span class="n">length</span><span class="p">(</span><span class="n">ps</span><span class="p">)</span> <span class="o">&lt;</span> <span class="nv">@max_players</span><span class="p">,</span> <span class="k">do</span><span class="p">:</span> <span class="no">false</span>
+  <span class="k">def</span> <span class="n">max_players?</span><span class="p">(</span><span class="n">_game</span><span class="p">),</span> <span class="k">do</span><span class="p">:</span> <span class="no">true</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<p>Попробуем выполнить это в iex.</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">iex</span><span class="p">(</span><span class="m">1</span><span class="p">)</span><span class="o">&gt;</span> <span class="n">game</span> <span class="o">=</span> <span class="p">%</span><span class="no">Game</span><span class="p">{}</span>
+<span class="p">%</span><span class="no">Game</span><span class="p">{</span><span class="ss">players:</span> <span class="p">[]}</span>
+<span class="n">iex</span><span class="p">(</span><span class="m">2</span><span class="p">)</span><span class="o">&gt;</span> <span class="n">game</span> <span class="o">=</span> <span class="no">Game</span><span class="o">.</span><span class="n">add_player</span><span class="p">(</span><span class="n">game</span><span class="p">,</span> <span class="sd">"</span><span class="s2">ben"</span><span class="p">)</span>
+<span class="p">%</span><span class="no">Game</span><span class="p">{</span><span class="ss">players:</span> <span class="p">[</span><span class="sd">"</span><span class="s2">ben"</span><span class="p">]}</span>
+<span class="n">iex</span><span class="p">(</span><span class="m">3</span><span class="p">)</span><span class="o">&gt;</span> <span class="n">game</span> <span class="o">=</span> <span class="no">Game</span><span class="o">.</span><span class="n">add_player</span><span class="p">(</span><span class="n">game</span><span class="p">,</span> <span class="sd">"</span><span class="s2">harry"</span><span class="p">)</span>
+<span class="p">%</span><span class="no">Game</span><span class="p">{</span><span class="ss">players:</span> <span class="p">[</span><span class="sd">"</span><span class="s2">harry"</span><span class="p">,</span> <span class="sd">"</span><span class="s2">ben"</span><span class="p">]}</span>
+<span class="n">iex</span><span class="p">(</span><span class="m">4</span><span class="p">)</span><span class="o">&gt;</span> <span class="n">game</span> <span class="o">=</span> <span class="no">Game</span><span class="o">.</span><span class="n">add_player</span><span class="p">(</span><span class="n">game</span><span class="p">,</span> <span class="sd">"</span><span class="s2">ralph"</span><span class="p">)</span>
+<span class="p">%</span><span class="no">Game</span><span class="p">{</span><span class="ss">players:</span> <span class="p">[</span><span class="sd">"</span><span class="s2">ralph"</span><span class="p">,</span> <span class="sd">"</span><span class="s2">harry"</span><span class="p">,</span> <span class="sd">"</span><span class="s2">ben"</span><span class="p">]}</span>
+<span class="n">iex</span><span class="p">(</span><span class="m">5</span><span class="p">)</span><span class="o">&gt;</span> <span class="no">Game</span><span class="o">.</span><span class="n">max_players?</span><span class="p">(</span><span class="n">game</span><span class="p">)</span>
+<span class="no">false</span>
+<span class="n">iex</span><span class="p">(</span><span class="m">6</span><span class="p">)</span><span class="o">&gt;</span> <span class="n">game</span> <span class="o">=</span> <span class="no">Game</span><span class="o">.</span><span class="n">add_player</span><span class="p">(</span><span class="n">game</span><span class="p">,</span> <span class="sd">"</span><span class="s2">tom"</span><span class="p">)</span>
+<span class="p">%</span><span class="no">Game</span><span class="p">{</span><span class="ss">players:</span> <span class="p">[</span><span class="sd">"</span><span class="s2">tom"</span><span class="p">,</span> <span class="sd">"</span><span class="s2">ralph"</span><span class="p">,</span> <span class="sd">"</span><span class="s2">harry"</span><span class="p">,</span> <span class="sd">"</span><span class="s2">ben"</span><span class="p">]}</span>
+<span class="n">iex</span><span class="p">(</span><span class="m">7</span><span class="p">)</span><span class="o">&gt;</span> <span class="no">Game</span><span class="o">.</span><span class="n">max_players?</span><span class="p">(</span><span class="n">game</span><span class="p">)</span>
+<span class="no">true</span>
+</code></pre></div></div>
+
+<p>Кажется, работает! Теперь хорошо бы обернуть всё это в процесс. OTP предоставляет несколько способов для решения этой задачи. Один из них — это GenServer. Для каждой игры организуем свой процесс, идентифицировать который будем по PID. Создадим свой GenServer и назовём его <code class="highlighter-rouge">GameServer</code>.</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">defmodule</span> <span class="no">GameServer</span> <span class="k">do</span>
+  <span class="kn">use</span> <span class="no">GenServer</span>
+
+  <span class="k">def</span> <span class="n">start_link</span> <span class="k">do</span>
+    <span class="no">GenServer</span><span class="o">.</span><span class="n">start_link</span><span class="p">(</span><span class="bp">__MODULE__</span><span class="p">,</span> <span class="p">%</span><span class="no">Game</span><span class="p">{})</span>
+  <span class="k">end</span>
+
+  <span class="k">def</span> <span class="n">get_state</span><span class="p">(</span><span class="n">pid</span><span class="p">)</span> <span class="k">do</span>
+    <span class="no">GenServer</span><span class="o">.</span><span class="n">call</span><span class="p">(</span><span class="n">pid</span><span class="p">,</span> <span class="ss">:get_state</span><span class="p">)</span>
+  <span class="k">end</span>
+
+  <span class="k">def</span> <span class="n">add_player</span><span class="p">(</span><span class="n">pid</span><span class="p">,</span> <span class="n">nick</span><span class="p">)</span> <span class="k">do</span>
+    <span class="n">game</span> <span class="o">=</span> <span class="n">get_state</span><span class="p">(</span><span class="n">pid</span><span class="p">)</span>
+    <span class="k">if</span> <span class="no">Game</span><span class="o">.</span><span class="n">max_players?</span><span class="p">(</span><span class="n">game</span><span class="p">)</span> <span class="k">do</span>
+      <span class="p">{</span><span class="ss">:error</span><span class="p">,</span> <span class="ss">:max_players</span><span class="p">}</span>
+    <span class="k">else</span>
+      <span class="no">GenServer</span><span class="o">.</span><span class="n">call</span><span class="p">(</span><span class="n">pid</span><span class="p">,</span> <span class="p">{</span><span class="ss">:add_player</span><span class="p">,</span> <span class="n">nick</span><span class="p">})</span>
+    <span class="k">end</span>
+  <span class="k">end</span>
+
+  <span class="c1"># Callbacks</span>
+
+  <span class="k">def</span> <span class="n">handle_call</span><span class="p">(</span><span class="ss">:get_state</span><span class="p">,</span>  <span class="n">_from</span><span class="p">,</span> <span class="n">game</span><span class="p">)</span> <span class="k">do</span>
+    <span class="p">{</span><span class="ss">:reply</span><span class="p">,</span> <span class="n">game</span><span class="p">,</span> <span class="n">game</span><span class="p">}</span>
+  <span class="k">end</span>
+
+  <span class="k">def</span> <span class="n">handle_call</span><span class="p">({</span><span class="ss">:add_player</span><span class="p">,</span> <span class="n">nick</span><span class="p">},</span> <span class="n">_from</span><span class="p">,</span> <span class="n">game</span><span class="p">)</span> <span class="k">do</span>
+    <span class="p">{</span><span class="ss">:reply</span><span class="p">,</span> <span class="ss">:ok</span><span class="p">,</span> <span class="no">Game</span><span class="o">.</span><span class="n">add_player</span><span class="p">(</span><span class="n">game</span><span class="p">,</span> <span class="n">nick</span><span class="p">)}</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<p>У нас будет две функции:</p>
+
+<ol>
+  <li>
+    <p>Функция <code class="highlighter-rouge">get_state</code>, которая возвращает текущее состояние игры;</p>
+  </li>
+  <li>
+    <p>Функция <code class="highlighter-rouge">add_player</code>, которая возвращает <code class="highlighter-rouge">{:error, reason}</code>, если игрока невозможно добавить в игру и <code class="highlighter-rouge">:ok</code> в противном случае.</p>
+  </li>
+</ol>
+
+<p>Снова запустим <code class="highlighter-rouge">iex</code>:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">iex</span><span class="p">(</span><span class="m">1</span><span class="p">)</span><span class="o">&gt;</span> <span class="p">{</span><span class="ss">:ok</span><span class="p">,</span> <span class="n">pid</span><span class="p">}</span> <span class="o">=</span> <span class="no">GameServer</span><span class="o">.</span><span class="n">start_link</span>
+<span class="p">{</span><span class="ss">:ok</span><span class="p">,</span> <span class="c1">#PID&lt;0.91.0&gt;}</span>
+<span class="n">iex</span><span class="p">(</span><span class="m">2</span><span class="p">)</span><span class="o">&gt;</span> <span class="no">GameServer</span><span class="o">.</span><span class="n">add_player</span><span class="p">(</span><span class="n">pid</span><span class="p">,</span> <span class="sd">"</span><span class="s2">ben"</span><span class="p">)</span>
+<span class="ss">:ok</span>
+<span class="n">iex</span><span class="p">(</span><span class="m">3</span><span class="p">)</span><span class="o">&gt;</span> <span class="no">GameServer</span><span class="o">.</span><span class="n">add_player</span><span class="p">(</span><span class="n">pid</span><span class="p">,</span> <span class="sd">"</span><span class="s2">harry"</span><span class="p">)</span>
+<span class="ss">:ok</span>
+<span class="n">iex</span><span class="p">(</span><span class="m">4</span><span class="p">)</span><span class="o">&gt;</span> <span class="no">GameServer</span><span class="o">.</span><span class="n">add_player</span><span class="p">(</span><span class="n">pid</span><span class="p">,</span> <span class="sd">"</span><span class="s2">ralph"</span><span class="p">)</span>
+<span class="ss">:ok</span>
+<span class="n">iex</span><span class="p">(</span><span class="m">5</span><span class="p">)</span><span class="o">&gt;</span> <span class="no">GameServer</span><span class="o">.</span><span class="n">add_player</span><span class="p">(</span><span class="n">pid</span><span class="p">,</span> <span class="sd">"</span><span class="s2">tom"</span><span class="p">)</span>
+<span class="ss">:ok</span>
+<span class="n">iex</span><span class="p">(</span><span class="m">6</span><span class="p">)</span><span class="o">&gt;</span> <span class="no">GameServer</span><span class="o">.</span><span class="n">add_player</span><span class="p">(</span><span class="n">pid</span><span class="p">,</span> <span class="sd">"</span><span class="s2">richard"</span><span class="p">)</span>
+<span class="p">{</span><span class="ss">:error</span><span class="p">,</span> <span class="ss">:max_players</span><span class="p">}</span>
+</code></pre></div></div>
+
+<h2 id="скрытое-состояние-гонки">Скрытое состояние гонки</h2>
+
+<p>В интерактивной оболочке это работает, но при развёртывании в продакшн вы можете столкнуться с тем, что время от времени каждый 5-й или 6-й игрок будет входить в игру вне очереди. А вот и состояние гонки! Докажем это, реализовав временную функцию в GameServer, которая добавляет n игроков одновременно:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">defmodule</span> <span class="no">GameServer</span> <span class="k">do</span>
+  <span class="c1"># ...</span>
+  <span class="k">def</span> <span class="n">add_players_simultaneously</span><span class="p">(</span><span class="n">pid</span><span class="p">,</span> <span class="n">nicks</span><span class="p">)</span> <span class="k">do</span>
+    <span class="no">Enum</span><span class="o">.</span><span class="n">each</span><span class="p">(</span><span class="n">nicks</span><span class="p">,</span> <span class="k">fn</span> <span class="n">nick</span> <span class="o">-&gt;</span>
+      <span class="no">Task</span><span class="o">.</span><span class="n">async</span><span class="p">(</span><span class="k">fn</span> <span class="o">-&gt;</span>
+        <span class="no">GameServer</span><span class="o">.</span><span class="n">add_player</span><span class="p">(</span><span class="n">pid</span><span class="p">,</span> <span class="n">nick</span><span class="p">)</span>
+      <span class="k">end</span><span class="p">)</span>
+    <span class="k">end</span><span class="p">)</span>
+  <span class="k">end</span>
+  <span class="c1"># ...</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<p>Данная функция обращается к списку ников и параллельно с этим вызывает <code class="highlighter-rouge">add_player</code>, используя отдельный процесс для каждого ника. Предположим, пятеро игроков пытаются присоединиться к игре.</p>
+
+<pre><code class="language-elxiir">iex(1)&gt; {:ok, pid} = GameServer.start_link
+{:ok, #PID&lt;0.100.0&gt;}
+iex(2)&gt; nicks =  ["ben", "harry", "ralph", "tom", "richard"]
+["ben", "harry", "ralph", "tom", "richard"]
+iex(3)&gt; GameServer.add_players_simultaneously(pid, nicks)
+:ok
+iex(4)&gt; GameServer.get_state(pid)
+%Game{players: ["richard", "tom", "ralph", "harry", "ben"]}
+</code></pre>
+
+<p>Подождите, каким образом в список попал <code class="highlighter-rouge">richard</code>?</p>
+
+<p>Модель процессов Erlang прекрасно справится с конкурентными операциями над состоянием, и, если всё сделать правильно, ошибки практически исключены. При выполнении операций для модифицирования состояния, вам просто нужно мыслями находиться на шаг впереди.</p>
+
+<p>Чтобы увидеть, как это работает, добавим несколько операторов puts в функцию <code class="highlighter-rouge">GameServer.add_player</code>.</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">defmodule</span> <span class="no">GameServer</span> <span class="k">do</span>
+  <span class="c1"># ...</span>
+  <span class="k">def</span> <span class="n">add_player</span><span class="p">(</span><span class="n">pid</span><span class="p">,</span> <span class="n">nick</span><span class="p">)</span> <span class="k">do</span>
+    <span class="n">game</span> <span class="o">=</span> <span class="n">get_state</span><span class="p">(</span><span class="n">pid</span><span class="p">)</span>
+    <span class="no">IO</span><span class="o">.</span><span class="n">puts</span><span class="p">(</span><span class="sd">"</span><span class="s2">Players in game: </span><span class="si">#{</span><span class="n">inspect</span> <span class="n">game</span><span class="o">.</span><span class="n">players</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+    <span class="k">if</span> <span class="no">Game</span><span class="o">.</span><span class="n">max_players?</span><span class="p">(</span><span class="n">game</span><span class="p">)</span> <span class="k">do</span>
+      <span class="p">{</span><span class="ss">:error</span><span class="p">,</span> <span class="ss">:max_players</span><span class="p">}</span>
+    <span class="k">else</span>
+      <span class="no">IO</span><span class="o">.</span><span class="n">puts</span><span class="p">(</span><span class="sd">"</span><span class="s2">Add player </span><span class="si">#{</span><span class="n">nick</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+      <span class="no">GenServer</span><span class="o">.</span><span class="n">call</span><span class="p">(</span><span class="n">pid</span><span class="p">,</span> <span class="p">{</span><span class="ss">:add_player</span><span class="p">,</span> <span class="n">nick</span><span class="p">})</span>
+    <span class="k">end</span>
+  <span class="k">end</span>
+  <span class="c1"># ...</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<p>А теперь снова запустим.</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">iex</span><span class="p">(</span><span class="m">1</span><span class="p">)</span><span class="o">&gt;</span> <span class="p">{</span><span class="ss">:ok</span><span class="p">,</span> <span class="n">pid</span><span class="p">}</span> <span class="o">=</span> <span class="no">GameServer</span><span class="o">.</span><span class="n">start_link</span>
+<span class="p">{</span><span class="ss">:ok</span><span class="p">,</span> <span class="c1">#PID&lt;0.119.0&gt;}</span>
+<span class="n">iex</span><span class="p">(</span><span class="m">2</span><span class="p">)</span><span class="o">&gt;</span> <span class="n">nicks</span> <span class="o">=</span>  <span class="p">[</span><span class="sd">"</span><span class="s2">ben"</span><span class="p">,</span> <span class="sd">"</span><span class="s2">harry"</span><span class="p">,</span> <span class="sd">"</span><span class="s2">ralph"</span><span class="p">,</span> <span class="sd">"</span><span class="s2">tom"</span><span class="p">,</span> <span class="sd">"</span><span class="s2">richard"</span><span class="p">]</span>
+<span class="p">[</span><span class="sd">"</span><span class="s2">ben"</span><span class="p">,</span> <span class="sd">"</span><span class="s2">harry"</span><span class="p">,</span> <span class="sd">"</span><span class="s2">ralph"</span><span class="p">,</span> <span class="sd">"</span><span class="s2">tom"</span><span class="p">,</span> <span class="sd">"</span><span class="s2">richard"</span><span class="p">]</span>
+<span class="n">iex</span><span class="p">(</span><span class="m">3</span><span class="p">)</span><span class="o">&gt;</span> <span class="no">GameServer</span><span class="o">.</span><span class="n">add_players_simultaneously</span><span class="p">(</span><span class="n">pid</span><span class="p">,</span> <span class="n">nicks</span><span class="p">)</span>
+<span class="no">Players</span> <span class="ow">in</span> <span class="ss">game:</span> <span class="p">[]</span>
+<span class="no">Players</span> <span class="ow">in</span> <span class="ss">game:</span> <span class="p">[]</span>
+<span class="no">Players</span> <span class="ow">in</span> <span class="ss">game:</span> <span class="p">[]</span>
+<span class="no">Players</span> <span class="ow">in</span> <span class="ss">game:</span> <span class="p">[]</span>
+<span class="no">Players</span> <span class="ow">in</span> <span class="ss">game:</span> <span class="p">[]</span>
+<span class="ss">:ok</span>
+<span class="no">Add</span> <span class="n">player</span> <span class="n">ben</span>
+<span class="no">Add</span> <span class="n">player</span> <span class="n">harry</span>
+<span class="no">Add</span> <span class="n">player</span> <span class="n">ralph</span>
+<span class="no">Add</span> <span class="n">player</span> <span class="n">tom</span>
+<span class="no">Add</span> <span class="n">player</span> <span class="n">richard</span>
+</code></pre></div></div>
+
+<p>Это типичное состояние гонки <strong>«проверь-затем-действуй»</strong> (check-then-act). Важно помнить, что GenServer обрабатывает по одному сообщению из почтового ящика в порядке их получения. Например, приходят пять сообщений <code class="highlighter-rouge">get_state</code>, GenServer обрабатывает их и возвращает текущее состояние. При этом игроки видят устаревшее состояние, каждый из них пытается войти в игру, и поступают ещё пять сообщений.</p>
+
+<p>Чтобы это исправить, нужно превратить операцию <code class="highlighter-rouge">add_player</code> в <a href="http://wiki.osdev.org/Atomic_operation">атомарную</a>. С GenServer это сделать достаточно просто, так как всё, что происходит в функции обратного вызова, в нём по умолчанию атомарно! Всё, что нам остаётся сделать, — это перенести эту логику в функцию обратного вызова <code class="highlighter-rouge">add_player</code>.</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">defmodule</span> <span class="no">GameServer</span> <span class="k">do</span>
+  <span class="c1"># ...</span>
+
+  <span class="c1"># Removed the max_players? check</span>
+  <span class="k">def</span> <span class="n">add_player</span><span class="p">(</span><span class="n">pid</span><span class="p">,</span> <span class="n">nick</span><span class="p">)</span> <span class="k">do</span>
+    <span class="no">GenServer</span><span class="o">.</span><span class="n">call</span><span class="p">(</span><span class="n">pid</span><span class="p">,</span> <span class="p">{</span><span class="ss">:add_player</span><span class="p">,</span> <span class="n">nick</span><span class="p">})</span>
+  <span class="k">end</span>
+
+  <span class="c1"># ...</span>
+
+  <span class="c1"># Checking inside the callback now</span>
+  <span class="k">def</span> <span class="n">handle_call</span><span class="p">({</span><span class="ss">:add_player</span><span class="p">,</span> <span class="n">nick</span><span class="p">},</span> <span class="n">_from</span><span class="p">,</span> <span class="n">game</span><span class="p">)</span> <span class="k">do</span>
+    <span class="k">if</span> <span class="no">Game</span><span class="o">.</span><span class="n">max_players?</span><span class="p">(</span><span class="n">game</span><span class="p">)</span> <span class="k">do</span>
+      <span class="p">{</span><span class="ss">:reply</span><span class="p">,</span> <span class="p">{</span><span class="ss">:error</span><span class="p">,</span> <span class="ss">:max_players</span><span class="p">},</span> <span class="n">game</span><span class="p">}</span>
+    <span class="k">else</span>
+      <span class="p">{</span><span class="ss">:reply</span><span class="p">,</span> <span class="ss">:ok</span><span class="p">,</span> <span class="no">Game</span><span class="o">.</span><span class="n">add_player</span><span class="p">(</span><span class="n">game</span><span class="p">,</span> <span class="n">nick</span><span class="p">)}</span>
+    <span class="k">end</span>
+  <span class="k">end</span>
+
+  <span class="c1"># ...</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<p>Попробуем ещё раз.</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">iex</span><span class="p">(</span><span class="m">1</span><span class="p">)</span><span class="o">&gt;</span> <span class="p">{</span><span class="ss">:ok</span><span class="p">,</span> <span class="n">pid</span><span class="p">}</span> <span class="o">=</span> <span class="no">GameServer</span><span class="o">.</span><span class="n">start_link</span>
+<span class="p">{</span><span class="ss">:ok</span><span class="p">,</span> <span class="c1">#PID&lt;0.137.0&gt;}</span>
+<span class="n">iex</span><span class="p">(</span><span class="m">2</span><span class="p">)</span><span class="o">&gt;</span> <span class="n">nicks</span> <span class="o">=</span>  <span class="p">[</span><span class="sd">"</span><span class="s2">ben"</span><span class="p">,</span> <span class="sd">"</span><span class="s2">harry"</span><span class="p">,</span> <span class="sd">"</span><span class="s2">ralph"</span><span class="p">,</span> <span class="sd">"</span><span class="s2">tom"</span><span class="p">,</span> <span class="sd">"</span><span class="s2">richard"</span><span class="p">]</span>
+<span class="p">[</span><span class="sd">"</span><span class="s2">ben"</span><span class="p">,</span> <span class="sd">"</span><span class="s2">harry"</span><span class="p">,</span> <span class="sd">"</span><span class="s2">ralph"</span><span class="p">,</span> <span class="sd">"</span><span class="s2">tom"</span><span class="p">,</span> <span class="sd">"</span><span class="s2">richard"</span><span class="p">]</span>
+<span class="n">iex</span><span class="p">(</span><span class="m">3</span><span class="p">)</span><span class="o">&gt;</span> <span class="no">GameServer</span><span class="o">.</span><span class="n">add_players_simultaneously</span><span class="p">(</span><span class="n">pid</span><span class="p">,</span> <span class="n">nicks</span><span class="p">)</span>
+<span class="ss">:ok</span>
+<span class="n">iex</span><span class="p">(</span><span class="m">4</span><span class="p">)</span><span class="o">&gt;</span> <span class="no">GameServer</span><span class="o">.</span><span class="n">get_state</span><span class="p">(</span><span class="n">pid</span><span class="p">)</span>
+<span class="p">%</span><span class="no">Game</span><span class="p">{</span><span class="ss">players:</span> <span class="p">[</span><span class="sd">"</span><span class="s2">ralph"</span><span class="p">,</span> <span class="sd">"</span><span class="s2">tom"</span><span class="p">,</span> <span class="sd">"</span><span class="s2">harry"</span><span class="p">,</span> <span class="sd">"</span><span class="s2">ben"</span><span class="p">]}</span>
+</code></pre></div></div>
+
+<p>Получаем устойчивое состояние, как и ожидалось! Если бы <code class="highlighter-rouge">richard</code> попытался присоединиться к игре, он бы получил ошибку max_players. В семантике <code class="highlighter-rouge">GenServer</code> примечательно то, что можно представить свой код в виде клиента и сервера. Все открытые API-функции, перечисленные в начале модуля, находятся в вызывающем процессе, то есть <strong>на стороне клиента</strong>, а все функции обратного вызова <code class="highlighter-rouge">handle_*</code> — в процессе GenServer или <strong>на стороне сервера</strong>. Если держать в голове такую модель, то сразу становится понятно, к какой стороне принадлежит ваш код.</p>
+
+<h2 id="узкие-места">Узкие места</h2>
+
+<p>Конечно, есть искушение в целях безопасности скинуть всё на сервер, но не стоит забывать, что это скажется на производительности. Создавая функции обратного вызова, вы должны задать себе вопрос:</p>
+
+<p>«Каково минимально возможное количество операций, которые мне необходимо выполнить, чтобы определить следующее состояние?»</p>
+
+<p>Помните, что несколько обратных вызовов не могут происходить одновременно, что вполне может стать узким местом программы. Подумайте также, можно ли выполнить длительные операции (в частности сетевые операции) не в функциях обратного вызова, а где-то в другом месте.</p>
+
+<h2 id="комплексное-решение">Комплексное решение</h2>
+
+<p>Несмотря на то, что в приведённом примере всё прекрасно работало, при разработке структуры Game была допущена ошибка. Создавая новую структуру данных, хорошо бы подумать о том, как предотвратить возможность приведения её в недопустимое состояние. Для обеспечения устойчивости состояния логика должна прослеживаться на уровне модуля. Работая с новой структурой, следует использовать только такой интерфейс для работы со структурами и возвращать ошибку, если что-то пошло не так. Можно изменить интерфейс модуля <code class="highlighter-rouge">Game</code> примерно следующим образом:</p>
+
+<div class="language-elixir highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">defmodule</span> <span class="no">Game</span> <span class="k">do</span>
+  <span class="nv">@max_players</span> <span class="m">4</span>
+  <span class="n">defstruct</span> <span class="ss">players:</span> <span class="p">[]</span>
+
+  <span class="k">def</span> <span class="n">add_player</span><span class="p">(</span><span class="n">game</span><span class="p">,</span> <span class="n">nick</span><span class="p">)</span> <span class="k">do</span>
+    <span class="k">if</span> <span class="n">max_players?</span><span class="p">(</span><span class="n">game</span><span class="p">)</span> <span class="k">do</span>
+      <span class="p">{</span><span class="ss">:error</span><span class="p">,</span> <span class="ss">:max_players</span><span class="p">}</span>
+    <span class="k">else</span>
+      <span class="p">{</span><span class="ss">:ok</span><span class="p">,</span> <span class="no">Map</span><span class="o">.</span><span class="n">update!</span><span class="p">(</span><span class="n">game</span><span class="p">,</span> <span class="ss">:players</span><span class="p">,</span> <span class="o">&amp;</span><span class="p">([</span><span class="n">nick</span> <span class="o">|</span> <span class="nv">&amp;1</span><span class="p">]))}</span>
+    <span class="k">end</span>
+  <span class="k">end</span>
+
+  <span class="k">defp</span> <span class="n">max_players?</span><span class="p">(%{</span><span class="ss">players:</span> <span class="n">ps</span><span class="p">})</span> <span class="ow">when</span> <span class="n">length</span><span class="p">(</span><span class="n">ps</span><span class="p">)</span> <span class="o">&lt;</span> <span class="nv">@max_players</span><span class="p">,</span> <span class="k">do</span><span class="p">:</span> <span class="no">false</span>
+  <span class="k">defp</span> <span class="n">max_players?</span><span class="p">(</span><span class="n">_game</span><span class="p">),</span> <span class="k">do</span><span class="p">:</span> <span class="no">true</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<p>Серверы скинут немного кода, но, думаю, это даже к лучшему. Можно почистить их ещё больше, например, с помощью <a href="https://github.com/sasa1977/exactor">exactor</a>.</p>
+
+<p><em>Изображение взято из игры <a href="https://play.google.com/store/apps/details?id=com.nanoo.cosmoracer&amp;hl=ru">Cosmic Race</a>.</em></p>
+
+  </div>
+
+  <!-- uSocial -->
+  <div class="post__share_block share_block">
+    <script async src="https://usocial.pro/usocial/usocial.js?v=6.1.4" data-script="usocial" charset="utf-8"></script>
+    <div class="uSocial-Share" data-pid="2fd19544e551bce292425ee8adaa31be" data-type="share" data-options="round,style2,default,absolute,horizontal,size32,counter1,counter-before,upArrow-right,nomobile" data-social="telegram,fb,vk,gPlus,twi,bookmarks"></div>
+  </div>
+  <!-- /uSocial -->
+</article>
+
+
+        <footer class="footer">
+    &copy; 2020
+    / Россия
+
+    <span class="pull-right">Любые мысли и вопросы пишите на <a href="mailto:elixir@wunsh.ru">elixir@wunsh.ru</a>.</span>
+</footer>
+
+        <div id="subscribeModal" class="modal">
+    <div class="modal__content">
+        <a href="#close" title="Close" class="modal__close">x</a>
+
+        <h2 class="modal__title">Ламповая рассылка про&nbsp;Эликсир</h2>
+
+        <p>Один-два раза в&nbsp;неделю присылаем тёплые письма об&nbsp;Эликсире: переводы самых интересных статей до&nbsp;их&nbsp;появления в&nbsp;открытом доступе, анонсы событий и&nbsp;вкусные бонусы.</p>
+
+        <form action="//wunsh.us14.list-manage.com/subscribe/post?u=c81ca3d4693f62db7f7f67c71&amp;id=a192e2dfef" method="post" id="mc-embedded-subscribe-form" name="mc-embedded-subscribe-form" class="pure-form h-tc validate" target="_blank" novalidate>
+            <input type="email" value="" name="EMAIL" class="modal__input pure-input-rounded large" id="mce-EMAIL" placeholder="Твоя почта" required>
+            <div style="position: absolute; left: -5000px;" aria-hidden="true"><input type="text" name="b_c81ca3d4693f62db7f7f67c71_a192e2dfef" tabindex="-1" value=""></div>
+
+            <input type="submit" value="Присоединиться" name="subscribe" onClick="yaCounter39773490.reachGoal('SUBSCRIBED'); return true" id="mc-embedded-subscribe" class="pure-button button-success large">
+        </form>
+
+        <p>Обязательно подтверди почту, перейдя по&nbsp;ссылке в&nbsp;письме, иначе мы&nbsp;не&nbsp;сможем делиться с&nbsp;тобой полезностями.</p>
+
+        <p>Надоедать точно не&nbsp;будем :)</p>
+    </div>
+</div>
+
+        <script src="/assets/js/vendors/zepto.min.js"></script>
+
+<script>
+    if ($(".post--docs").length) {
+        $(".footer").addClass("footer--docs")
+    }
+
+    $(".modal--close_backdrop").click(function(){
+        window.location.hash = "";
+    });
+</script>
+
+        <!-- Yandex.Metrika counter -->
+<script type="text/javascript">
+    (function (d, w, c) {
+        (w[c] = w[c] || []).push(function() {
+            try {
+                w.yaCounter39773490 = new Ya.Metrika({
+                    id:39773490,
+                    clickmap:true,
+                    trackLinks:true,
+                    accurateTrackBounce:true,
+                    webvisor:true,
+                    ut:"noindex"
+                });
+            } catch(e) { }
+        });
+
+        var n = d.getElementsByTagName("script")[0],
+            s = d.createElement("script"),
+            f = function () { n.parentNode.insertBefore(s, n); };
+        s.type = "text/javascript";
+        s.async = true;
+        s.src = "https://mc.yandex.ru/metrika/watch.js";
+
+        if (w.opera == "[object Opera]") {
+            d.addEventListener("DOMContentLoaded", f, false);
+        } else { f(); }
+    })(document, window, "yandex_metrika_callbacks");
+</script>
+<noscript><div><img src="https://mc.yandex.ru/watch/39773490?ut=noindex" style="position:absolute; left:-9999px;" alt="" /></div></noscript>
+<!-- /Yandex.Metrika counter -->
+
+      </div>
+    </div>
+  </body>
+</html>
