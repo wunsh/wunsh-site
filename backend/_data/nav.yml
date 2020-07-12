@@ -5,7 +5,7 @@
   path: install/linux-asdf
   section_id: install
 - name: Документация
-  path: docs
+  path: docs/
   section_id: docs
 - name: Гайды
   path: guides
